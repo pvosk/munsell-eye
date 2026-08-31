@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL('https://munsell-eye-color-training.pet-ty.chatgpt.site'),
   title: 'Munsell Eye — Color Perception Training',
   description: 'Train your eye to identify Munsell value, hue, and chroma.',
   applicationName: 'Munsell Eye',
