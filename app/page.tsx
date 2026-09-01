@@ -99,26 +99,48 @@ function Picker({ label, options, value, onChange, compact = false }: {
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<number | undefined>(undefined);
+  const centerTimer = useRef<number | undefined>(undefined);
   const momentumFrame = useRef<number | undefined>(undefined);
-  const drag = useRef({ pointerId: -1, lastX: 0, lastAt: 0, velocity: 0, moved: false });
+  const localSelection = useRef<string | null>(null);
+  const drag = useRef({ pointerId: -1, lastX: 0, lastAt: 0, velocity: 0, distance: 0, moved: false });
   const suppressClick = useRef(false);
 
   const centerOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
-    const element = ref.current?.querySelector<HTMLButtonElement>(`[data-value="${CSS.escape(option)}"]`);
-    element?.scrollIntoView({ behavior, inline: 'center', block: 'nearest' });
+    const container = ref.current;
+    const element = container?.querySelector<HTMLButtonElement>(`[data-value="${CSS.escape(option)}"]`);
+    if (!container || !element) return;
+    const left = element.offsetLeft + element.offsetWidth / 2 - container.clientWidth / 2;
+    container.scrollTo({ left, behavior });
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => centerOption(value, 'auto'), 40);
-    return () => window.clearTimeout(timer);
+    window.clearTimeout(centerTimer.current);
+    if (localSelection.current === value) {
+      localSelection.current = null;
+      return;
+    }
+    centerTimer.current = window.setTimeout(() => {
+      if (drag.current.pointerId === -1 && momentumFrame.current === undefined) centerOption(value, 'auto');
+    }, 40);
+    return () => window.clearTimeout(centerTimer.current);
   }, [centerOption, value, options]);
 
   useEffect(() => () => {
     window.clearTimeout(settleTimer.current);
-    if (momentumFrame.current) window.cancelAnimationFrame(momentumFrame.current);
+    window.clearTimeout(centerTimer.current);
+    if (momentumFrame.current !== undefined) window.cancelAnimationFrame(momentumFrame.current);
   }, []);
 
-  const selectClosest = useCallback(() => {
+  const chooseOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
+    localSelection.current = option;
+    onChange(option);
+    centerOption(option, behavior);
+    window.setTimeout(() => {
+      if (localSelection.current === option) localSelection.current = null;
+    }, 0);
+  }, [centerOption, onChange]);
+
+  const selectClosest = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (!ref.current) return;
     const center = ref.current.getBoundingClientRect().left + ref.current.clientWidth / 2;
     const buttons = Array.from(ref.current.querySelectorAll<HTMLButtonElement>('button'));
@@ -127,19 +149,21 @@ function Picker({ label, options, value, onChange, compact = false }: {
       const distance = Math.abs(rect.left + rect.width / 2 - center);
       return distance < best.distance ? { button, distance } : best;
     }, { button: buttons[0], distance: Number.POSITIVE_INFINITY });
-    if (closest.button?.dataset.value) onChange(closest.button.dataset.value);
-  }, [onChange]);
+    if (closest.button?.dataset.value) chooseOption(closest.button.dataset.value, behavior);
+  }, [chooseOption]);
 
   const settle = () => {
+    if (drag.current.pointerId !== -1 || momentumFrame.current !== undefined) return;
     window.clearTimeout(settleTimer.current);
-    settleTimer.current = window.setTimeout(selectClosest, 110);
+    settleTimer.current = window.setTimeout(() => {
+      if (drag.current.pointerId === -1 && momentumFrame.current === undefined) selectClosest();
+    }, 130);
   };
 
   const move = (direction: number) => {
     const index = options.indexOf(value);
     const next = options[Math.min(options.length - 1, Math.max(0, index + direction))];
-    onChange(next);
-    centerOption(next);
+    chooseOption(next);
   };
 
   const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -149,26 +173,53 @@ function Picker({ label, options, value, onChange, compact = false }: {
     const didMove = drag.current.moved;
     if (didMove) {
       suppressClick.current = true;
-      window.setTimeout(() => { suppressClick.current = false; }, 140);
+      window.setTimeout(() => { suppressClick.current = false; }, 180);
     }
-    const glide = () => {
-      drag.current.velocity *= 0.92;
-      if (Math.abs(drag.current.velocity) < 0.025) {
-        element.classList.remove('dragging');
-        selectClosest();
+
+    drag.current.pointerId = -1;
+    if (!didMove) {
+      element.classList.remove('dragging');
+      return;
+    }
+
+    const finish = () => {
+      momentumFrame.current = undefined;
+      element.classList.remove('dragging');
+      selectClosest();
+    };
+    let previousFrame = performance.now();
+    const glide = (now: number) => {
+      const elapsed = Math.min(32, Math.max(8, now - previousFrame));
+      previousFrame = now;
+      drag.current.velocity *= 0.92 ** (elapsed / 16);
+      if (Math.abs(drag.current.velocity) < 0.018) {
+        finish();
         return;
       }
       const before = element.scrollLeft;
-      element.scrollLeft += drag.current.velocity * 16;
-      if (element.scrollLeft === before) drag.current.velocity = 0;
+      element.scrollLeft += drag.current.velocity * elapsed;
+      if (Math.abs(element.scrollLeft - before) < 0.1) {
+        finish();
+        return;
+      }
       momentumFrame.current = window.requestAnimationFrame(glide);
     };
+    if (Math.abs(drag.current.velocity) >= 0.018) momentumFrame.current = window.requestAnimationFrame(glide);
+    else finish();
+  };
+
+  const cancelDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const element = ref.current;
+    if (!element || drag.current.pointerId !== event.pointerId) return;
+    if (element.hasPointerCapture(event.pointerId)) element.releasePointerCapture(event.pointerId);
     drag.current.pointerId = -1;
-    if (didMove && Math.abs(drag.current.velocity) >= 0.025) momentumFrame.current = window.requestAnimationFrame(glide);
-    else {
-      element.classList.remove('dragging');
-      selectClosest();
+    drag.current.velocity = 0;
+    if (momentumFrame.current !== undefined) {
+      window.cancelAnimationFrame(momentumFrame.current);
+      momentumFrame.current = undefined;
     }
+    element.classList.remove('dragging');
+    selectClosest();
   };
 
   return (
@@ -190,26 +241,34 @@ function Picker({ label, options, value, onChange, compact = false }: {
           }}
           onPointerDown={(event) => {
             if (event.button !== 0 || !ref.current) return;
-            if (momentumFrame.current) window.cancelAnimationFrame(momentumFrame.current);
+            window.clearTimeout(settleTimer.current);
+            window.clearTimeout(centerTimer.current);
+            if (momentumFrame.current !== undefined) {
+              window.cancelAnimationFrame(momentumFrame.current);
+              momentumFrame.current = undefined;
+            }
             ref.current.setPointerCapture(event.pointerId);
             ref.current.classList.add('dragging');
-            drag.current = { pointerId: event.pointerId, lastX: event.clientX, lastAt: event.timeStamp, velocity: 0, moved: false };
+            ref.current.scrollTo({ left: ref.current.scrollLeft, behavior: 'auto' });
+            drag.current = { pointerId: event.pointerId, lastX: event.clientX, lastAt: event.timeStamp, velocity: 0, distance: 0, moved: false };
           }}
           onPointerMove={(event) => {
             if (!ref.current || drag.current.pointerId !== event.pointerId) return;
             const movement = event.clientX - drag.current.lastX;
             const elapsed = Math.max(8, event.timeStamp - drag.current.lastAt);
-            if (Math.abs(movement) > 1) drag.current.moved = true;
+            drag.current.distance += Math.abs(movement);
+            if (drag.current.distance > 3) drag.current.moved = true;
             if (drag.current.moved) {
               event.preventDefault();
               ref.current.scrollLeft -= movement;
-              drag.current.velocity = -movement / elapsed;
+              const instantaneousVelocity = -movement / elapsed;
+              drag.current.velocity = drag.current.velocity * 0.35 + instantaneousVelocity * 0.65;
             }
             drag.current.lastX = event.clientX;
             drag.current.lastAt = event.timeStamp;
           }}
           onPointerUp={endDrag}
-          onPointerCancel={endDrag}
+          onPointerCancel={cancelDrag}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
             if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); move(1); }
@@ -220,7 +279,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
               className={value === option ? 'selected' : ''}
               data-value={option}
               key={option}
-              onClick={() => { onChange(option); centerOption(option); }}
+              onClick={() => chooseOption(option)}
               role="option"
               aria-selected={value === option}
               tabIndex={-1}
