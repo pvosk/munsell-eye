@@ -5,20 +5,17 @@ import { HUE_ORDER, MUNSELL_COLORS, MUNSELL_SOURCE, NEUTRALS, type MunsellColor 
 import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, type SourceMode } from './progress-db';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
+const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
 const PRACTICE_CHROMA_MAX = 12;
 const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
-const HUE_TRAINING_VALUE = 7;
-const HUE_TRAINING_CHROMA = 8;
-const HUE_TRAINING_POOL = HUE_ORDER
-  .map((hue) => MUNSELL_COLORS.find((color) => color.h === hue && color.v === HUE_TRAINING_VALUE && color.c === HUE_TRAINING_CHROMA))
-  .filter((color): color is MunsellColor => Boolean(color));
-const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8 && color.c <= 12);
-const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CHROMA_MAX);
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
   return [...colors].sort((a, b) => b.c - a.c || Math.abs(a.v - 6) - Math.abs(b.v - 6))[0];
 }).filter((color): color is MunsellColor => Boolean(color));
+const HUE_TRAINING_POOL = HUE_EDGE_COLORS;
+const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8 && color.c <= 12);
+const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CHROMA_MAX);
 
 type AppView = 'practice' | 'reference';
 
@@ -49,6 +46,7 @@ const IMAGE_PROMPTS: ImagePrompt[] = [
 ];
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
+const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
 const rgbCss = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 
@@ -157,7 +155,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
     window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
       if (drag.current.pointerId === -1 && momentumFrame.current === undefined) selectClosest();
-    }, 130);
+    }, 180);
   };
 
   const move = (direction: number) => {
@@ -240,7 +238,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
             event.stopPropagation();
           }}
           onPointerDown={(event) => {
-            if (event.button !== 0 || !ref.current) return;
+            if (event.pointerType !== 'mouse' || event.button !== 0 || !ref.current) return;
             window.clearTimeout(settleTimer.current);
             window.clearTimeout(centerTimer.current);
             if (momentumFrame.current !== undefined) {
@@ -291,6 +289,21 @@ function Picker({ label, options, value, onChange, compact = false }: {
         </div>
       </div>
     </div>
+  );
+}
+
+function HuePickers({ value, onChange, compact = false }: {
+  value: string;
+  onChange: (value: string) => void;
+  compact?: boolean;
+}) {
+  const family = familyOf(value);
+  const number = numberOf(value);
+  return (
+    <>
+      <Picker label="Hue family" options={BASIC_HUES} value={family} onChange={(next) => onChange(`${number}${next}`)} compact={compact} />
+      <Picker label="Hue number" options={HUE_NUMBERS} value={number} onChange={(next) => onChange(`${next}${family}`)} compact={compact} />
+    </>
   );
 }
 
@@ -429,12 +442,29 @@ function PosterizedImage({ prompt, exercise, onColor }: {
   );
 }
 
-function scoreLabel(error: number, singular: string) {
-  return error === 0 ? null : `${error} ${singular}${error === 1 ? '' : 's'} off`;
-}
-
 const wrapIndex = (index: number, length: number) => ((index % length) + length) % length;
 const normalizeAngle = (angle: number) => ((angle + 180) % 360 + 360) % 360 - 180;
+
+function HueMissMap({ target, guess }: { target: string; guess: string }) {
+  const targetIndex = Math.max(0, HUE_ORDER.indexOf(target as (typeof HUE_ORDER)[number]));
+  const guessIndex = Math.max(0, HUE_ORDER.indexOf(guess as (typeof HUE_ORDER)[number]));
+  const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
+  return (
+    <div className="hue-miss-map" aria-label={`Correct hue ${target}; guessed ${guess}`}>
+      <div className="mini-hue-wheel" aria-hidden="true">
+        {HUE_EDGE_COLORS.map((color, index) => (
+          <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
+        ))}
+        <span className="hue-miss-marker answer" style={{ '--position': position(targetIndex) } as CSSProperties} />
+        <span className="hue-miss-marker guess" style={{ '--position': position(guessIndex) } as CSSProperties} />
+      </div>
+      <div className="hue-miss-legend">
+        <span><i className="answer" />Correct <strong>{target}</strong></span>
+        <span><i className="guess" />Your guess <strong>{guess}</strong></span>
+      </div>
+    </div>
+  );
+}
 
 function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) => void }) {
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -568,7 +598,7 @@ function ReferenceView() {
 
   const changeHue = (nextHue: string) => {
     const nextColors = MUNSELL_COLORS.filter((color) => color.h === nextHue);
-    const nextChip = nextColors.find((color) => color.v === HUE_TRAINING_VALUE && color.c === HUE_TRAINING_CHROMA) ?? nextColors[0];
+    const nextChip = HUE_EDGE_COLORS.find((color) => color.h === nextHue) ?? nextColors[0];
     setHue(nextHue);
     if (nextChip) setSelectedChip(nextChip);
   };
@@ -577,7 +607,7 @@ function ReferenceView() {
     <section className="reference-view" aria-labelledby="reference-title">
       <div className="reference-intro">
         <span className="eyebrow">Reference</span>
-        <h1 id="reference-title">The 40 Munsell hues</h1>
+        <h1 id="reference-title">Munsell Hues</h1>
         <p>Rotate the wheel, then study one constant-hue page. Value rises vertically; chroma moves outward from neutral.</p>
       </div>
 
@@ -590,8 +620,8 @@ function ReferenceView() {
         </div>
         <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
         <div>
-          <span>Hue training slice</span>
-          <strong>V{HUE_TRAINING_VALUE} / C{HUE_TRAINING_CHROMA}</strong>
+          <span>Hue practice</span>
+          <strong>Highest in-gamut chroma</strong>
         </div>
       </div>
 
@@ -756,7 +786,6 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleEnter);
   });
 
-  const hueOptions = HUE_ORDER;
   const promptText = exercise === 'value'
     ? 'Identify this value'
     : exercise === 'hue'
@@ -775,6 +804,13 @@ export default function Home() {
         : exercise === 'family'
           ? `${familyHue} ${answerV}/${answerC}`
           : `${answerH} ${answerV}/${answerC}`;
+  const visibleTarget = exercise === 'value'
+    ? `N${target.v}`
+    : exercise === 'hue'
+      ? target.h
+      : exercise === 'chroma'
+        ? `/${target.c}`
+        : notation(target);
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -799,10 +835,16 @@ export default function Home() {
   }, [attempts]);
 
   const feedbackErrors = submitted ? [
-    (exercise === 'hue' || exercise === 'full') && scoreLabel(submitted.hueError, 'hue step'),
-    (exercise === 'value' || exercise === 'family' || exercise === 'full') && scoreLabel(submitted.valueError, 'value step'),
-    (exercise === 'chroma' || exercise === 'family' || exercise === 'full') && scoreLabel(submitted.chromaError, 'chroma step'),
-  ].filter(Boolean) : [];
+    (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0
+      ? `${submitted.hueError} hue step${submitted.hueError === 1 ? '' : 's'} apart`
+      : null,
+    (exercise === 'value' || exercise === 'family' || exercise === 'full') && submitted.valueError > 0
+      ? `${submitted.valueError} value step${submitted.valueError === 1 ? '' : 's'} ${submitted.answerV > submitted.targetV ? 'too light' : 'too dark'}`
+      : null,
+    (exercise === 'chroma' || exercise === 'family' || exercise === 'full') && submitted.chromaError > 0
+      ? `${submitted.chromaError} chroma step${submitted.chromaError === 1 ? '' : 's'} ${submitted.answerC > submitted.targetC ? 'too high' : 'too low'}`
+      : null,
+  ].filter((message): message is string => Boolean(message)) : [];
 
   return (
     <main className="app-shell">
@@ -852,7 +894,9 @@ export default function Home() {
 
         {exercise === 'family' && (
           <div className="family-control">
-            <Picker label="Fixed hue family" options={HUE_ORDER} value={familyHue} onChange={changeFamilyHue} />
+            <div className="family-hue-grid">
+              <HuePickers value={familyHue} onChange={changeFamilyHue} />
+            </div>
             <small>All valid V1–V9 chips through C12 in this hue.</small>
           </div>
         )}
@@ -862,7 +906,7 @@ export default function Home() {
             <span>{promptText}</span>
             {source === 'image' && <small>{imagePrompt.region.name}</small>}
           </div>
-          <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · V7/C8' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
+          <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
         </div>
 
         {source === 'swatch' ? (
@@ -883,8 +927,8 @@ export default function Home() {
           {!submitted ? (
             <>
               <p>Your answer</p>
-              <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : ''}`}>
-                {(exercise === 'hue' || exercise === 'full') && <Picker label="Hue" options={hueOptions} value={answerH} onChange={setAnswerH} compact={exercise === 'full'} />}
+              <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
+                {(exercise === 'hue' || exercise === 'full') && <HuePickers value={answerH} onChange={setAnswerH} compact={exercise === 'full'} />}
                 {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={setAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
                 {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={setAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
               </div>
@@ -895,12 +939,16 @@ export default function Home() {
               <div className="feedback-head">
                 <div>
                   <span className="feedback-kicker">{submitted.exact ? 'Exact' : 'Take another look'}</span>
-                  <strong>{notation(target)}</strong>
+                  <strong>{submitted.exact ? 'Correct' : 'Compare'}</strong>
                 </div>
                 <span className="feedback-swatch" style={{ background: rgbCss(target) }} />
               </div>
+              <div className="feedback-comparison">
+                <div><span>Correct answer</span><strong>{visibleTarget}</strong></div>
+                <div><span>Your guess</span><strong>{visibleAnswer}</strong></div>
+              </div>
+              {(exercise === 'hue' || exercise === 'full') && submitted.hueError > 0 && <HueMissMap target={target.h} guess={answerH} />}
               <div className="feedback-detail">
-                <span>Your answer: {visibleAnswer}</span>
                 <span>{feedbackErrors.length ? feedbackErrors.join(' · ') : 'All selected dimensions are correct.'}</span>
               </div>
               <button className="check-button" onClick={advanceQuestion} type="button">Next</button>
