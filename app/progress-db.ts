@@ -1,4 +1,4 @@
-export type Exercise = 'value' | 'hue' | 'chroma' | 'full';
+export type Exercise = 'value' | 'hue' | 'chroma' | 'family' | 'full';
 export type SourceMode = 'swatch' | 'image';
 
 export type Attempt = {

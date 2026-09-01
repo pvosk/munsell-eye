@@ -6,14 +6,15 @@ import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, 
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
-const CHROMA_OPTIONS = Array.from({ length: 12 }, (_, index) => String((index + 1) * 2));
+const PRACTICE_CHROMA_MAX = 12;
+const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
 const HUE_TRAINING_VALUE = 7;
 const HUE_TRAINING_CHROMA = 8;
 const HUE_TRAINING_POOL = HUE_ORDER
   .map((hue) => MUNSELL_COLORS.find((color) => color.h === hue && color.v === HUE_TRAINING_VALUE && color.c === HUE_TRAINING_CHROMA))
   .filter((color): color is MunsellColor => Boolean(color));
 const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8 && color.c <= 12);
-const IMAGE_COLOR_POOL = MUNSELL_COLORS;
+const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CHROMA_MAX);
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
   return [...colors].sort((a, b) => b.c - a.c || Math.abs(a.v - 6) - Math.abs(b.v - 6))[0];
@@ -74,6 +75,7 @@ function weaknessWeight(color: MunsellColor, exercise: Exercise, attempts: Attem
   const recent = attempts.slice(-160).filter((attempt) => {
     if (exercise === 'value') return attempt.targetV === color.v;
     if (exercise === 'chroma') return attempt.targetC === color.c;
+    if (exercise === 'family') return attempt.targetH === color.h;
     return familyOf(attempt.targetH) === familyOf(color.h);
   });
   if (!recent.length) return 1.8;
@@ -81,6 +83,7 @@ function weaknessWeight(color: MunsellColor, exercise: Exercise, attempts: Attem
     if (exercise === 'value') return sum + attempt.valueError;
     if (exercise === 'hue') return sum + attempt.hueError;
     if (exercise === 'chroma') return sum + attempt.chromaError;
+    if (exercise === 'family') return sum + attempt.valueError + attempt.chromaError;
     return sum + attempt.valueError + attempt.hueError + attempt.chromaError;
   }, 0) / recent.length;
   const misses = recent.filter((attempt) => !attempt.exact).length / recent.length;
@@ -473,7 +476,7 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
           <button
             aria-label={`Select hue ${hue}`}
             aria-selected={hue === value}
-            className={`hue-wheel-chip ${hue === value ? 'selected' : ''}`}
+            className="hue-wheel-chip"
             key={hue}
             onClick={() => onChange(hue)}
             role="option"
@@ -483,6 +486,7 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
           />
         );
       })}
+      <span className="hue-wheel-indicator" aria-hidden="true" />
       <div className="hue-wheel-center">
         <span>Selected hue</span>
         <div>
@@ -499,14 +503,16 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
 function ReferenceView() {
   const [hue, setHue] = useState('7.5Y');
   const hueColors = useMemo(() => MUNSELL_COLORS.filter((color) => color.h === hue), [hue]);
-  const defaultChip = useMemo(() => hueColors.find((color) => color.v === HUE_TRAINING_VALUE && color.c === HUE_TRAINING_CHROMA) ?? hueColors[0], [hueColors]);
   const [selectedChip, setSelectedChip] = useState<MunsellColor>(() => HUE_TRAINING_POOL.find((color) => color.h === '7.5Y') ?? HUE_TRAINING_POOL[0]);
   const maxChroma = Math.max(2, ...hueColors.map((color) => color.c));
   const chromas = Array.from({ length: maxChroma / 2 + 1 }, (_, index) => index * 2);
 
-  useEffect(() => {
-    if (defaultChip) setSelectedChip(defaultChip);
-  }, [defaultChip]);
+  const changeHue = (nextHue: string) => {
+    const nextColors = MUNSELL_COLORS.filter((color) => color.h === nextHue);
+    const nextChip = nextColors.find((color) => color.v === HUE_TRAINING_VALUE && color.c === HUE_TRAINING_CHROMA) ?? nextColors[0];
+    setHue(nextHue);
+    if (nextChip) setSelectedChip(nextChip);
+  };
 
   return (
     <section className="reference-view" aria-labelledby="reference-title">
@@ -516,7 +522,7 @@ function ReferenceView() {
         <p>Rotate the wheel, then study one constant-hue page. Value rises vertically; chroma moves outward from neutral.</p>
       </div>
 
-      <HueWheel value={hue} onChange={setHue} />
+      <HueWheel value={hue} onChange={changeHue} />
 
       <div className="reference-readout" aria-live="polite">
         <div>
@@ -533,7 +539,7 @@ function ReferenceView() {
       <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
         <div className="hue-page-head">
           <div><span className="eyebrow">Constant hue</span><h2>{hue}</h2></div>
-          <span>Discrete, in-gamut Munsell chips</span>
+          <span>Practice C2–C12 · extended chips included</span>
         </div>
         <div className="hue-chart-scroll">
           <div className="hue-chart" style={{ '--chart-columns': chromas.length } as CSSProperties}>
@@ -569,6 +575,7 @@ export default function Home() {
   const [view, setView] = useState<AppView>('practice');
   const [source, setSource] = useState<SourceMode>('swatch');
   const [exercise, setExercise] = useState<Exercise>('value');
+  const [familyHue, setFamilyHue] = useState('5RP');
   const [target, setTarget] = useState<MunsellColor>(NEUTRALS[4]);
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
   const [imageReady, setImageReady] = useState(true);
@@ -579,9 +586,10 @@ export default function Home() {
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
-  const startedAt = useRef(Date.now());
+  const startedAt = useRef(0);
 
   useEffect(() => {
+    startedAt.current = Date.now();
     readAttempts().then(setAttempts).catch(() => undefined);
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   }, []);
@@ -594,27 +602,41 @@ export default function Home() {
     startedAt.current = Date.now();
   }, []);
 
-  const nextQuestion = useCallback((nextSource = source, nextExercise = exercise) => {
+  const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
-    if (nextSource === 'image') {
+    if (nextSource === 'image' && nextExercise !== 'family') {
       const choices = IMAGE_PROMPTS.filter((prompt) => prompt.id !== imagePrompt.id);
       setImagePrompt(choices[Math.floor(Math.random() * choices.length)] ?? IMAGE_PROMPTS[0]);
       setImageReady(false);
     } else {
-      const pool = nextExercise === 'value' ? NEUTRALS : nextExercise === 'hue' ? HUE_TRAINING_POOL : SWATCH_POOL;
+      const pool = nextExercise === 'value'
+        ? NEUTRALS
+        : nextExercise === 'hue'
+          ? HUE_TRAINING_POOL
+          : nextExercise === 'family'
+            ? IMAGE_COLOR_POOL.filter((color) => color.h === nextFamilyHue)
+            : SWATCH_POOL;
       setTarget(weightedChoice(pool, (color) => weaknessWeight(color, nextExercise, attempts)));
       setImageReady(true);
     }
-  }, [attempts, exercise, imagePrompt.id, resetAnswer, source]);
+  }, [attempts, exercise, familyHue, imagePrompt.id, resetAnswer, source]);
 
   const changeSource = (next: SourceMode) => {
+    if (exercise === 'family') return;
     setSource(next);
-    nextQuestion(next, exercise);
+    nextQuestion(next, exercise, familyHue);
   };
 
   const changeExercise = (next: Exercise) => {
+    const nextSource = next === 'family' ? 'swatch' : source;
     setExercise(next);
-    nextQuestion(source, next);
+    if (next === 'family') setSource('swatch');
+    nextQuestion(nextSource, next, familyHue);
+  };
+
+  const changeFamilyHue = (next: string) => {
+    setFamilyHue(next);
+    nextQuestion('swatch', 'family', next);
   };
 
   const handleImageColor = useCallback((color: MunsellColor) => {
@@ -624,7 +646,7 @@ export default function Home() {
 
   const submit = async () => {
     if (!imageReady || submitted) return;
-    const hueError = target.h === 'N' ? 0 : hueDistance(answerH, target.h);
+    const hueError = target.h === 'N' || exercise === 'family' ? 0 : hueDistance(answerH, target.h);
     const valueError = Math.abs(Number(answerV) - target.v);
     const chromaError = target.c === 0 ? 0 : Math.abs(Number(answerC) - target.c) / 2;
     const exact = exercise === 'value'
@@ -633,7 +655,9 @@ export default function Home() {
         ? hueError === 0
         : exercise === 'chroma'
           ? chromaError === 0
-          : hueError === 0 && valueError === 0 && chromaError === 0;
+          : exercise === 'family'
+            ? valueError === 0 && chromaError === 0
+            : hueError === 0 && valueError === 0 && chromaError === 0;
     const attempt: Attempt = {
       createdAt: Date.now(),
       source,
@@ -641,7 +665,7 @@ export default function Home() {
       targetH: target.h,
       targetV: target.v,
       targetC: target.c,
-      answerH,
+      answerH: exercise === 'family' ? familyHue : answerH,
       answerV: Number(answerV),
       answerC: Number(answerC),
       hueError,
@@ -674,35 +698,51 @@ export default function Home() {
   });
 
   const hueOptions = HUE_ORDER;
-  const promptText = exercise === 'value' ? 'Identify this value' : exercise === 'hue' ? 'Identify this hue' : exercise === 'chroma' ? 'Identify this chroma' : 'Identify hue, value & chroma';
-  const visibleAnswer = exercise === 'value' ? `N${answerV}` : exercise === 'hue' ? answerH : exercise === 'chroma' ? `/${answerC}` : `${answerH} ${answerV}/${answerC}`;
+  const promptText = exercise === 'value'
+    ? 'Identify this value'
+    : exercise === 'hue'
+      ? 'Identify this hue'
+      : exercise === 'chroma'
+        ? 'Identify this chroma'
+        : exercise === 'family'
+          ? `Identify value & chroma within ${familyHue}`
+          : 'Identify hue, value & chroma';
+  const visibleAnswer = exercise === 'value'
+    ? `N${answerV}`
+    : exercise === 'hue'
+      ? answerH
+      : exercise === 'chroma'
+        ? `/${answerC}`
+        : exercise === 'family'
+          ? `${familyHue} ${answerV}/${answerC}`
+          : `${answerH} ${answerV}/${answerC}`;
 
   const statistics = useMemo(() => {
     const total = attempts.length;
     const exact = attempts.filter((attempt) => attempt.exact).length;
-    const average = (key: 'hueError' | 'valueError' | 'chromaError') => total ? attempts.reduce((sum, attempt) => sum + attempt[key], 0) / total : 0;
+    const hueAttempts = attempts.filter((attempt) => attempt.exercise === 'hue' || attempt.exercise === 'full');
+    const valueAttempts = attempts.filter((attempt) => attempt.exercise === 'value' || attempt.exercise === 'family' || attempt.exercise === 'full');
+    const chromaAttempts = attempts.filter((attempt) => attempt.exercise === 'chroma' || attempt.exercise === 'family' || attempt.exercise === 'full');
+    const average = (rows: Attempt[], key: 'hueError' | 'valueError' | 'chromaError') => rows.length ? rows.reduce((sum, attempt) => sum + attempt[key], 0) / rows.length : 0;
     const hueGroups = BASIC_HUES.map((family) => {
-      const rows = attempts.filter((attempt) => familyOf(attempt.targetH) === family && attempt.targetH !== 'N');
+      const rows = hueAttempts.filter((attempt) => familyOf(attempt.targetH) === family && attempt.targetH !== 'N');
       return { family, count: rows.length, error: rows.length ? rows.reduce((sum, row) => sum + row.hueError, 0) / rows.length : 0 };
     }).filter((group) => group.count);
     const weakHue = [...hueGroups].sort((a, b) => b.error - a.error)[0];
-    const colorAttempts = attempts.filter((attempt) => attempt.targetC > 0);
-    const valueBias = attempts.length ? attempts.reduce((sum, attempt) => sum + attempt.answerV - attempt.targetV, 0) / attempts.length : 0;
-    const chromaBias = colorAttempts.length ? colorAttempts.reduce((sum, attempt) => sum + attempt.answerC - attempt.targetC, 0) / colorAttempts.length : 0;
+    const valueBias = valueAttempts.length ? valueAttempts.reduce((sum, attempt) => sum + attempt.answerV - attempt.targetV, 0) / valueAttempts.length : 0;
+    const chromaBias = chromaAttempts.length ? chromaAttempts.reduce((sum, attempt) => sum + attempt.answerC - attempt.targetC, 0) / chromaAttempts.length : 0;
     const insights = [
       weakHue && weakHue.error > 0 ? `${weakHue.family} is currently your least certain hue family.` : 'No persistent hue confusion yet.',
       Math.abs(valueBias) >= 0.2 ? `You tend to judge values ${valueBias > 0 ? 'lighter' : 'darker'} than the target.` : 'Your value guesses are not showing a directional bias.',
       Math.abs(chromaBias) >= 0.5 ? `You tend to judge chroma ${chromaBias > 0 ? 'higher' : 'lower'} than the target.` : 'Your chroma guesses are balanced so far.',
     ];
-    return { total, exactRate: total ? exact / total : 0, hueAverage: average('hueError'), valueAverage: average('valueError'), chromaAverage: average('chromaError'), insights };
+    return { total, exactRate: total ? exact / total : 0, hueAverage: average(hueAttempts, 'hueError'), valueAverage: average(valueAttempts, 'valueError'), chromaAverage: average(chromaAttempts, 'chromaError'), insights };
   }, [attempts]);
 
   const feedbackErrors = submitted ? [
-    exercise !== 'value' && scoreLabel(submitted.hueError, 'hue step'),
-    exercise !== 'hue' && exercise !== 'chroma' && scoreLabel(submitted.valueError, 'value step'),
-    exercise !== 'value' && exercise !== 'hue' && scoreLabel(submitted.chromaError, 'chroma step'),
-    exercise === 'value' && scoreLabel(submitted.valueError, 'value step'),
-    exercise === 'chroma' && scoreLabel(submitted.chromaError, 'chroma step'),
+    (exercise === 'hue' || exercise === 'full') && scoreLabel(submitted.hueError, 'hue step'),
+    (exercise === 'value' || exercise === 'family' || exercise === 'full') && scoreLabel(submitted.valueError, 'value step'),
+    (exercise === 'chroma' || exercise === 'family' || exercise === 'full') && scoreLabel(submitted.chromaError, 'chroma step'),
   ].filter(Boolean) : [];
 
   return (
@@ -724,7 +764,14 @@ export default function Home() {
         <div className="mode-row">
           <div className="segmented" aria-label="Question source">
             {(['swatch', 'image'] as SourceMode[]).map((mode) => (
-              <button className={source === mode ? 'active' : ''} key={mode} onClick={() => changeSource(mode)} type="button">
+              <button
+                className={source === mode ? 'active' : ''}
+                disabled={exercise === 'family' && mode === 'image'}
+                key={mode}
+                onClick={() => changeSource(mode)}
+                title={exercise === 'family' && mode === 'image' ? 'Family practice uses discrete swatches' : undefined}
+                type="button"
+              >
                 {mode === 'swatch' ? 'Swatch' : 'Image'}
               </button>
             ))}
@@ -737,18 +784,26 @@ export default function Home() {
             ['value', 'Value'],
             ['hue', 'Hue'],
             ['chroma', 'Chroma'],
+            ['family', 'Family'],
             ['full', 'Full H/V/C'],
           ] as [Exercise, string][]).map(([mode, label]) => (
             <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
           ))}
         </nav>
 
+        {exercise === 'family' && (
+          <div className="family-control">
+            <Picker label="Fixed hue family" options={HUE_ORDER} value={familyHue} onChange={changeFamilyHue} />
+            <small>All valid V1–V9 chips through C12 in this hue.</small>
+          </div>
+        )}
+
         <div className="prompt-copy">
           <div>
             <span>{promptText}</span>
             {source === 'image' && <small>{imagePrompt.region.name}</small>}
           </div>
-          <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · V7/C8' : '40 HUES' : exercise === 'full' ? 'H / V / C' : 'C2–C24'}</span>
+          <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · V7/C8' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
         </div>
 
         {source === 'swatch' ? (
@@ -769,10 +824,10 @@ export default function Home() {
           {!submitted ? (
             <>
               <p>Your answer</p>
-              <div className={`picker-grid ${exercise === 'full' ? 'full' : ''}`}>
+              <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : ''}`}>
                 {(exercise === 'hue' || exercise === 'full') && <Picker label="Hue" options={hueOptions} value={answerH} onChange={setAnswerH} compact={exercise === 'full'} />}
-                {(exercise === 'value' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={setAnswerV} compact={exercise === 'full'} />}
-                {(exercise === 'chroma' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={setAnswerC} compact={exercise === 'full'} />}
+                {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={setAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
+                {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={setAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
               </div>
               <button className="check-button" disabled={!imageReady} onClick={submit} type="button">{imageReady ? 'Check answer' : 'Preparing image…'}</button>
             </>
