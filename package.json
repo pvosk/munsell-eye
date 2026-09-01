@@ -2,6 +2,11 @@
   "name": "munsell-eye",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://munsell-eye-color-training.pet-ty.chatgpt.site/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pvosk/munsell-eye.git"
+  },
   "engines": {
     "node": ">=22.13.0"
   },
