@@ -51,7 +51,7 @@ const rows = source.split(/\r?\n/).slice(1).map((line) => {
 }).filter(Boolean);
 
 const colors = rows
-  .filter((row) => hueIndex.has(row.hue) && Number.isInteger(row.value) && row.value >= 1 && row.value <= 9 && row.chroma >= 2 && row.chroma <= 12 && row.chroma % 2 === 0)
+  .filter((row) => hueIndex.has(row.hue) && Number.isInteger(row.value) && row.value >= 1 && row.value <= 9 && row.chroma >= 2 && row.chroma <= 24 && row.chroma % 2 === 0)
   .map((row) => ({ ...row, ...xyYToSrgb(row.x, row.y, row.Y) }))
   .filter((row) => row.inGamut)
   .map((row) => ({

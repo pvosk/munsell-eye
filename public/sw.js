@@ -1,4 +1,4 @@
-const CACHE = 'munsell-eye-v1';
+const CACHE = 'munsell-eye-v2';
 const CORE = [
   '/',
   '/manifest.webmanifest',
@@ -26,18 +26,23 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
         .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-          }
+          if (response.ok) caches.open(CACHE).then((cache) => cache.put('/', response.clone()));
           return response;
         })
-        .catch(() => cached);
-      return cached || network;
-    })
+        .catch(() => caches.match('/'))
+    );
+    return;
+  }
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
