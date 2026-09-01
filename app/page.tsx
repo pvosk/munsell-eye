@@ -62,6 +62,15 @@ const IMAGE_PROMPTS: ImagePrompt[] = [
   { id: 'quilter-face', src: '/practice/figure-quilter.webp', title: 'The State Quilt', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Mrs._Bill_Stagg_with_state_quilt_1a34161v.jpg', region: { x: 22, y: 41, w: 6, h: 6, name: 'face plane' } },
 ];
 
+// One entry per source image. The FSA set is deliberately out of rotation while
+// it is replaced by a modern, color-faithful figure library.
+const ACTIVE_IMAGE_BANK = IMAGE_PROMPTS.filter((prompt, index, prompts) => (
+  !prompt.src.startsWith('/practice/figure-')
+  && prompts.findIndex((candidate) => candidate.src === prompt.src) === index
+));
+
+const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'Look once more'];
+
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
 const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
 const rgbCss = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
@@ -342,30 +351,94 @@ function rgbToOklab(rgb: [number, number, number]) {
   ];
 }
 
+const OKLAB_CACHE = new Map<MunsellColor, number[]>();
+const labForColor = (color: MunsellColor) => {
+  const cached = OKLAB_CACHE.get(color);
+  if (cached) return cached;
+  const lab = rgbToOklab(color.rgb);
+  OKLAB_CACHE.set(color, lab);
+  return lab;
+};
+
 function nearestColor(rgb: [number, number, number], candidates: MunsellColor[]) {
   let best = candidates[0];
   let bestDistance = Number.POSITIVE_INFINITY;
   const source = rgbToOklab(rgb);
   for (const candidate of candidates) {
-    const target = rgbToOklab(candidate.rgb);
+    const target = labForColor(candidate);
     const distance = (source[0] - target[0]) ** 2 + (source[1] - target[1]) ** 2 + (source[2] - target[2]) ** 2;
     if (distance < bestDistance) { best = candidate; bestDistance = distance; }
   }
   return best;
 }
 
-function PosterizedImage({ prompt, exercise, onColor, correct = false }: {
+function mapUniqueColors(centers: number[][], candidates: MunsellColor[]) {
+  const centerLabs = centers.map((center) => rgbToOklab(center as [number, number, number]));
+  const candidateLabs = candidates.map(labForColor);
+  const pairs: { cluster: number; candidate: number; distance: number }[] = [];
+  centerLabs.forEach((source, cluster) => {
+    candidateLabs.forEach((target, candidate) => {
+      pairs.push({
+        cluster,
+        candidate,
+        distance: (source[0] - target[0]) ** 2 + (source[1] - target[1]) ** 2 + (source[2] - target[2]) ** 2,
+      });
+    });
+  });
+  pairs.sort((a, b) => a.distance - b.distance);
+  const mapped: (MunsellColor | undefined)[] = Array(centers.length);
+  const used = new Set<number>();
+  for (const pair of pairs) {
+    if (mapped[pair.cluster] || used.has(pair.candidate)) continue;
+    mapped[pair.cluster] = candidates[pair.candidate];
+    used.add(pair.candidate);
+    if (used.size === centers.length) break;
+  }
+  return mapped.map((color, cluster) => color ?? nearestColor(centers[cluster] as [number, number, number], candidates));
+}
+
+function chooseCoherentSample(labels: Uint8Array, width: number, height: number, mapped: MunsellColor[]) {
+  const radius = Math.max(3, Math.round(Math.min(width, height) * 0.014));
+  const offsets = [
+    [0, 0], [radius, 0], [-radius, 0], [0, radius], [0, -radius],
+    [radius, radius], [radius, -radius], [-radius, radius], [-radius, -radius],
+    [radius * 2, 0], [-radius * 2, 0], [0, radius * 2], [0, -radius * 2],
+  ];
+  const marginX = Math.max(radius * 3, Math.round(width * 0.1));
+  const marginY = Math.max(radius * 3, Math.round(height * 0.1));
+  let best = { x: Math.round(width / 2), y: Math.round(height / 2), cluster: labels[Math.round(height / 2) * width + Math.round(width / 2)], score: -1 };
+  for (let index = 0; index < 220; index++) {
+    const x = Math.round(marginX + Math.random() * Math.max(1, width - marginX * 2 - 1));
+    const y = Math.round(marginY + Math.random() * Math.max(1, height - marginY * 2 - 1));
+    const cluster = labels[y * width + x];
+    const matches = offsets.reduce((sum, [dx, dy]) => {
+      const sampleX = Math.min(width - 1, Math.max(0, x + dx));
+      const sampleY = Math.min(height - 1, Math.max(0, y + dy));
+      return sum + Number(labels[sampleY * width + sampleX] === cluster);
+    }, 0);
+    const purity = matches / offsets.length;
+    const centerDistance = Math.hypot(x / width - 0.5, y / height - 0.5);
+    const score = purity - centerDistance * 0.08 + Math.random() * 0.035;
+    if (score > best.score) best = { x, y, cluster, score };
+  }
+  return { x: best.x / width * 100, y: best.y / height * 100, color: mapped[best.cluster] };
+}
+
+function PosterizedImage({ prompt, exercise, questionKey, onColor, correct = false }: {
   prompt: ImagePrompt;
   exercise: Exercise;
+  questionKey: number;
   onColor: (color: MunsellColor) => void;
   correct?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
+  const [sample, setSample] = useState<{ x: number; y: number; color: MunsellColor } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setSample(null);
     const image = new Image();
     image.decoding = 'async';
     image.src = prompt.src;
@@ -415,12 +488,8 @@ function PosterizedImage({ prompt, exercise, onColor, correct = false }: {
         });
       }
       const candidates = exercise === 'value' ? NEUTRALS : IMAGE_COLOR_POOL;
-      const mapped = centers.map((center) => nearestColor(center as [number, number, number], candidates));
-      const region = prompt.region;
-      const targetX = Math.min(width - 1, Math.max(0, Math.round(region.x / 100 * (width - 1))));
-      const targetY = Math.min(height - 1, Math.max(0, Math.round(region.y / 100 * (height - 1))));
-      const targetPixel = targetY * width + targetX;
-      let targetCluster = 0;
+      const mapped = mapUniqueColors(centers, candidates);
+      const labels = new Uint8Array(count);
       for (let pixel = 0; pixel < count; pixel++) {
         const offset = pixel * 4;
         let best = 0;
@@ -430,31 +499,32 @@ function PosterizedImage({ prompt, exercise, onColor, correct = false }: {
           const next = (pixels[offset] - center[0]) ** 2 + (pixels[offset + 1] - center[1]) ** 2 + (pixels[offset + 2] - center[2]) ** 2;
           if (next < distance) { distance = next; best = cluster; }
         }
-        if (pixel === targetPixel) targetCluster = best;
+        labels[pixel] = best;
         const color = mapped[best].rgb;
         pixels[offset] = color[0]; pixels[offset + 1] = color[1]; pixels[offset + 2] = color[2];
       }
       context.putImageData(data, 0, 0);
       if (!cancelled) {
-        onColor(mapped[targetCluster]);
+        const nextSample = chooseCoherentSample(labels, width, height, mapped);
+        setSample(nextSample);
+        onColor(nextSample.color);
         setLoading(false);
       }
     };
     image.onerror = () => setLoading(false);
     return () => { cancelled = true; };
-  }, [exercise, onColor, prompt]);
+  }, [exercise, onColor, prompt, questionKey]);
 
-  const { region } = prompt;
   return (
     <div className={`image-stage ${correct ? 'is-correct' : ''}`}>
       <div className="canvas-wrap">
         <canvas ref={canvasRef} aria-label={`Munsell-mapped ${prompt.title}`} />
         {loading && <div className="image-loading">Preparing image…</div>}
-        {!loading && (
+        {!loading && sample && (
           <div
-            className="region-outline"
-            aria-label={`Highlighted ${region.name}`}
-            style={{ left: `${region.x}%`, top: `${region.y}%` }}
+            className="sample-marker"
+            aria-label={`Target sample: ${notation(sample.color)}`}
+            style={{ background: rgbCss(sample.color), left: `${sample.x}%`, top: `${sample.y}%` }}
           />
         )}
       </div>
@@ -482,6 +552,27 @@ function HueMissMap({ target, guess }: { target: string; guess: string }) {
         <span><i className="answer" />Correct <strong>{target}</strong></span>
         <span><i className="guess" />Your guess <strong>{guess}</strong></span>
       </div>
+    </div>
+  );
+}
+
+function nearestNotationColor(hue: string, value: number, chroma: number) {
+  if (hue === 'N') return NEUTRALS[Math.min(8, Math.max(0, value - 1))];
+  const candidates = MUNSELL_COLORS.filter((color) => color.h === hue);
+  return [...candidates].sort((a, b) => (
+    Math.abs(a.v - value) * 6 + Math.abs(a.c - chroma)
+    - (Math.abs(b.v - value) * 6 + Math.abs(b.c - chroma))
+  ))[0];
+}
+
+function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: MunsellColor }) {
+  return (
+    <div
+      className="albers-compare"
+      aria-label={`Correct color ${notation(correct)} outside; your guess ${notation(guess)} inside`}
+      style={{ background: rgbCss(correct) }}
+    >
+      <span className="albers-guess" style={{ background: rgbCss(guess) }} />
     </div>
   );
 }
@@ -684,13 +775,13 @@ export default function Home() {
   const [view, setView] = useState<AppView>('practice');
   const [source, setSource] = useState<SourceMode>('swatch');
   const [exercise, setExercise] = useState<Exercise>('value');
-  const [familyHue, setFamilyHue] = useState('5RP');
+  const [familyHue, setFamilyHue] = useState('5BG');
   const [target, setTarget] = useState<MunsellColor>(NEUTRALS[4]);
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
   const [imageReady, setImageReady] = useState(true);
-  const [answerH, setAnswerH] = useState('5YR');
+  const [answerH, setAnswerH] = useState('5BG');
   const [answerV, setAnswerV] = useState('5');
-  const [answerC, setAnswerC] = useState('4');
+  const [answerC, setAnswerC] = useState('6');
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
@@ -699,7 +790,6 @@ export default function Home() {
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const recentTargetKeys = useRef<string[]>([]);
-  const keyboardFlow = useRef(false);
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -708,9 +798,9 @@ export default function Home() {
   }, []);
 
   const resetAnswer = useCallback(() => {
-    setAnswerH('5YR');
+    setAnswerH('5BG');
     setAnswerV('5');
-    setAnswerC('4');
+    setAnswerC('6');
     setSubmitted(null);
     startedAt.current = Date.now();
   }, []);
@@ -718,10 +808,10 @@ export default function Home() {
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
     if (nextSource === 'image' && nextExercise !== 'family') {
-      const choices = IMAGE_PROMPTS.filter((prompt) => prompt.src !== imagePrompt.src);
+      const choices = ACTIVE_IMAGE_BANK.filter((prompt) => prompt.src !== imagePrompt.src);
       const figureChoices = choices.filter((prompt) => prompt.category === 'Figure');
-      const bank = figureChoices.length && Math.random() < 0.78 ? figureChoices : choices;
-      setImagePrompt(bank[Math.floor(Math.random() * bank.length)] ?? IMAGE_PROMPTS[0]);
+      const bank = figureChoices.length && Math.random() < 0.65 ? figureChoices : choices;
+      setImagePrompt(bank[Math.floor(Math.random() * bank.length)] ?? ACTIVE_IMAGE_BANK[0]);
       setImageReady(false);
     } else {
       const pool = nextExercise === 'value'
@@ -802,17 +892,20 @@ export default function Home() {
     await saveAttempt(attempt).catch(() => undefined);
   };
 
-  const focusFirstAnswer = () => {
+  const focusFirstAnswer = useCallback(() => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       answerPanelRef.current?.querySelector<HTMLElement>('.picker')?.focus();
     }));
-  };
+  }, []);
 
   const advanceQuestion = () => {
     setSessionCount((count) => count + 1);
     nextQuestion();
-    if (keyboardFlow.current) focusFirstAnswer();
   };
+
+  useEffect(() => {
+    if (view === 'practice' && !progressOpen && !submitted && imageReady) focusFirstAnswer();
+  }, [exercise, focusFirstAnswer, imageReady, progressOpen, sessionCount, source, submitted, view]);
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
@@ -822,7 +915,6 @@ export default function Home() {
         const pickers = Array.from(answerPanelRef.current?.querySelectorAll<HTMLElement>('.picker') ?? []);
         if (pickers.length > 1) {
           event.preventDefault();
-          keyboardFlow.current = true;
           const activeIndex = pickers.findIndex((picker) => picker === document.activeElement);
           const nextIndex = event.shiftKey
             ? (activeIndex <= 0 ? pickers.length - 1 : activeIndex - 1)
@@ -834,7 +926,6 @@ export default function Home() {
       if (event.key !== 'Enter' || event.repeat) return;
       if (element?.closest('input, textarea, select, a, button')) return;
       event.preventDefault();
-      keyboardFlow.current = true;
       if (submitted) advanceQuestion();
       else void submit();
     };
@@ -867,6 +958,14 @@ export default function Home() {
       : exercise === 'chroma'
         ? `/${target.c}`
         : notation(target);
+  const guessedColor = useMemo(() => {
+    if (exercise === 'value') return nearestNotationColor('N', Number(answerV), 0);
+    if (exercise === 'hue') return nearestNotationColor(answerH, target.v, target.c) ?? target;
+    if (exercise === 'chroma') return nearestNotationColor(target.h, target.v, Number(answerC)) ?? target;
+    if (exercise === 'family') return nearestNotationColor(familyHue, Number(answerV), Number(answerC)) ?? target;
+    return nearestNotationColor(answerH, Number(answerV), Number(answerC)) ?? target;
+  }, [answerC, answerH, answerV, exercise, familyHue, target]);
+  const missPrompt = submitted ? MISS_PROMPTS[Math.floor(submitted.createdAt / 1000) % MISS_PROMPTS.length] : MISS_PROMPTS[0];
   const exerciseOptions: [Exercise, string][] = [
     ['value', 'Value'],
     ['hue', 'Hue'],
@@ -963,7 +1062,6 @@ export default function Home() {
         <div className="prompt-copy">
           <div>
             <span>{promptText}</span>
-            {source === 'image' && <small>{imagePrompt.region.name}</small>}
           </div>
           <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
         </div>
@@ -974,7 +1072,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <PosterizedImage prompt={imagePrompt} exercise={exercise} onColor={handleImageColor} correct={Boolean(submitted?.exact)} />
+            <PosterizedImage prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} onColor={handleImageColor} correct={Boolean(submitted?.exact)} />
             <div className="image-caption">
               <span><strong>{imagePrompt.title}</strong> · {imagePrompt.category}</span>
               <a href={imagePrompt.source} target="_blank" rel="noreferrer">{imagePrompt.credit}</a>
@@ -1014,10 +1112,10 @@ export default function Home() {
             <div className="feedback" role="status" aria-live="polite">
               <div className="feedback-head">
                 <div>
-                  <span className="feedback-kicker">Take another look</span>
+                  <span className="feedback-kicker" key={submitted.createdAt}>{missPrompt}</span>
                   <strong>{hueMiss && exercise === 'hue' ? 'Hue comparison' : visibleTarget}</strong>
                 </div>
-                <span className="feedback-swatch" style={{ background: rgbCss(target) }} />
+                <AlbersComparison correct={target} guess={guessedColor} />
               </div>
               {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
               {hueMiss && <HueMissMap target={target.h} guess={answerH} />}

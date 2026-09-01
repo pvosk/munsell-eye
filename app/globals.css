@@ -107,12 +107,12 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .canvas-wrap { line-height: 0; max-width: 100%; position: relative; width: fit-content; }
 .image-stage canvas { display: block; height: auto; max-height: 440px; max-width: 100%; }
 .image-loading { color: rgba(29,29,27,.66); font-size: 12px; position: absolute; }
-.region-outline {
+.sample-marker {
   aspect-ratio: 1;
   border: 1.5px solid rgba(255,255,255,.98);
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(29,29,27,.78), 0 1px 6px rgba(0,0,0,.22);
-  height: clamp(10px, 1vw, 12px);
+  height: clamp(11px, 1.15vw, 14px);
   pointer-events: none;
   position: absolute;
   transform: translate(-50%, -50%);
@@ -203,10 +203,11 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .feedback.correct { border-color: rgba(66,107,78,.28); }
 .feedback-head { align-items: center; display: flex; justify-content: space-between; }
 .feedback-head > div { display: flex; flex-direction: column; gap: 2px; }
-.feedback-kicker { color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.feedback-kicker { animation: prompt-arrive .34s cubic-bezier(.2,.75,.25,1) both; color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
 .feedback.correct .feedback-kicker { color: var(--correct); }
 .feedback-head strong { font-size: 22px; font-weight: 680; letter-spacing: -.03em; }
-.feedback-swatch { border: 1px solid rgba(29,29,27,.14); height: 42px; width: 42px; }
+.albers-compare { border: 1px solid rgba(255,255,255,.96); box-shadow: 0 0 0 1px rgba(29,29,27,.18); display: grid; height: 58px; place-items: center; width: 58px; }
+.albers-guess { border: 1px solid rgba(29,29,27,.82); display: block; height: 31px; width: 31px; }
 .feedback-guess { align-items: center; background: rgba(29,29,27,.045); border-radius: 9px; display: flex; justify-content: space-between; margin-top: 13px; padding: 10px 12px; }
 .feedback-guess span { color: var(--muted); font-size: 9px; letter-spacing: .07em; text-transform: uppercase; }
 .feedback-guess strong { font-size: 15px; font-weight: 680; }
@@ -239,6 +240,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 @keyframes correct-turn { 0% { transform: rotate(0) scale(1); } 45% { transform: rotate(2deg) scale(.975); } 100% { transform: rotate(0) scale(1); } }
 @keyframes reward-pop { from { opacity: 0; transform: scale(.55) rotate(-18deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
 @keyframes success-flash { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); } 45% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } 100% { opacity: .94; transform: translate(-50%, -50%) scale(1); } }
+@keyframes prompt-arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .modal-backdrop {
   align-items: flex-start;
   background: rgba(29,29,27,.38);
