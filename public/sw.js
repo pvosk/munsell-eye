@@ -1,15 +1,9 @@
-const CACHE = 'munsell-eye-v3';
+const CACHE = 'munsell-eye-v4';
 const CORE = [
   '/',
   '/manifest.webmanifest',
   '/icon-192.png',
-  '/icon-512.png',
-  '/practice/model-study.jpg',
-  '/practice/studio-portrait.jpg',
-  '/practice/still-life-fruit.jpg',
-  '/practice/badlands.jpg',
-  '/practice/fruit-painting.jpg',
-  '/practice/summer-landscape.jpg'
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {

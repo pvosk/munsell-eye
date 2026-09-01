@@ -6,6 +6,10 @@ import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, 
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
+const HUE_FAMILY_NAMES: Record<string, string> = {
+  R: 'red', YR: 'yellow-red', Y: 'yellow', GY: 'green-yellow', G: 'green',
+  BG: 'blue-green', B: 'blue', PB: 'purple-blue', P: 'purple', RP: 'red-purple',
+};
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
 const PRACTICE_CHROMA_MAX = 12;
 const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
@@ -43,6 +47,19 @@ const IMAGE_PROMPTS: ImagePrompt[] = [
   { id: 'grapes', src: '/practice/fruit-painting.jpg', title: 'Still Life with Fruit', category: 'Still life', credit: 'Jacob van Walscapelle / NGA · CC0', source: 'https://commons.wikimedia.org/wiki/File:Jacob_van_Walscapelle,_Still_Life_with_Fruit,_1675,_NGA_119295.jpg', region: { x: 72, y: 69, w: 24, h: 22, name: 'grape cluster' } },
   { id: 'summer-field', src: '/practice/summer-landscape.jpg', title: 'A Summer Landscape', category: 'Landscape', credit: 'Georges Seurat / NGA · CC0', source: 'https://commons.wikimedia.org/wiki/File:Georges_Seurat,_A_Summer_Landscape,_1883,_NGA_164962.jpg', region: { x: 66, y: 70, w: 30, h: 24, name: 'field plane' } },
   { id: 'summer-sky', src: '/practice/summer-landscape.jpg', title: 'A Summer Landscape', category: 'Landscape', credit: 'Georges Seurat / NGA · CC0', source: 'https://commons.wikimedia.org/wiki/File:Georges_Seurat,_A_Summer_Landscape,_1883,_NGA_164962.jpg', region: { x: 70, y: 20, w: 30, h: 18, name: 'sky plane' } },
+  { id: 'shepherd-face', src: '/practice/figure-shepherd.webp', title: 'Shepherd in Montana', category: 'Figure', credit: 'FSA / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:American_shepherd.jpg', region: { x: 72, y: 24, w: 6, h: 6, name: 'face plane' } },
+  { id: 'children-mother', src: '/practice/figure-children.webp', title: 'Mother and Children', category: 'Figure', credit: 'FSA / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:1940_African_American_children_Natchitoches_Louisiana.jpg', region: { x: 49, y: 25, w: 6, h: 6, name: 'mother’s face' } },
+  { id: 'children-child', src: '/practice/figure-children.webp', title: 'Mother and Children', category: 'Figure', credit: 'FSA / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:1940_African_American_children_Natchitoches_Louisiana.jpg', region: { x: 71, y: 45, w: 6, h: 6, name: 'child’s face' } },
+  { id: 'valley-painter', src: '/practice/figure-painter.webp', title: 'Painting the Valley', category: 'Figure', credit: 'FSA / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:A_woman_painting_a_view_of_the_Shenandoah_Valley_1a33799v.jpg', region: { x: 39, y: 66, w: 7, h: 7, name: 'coat plane' } },
+  { id: 'couple-man', src: '/practice/figure-couple.webp', title: 'Pie Town Homesteaders', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Jim_Norris_and_wife,_homesteaders_1a34109v.jpg', region: { x: 34, y: 43, w: 6, h: 6, name: 'man’s face' } },
+  { id: 'couple-woman', src: '/practice/figure-couple.webp', title: 'Pie Town Homesteaders', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Jim_Norris_and_wife,_homesteaders_1a34109v.jpg', region: { x: 68, y: 42, w: 6, h: 6, name: 'woman’s face' } },
+  { id: 'father-face', src: '/practice/figure-father-daughter.webp', title: 'Father and Daughter', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Homesteader_feeding_his_daughter_1a34129v.jpg', region: { x: 39, y: 22, w: 6, h: 6, name: 'father’s face' } },
+  { id: 'daughter-face', src: '/practice/figure-father-daughter.webp', title: 'Father and Daughter', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Homesteader_feeding_his_daughter_1a34129v.jpg', region: { x: 63, y: 30, w: 6, h: 6, name: 'child’s face' } },
+  { id: 'school-child', src: '/practice/figure-schoolchildren.webp', title: 'School Chorus', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:School_children_singing,_Pie_Town_1a34151v.jpg', region: { x: 49, y: 49, w: 5, h: 5, name: 'child’s face' } },
+  { id: 'family-child', src: '/practice/figure-family.webp', title: 'Homesteader Family', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Jack_Whinery,_homesteader,_with_his_wife_and_the_youngest_of_his_five_children_1a34170v.jpg', region: { x: 23, y: 47, w: 6, h: 6, name: 'child’s face' } },
+  { id: 'family-mother', src: '/practice/figure-family.webp', title: 'Homesteader Family', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Jack_Whinery,_homesteader,_with_his_wife_and_the_youngest_of_his_five_children_1a34170v.jpg', region: { x: 50, y: 42, w: 6, h: 6, name: 'mother’s face' } },
+  { id: 'family-father', src: '/practice/figure-family.webp', title: 'Homesteader Family', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Jack_Whinery,_homesteader,_with_his_wife_and_the_youngest_of_his_five_children_1a34170v.jpg', region: { x: 72, y: 34, w: 6, h: 6, name: 'father’s face' } },
+  { id: 'quilter-face', src: '/practice/figure-quilter.webp', title: 'The State Quilt', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Mrs._Bill_Stagg_with_state_quilt_1a34161v.jpg', region: { x: 22, y: 41, w: 6, h: 6, name: 'face plane' } },
 ];
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
@@ -85,7 +102,7 @@ function weaknessWeight(color: MunsellColor, exercise: Exercise, attempts: Attem
     return sum + attempt.valueError + attempt.hueError + attempt.chromaError;
   }, 0) / recent.length;
   const misses = recent.filter((attempt) => !attempt.exact).length / recent.length;
-  return 1 + error * 0.45 + misses * 1.6;
+  return 1 + error * 0.25 + misses * 0.7;
 }
 
 function Picker({ label, options, value, onChange, compact = false }: {
@@ -337,22 +354,25 @@ function nearestColor(rgb: [number, number, number], candidates: MunsellColor[])
   return best;
 }
 
-function PosterizedImage({ prompt, exercise, onColor }: {
+function PosterizedImage({ prompt, exercise, onColor, correct = false }: {
   prompt: ImagePrompt;
   exercise: Exercise;
   onColor: (color: MunsellColor) => void;
+  correct?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     const image = new Image();
+    image.decoding = 'async';
     image.src = prompt.src;
     image.onload = () => {
       if (cancelled || !canvasRef.current) return;
-      const maxWidth = 700;
-      const maxHeight = 520;
+      const maxWidth = 620;
+      const maxHeight = 460;
       const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight, 1);
       const width = Math.max(1, Math.round(image.naturalWidth * scale));
       const height = Math.max(1, Math.round(image.naturalHeight * scale));
@@ -361,7 +381,10 @@ function PosterizedImage({ prompt, exercise, onColor }: {
       canvas.height = height;
       const context = canvas.getContext('2d', { willReadFrequently: true });
       if (!context) return;
+      context.save();
+      context.filter = 'blur(.65px)';
       context.drawImage(image, 0, 0, width, height);
+      context.restore();
       const data = context.getImageData(0, 0, width, height);
       const pixels = data.data;
       const count = width * height;
@@ -372,10 +395,10 @@ function PosterizedImage({ prompt, exercise, onColor }: {
         const pixel = Math.min(count - 1, Math.floor(count * seedPoint)) * 4;
         centers.push([pixels[pixel], pixels[pixel + 1], pixels[pixel + 2]]);
       }
-      const labels = new Uint8Array(count);
-      for (let iteration = 0; iteration < 6; iteration++) {
+      const sampleStride = Math.max(3, Math.floor(count / 30000));
+      for (let iteration = 0; iteration < 5; iteration++) {
         const sums = Array.from({ length: clusterCount }, () => [0, 0, 0, 0]);
-        for (let pixel = 0; pixel < count; pixel += 3) {
+        for (let pixel = 0; pixel < count; pixel += sampleStride) {
           const offset = pixel * 4;
           let best = 0;
           let distance = Number.POSITIVE_INFINITY;
@@ -393,8 +416,11 @@ function PosterizedImage({ prompt, exercise, onColor }: {
       }
       const candidates = exercise === 'value' ? NEUTRALS : IMAGE_COLOR_POOL;
       const mapped = centers.map((center) => nearestColor(center as [number, number, number], candidates));
-      const regionCounts = new Array(clusterCount).fill(0);
       const region = prompt.region;
+      const targetX = Math.min(width - 1, Math.max(0, Math.round(region.x / 100 * (width - 1))));
+      const targetY = Math.min(height - 1, Math.max(0, Math.round(region.y / 100 * (height - 1))));
+      const targetPixel = targetY * width + targetX;
+      let targetCluster = 0;
       for (let pixel = 0; pixel < count; pixel++) {
         const offset = pixel * 4;
         let best = 0;
@@ -404,19 +430,13 @@ function PosterizedImage({ prompt, exercise, onColor }: {
           const next = (pixels[offset] - center[0]) ** 2 + (pixels[offset + 1] - center[1]) ** 2 + (pixels[offset + 2] - center[2]) ** 2;
           if (next < distance) { distance = next; best = cluster; }
         }
-        labels[pixel] = best;
+        if (pixel === targetPixel) targetCluster = best;
         const color = mapped[best].rgb;
         pixels[offset] = color[0]; pixels[offset + 1] = color[1]; pixels[offset + 2] = color[2];
-        const x = pixel % width;
-        const y = Math.floor(pixel / width);
-        const dx = (x / width * 100 - region.x) / (region.w / 2);
-        const dy = (y / height * 100 - region.y) / (region.h / 2);
-        if (dx * dx + dy * dy <= 1) regionCounts[best] += 1;
       }
       context.putImageData(data, 0, 0);
-      const dominant = regionCounts.indexOf(Math.max(...regionCounts));
       if (!cancelled) {
-        onColor(mapped[Math.max(0, dominant)]);
+        onColor(mapped[targetCluster]);
         setLoading(false);
       }
     };
@@ -426,7 +446,7 @@ function PosterizedImage({ prompt, exercise, onColor }: {
 
   const { region } = prompt;
   return (
-    <div className="image-stage">
+    <div className={`image-stage ${correct ? 'is-correct' : ''}`}>
       <div className="canvas-wrap">
         <canvas ref={canvasRef} aria-label={`Munsell-mapped ${prompt.title}`} />
         {loading && <div className="image-loading">Preparing image…</div>}
@@ -675,7 +695,11 @@ export default function Home() {
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
+  const [streak, setStreak] = useState(0);
   const startedAt = useRef(0);
+  const answerPanelRef = useRef<HTMLElement>(null);
+  const recentTargetKeys = useRef<string[]>([]);
+  const keyboardFlow = useRef(false);
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -694,8 +718,10 @@ export default function Home() {
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
     if (nextSource === 'image' && nextExercise !== 'family') {
-      const choices = IMAGE_PROMPTS.filter((prompt) => prompt.id !== imagePrompt.id);
-      setImagePrompt(choices[Math.floor(Math.random() * choices.length)] ?? IMAGE_PROMPTS[0]);
+      const choices = IMAGE_PROMPTS.filter((prompt) => prompt.src !== imagePrompt.src);
+      const figureChoices = choices.filter((prompt) => prompt.category === 'Figure');
+      const bank = figureChoices.length && Math.random() < 0.78 ? figureChoices : choices;
+      setImagePrompt(bank[Math.floor(Math.random() * bank.length)] ?? IMAGE_PROMPTS[0]);
       setImageReady(false);
     } else {
       const pool = nextExercise === 'value'
@@ -705,15 +731,22 @@ export default function Home() {
           : nextExercise === 'family'
             ? IMAGE_COLOR_POOL.filter((color) => color.h === nextFamilyHue)
             : SWATCH_POOL;
-      setTarget(weightedChoice(pool, (color) => weaknessWeight(color, nextExercise, attempts)));
+      const cooldown = nextExercise === 'value' ? 3 : nextExercise === 'chroma' ? 2 : 6;
+      const blocked = recentTargetKeys.current.slice(-cooldown);
+      const eligible = pool.filter((color) => !blocked.includes(`${nextExercise}:${notation(color)}`));
+      const choicePool = eligible.length ? eligible : pool;
+      const nextTarget = weightedChoice(choicePool, (color) => weaknessWeight(color, nextExercise, attempts));
+      recentTargetKeys.current = [...recentTargetKeys.current, `${nextExercise}:${notation(nextTarget)}`].slice(-10);
+      setTarget(nextTarget);
       setImageReady(true);
     }
-  }, [attempts, exercise, familyHue, imagePrompt.id, resetAnswer, source]);
+  }, [attempts, exercise, familyHue, imagePrompt.src, resetAnswer, source]);
 
   const changeSource = (next: SourceMode) => {
-    if (exercise === 'family') return;
+    const nextExercise = next === 'image' && exercise === 'family' ? 'full' : exercise;
+    if (nextExercise !== exercise) setExercise(nextExercise);
     setSource(next);
-    nextQuestion(next, exercise, familyHue);
+    nextQuestion(next, nextExercise, familyHue);
   };
 
   const changeExercise = (next: Exercise) => {
@@ -764,26 +797,49 @@ export default function Home() {
       responseMs: Date.now() - startedAt.current,
     };
     setSubmitted(attempt);
+    setStreak((current) => exact ? current + 1 : 0);
     setAttempts((current) => [...current, attempt].slice(-600));
     await saveAttempt(attempt).catch(() => undefined);
+  };
+
+  const focusFirstAnswer = () => {
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      answerPanelRef.current?.querySelector<HTMLElement>('.picker')?.focus();
+    }));
   };
 
   const advanceQuestion = () => {
     setSessionCount((count) => count + 1);
     nextQuestion();
+    if (keyboardFlow.current) focusFirstAnswer();
   };
 
   useEffect(() => {
-    const handleEnter = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' || event.repeat || progressOpen || view !== 'practice') return;
+    const handleKeyboard = (event: KeyboardEvent) => {
+      if (progressOpen || view !== 'practice') return;
       const element = event.target as HTMLElement | null;
-      if (element?.closest('input, textarea, select, a')) return;
+      if (event.key === 'Tab' && !submitted) {
+        const pickers = Array.from(answerPanelRef.current?.querySelectorAll<HTMLElement>('.picker') ?? []);
+        if (pickers.length > 1) {
+          event.preventDefault();
+          keyboardFlow.current = true;
+          const activeIndex = pickers.findIndex((picker) => picker === document.activeElement);
+          const nextIndex = event.shiftKey
+            ? (activeIndex <= 0 ? pickers.length - 1 : activeIndex - 1)
+            : (activeIndex + 1) % pickers.length;
+          pickers[nextIndex].focus();
+        }
+        return;
+      }
+      if (event.key !== 'Enter' || event.repeat) return;
+      if (element?.closest('input, textarea, select, a, button')) return;
       event.preventDefault();
+      keyboardFlow.current = true;
       if (submitted) advanceQuestion();
       else void submit();
     };
-    window.addEventListener('keydown', handleEnter);
-    return () => window.removeEventListener('keydown', handleEnter);
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
   });
 
   const promptText = exercise === 'value'
@@ -811,6 +867,13 @@ export default function Home() {
       : exercise === 'chroma'
         ? `/${target.c}`
         : notation(target);
+  const exerciseOptions: [Exercise, string][] = [
+    ['value', 'Value'],
+    ['hue', 'Hue'],
+    ['chroma', 'Chroma'],
+    ...(source === 'swatch' ? [['family', 'Family'] as [Exercise, string]] : []),
+    ['full', 'Full H/V/C'],
+  ];
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -834,9 +897,10 @@ export default function Home() {
     return { total, exactRate: total ? exact / total : 0, hueAverage: average(hueAttempts, 'hueError'), valueAverage: average(valueAttempts, 'valueError'), chromaAverage: average(chromaAttempts, 'chromaError'), insights };
   }, [attempts]);
 
+  const hueMiss = Boolean(submitted && (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0);
   const feedbackErrors = submitted ? [
     (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0
-      ? `${submitted.hueError} hue step${submitted.hueError === 1 ? '' : 's'} apart`
+      ? `Your guess is ${submitted.hueError} hue step${submitted.hueError === 1 ? '' : 's'} toward ${HUE_FAMILY_NAMES[familyOf(submitted.answerH)] ?? familyOf(submitted.answerH)}`
       : null,
     (exercise === 'value' || exercise === 'family' || exercise === 'full') && submitted.valueError > 0
       ? `${submitted.valueError} value step${submitted.valueError === 1 ? '' : 's'} ${submitted.answerV > submitted.targetV ? 'too light' : 'too dark'}`
@@ -867,27 +931,22 @@ export default function Home() {
             {(['swatch', 'image'] as SourceMode[]).map((mode) => (
               <button
                 className={source === mode ? 'active' : ''}
-                disabled={exercise === 'family' && mode === 'image'}
                 key={mode}
                 onClick={() => changeSource(mode)}
-                title={exercise === 'family' && mode === 'image' ? 'Family practice uses discrete swatches' : undefined}
                 type="button"
               >
                 {mode === 'swatch' ? 'Swatch' : 'Image'}
               </button>
             ))}
           </div>
-          <span className="question-count">Practice {sessionCount}</span>
+          <div className="question-meta">
+            <span className="question-count">Practice {sessionCount}</span>
+            {streak > 1 && <span className="streak-count">{streak} in a row</span>}
+          </div>
         </div>
 
         <nav className="exercise-tabs" aria-label="Exercise">
-          {([
-            ['value', 'Value'],
-            ['hue', 'Hue'],
-            ['chroma', 'Chroma'],
-            ['family', 'Family'],
-            ['full', 'Full H/V/C'],
-          ] as [Exercise, string][]).map(([mode, label]) => (
+          {exerciseOptions.map(([mode, label]) => (
             <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
           ))}
         </nav>
@@ -910,12 +969,12 @@ export default function Home() {
         </div>
 
         {source === 'swatch' ? (
-          <div className="swatch-stage" aria-label="Color swatch">
-            <div className="swatch" style={{ background: rgbCss(target) }} />
+          <div className={`swatch-stage ${submitted?.exact ? 'is-correct' : ''}`} aria-label="Color swatch">
+            <div className="swatch" key={`${sessionCount}-${notation(target)}`} style={{ background: rgbCss(target) }} />
           </div>
         ) : (
           <>
-            <PosterizedImage prompt={imagePrompt} exercise={exercise} onColor={handleImageColor} />
+            <PosterizedImage prompt={imagePrompt} exercise={exercise} onColor={handleImageColor} correct={Boolean(submitted?.exact)} />
             <div className="image-caption">
               <span><strong>{imagePrompt.title}</strong> · {imagePrompt.category}</span>
               <a href={imagePrompt.source} target="_blank" rel="noreferrer">{imagePrompt.credit}</a>
@@ -923,7 +982,15 @@ export default function Home() {
           </>
         )}
 
-        <section className="answer-panel" aria-label="Your answer">
+        <section className="answer-panel" aria-label="Your answer" ref={answerPanelRef}>
+          <button
+            className="check-button practice-action"
+            disabled={!submitted && !imageReady}
+            onClick={submitted ? advanceQuestion : submit}
+            type="button"
+          >
+            {submitted ? 'Next' : imageReady ? 'Check answer' : 'Preparing image…'}
+          </button>
           {!submitted ? (
             <>
               <p>Your answer</p>
@@ -932,26 +999,32 @@ export default function Home() {
                 {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={setAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
                 {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={setAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
               </div>
-              <button className="check-button" disabled={!imageReady} onClick={submit} type="button">{imageReady ? 'Check answer' : 'Preparing image…'}</button>
             </>
+          ) : submitted.exact ? (
+            <div className="feedback correct" role="status" aria-live="polite">
+              <div className="correct-reward">
+                <span className="reward-mark" aria-hidden="true">✓</span>
+                <div>
+                  <strong>Correct</strong>
+                  <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className={`feedback ${submitted.exact ? 'correct' : ''}`} role="status" aria-live="polite">
+            <div className="feedback" role="status" aria-live="polite">
               <div className="feedback-head">
                 <div>
-                  <span className="feedback-kicker">{submitted.exact ? 'Exact' : 'Take another look'}</span>
-                  <strong>{submitted.exact ? 'Correct' : 'Compare'}</strong>
+                  <span className="feedback-kicker">Take another look</span>
+                  <strong>{hueMiss && exercise === 'hue' ? 'Hue comparison' : visibleTarget}</strong>
                 </div>
                 <span className="feedback-swatch" style={{ background: rgbCss(target) }} />
               </div>
-              <div className="feedback-comparison">
-                <div><span>Correct answer</span><strong>{visibleTarget}</strong></div>
-                <div><span>Your guess</span><strong>{visibleAnswer}</strong></div>
-              </div>
-              {(exercise === 'hue' || exercise === 'full') && submitted.hueError > 0 && <HueMissMap target={target.h} guess={answerH} />}
+              {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
+              {hueMiss && <HueMissMap target={target.h} guess={answerH} />}
               <div className="feedback-detail">
-                <span>{feedbackErrors.length ? feedbackErrors.join(' · ') : 'All selected dimensions are correct.'}</span>
+                <strong>{feedbackErrors.join(' · ')}</strong>
+                {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
               </div>
-              <button className="check-button" onClick={advanceQuestion} type="button">Next</button>
             </div>
           )}
         </section>
