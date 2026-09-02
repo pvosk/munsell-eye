@@ -36,12 +36,12 @@ type UnsplashResult = {
 };
 
 const SEARCHES = [
-  { query: 'people street', category: 'Street figure', openverseCategory: 'photograph', unsplashQuery: 'candid people street' },
-  { query: 'people walking', category: 'Street figure', openverseCategory: 'photograph', unsplashQuery: 'people walking city candid' },
-  { query: 'portrait', category: 'Portrait', openverseCategory: 'photograph', unsplashQuery: 'studio portrait natural light person' },
-  { query: 'figure painting', category: 'Master painting', openverseCategory: 'digitized_artwork', unsplashQuery: null },
-  { query: 'group portrait', category: 'Candid figure', openverseCategory: 'photograph', unsplashQuery: 'friends candid outdoor people' },
-  { query: 'artist portrait', category: 'Studio figure', openverseCategory: 'photograph', unsplashQuery: 'artist studio portrait person' },
+  { query: 'close up portrait', category: 'Close portrait', openverseCategory: 'photograph', unsplashQuery: 'close up face portrait natural light' },
+  { query: 'studio portrait', category: 'Studio portrait', openverseCategory: 'photograph', unsplashQuery: 'studio portrait close up person' },
+  { query: 'street portrait', category: 'Street portrait', openverseCategory: 'photograph', unsplashQuery: 'candid street portrait face' },
+  { query: 'figure painting portrait', category: 'Master painting', openverseCategory: 'digitized_artwork', unsplashQuery: null },
+  { query: 'natural light portrait person', category: 'Natural portrait', openverseCategory: 'photograph', unsplashQuery: 'natural light portrait person face' },
+  { query: 'artist portrait', category: 'Artist portrait', openverseCategory: 'photograph', unsplashQuery: 'artist studio close up portrait' },
 ] as const;
 
 const clampBatch = (value: string | null) => Math.min(17, Math.max(0, Number.parseInt(value ?? '0', 10) || 0));
@@ -106,8 +106,8 @@ async function fetchUnsplash(search: (typeof SEARCHES)[number], page: number, ac
       source.searchParams.set('auto', 'format');
       source.searchParams.set('fit', 'max');
       source.searchParams.set('fm', 'jpg');
-      source.searchParams.set('q', '78');
-      source.searchParams.set('w', '1000');
+      source.searchParams.set('q', '76');
+      source.searchParams.set('w', '820');
       const landingPage = image.links?.html || image.user?.links?.html || (image.user?.username ? `https://unsplash.com/@${image.user.username}` : 'https://unsplash.com/');
       const landingUrl = new URL(landingPage);
       landingUrl.searchParams.set('utm_source', 'munsell_eye');

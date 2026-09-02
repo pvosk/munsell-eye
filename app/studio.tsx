@@ -8,11 +8,11 @@ type Family = (typeof FAMILIES)[number];
 type Study = 'albers' | 'klee' | 'ostwald' | 'vanderpoel' | 'gartside';
 
 const STUDIES: { id: Study; name: string; eyebrow: string; description: string }[] = [
-  { id: 'albers', name: 'Relativity', eyebrow: 'After Josef Albers', description: 'One identical color is held inside two different grounds. The center chips never change—only their context does.' },
+  { id: 'albers', name: 'Relativity', eyebrow: 'After Josef Albers', description: 'One identical square is nested inside two different grounds. The three-color study isolates how context changes appearance.' },
   { id: 'klee', name: 'Color movement', eyebrow: 'After Paul Klee', description: 'A field of stepped hue, value and chroma rhythms. Every transition is built from discrete Munsell chips.' },
-  { id: 'ostwald', name: 'Constant-hue triangle', eyebrow: 'After Wilhelm Ostwald', description: 'A triangular path between light, dark and chromatic color, translated into the nearest available Munsell chips.' },
-  { id: 'vanderpoel', name: 'Proportion study', eyebrow: 'After Emily Noyes Vanderpoel', description: 'A ten-by-ten abstraction for seeing the balance, interval and area of a small palette.' },
-  { id: 'gartside', name: 'Color field', eyebrow: 'After Mary Gartside', description: 'Soft, asymmetric color masses evoke Gartside’s painted blots while the palette below preserves the exact Munsell sources.' },
+  { id: 'ostwald', name: 'Complement field', eyebrow: 'After Wilhelm Ostwald', description: 'Diametrically opposed hues share a diamond field. White content rises, black content falls and chromatic strength moves toward either edge.' },
+  { id: 'vanderpoel', name: 'Color problems', eyebrow: 'After Emily Noyes Vanderpoel', description: 'Cellular ten-by-ten arrangements explore proportion, borders, axes and connected masses using a limited palette.' },
+  { id: 'gartside', name: 'Color field', eyebrow: 'After Mary Gartside', description: 'Opaque asymmetric masses evoke Gartside’s painted blots without pretending that screen transparency behaves like watercolor.' },
 ];
 
 const rgb = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
@@ -27,6 +27,13 @@ function randomFor(seed: number) {
     result ^= result + Math.imul(result ^ result >>> 7, 61 | result);
     return ((result ^ result >>> 14) >>> 0) / 4294967296;
   };
+}
+
+function randomSeed(previous: number) {
+  const array = new Uint32Array(1);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(array);
+  const next = array[0] || Math.floor(Math.random() * 0xffffffff);
+  return next === previous ? (next + 1) >>> 0 : next;
 }
 
 function closestChip(hue: string, value: number, chroma: number) {
@@ -71,7 +78,7 @@ function AlbersStudy({ colors }: { colors: MunsellColor[] }) {
     <div className="study-canvas study-albers">
       {[colors[1], colors[3]].map((ground, index) => (
         <div className="albers-ground" key={notation(ground)} style={{ background: rgb(ground) }}>
-          <span style={{ background: rgb(center) }} aria-label={index === 0 ? `Identical center color ${notation(center)}` : undefined} />
+          <span style={{ background: rgb(center) }} aria-label={index === 0 ? `Identical inner square ${notation(center)}` : undefined} />
         </div>
       ))}
     </div>
@@ -103,55 +110,90 @@ function KleeStudy({ family, seed }: { family: Family | 'Any'; seed: number }) {
 }
 
 function OstwaldStudy({ family, seed }: { family: Family | 'Any'; seed: number }) {
-  const hue = studyHues(family, seed)[0];
-  const rows = useMemo(() => Array.from({ length: 9 }, (_, row) => (
-    Array.from({ length: row + 1 }, (_, column) => {
-      const white = (8 - row) / 8;
-      const chromatic = row ? column / row : 0;
-      const black = 1 - white - chromatic * (1 - white);
-      const value = Math.max(1, Math.min(9, Math.round(1 + white * 8 + chromatic * 4 - black)));
-      const chroma = Math.max(0, Math.min(12, 2 * Math.round(chromatic * 6)));
-      return chroma === 0 ? closestChip('N', value, 0) : closestChip(hue, value, chroma);
-    })
-  )), [hue]);
+  const baseHue = studyHues(family, seed)[0];
+  const complementHue = HUE_ORDER[wrap(HUE_ORDER.indexOf(baseHue) + HUE_ORDER.length / 2)];
+  const cells = useMemo(() => Array.from({ length: 81 }, (_, index) => {
+    const row = Math.floor(index / 9);
+    const column = index % 9;
+    const horizontal = column - 4;
+    const value = Math.max(1, Math.min(9, Math.round(9 - row)));
+    if (horizontal === 0) return closestChip('N', value, 0);
+    const distance = Math.abs(horizontal) / 4;
+    const middleStrength = Math.max(.25, 1 - Math.abs(row - 4) / 7);
+    const chroma = Math.max(2, Math.min(12, 2 * Math.round(distance * middleStrength * 6)));
+    return closestChip(horizontal < 0 ? baseHue : complementHue, value, chroma);
+  }), [baseHue, complementHue]);
   return (
     <>
       <div className="study-canvas study-ostwald">
-        {rows.map((row, rowIndex) => (
-          <div key={rowIndex}>
-            {row.map((color, index) => <span key={`${index}-${notation(color)}`} style={{ background: rgb(color) }} />)}
-          </div>
-        ))}
+        <span className="ostwald-axis white">More white</span>
+        <span className="ostwald-axis black">More black</span>
+        <span className="ostwald-axis left">{baseHue}</span>
+        <span className="ostwald-axis right">{complementHue}</span>
+        <div className="ostwald-diamond">
+          {cells.map((color, index) => <span key={`${index}-${notation(color)}`} style={{ background: rgb(color) }} />)}
+        </div>
       </div>
-      <PaletteLegend colors={[rows[0][0], rows[4][0], rows[4][4], rows[8][0], rows[8][8]]} />
+      <PaletteLegend colors={[cells[36], cells[40], cells[44], cells[4], cells[76]]} />
     </>
   );
 }
 
 function VanderpoelStudy({ colors, seed }: { colors: MunsellColor[]; seed: number }) {
-  const cells = useMemo(() => Array.from({ length: 100 }, (_, index) => {
-    const row = Math.floor(index / 10);
-    const column = index % 10;
-    const diagonal = column > row + ((seed % 3) - 1) ? 1 : 0;
-    const stripe = Math.floor(row / 3) + Math.floor(column / 4);
-    return colors[(stripe + diagonal * 2 + (row > 6 && column < 3 ? 1 : 0)) % colors.length];
-  }), [colors, seed]);
+  const result = useMemo(() => {
+    const names = ['Cellular field', 'Framed field', 'Cross axis', 'Diagonal current', 'Nested blocks', 'Woven bands', 'Split rhythm', 'Stepped islands'];
+    const random = randomFor(seed * 131 + 17);
+    const pattern = seed % names.length;
+    let indexes = Array.from({ length: 100 }, () => Math.min(colors.length - 1, Math.floor(Math.pow(random(), 1.35) * colors.length)));
+
+    // A small cellular pass joins isolated chips into the connected masses seen in Vanderpoel's grids.
+    for (let pass = 0; pass < 2; pass++) {
+      indexes = indexes.map((current, index, source) => {
+        const row = Math.floor(index / 10);
+        const column = index % 10;
+        const neighbors = [[row - 1, column], [row + 1, column], [row, column - 1], [row, column + 1]]
+          .filter(([r, c]) => r >= 0 && r < 10 && c >= 0 && c < 10)
+          .map(([r, c]) => source[r * 10 + c]);
+        const counts = neighbors.reduce<Record<number, number>>((all, value) => ({ ...all, [value]: (all[value] ?? 0) + 1 }), {});
+        const majority = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+        return majority && majority[1] >= 2 && random() < .76 ? Number(majority[0]) : current;
+      });
+    }
+
+    indexes = indexes.map((current, index) => {
+      const row = Math.floor(index / 10);
+      const column = index % 10;
+      if (pattern === 1 && (row === 0 || row === 9 || column === 0 || column === 9)) return 0;
+      if (pattern === 1 && row >= 3 && row <= 6 && column >= 3 && column <= 6) return 2;
+      if (pattern === 2 && (row === 4 || column === 5)) return row === 4 && column === 5 ? 4 : 1;
+      if (pattern === 3 && Math.abs(column - row) <= 1) return 3;
+      if (pattern === 4 && Math.min(row, column, 9 - row, 9 - column) % 2 === 0) return (Math.min(row, column, 9 - row, 9 - column) / 2) % colors.length;
+      if (pattern === 5 && (row % 3 === 0 || column % 4 === 1)) return (row + column) % colors.length;
+      if (pattern === 6 && column < 5) return (current + (row > 5 ? 1 : 0)) % colors.length;
+      if (pattern === 7 && column >= row - 1 && column <= row + 2) return (Math.floor(row / 3) + 1) % colors.length;
+      return current;
+    });
+    return { cells: indexes.map((index) => colors[index]), name: names[pattern] };
+  }, [colors, seed]);
   return (
-    <div className="study-canvas study-vanderpoel">
-      {cells.map((color, index) => <span key={`${index}-${notation(color)}`} style={{ background: rgb(color) }} />)}
-    </div>
+    <>
+      <div className="study-canvas study-vanderpoel">
+        {result.cells.map((color, index) => <span key={`${index}-${notation(color)}`} style={{ background: rgb(color) }} />)}
+      </div>
+      <span className="study-variation-name">Arrangement · {result.name}</span>
+    </>
   );
 }
 
 function GartsideStudy({ colors, seed }: { colors: MunsellColor[]; seed: number }) {
   const blobs = useMemo(() => {
     const random = randomFor(seed * 97 + 11);
-    return Array.from({ length: 12 }, (_, index) => {
+    return Array.from({ length: 10 }, (_, index) => {
       const color = colors[index % colors.length];
       return {
         color,
         style: {
-          '--blob-color': `rgba(${color.rgb.join(',')}, .88)`,
+          '--blob-color': rgb(color),
           '--blob-left': `${4 + random() * 70}%`,
           '--blob-top': `${2 + random() * 68}%`,
           '--blob-width': `${20 + random() * 30}%`,
@@ -198,7 +240,7 @@ export default function StudioView() {
             {FAMILIES.map((entry) => <option value={entry} key={entry}>{entry}</option>)}
           </select>
         </label>
-        <button type="button" onClick={() => setSeed((currentSeed) => currentSeed + 1)}>New variation</button>
+        <button type="button" onClick={() => setSeed((currentSeed) => randomSeed(currentSeed))}>New variation</button>
       </div>
 
       <article className="study-card">
@@ -211,7 +253,8 @@ export default function StudioView() {
         {study === 'ostwald' && <OstwaldStudy family={family} seed={seed} />}
         {study === 'vanderpoel' && <VanderpoelStudy colors={colors} seed={seed} />}
         {study === 'gartside' && <GartsideStudy colors={colors} seed={seed} />}
-        {!['klee', 'ostwald'].includes(study) && <PaletteLegend colors={colors} />}
+        {study === 'albers' && <PaletteLegend colors={[colors[0], colors[1], colors[3]]} />}
+        {['vanderpoel', 'gartside'].includes(study) && <PaletteLegend colors={colors} />}
         <small className="study-method-note">Generated from discrete Munsell chips · representative notation shown in the palette</small>
       </article>
     </section>

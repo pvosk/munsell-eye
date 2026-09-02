@@ -30,11 +30,12 @@ const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR
 type AppView = 'practice' | 'studio' | 'reference';
 type SwatchPresentation = 'isolated' | 'context';
 type HuePresentation = 'swatch' | 'slice';
+type CompareDimension = 'value' | 'chroma' | 'hue';
 type CompareQuestion = {
   prompt: string;
   colors: MunsellColor[];
   correctIndex: number;
-  dimension: 'value' | 'chroma' | 'hue';
+  dimension: CompareDimension;
 };
 
 type Region = { x: number; y: number; w: number; h: number; name: string };
@@ -91,7 +92,7 @@ const ACTIVE_IMAGE_BANK = IMAGE_PROMPTS.filter((prompt, index, prompts) => (
 
 const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'Look once more'];
 const IMAGE_BANK_BATCHES = [0, 1, 2, 3, 4, 5];
-const IMAGE_BANK_CACHE_KEY = 'munsell-eye-image-bank-v1';
+const IMAGE_BANK_CACHE_KEY = 'munsell-eye-image-bank-v2';
 const IMAGE_BANK_CACHE_TTL = 24 * 60 * 60 * 1000;
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
@@ -696,6 +697,63 @@ function HueMissMap({ target, guess }: { target: string; guess: string }) {
   );
 }
 
+function ComparisonMap({ question, choice }: { question: CompareQuestion; choice: number }) {
+  if (question.dimension === 'hue') {
+    const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
+    return (
+      <div className="comparison-map hue" aria-label="All four choices mapped around the Munsell hue wheel">
+        <div className="mini-hue-wheel" aria-hidden="true">
+          {HUE_EDGE_COLORS.map((color, index) => (
+            <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
+          ))}
+          {question.colors.map((color, index) => (
+            <span
+              className={`comparison-map-marker ${index === question.correctIndex ? 'answer' : ''} ${index === choice ? 'guess' : ''}`}
+              key={`${color.h}-${index}`}
+              style={{ '--position': position(HUE_ORDER.indexOf(color.h as (typeof HUE_ORDER)[number])) } as CSSProperties}
+            >{index + 1}</span>
+          ))}
+        </div>
+        <div className="comparison-map-copy">
+          <span>All four choices</span>
+          <strong>{notation(question.colors[question.correctIndex])}</strong>
+          <small>Correct · your choice {notation(question.colors[choice])}</small>
+        </div>
+      </div>
+    );
+  }
+
+  const values = question.colors.map((color) => question.dimension === 'value' ? color.v : color.c);
+  const step = question.dimension === 'value' ? 1 : 2;
+  const low = Math.max(question.dimension === 'value' ? 1 : 0, Math.min(...values) - step);
+  const high = Math.min(question.dimension === 'value' ? 9 : PRACTICE_CHROMA_MAX, Math.max(...values) + step);
+  const position = (value: number) => `${((value - low) / Math.max(step, high - low)) * 100}%`;
+  return (
+    <div className="comparison-map axis" aria-label={`All four choices mapped by ${question.dimension}`}>
+      <div className="comparison-axis">
+        <span className="comparison-axis-line" />
+        {question.colors.map((color, index) => {
+          const value = question.dimension === 'value' ? color.v : color.c;
+          return (
+            <span
+              className={`comparison-axis-marker ${index === question.correctIndex ? 'answer' : ''} ${index === choice ? 'guess' : ''}`}
+              key={`${notation(color)}-${index}`}
+              style={{ left: position(value) }}
+            >{index + 1}</span>
+          );
+        })}
+        <small className="axis-low">{low}</small>
+        <small className="axis-high">{high}</small>
+      </div>
+      <div className="comparison-map-copy">
+        <span>{question.dimension === 'value' ? 'Value axis' : 'Chroma axis'}</span>
+        <strong>{notation(question.colors[question.correctIndex])}</strong>
+        <small>Correct · your choice {notation(question.colors[choice])}</small>
+      </div>
+    </div>
+  );
+}
+
 function nearestNotationColor(hue: string, value: number, chroma: number) {
   if (hue === 'N') return NEUTRALS[Math.min(8, Math.max(0, value - 1))];
   const candidates = MUNSELL_COLORS.filter((color) => color.h === hue);
@@ -719,9 +777,9 @@ function shuffledComparison(prompt: string, colors: MunsellColor[], correct: Mun
   };
 }
 
-function createCompareQuestion(): CompareQuestion {
-  const variant = Math.floor(Math.random() * 6);
-  if (variant < 2) {
+function createCompareQuestion(dimension: CompareDimension): CompareQuestion {
+  if (dimension === 'value') {
+    const lighter = Math.random() < .5;
     const groups = new Map<string, MunsellColor[]>();
     for (const color of SWATCH_POOL.filter((entry) => entry.c >= 2 && entry.c <= 10)) {
       const key = `${color.h}:${color.c}`;
@@ -732,11 +790,12 @@ function createCompareQuestion(): CompareQuestion {
     const unique = [...new Map(group.map((color) => [color.v, color])).values()];
     const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
     const colors = unique.slice(start, start + 4);
-    const correct = variant === 0 ? colors[colors.length - 1] : colors[0];
-    return shuffledComparison(variant === 0 ? 'Which color is lighter?' : 'Which color is darker?', colors, correct, 'value');
+    const correct = lighter ? colors[colors.length - 1] : colors[0];
+    return shuffledComparison(lighter ? 'Which color is lighter?' : 'Which color is darker?', colors, correct, 'value');
   }
 
-  if (variant < 4) {
+  if (dimension === 'chroma') {
+    const moreChromatic = Math.random() < .5;
     const groups = new Map<string, MunsellColor[]>();
     for (const color of SWATCH_POOL) {
       const key = `${color.h}:${color.v}`;
@@ -747,17 +806,20 @@ function createCompareQuestion(): CompareQuestion {
     const unique = [...new Map(group.map((color) => [color.c, color])).values()];
     const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
     const colors = unique.slice(start, start + 4);
-    const correct = variant === 2 ? colors[colors.length - 1] : colors[0];
-    return shuffledComparison(variant === 2 ? 'Which color is more chromatic?' : 'Which color is more neutral?', colors, correct, 'chroma');
+    const correct = moreChromatic ? colors[colors.length - 1] : colors[0];
+    return shuffledComparison(moreChromatic ? 'Which color is more chromatic?' : 'Which color is more neutral?', colors, correct, 'chroma');
   }
 
-  const hues = variant === 4
-    ? ['10GY', '2.5G', '5G', '7.5G']
-    : ['10B', '2.5PB', '5PB', '7.5PB'];
-  const colors = hues.map((hue) => nearestNotationColor(hue, 5, 6)).filter((color): color is MunsellColor => Boolean(color));
-  const correctHue = variant === 4 ? '5G' : '5PB';
+  const familyIndex = Math.floor(Math.random() * BASIC_HUES.length);
+  const family = BASIC_HUES[familyIndex];
+  const correctHue = `5${family}`;
+  const center = HUE_ORDER.indexOf(correctHue as (typeof HUE_ORDER)[number]);
+  const offsets = [-3, -1, 0, 2];
+  const colors = offsets
+    .map((offset) => nearestNotationColor(HUE_ORDER[wrapIndex(center + offset, HUE_ORDER.length)], 5, 6))
+    .filter((color): color is MunsellColor => Boolean(color));
   const correct = colors.find((color) => color.h === correctHue) ?? colors[0];
-  return shuffledComparison(variant === 4 ? 'Which color is greener?' : 'Which color is more purple-blue?', colors, correct, 'hue');
+  return shuffledComparison(`Which color is closest to ${HUE_FAMILY_NAMES[family]}?`, colors, correct, 'hue');
 }
 
 function HueSlice({ hue }: { hue: string }) {
@@ -1038,15 +1100,19 @@ export default function Home() {
   const [progressOpen, setProgressOpen] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
   const [streak, setStreak] = useState(0);
+  const [compareDimension, setCompareDimension] = useState<CompareDimension>('value');
   const [compareQuestion, setCompareQuestion] = useState<CompareQuestion>(() => ({
-    prompt: 'Which color is greener?',
-    colors: ['10GY', '2.5G', '5G', '7.5G'].map((hue) => nearestNotationColor(hue, 5, 6)),
-    correctIndex: 2,
-    dimension: 'hue',
+    prompt: 'Which color is lighter?',
+    colors: [3, 4, 5, 6].map((value) => nearestNotationColor('5BG', value, 4)).filter((color): color is MunsellColor => Boolean(color)),
+    correctIndex: 3,
+    dimension: 'value',
   }));
   const [compareChoice, setCompareChoice] = useState<number | null>(null);
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
+  const compareAdvanceTimer = useRef<number | undefined>(undefined);
+  const lastStandardExercise = useRef<Exclude<Exercise, 'compare'>>('value');
+  const warmedImageIds = useRef(new Set<string>());
   const recentTargetKeys = useRef<string[]>([]);
   const recentImageTargetValues = useRef<number[]>([]);
   const recordedImageQuestion = useRef('');
@@ -1058,6 +1124,10 @@ export default function Home() {
     startedAt.current = Date.now();
     readAttempts().then(setAttempts).catch(() => undefined);
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+  }, []);
+
+  useEffect(() => () => {
+    if (compareAdvanceTimer.current !== undefined) window.clearTimeout(compareAdvanceTimer.current);
   }, []);
 
   useEffect(() => {
@@ -1075,17 +1145,12 @@ export default function Home() {
       } catch {
         // Private browsing and strict storage settings can disable localStorage.
       }
-      const batches: PromiseSettledResult<ImagePrompt[]>[] = [];
-      for (let index = 0; index < IMAGE_BANK_BATCHES.length; index += 2) {
-        const pair = IMAGE_BANK_BATCHES.slice(index, index + 2);
-        const results = await Promise.allSettled(pair.map(async (batch) => {
+      const batches = await Promise.allSettled(IMAGE_BANK_BATCHES.map(async (batch) => {
           const response = await fetch(`/api/practice-images?batch=${batch}`);
           if (!response.ok) return [];
           const payload = await response.json() as ImageBankResponse;
           return payload.images ?? [];
-        }));
-        batches.push(...results);
-      }
+      }));
       if (cancelled) return;
       const images = batches.flatMap((batch) => batch.status === 'fulfilled' ? batch.value : []);
       const unique = [...new Map(images.map((image) => [image.id, image])).values()];
@@ -1105,6 +1170,20 @@ export default function Home() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    const portraits = remoteImages
+      .filter((prompt) => /portrait|figure|candid|street|studio|people/i.test(prompt.category))
+      .slice(0, 24);
+    portraits.forEach((prompt) => {
+      if (warmedImageIds.current.has(prompt.id)) return;
+      const image = new Image();
+      image.decoding = 'async';
+      image.crossOrigin = 'anonymous';
+      image.onload = () => warmedImageIds.current.add(prompt.id);
+      image.src = prompt.src;
+    });
+  }, [remoteImages]);
+
   const resetAnswer = useCallback(() => {
     answerHLive.current = '5BG';
     answerVLive.current = '5';
@@ -1116,11 +1195,11 @@ export default function Home() {
     startedAt.current = Date.now();
   }, []);
 
-  const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
+  const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue, nextCompareDimension = compareDimension) => {
     resetAnswer();
     setCompareChoice(null);
     if (nextExercise === 'compare') {
-      setCompareQuestion(createCompareQuestion());
+      setCompareQuestion(createCompareQuestion(nextCompareDimension));
       setImageReady(true);
       return;
     }
@@ -1130,7 +1209,9 @@ export default function Home() {
       const choices = [...remoteImages, ...ACTIVE_IMAGE_BANK].filter((prompt) => prompt.src !== imagePrompt.src);
       const figureChoices = choices.filter((prompt) => /figure|portrait|candid|street|studio/i.test(prompt.category));
       const bank = figureChoices.length && Math.random() < 0.86 ? figureChoices : choices;
-      setImagePrompt(bank[Math.floor(Math.random() * bank.length)] ?? ACTIVE_IMAGE_BANK[0]);
+      const warm = bank.filter((prompt) => warmedImageIds.current.has(prompt.id));
+      const readyBank = warm.length >= 4 && Math.random() < .78 ? warm : bank;
+      setImagePrompt(readyBank[Math.floor(Math.random() * readyBank.length)] ?? ACTIVE_IMAGE_BANK[0]);
       setImageReady(false);
     } else {
       const pool = nextExercise === 'value'
@@ -1149,14 +1230,27 @@ export default function Home() {
       setTarget(nextTarget);
       setImageReady(true);
     }
-  }, [attempts, exercise, familyHue, imagePrompt.src, remoteImages, resetAnswer, source]);
+  }, [attempts, compareDimension, exercise, familyHue, imagePrompt.src, remoteImages, resetAnswer, source]);
 
-  const presentation = source === 'image' ? 'image' : swatchPresentation;
+  const presentation: SwatchPresentation | 'image' | 'contrast' = exercise === 'compare' ? 'contrast' : source === 'image' ? 'image' : swatchPresentation;
 
-  const changePresentation = (next: SwatchPresentation | 'image') => {
+  const changePresentation = (next: SwatchPresentation | 'image' | 'contrast') => {
     if (next === presentation) return;
+    if (compareAdvanceTimer.current !== undefined) {
+      window.clearTimeout(compareAdvanceTimer.current);
+      compareAdvanceTimer.current = undefined;
+    }
+    if (next === 'contrast') {
+      if (exercise !== 'compare') lastStandardExercise.current = exercise;
+      setExercise('compare');
+      setSource('swatch');
+      setSwatchPresentation('isolated');
+      nextQuestion('swatch', 'compare', familyHue, compareDimension);
+      return;
+    }
     const nextSource: SourceMode = next === 'image' ? 'image' : 'swatch';
-    const nextExercise = nextSource === 'image' && exercise === 'family' ? 'full' : exercise;
+    const restoredExercise = exercise === 'compare' ? lastStandardExercise.current : exercise;
+    const nextExercise = nextSource === 'image' && restoredExercise === 'family' ? 'full' : restoredExercise;
     if (nextExercise !== exercise) setExercise(nextExercise);
     if (next !== 'image') {
       setSwatchPresentation(next);
@@ -1167,11 +1261,21 @@ export default function Home() {
   };
 
   const changeExercise = (next: Exercise) => {
-    const nextSource = next === 'family' || next === 'compare' ? 'swatch' : source;
+    if (next === 'compare') return;
+    lastStandardExercise.current = next;
+    const nextSource = next === 'family' ? 'swatch' : source;
     setExercise(next);
-    if (next === 'family' || next === 'compare') setSource('swatch');
-    if (next === 'compare') setSwatchPresentation('isolated');
+    if (next === 'family') setSource('swatch');
     nextQuestion(nextSource, next, familyHue);
+  };
+
+  const changeCompareDimension = (next: CompareDimension) => {
+    if (next === compareDimension) return;
+    if (compareAdvanceTimer.current !== undefined) window.clearTimeout(compareAdvanceTimer.current);
+    compareAdvanceTimer.current = undefined;
+    setCompareDimension(next);
+    setSessionCount((count) => count + 1);
+    nextQuestion('swatch', 'compare', familyHue, next);
   };
 
   const changeHuePresentation = (next: HuePresentation) => {
@@ -1240,6 +1344,13 @@ export default function Home() {
     setCompareChoice(index);
     setStreak((current) => exact ? current + 1 : 0);
     setAttempts((current) => [...current, attempt].slice(-600));
+    if (exact) {
+      compareAdvanceTimer.current = window.setTimeout(() => {
+        compareAdvanceTimer.current = undefined;
+        setSessionCount((count) => count + 1);
+        nextQuestion('swatch', 'compare', familyHue, compareDimension);
+      }, 560);
+    }
     await saveAttempt(attempt).catch(() => undefined);
   };
 
@@ -1289,6 +1400,8 @@ export default function Home() {
   }, []);
 
   const advanceQuestion = () => {
+    if (compareAdvanceTimer.current !== undefined) window.clearTimeout(compareAdvanceTimer.current);
+    compareAdvanceTimer.current = undefined;
     setSessionCount((count) => count + 1);
     nextQuestion();
   };
@@ -1307,7 +1420,7 @@ export default function Home() {
           void chooseComparison(Number(event.key) - 1);
           return;
         }
-        if (event.key === 'Enter' && !event.repeat && compareChoice !== null) {
+        if (event.key === 'Enter' && !event.repeat && compareChoice !== null && compareChoice !== compareQuestion.correctIndex) {
           event.preventDefault();
           advanceQuestion();
         }
@@ -1379,7 +1492,6 @@ export default function Home() {
     ['chroma', 'Chroma'],
     ...(source === 'swatch' ? [['family', 'Family'] as [Exercise, string]] : []),
     ['full', 'Full H/V/C'],
-    ['compare', 'Compare'],
   ];
   const contextColors = useMemo(() => contextColorsFor(target, exercise, familyHue), [exercise, familyHue, target]);
   const contextGrid = useMemo(() => [
@@ -1433,8 +1545,8 @@ export default function Home() {
         </div>
         <nav className="top-actions" aria-label="App sections">
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
-          <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
+          <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
           <button className="quiet-button" type="button" onClick={() => setProgressOpen(true)}>Progress</button>
         </nav>
       </header>
@@ -1442,35 +1554,44 @@ export default function Home() {
       {view === 'practice' ? (
         <section className="workspace" aria-label="Color identification practice">
         <div className="mode-row">
-          {exercise === 'compare' ? <span className="compare-source-note">Four close chips</span> : (
-            <div className="segmented display-segmented" aria-label="Question presentation">
-              {([
-                { id: 'isolated', label: 'Swatch' },
-                { id: 'context', label: 'Context' },
-                { id: 'image', label: 'Image' },
-              ] as const).map((mode) => (
-                <button
-                  className={presentation === mode.id ? 'active' : ''}
-                  key={mode.id}
-                  onClick={() => changePresentation(mode.id)}
-                  type="button"
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="segmented display-segmented" aria-label="Question presentation">
+            {([
+              { id: 'isolated', label: 'Swatch' },
+              { id: 'context', label: 'Context' },
+              { id: 'image', label: 'Image' },
+              { id: 'contrast', label: 'Contrast' },
+            ] as const).map((mode) => (
+              <button
+                className={presentation === mode.id ? 'active' : ''}
+                key={mode.id}
+                onClick={() => changePresentation(mode.id)}
+                type="button"
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
           <div className="question-meta">
             <span className="question-count">Practice {sessionCount}</span>
             {streak > 1 && <span className="streak-count">{streak} in a row</span>}
           </div>
         </div>
 
-        <nav className="exercise-tabs" aria-label="Exercise">
-          {exerciseOptions.map(([mode, label]) => (
-            <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
-          ))}
-        </nav>
+        {exercise === 'compare' ? (
+          <nav className="exercise-tabs contrast-tabs" aria-label="Contrast dimension">
+            {(['value', 'hue', 'chroma'] as CompareDimension[]).map((dimension) => (
+              <button className={compareDimension === dimension ? 'active' : ''} key={dimension} onClick={() => changeCompareDimension(dimension)} type="button">
+                {dimension[0].toUpperCase() + dimension.slice(1)}
+              </button>
+            ))}
+          </nav>
+        ) : (
+          <nav className="exercise-tabs" aria-label="Exercise">
+            {exerciseOptions.map(([mode, label]) => (
+              <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
+            ))}
+          </nav>
+        )}
 
         {exercise === 'family' && (
           <div className="family-control">
@@ -1552,35 +1673,21 @@ export default function Home() {
         )}
 
         {exercise === 'compare' ? (
-          <section className="answer-panel compare-answer-panel" aria-label="Comparison result">
-            <button
-              className="check-button practice-action"
-              disabled={compareChoice === null}
-              onClick={advanceQuestion}
-              type="button"
-            >
-              {compareChoice === null ? 'Choose a color' : 'Next'}
-            </button>
-            <div className="answer-state compare">
-              {compareChoice === null ? (
-                <p>Tap a color or press 1–4</p>
-              ) : (
-                <div className={`feedback ${compareChoice === compareQuestion.correctIndex ? 'correct' : ''}`} role="status" aria-live="polite">
-                  {compareChoice === compareQuestion.correctIndex ? (
-                    <div className="correct-reward">
-                      <span className="reward-mark" aria-hidden="true">✓</span>
-                      <div><strong>Correct</strong><small>{streak > 1 ? `${streak} in a row` : 'You saw the relationship.'}</small></div>
-                    </div>
-                  ) : (
-                    <div className="compare-feedback-row">
-                      <div><span className="feedback-kicker">Look at the interval</span><strong>{notation(compareQuestion.colors[compareQuestion.correctIndex])}</strong><small>Correct answer</small></div>
-                      <AlbersComparison correct={compareQuestion.colors[compareQuestion.correctIndex]} guess={compareQuestion.colors[compareChoice]} />
-                    </div>
-                  )}
+          <div className="contrast-response" aria-live="polite">
+            {compareChoice === null ? (
+              <p className="contrast-hint">Tap a square or press 1–4</p>
+            ) : compareChoice === compareQuestion.correctIndex ? (
+              <div className="contrast-correct" role="status"><span aria-hidden="true">✓</span> Correct</div>
+            ) : (
+              <section className="answer-panel compare-answer-panel" aria-label="Contrast result">
+                <button className="check-button practice-action" onClick={advanceQuestion} type="button">Next</button>
+                <div className="feedback" role="status">
+                  <span className="feedback-kicker">Look at the interval</span>
+                  <ComparisonMap question={compareQuestion} choice={compareChoice} />
                 </div>
-              )}
-            </div>
-          </section>
+              </section>
+            )}
+          </div>
         ) : (
         <section className="answer-panel" aria-label="Your answer" ref={answerPanelRef}>
           <button
