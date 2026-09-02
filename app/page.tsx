@@ -12,6 +12,9 @@ const HUE_FAMILY_NAMES: Record<string, string> = {
 };
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
 const PRACTICE_CHROMA_MAX = 12;
+const VALUE_ONE_CHANCE = 1 / 30;
+const VALUE_ONE_COOLDOWN = 29;
+const VALUE_TWO_CHANCE = 0.16;
 const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
@@ -468,7 +471,13 @@ function contextColorsFor(target: MunsellColor, exercise: Exercise, familyHue: s
   return selected;
 }
 
-function chooseLocalSample(pixels: Uint8ClampedArray, width: number, height: number) {
+function chooseLocalSample(
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+  reduceDarkTargets: boolean,
+  allowValueOne: boolean,
+) {
   const radius = Math.max(3, Math.round(Math.min(width, height) * 0.012));
   const offsets = [
     [0, 0], [radius, 0], [-radius, 0], [0, radius], [0, -radius],
@@ -477,7 +486,7 @@ function chooseLocalSample(pixels: Uint8ClampedArray, width: number, height: num
   ];
   const marginX = Math.max(radius * 3, Math.round(width * 0.1));
   const marginY = Math.max(radius * 3, Math.round(height * 0.1));
-  let best: { x: number; y: number; rgb: [number, number, number]; score: number } | null = null;
+  const candidates: { x: number; y: number; rgb: [number, number, number]; score: number }[] = [];
   for (let index = 0; index < 280; index++) {
     const x = Math.round(marginX + Math.random() * Math.max(1, width - marginX * 2 - 1));
     const y = Math.round(marginY + Math.random() * Math.max(1, height - marginY * 2 - 1));
@@ -502,21 +511,48 @@ function chooseLocalSample(pixels: Uint8ClampedArray, width: number, height: num
     const centerDistance = Math.hypot(x / width - 0.5, y / height - 0.5);
     const extremePenalty = mean[0] < 0.08 || mean[0] > 0.96 ? 0.02 : 0;
     const score = variance + tonalRange ** 2 * 0.035 + centerDistance * 0.0015 + extremePenalty + Math.random() * 0.0003;
-    if (!best || score < best.score) best = { x, y, rgb, score };
+    candidates.push({ x, y, rgb, score });
   }
-  const fallback = best ?? { x: Math.round(width / 2), y: Math.round(height / 2), rgb: [127, 127, 127] as [number, number, number] };
+
+  const ranked = candidates.sort((a, b) => a.score - b.score);
+  const bestScore = ranked[0]?.score ?? 0;
+  const mapped = ranked
+    .slice(0, 72)
+    .filter((candidate) => candidate.score <= bestScore + 0.01)
+    .map((candidate) => ({ ...candidate, color: nearestColor(candidate.rgb, IMAGE_COLOR_POOL) }));
+
+  let selected = mapped[0] ?? {
+    x: Math.round(width / 2),
+    y: Math.round(height / 2),
+    rgb: [127, 127, 127] as [number, number, number],
+    score: 0,
+    color: nearestColor([127, 127, 127], IMAGE_COLOR_POOL),
+  };
+
+  if (reduceDarkTargets) {
+    const valueOne = mapped.find((candidate) => candidate.color.v === 1);
+    const valueTwo = mapped.find((candidate) => candidate.color.v === 2);
+    const practical = mapped.find((candidate) => candidate.color.v >= 3);
+
+    if (allowValueOne && valueOne) selected = valueOne;
+    else if (valueTwo && Math.random() < VALUE_TWO_CHANCE) selected = valueTwo;
+    else if (practical) selected = practical;
+    else return null;
+  }
+
   return {
-    x: fallback.x / width * 100,
-    y: fallback.y / height * 100,
-    color: nearestColor(fallback.rgb, IMAGE_COLOR_POOL),
+    x: selected.x / width * 100,
+    y: selected.y / height * 100,
+    color: selected.color,
   };
 }
 
-function PracticeImage({ prompt, exercise, questionKey, monochrome, onColor, onError, correct = false }: {
+function PracticeImage({ prompt, exercise, questionKey, monochrome, allowValueOne, onColor, onError, correct = false }: {
   prompt: ImagePrompt;
   exercise: Exercise;
   questionKey: number;
   monochrome: boolean;
+  allowValueOne: boolean;
   onColor: (color: MunsellColor) => void;
   onError: () => void;
   correct?: boolean;
@@ -551,7 +587,12 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, onColor, onE
       context.drawImage(image, 0, 0, width, height);
       const data = context.getImageData(0, 0, width, height);
       if (!cancelled) {
-        const nextSample = chooseLocalSample(data.data, width, height);
+        const nextSample = chooseLocalSample(data.data, width, height, exercise !== 'value', allowValueOne);
+        if (!nextSample) {
+          setLoading(false);
+          onErrorRef.current();
+          return;
+        }
         setSample(nextSample);
         onColor(nextSample.color);
         setLoading(false);
@@ -563,7 +604,7 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, onColor, onE
       onErrorRef.current();
     };
     return () => { cancelled = true; };
-  }, [exercise, onColor, prompt, questionKey]);
+  }, [allowValueOne, exercise, onColor, prompt, questionKey]);
 
   return (
     <div className={`image-stage ${correct ? 'is-correct' : ''}`}>
@@ -856,6 +897,7 @@ export default function Home() {
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
   const [remoteImages, setRemoteImages] = useState<ImagePrompt[]>([]);
   const [imageReady, setImageReady] = useState(true);
+  const [allowValueOneImageTarget, setAllowValueOneImageTarget] = useState(false);
   const [answerH, setAnswerH] = useState('5BG');
   const [answerV, setAnswerV] = useState('5');
   const [answerC, setAnswerC] = useState('6');
@@ -867,6 +909,8 @@ export default function Home() {
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const recentTargetKeys = useRef<string[]>([]);
+  const recentImageTargetValues = useRef<number[]>([]);
+  const recordedImageQuestion = useRef('');
   const answerHLive = useRef('5BG');
   const answerVLive = useRef('5');
   const answerCLive = useRef('6');
@@ -936,6 +980,8 @@ export default function Home() {
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
     if (nextSource === 'image' && nextExercise !== 'family') {
+      const recentlyUsedValueOne = recentImageTargetValues.current.slice(-VALUE_ONE_COOLDOWN).includes(1);
+      setAllowValueOneImageTarget(nextExercise !== 'value' && !recentlyUsedValueOne && Math.random() < VALUE_ONE_CHANCE);
       const choices = [...remoteImages, ...ACTIVE_IMAGE_BANK].filter((prompt) => prompt.src !== imagePrompt.src);
       const figureChoices = choices.filter((prompt) => /figure|portrait|candid|street|studio/i.test(prompt.category));
       const bank = figureChoices.length && Math.random() < 0.86 ? figureChoices : choices;
@@ -985,9 +1031,14 @@ export default function Home() {
   };
 
   const handleImageColor = useCallback((color: MunsellColor) => {
+    const questionId = `${imagePrompt.id}:${exercise}:${sessionCount}`;
+    if (exercise !== 'value' && recordedImageQuestion.current !== questionId) {
+      recordedImageQuestion.current = questionId;
+      recentImageTargetValues.current = [...recentImageTargetValues.current, color.v].slice(-(VALUE_ONE_COOLDOWN + 1));
+    }
     setTarget(color);
     setImageReady(true);
-  }, []);
+  }, [exercise, imagePrompt.id, sessionCount]);
 
   const handleImageError = useCallback(() => {
     setImageReady(false);
@@ -1263,7 +1314,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <PracticeImage key={`${imagePrompt.id}-${exercise}-${sessionCount}`} prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} monochrome={valueMonochrome} onColor={handleImageColor} onError={handleImageError} correct={Boolean(submitted?.exact)} />
+            <PracticeImage key={`${imagePrompt.id}-${exercise}-${sessionCount}`} prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} monochrome={valueMonochrome} allowValueOne={allowValueOneImageTarget} onColor={handleImageColor} onError={handleImageError} correct={Boolean(submitted?.exact)} />
             <div className="image-caption">
               <span><strong>{imagePrompt.title}</strong> · {imagePrompt.category}</span>
               <a href={imagePrompt.source} target="_blank" rel="noreferrer">{imagePrompt.credit}</a>
