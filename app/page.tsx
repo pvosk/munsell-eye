@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_COLORS, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
 import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, type SourceMode } from './progress-db';
+import StudioView from './studio';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
@@ -26,8 +27,15 @@ const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CH
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
-type AppView = 'practice' | 'reference';
+type AppView = 'practice' | 'studio' | 'reference';
 type SwatchPresentation = 'isolated' | 'context';
+type HuePresentation = 'swatch' | 'slice';
+type CompareQuestion = {
+  prompt: string;
+  colors: MunsellColor[];
+  correctIndex: number;
+  dimension: 'value' | 'chroma' | 'hue';
+};
 
 type Region = { x: number; y: number; w: number; h: number; name: string };
 type ImagePrompt = {
@@ -477,6 +485,7 @@ function chooseLocalSample(
   height: number,
   reduceDarkTargets: boolean,
   allowValueOne: boolean,
+  subjectBiased: boolean,
 ) {
   const radius = Math.max(3, Math.round(Math.min(width, height) * 0.012));
   const offsets = [
@@ -484,8 +493,28 @@ function chooseLocalSample(
     [radius, radius], [radius, -radius], [-radius, radius], [-radius, -radius],
     [radius * 2, 0], [-radius * 2, 0], [0, radius * 2], [0, -radius * 2],
   ];
+  const ringRadius = radius * 5;
+  const ringOffsets = [
+    [ringRadius, 0], [-ringRadius, 0], [0, ringRadius], [0, -ringRadius],
+    [ringRadius, ringRadius], [ringRadius, -ringRadius], [-ringRadius, ringRadius], [-ringRadius, -ringRadius],
+  ];
   const marginX = Math.max(radius * 3, Math.round(width * 0.1));
   const marginY = Math.max(radius * 3, Math.round(height * 0.1));
+  const globalSamples: [number, number, number][] = [];
+  for (let row = 1; row <= 9; row++) {
+    for (let column = 1; column <= 12; column++) {
+      const sampleX = Math.min(width - 1, Math.round(column / 13 * width));
+      const sampleY = Math.min(height - 1, Math.round(row / 10 * height));
+      const offset = (sampleY * width + sampleX) * 4;
+      globalSamples.push(rgbToOklab([pixels[offset], pixels[offset + 1], pixels[offset + 2]]) as [number, number, number]);
+    }
+  }
+  const globalMean = globalSamples.reduce<[number, number, number]>((sum, lab) => (
+    [sum[0] + lab[0], sum[1] + lab[1], sum[2] + lab[2]]
+  ), [0, 0, 0]).map((channel) => channel / globalSamples.length) as [number, number, number];
+  const distance = (first: number[], second: number[]) => Math.sqrt(
+    (first[0] - second[0]) ** 2 + (first[1] - second[1]) ** 2 + (first[2] - second[2]) ** 2
+  );
   const candidates: { x: number; y: number; rgb: [number, number, number]; score: number }[] = [];
   for (let index = 0; index < 280; index++) {
     const x = Math.round(marginX + Math.random() * Math.max(1, width - marginX * 2 - 1));
@@ -508,9 +537,22 @@ function chooseLocalSample(
     ), 0) / labs.length;
     const lightness = labs.map((lab) => lab[0]);
     const tonalRange = Math.max(...lightness) - Math.min(...lightness);
+    const ringLabs = ringOffsets.map(([dx, dy]) => {
+      const sampleX = Math.min(width - 1, Math.max(0, x + dx));
+      const sampleY = Math.min(height - 1, Math.max(0, y + dy));
+      const offset = (sampleY * width + sampleX) * 4;
+      return rgbToOklab([pixels[offset], pixels[offset + 1], pixels[offset + 2]]);
+    });
+    const ringMean = ringLabs.reduce<[number, number, number]>((sum, lab) => (
+      [sum[0] + lab[0], sum[1] + lab[1], sum[2] + lab[2]]
+    ), [0, 0, 0]).map((channel) => channel / ringLabs.length) as [number, number, number];
+    const localSeparation = distance(mean, ringMean);
+    const globalSeparation = distance(mean, globalMean);
     const centerDistance = Math.hypot(x / width - 0.5, y / height - 0.5);
     const extremePenalty = mean[0] < 0.08 || mean[0] > 0.96 ? 0.02 : 0;
-    const score = variance + tonalRange ** 2 * 0.035 + centerDistance * 0.0015 + extremePenalty + Math.random() * 0.0003;
+    const centerWeight = subjectBiased ? 0.0036 : 0.0022;
+    const saliencyReward = Math.min(localSeparation, 0.2) * 0.007 + Math.min(globalSeparation, 0.28) * 0.002;
+    const score = variance + tonalRange ** 2 * 0.035 + centerDistance * centerWeight + extremePenalty - saliencyReward + Math.random() * 0.0003;
     candidates.push({ x, y, rgb, score });
   }
 
@@ -587,7 +629,14 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, allowValueOn
       context.drawImage(image, 0, 0, width, height);
       const data = context.getImageData(0, 0, width, height);
       if (!cancelled) {
-        const nextSample = chooseLocalSample(data.data, width, height, exercise !== 'value', allowValueOne);
+        const nextSample = chooseLocalSample(
+          data.data,
+          width,
+          height,
+          exercise !== 'value',
+          allowValueOne,
+          /figure|portrait|candid|street|studio|people/i.test(prompt.category),
+        );
         if (!nextSample) {
           setLoading(false);
           onErrorRef.current();
@@ -654,6 +703,88 @@ function nearestNotationColor(hue: string, value: number, chroma: number) {
     Math.abs(a.v - value) * 6 + Math.abs(a.c - chroma)
     - (Math.abs(b.v - value) * 6 + Math.abs(b.c - chroma))
   ))[0];
+}
+
+function shuffledComparison(prompt: string, colors: MunsellColor[], correct: MunsellColor, dimension: CompareQuestion['dimension']): CompareQuestion {
+  const entries = colors.map((color) => ({ color, correct: color === correct }));
+  for (let index = entries.length - 1; index > 0; index--) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [entries[index], entries[swap]] = [entries[swap], entries[index]];
+  }
+  return {
+    prompt,
+    colors: entries.map((entry) => entry.color),
+    correctIndex: entries.findIndex((entry) => entry.correct),
+    dimension,
+  };
+}
+
+function createCompareQuestion(): CompareQuestion {
+  const variant = Math.floor(Math.random() * 6);
+  if (variant < 2) {
+    const groups = new Map<string, MunsellColor[]>();
+    for (const color of SWATCH_POOL.filter((entry) => entry.c >= 2 && entry.c <= 10)) {
+      const key = `${color.h}:${color.c}`;
+      groups.set(key, [...(groups.get(key) ?? []), color]);
+    }
+    const eligible = [...groups.values()].map((colors) => [...colors].sort((a, b) => a.v - b.v)).filter((colors) => new Set(colors.map((color) => color.v)).size >= 4);
+    const group = eligible[Math.floor(Math.random() * eligible.length)];
+    const unique = [...new Map(group.map((color) => [color.v, color])).values()];
+    const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
+    const colors = unique.slice(start, start + 4);
+    const correct = variant === 0 ? colors[colors.length - 1] : colors[0];
+    return shuffledComparison(variant === 0 ? 'Which color is lighter?' : 'Which color is darker?', colors, correct, 'value');
+  }
+
+  if (variant < 4) {
+    const groups = new Map<string, MunsellColor[]>();
+    for (const color of SWATCH_POOL) {
+      const key = `${color.h}:${color.v}`;
+      groups.set(key, [...(groups.get(key) ?? []), color]);
+    }
+    const eligible = [...groups.values()].map((colors) => [...colors].sort((a, b) => a.c - b.c)).filter((colors) => new Set(colors.map((color) => color.c)).size >= 4);
+    const group = eligible[Math.floor(Math.random() * eligible.length)];
+    const unique = [...new Map(group.map((color) => [color.c, color])).values()];
+    const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
+    const colors = unique.slice(start, start + 4);
+    const correct = variant === 2 ? colors[colors.length - 1] : colors[0];
+    return shuffledComparison(variant === 2 ? 'Which color is more chromatic?' : 'Which color is more neutral?', colors, correct, 'chroma');
+  }
+
+  const hues = variant === 4
+    ? ['10GY', '2.5G', '5G', '7.5G']
+    : ['10B', '2.5PB', '5PB', '7.5PB'];
+  const colors = hues.map((hue) => nearestNotationColor(hue, 5, 6)).filter((color): color is MunsellColor => Boolean(color));
+  const correctHue = variant === 4 ? '5G' : '5PB';
+  const correct = colors.find((color) => color.h === correctHue) ?? colors[0];
+  return shuffledComparison(variant === 4 ? 'Which color is greener?' : 'Which color is more purple-blue?', colors, correct, 'hue');
+}
+
+function HueSlice({ hue }: { hue: string }) {
+  const hueColors = MUNSELL_COLORS.filter((color) => color.h === hue);
+  const maxChroma = Math.max(2, ...hueColors.map((color) => color.c));
+  const chromas = Array.from({ length: maxChroma / 2 + 1 }, (_, index) => index * 2);
+  return (
+    <div className="practice-hue-slice" aria-label={`Complete ${hue} value and chroma slice`}>
+      <div className="hue-chart-scroll">
+        <div className="hue-chart" style={{ '--chart-columns': chromas.length } as CSSProperties}>
+          <span className="chart-corner">V/C</span>
+          {chromas.map((chroma) => <span className="chart-label" key={`head-${chroma}`}>{chroma === 0 ? 'N' : `/${chroma}`}</span>)}
+          {[9, 8, 7, 6, 5, 4, 3, 2, 1].map((value) => (
+            <div className="chart-row" key={value}>
+              <span className="chart-value">{value}</span>
+              {chromas.map((chroma) => {
+                const color = chroma === 0 ? NEUTRALS[value - 1] : hueColors.find((entry) => entry.v === value && entry.c === chroma);
+                return color
+                  ? <span className="chart-chip" key={`${value}-${chroma}`} style={{ background: rgbCss(color) }} />
+                  : <span className="chart-chip empty" key={`${value}-${chroma}`} />;
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: MunsellColor }) {
@@ -890,6 +1021,7 @@ export default function Home() {
   const [view, setView] = useState<AppView>('practice');
   const [source, setSource] = useState<SourceMode>('swatch');
   const [swatchPresentation, setSwatchPresentation] = useState<SwatchPresentation>('isolated');
+  const [huePresentation, setHuePresentation] = useState<HuePresentation>('swatch');
   const [exercise, setExercise] = useState<Exercise>('value');
   const [valueMonochrome, setValueMonochrome] = useState(false);
   const [familyHue, setFamilyHue] = useState('5BG');
@@ -906,6 +1038,13 @@ export default function Home() {
   const [progressOpen, setProgressOpen] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
   const [streak, setStreak] = useState(0);
+  const [compareQuestion, setCompareQuestion] = useState<CompareQuestion>(() => ({
+    prompt: 'Which color is greener?',
+    colors: ['10GY', '2.5G', '5G', '7.5G'].map((hue) => nearestNotationColor(hue, 5, 6)),
+    correctIndex: 2,
+    dimension: 'hue',
+  }));
+  const [compareChoice, setCompareChoice] = useState<number | null>(null);
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const recentTargetKeys = useRef<string[]>([]);
@@ -979,6 +1118,12 @@ export default function Home() {
 
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
+    setCompareChoice(null);
+    if (nextExercise === 'compare') {
+      setCompareQuestion(createCompareQuestion());
+      setImageReady(true);
+      return;
+    }
     if (nextSource === 'image' && nextExercise !== 'family') {
       const recentlyUsedValueOne = recentImageTargetValues.current.slice(-VALUE_ONE_COOLDOWN).includes(1);
       setAllowValueOneImageTarget(nextExercise !== 'value' && !recentlyUsedValueOne && Math.random() < VALUE_ONE_CHANCE);
@@ -1013,16 +1158,27 @@ export default function Home() {
     const nextSource: SourceMode = next === 'image' ? 'image' : 'swatch';
     const nextExercise = nextSource === 'image' && exercise === 'family' ? 'full' : exercise;
     if (nextExercise !== exercise) setExercise(nextExercise);
-    if (next !== 'image') setSwatchPresentation(next);
+    if (next !== 'image') {
+      setSwatchPresentation(next);
+      if (next === 'context') setHuePresentation('swatch');
+    }
     setSource(nextSource);
     nextQuestion(nextSource, nextExercise, familyHue);
   };
 
   const changeExercise = (next: Exercise) => {
-    const nextSource = next === 'family' ? 'swatch' : source;
+    const nextSource = next === 'family' || next === 'compare' ? 'swatch' : source;
     setExercise(next);
-    if (next === 'family') setSource('swatch');
+    if (next === 'family' || next === 'compare') setSource('swatch');
+    if (next === 'compare') setSwatchPresentation('isolated');
     nextQuestion(nextSource, next, familyHue);
+  };
+
+  const changeHuePresentation = (next: HuePresentation) => {
+    if (next === huePresentation) return;
+    setHuePresentation(next);
+    if (next === 'slice') setSwatchPresentation('isolated');
+    nextQuestion('swatch', 'hue', familyHue);
   };
 
   const changeFamilyHue = (next: string) => {
@@ -1059,6 +1215,33 @@ export default function Home() {
     answerCLive.current = next;
     setAnswerC(next);
   }, []);
+
+  const chooseComparison = async (index: number) => {
+    if (compareChoice !== null) return;
+    const answer = compareQuestion.colors[index];
+    const correct = compareQuestion.colors[compareQuestion.correctIndex];
+    const exact = index === compareQuestion.correctIndex;
+    const attempt: Attempt = {
+      createdAt: Date.now(),
+      source: 'swatch',
+      exercise: 'compare',
+      targetH: correct.h,
+      targetV: correct.v,
+      targetC: correct.c,
+      answerH: answer.h,
+      answerV: answer.v,
+      answerC: answer.c,
+      hueError: hueDistance(answer.h, correct.h),
+      valueError: Math.abs(answer.v - correct.v),
+      chromaError: Math.abs(answer.c - correct.c) / 2,
+      exact,
+      responseMs: Date.now() - startedAt.current,
+    };
+    setCompareChoice(index);
+    setStreak((current) => exact ? current + 1 : 0);
+    setAttempts((current) => [...current, attempt].slice(-600));
+    await saveAttempt(attempt).catch(() => undefined);
+  };
 
   const submit = async () => {
     if (!imageReady || submitted) return;
@@ -1111,13 +1294,25 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (view === 'practice' && !progressOpen && !submitted && imageReady) focusFirstAnswer();
+    if (view === 'practice' && exercise !== 'compare' && !progressOpen && !submitted && imageReady) focusFirstAnswer();
   }, [exercise, focusFirstAnswer, imageReady, progressOpen, sessionCount, source, submitted, view]);
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
       if (progressOpen || view !== 'practice') return;
       const element = event.target as HTMLElement | null;
+      if (exercise === 'compare') {
+        if (compareChoice === null && ['1', '2', '3', '4'].includes(event.key)) {
+          event.preventDefault();
+          void chooseComparison(Number(event.key) - 1);
+          return;
+        }
+        if (event.key === 'Enter' && !event.repeat && compareChoice !== null) {
+          event.preventDefault();
+          advanceQuestion();
+        }
+        return;
+      }
       if (event.key === 'Tab' && !submitted) {
         const pickers = Array.from(answerPanelRef.current?.querySelectorAll<HTMLElement>('.picker') ?? []);
         if (pickers.length > 1) {
@@ -1148,7 +1343,9 @@ export default function Home() {
         ? 'Identify this chroma'
         : exercise === 'family'
           ? `Identify value & chroma within ${familyHue}`
-          : 'Identify hue, value & chroma';
+          : exercise === 'compare'
+            ? compareQuestion.prompt
+            : 'Identify hue, value & chroma';
   const resolvedAnswerH = submitted?.answerH ?? answerH;
   const resolvedAnswerV = String(submitted?.answerV ?? answerV);
   const resolvedAnswerC = String(submitted?.answerC ?? answerC);
@@ -1182,6 +1379,7 @@ export default function Home() {
     ['chroma', 'Chroma'],
     ...(source === 'swatch' ? [['family', 'Family'] as [Exercise, string]] : []),
     ['full', 'Full H/V/C'],
+    ['compare', 'Compare'],
   ];
   const contextColors = useMemo(() => contextColorsFor(target, exercise, familyHue), [exercise, familyHue, target]);
   const contextGrid = useMemo(() => [
@@ -1235,6 +1433,7 @@ export default function Home() {
         </div>
         <nav className="top-actions" aria-label="App sections">
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
+          <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className="quiet-button" type="button" onClick={() => setProgressOpen(true)}>Progress</button>
         </nav>
@@ -1243,22 +1442,24 @@ export default function Home() {
       {view === 'practice' ? (
         <section className="workspace" aria-label="Color identification practice">
         <div className="mode-row">
-          <div className="segmented display-segmented" aria-label="Question presentation">
-            {([
-              { id: 'isolated', label: 'Swatch' },
-              { id: 'context', label: 'Context' },
-              { id: 'image', label: 'Image' },
-            ] as const).map((mode) => (
-              <button
-                className={presentation === mode.id ? 'active' : ''}
-                key={mode.id}
-                onClick={() => changePresentation(mode.id)}
-                type="button"
-              >
-                {mode.label}
-              </button>
-            ))}
-          </div>
+          {exercise === 'compare' ? <span className="compare-source-note">Four close chips</span> : (
+            <div className="segmented display-segmented" aria-label="Question presentation">
+              {([
+                { id: 'isolated', label: 'Swatch' },
+                { id: 'context', label: 'Context' },
+                { id: 'image', label: 'Image' },
+              ] as const).map((mode) => (
+                <button
+                  className={presentation === mode.id ? 'active' : ''}
+                  key={mode.id}
+                  onClick={() => changePresentation(mode.id)}
+                  type="button"
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div className="question-meta">
             <span className="question-count">Practice {sessionCount}</span>
             {streak > 1 && <span className="streak-count">{streak} in a row</span>}
@@ -1285,19 +1486,47 @@ export default function Home() {
             <span>{promptText}</span>
           </div>
           <div className="prompt-settings">
-            <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
+            <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? huePresentation === 'slice' ? '40 HUE SLICES' : '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : exercise === 'compare' ? '4 CLOSE CHIPS' : 'C2–C12'}</span>
             {exercise === 'value' && (
               <div className="segmented value-display-toggle" aria-label="Value question appearance">
                 <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
                 <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
               </div>
             )}
+            {exercise === 'hue' && source === 'swatch' && (
+              <div className="segmented value-display-toggle" aria-label="Hue question appearance">
+                <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
+                <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
+              </div>
+            )}
           </div>
         </div>
 
-        {source === 'swatch' ? (
+        {exercise === 'compare' ? (
+          <div className="compare-stage" aria-label={compareQuestion.prompt}>
+            {compareQuestion.colors.map((color, index) => {
+              const isCorrect = compareChoice !== null && index === compareQuestion.correctIndex;
+              const isWrong = compareChoice === index && index !== compareQuestion.correctIndex;
+              return (
+                <button
+                  aria-label={`Choice ${index + 1}${compareChoice !== null ? `: ${notation(color)}` : ''}`}
+                  className={`${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`}
+                  disabled={compareChoice !== null}
+                  key={`${notation(color)}-${index}`}
+                  onClick={() => void chooseComparison(index)}
+                  style={{ background: rgbCss(color) }}
+                  type="button"
+                >
+                  <span>{index + 1}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : source === 'swatch' ? (
           <div className={`swatch-stage ${submitted?.exact ? 'is-correct' : ''}`} aria-label="Color swatch">
-            {swatchPresentation === 'context' ? (
+            {exercise === 'hue' && huePresentation === 'slice' ? (
+              <HueSlice hue={target.h} />
+            ) : swatchPresentation === 'context' ? (
               <div className="context-grid" key={`${sessionCount}-${notation(target)}`}>
                 {contextGrid.map((color, index) => (
                   <span
@@ -1322,6 +1551,37 @@ export default function Home() {
           </>
         )}
 
+        {exercise === 'compare' ? (
+          <section className="answer-panel compare-answer-panel" aria-label="Comparison result">
+            <button
+              className="check-button practice-action"
+              disabled={compareChoice === null}
+              onClick={advanceQuestion}
+              type="button"
+            >
+              {compareChoice === null ? 'Choose a color' : 'Next'}
+            </button>
+            <div className="answer-state compare">
+              {compareChoice === null ? (
+                <p>Tap a color or press 1–4</p>
+              ) : (
+                <div className={`feedback ${compareChoice === compareQuestion.correctIndex ? 'correct' : ''}`} role="status" aria-live="polite">
+                  {compareChoice === compareQuestion.correctIndex ? (
+                    <div className="correct-reward">
+                      <span className="reward-mark" aria-hidden="true">✓</span>
+                      <div><strong>Correct</strong><small>{streak > 1 ? `${streak} in a row` : 'You saw the relationship.'}</small></div>
+                    </div>
+                  ) : (
+                    <div className="compare-feedback-row">
+                      <div><span className="feedback-kicker">Look at the interval</span><strong>{notation(compareQuestion.colors[compareQuestion.correctIndex])}</strong><small>Correct answer</small></div>
+                      <AlbersComparison correct={compareQuestion.colors[compareQuestion.correctIndex]} guess={compareQuestion.colors[compareChoice]} />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        ) : (
         <section className="answer-panel" aria-label="Your answer" ref={answerPanelRef}>
           <button
             className="check-button practice-action"
@@ -1370,8 +1630,9 @@ export default function Home() {
             )}
           </div>
         </section>
+        )}
         </section>
-      ) : <ReferenceView />}
+      ) : view === 'studio' ? <StudioView /> : <ReferenceView />}
 
       {progressOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setProgressOpen(false); }}>
