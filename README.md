@@ -21,7 +21,7 @@ Progress and adaptive weighting are stored only in the current browser with Inde
 
 The discrete chip set is generated from the RIT Munsell Renotation `real.dat` dataset (Illuminant C), adapted to D65 sRGB. Screen colors are useful training approximations, not replacements for calibrated physical Munsell chips; display gamut and calibration affect every rendered swatch.
 
-The curated practice images are public-domain or CC0 works, with individual credits and source links shown in the app.
+The image bank combines local public-domain/CC0 works with openly licensed Openverse results and public Unsplash photographs. Individual credits and source links are shown in the app. Each image is independently posterized into its own nearest-chip palette before a coherent target region is selected.
 
 ## Run locally
 
@@ -33,6 +33,8 @@ npm run dev
 ```
 
 Then open `http://localhost:3000`.
+
+Copy `.env.example` to `.dev.vars` and add an Unsplash Access Key to enable Unsplash locally. Openverse and the bundled image set remain available without it. Keep `.dev.vars` private; it is excluded from Git.
 
 Useful checks:
 
@@ -47,4 +49,3 @@ npm run build
 - `data/real.dat` — source Munsell Renotation dataset
 - `scripts/build-munsell-data.mjs` — color-data generator
 - `public/practice/` — credited practice imagery
-
