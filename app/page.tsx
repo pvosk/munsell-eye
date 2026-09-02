@@ -15,13 +15,16 @@ const PRACTICE_CHROMA_MAX = 12;
 const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
-  return [...colors].sort((a, b) => b.c - a.c || Math.abs(a.v - 6) - Math.abs(b.v - 6))[0];
+  return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
 }).filter((color): color is MunsellColor => Boolean(color));
 const HUE_TRAINING_POOL = HUE_EDGE_COLORS;
 const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8 && color.c <= 12);
 const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CHROMA_MAX);
+const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
+const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
 type AppView = 'practice' | 'reference';
+type SwatchPresentation = 'isolated' | 'context';
 
 type Region = { x: number; y: number; w: number; h: number; name: string };
 type ImagePrompt = {
@@ -133,8 +136,11 @@ function Picker({ label, options, value, onChange, compact = false }: {
   const ref = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<number | undefined>(undefined);
   const centerTimer = useRef<number | undefined>(undefined);
+  const centerFrame = useRef<number | undefined>(undefined);
   const momentumFrame = useRef<number | undefined>(undefined);
   const localSelection = useRef<string | null>(null);
+  const currentValue = useRef(value);
+  const programmaticTarget = useRef<string | null>(null);
   const drag = useRef({ pointerId: -1, lastX: 0, lastAt: 0, velocity: 0, distance: 0, moved: false });
   const suppressClick = useRef(false);
 
@@ -146,55 +152,86 @@ function Picker({ label, options, value, onChange, compact = false }: {
     container.scrollTo({ left, behavior });
   }, []);
 
-  useEffect(() => {
+  const closestOption = useCallback(() => {
+    const container = ref.current;
+    if (!container) return null;
+    const center = container.scrollLeft + container.clientWidth / 2;
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>('button'));
+    const closest = buttons.reduce((best, button) => {
+      const distance = Math.abs(button.offsetLeft + button.offsetWidth / 2 - center);
+      return distance < best.distance ? { button, distance } : best;
+    }, { button: buttons[0], distance: Number.POSITIVE_INFINITY });
+    return closest.button?.dataset.value ?? null;
+  }, []);
+
+  const commitOption = useCallback((option: string) => {
+    if (currentValue.current === option) return;
+    currentValue.current = option;
+    localSelection.current = option;
+    onChange(option);
+  }, [onChange]);
+
+  const clearProgrammaticTarget = useCallback((delay = 0) => {
     window.clearTimeout(centerTimer.current);
+    centerTimer.current = window.setTimeout(() => {
+      programmaticTarget.current = null;
+    }, delay);
+  }, []);
+
+  const chooseOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
+    programmaticTarget.current = option;
+    commitOption(option);
+    centerOption(option, behavior);
+    clearProgrammaticTarget(behavior === 'smooth' ? 280 : 0);
+  }, [centerOption, clearProgrammaticTarget, commitOption]);
+
+  const updateClosest = useCallback(() => {
+    if (programmaticTarget.current) return;
+    const option = closestOption();
+    if (option) commitOption(option);
+  }, [closestOption, commitOption]);
+
+  const selectClosest = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const option = closestOption();
+    if (!option) return;
+    chooseOption(option, behavior);
+  }, [chooseOption, closestOption]);
+
+  useEffect(() => {
+    currentValue.current = value;
     if (localSelection.current === value) {
       localSelection.current = null;
       return;
     }
-    centerTimer.current = window.setTimeout(() => {
-      if (drag.current.pointerId === -1 && momentumFrame.current === undefined) centerOption(value, 'auto');
-    }, 40);
-    return () => window.clearTimeout(centerTimer.current);
-  }, [centerOption, value, options]);
+    window.cancelAnimationFrame(centerFrame.current ?? 0);
+    programmaticTarget.current = value;
+    centerFrame.current = window.requestAnimationFrame(() => {
+      centerFrame.current = window.requestAnimationFrame(() => {
+        if (drag.current.pointerId === -1 && momentumFrame.current === undefined) centerOption(value, 'auto');
+        clearProgrammaticTarget();
+      });
+    });
+    return () => window.cancelAnimationFrame(centerFrame.current ?? 0);
+  }, [centerOption, clearProgrammaticTarget, value, options]);
 
   useEffect(() => () => {
     window.clearTimeout(settleTimer.current);
     window.clearTimeout(centerTimer.current);
+    window.cancelAnimationFrame(centerFrame.current ?? 0);
     if (momentumFrame.current !== undefined) window.cancelAnimationFrame(momentumFrame.current);
   }, []);
 
-  const chooseOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
-    localSelection.current = option;
-    onChange(option);
-    centerOption(option, behavior);
-    window.setTimeout(() => {
-      if (localSelection.current === option) localSelection.current = null;
-    }, 0);
-  }, [centerOption, onChange]);
-
-  const selectClosest = useCallback((behavior: ScrollBehavior = 'smooth') => {
-    if (!ref.current) return;
-    const center = ref.current.getBoundingClientRect().left + ref.current.clientWidth / 2;
-    const buttons = Array.from(ref.current.querySelectorAll<HTMLButtonElement>('button'));
-    const closest = buttons.reduce((best, button) => {
-      const rect = button.getBoundingClientRect();
-      const distance = Math.abs(rect.left + rect.width / 2 - center);
-      return distance < best.distance ? { button, distance } : best;
-    }, { button: buttons[0], distance: Number.POSITIVE_INFINITY });
-    if (closest.button?.dataset.value) chooseOption(closest.button.dataset.value, behavior);
-  }, [chooseOption]);
-
   const settle = () => {
-    if (drag.current.pointerId !== -1 || momentumFrame.current !== undefined) return;
+    updateClosest();
+    if (programmaticTarget.current || drag.current.pointerId !== -1 || momentumFrame.current !== undefined) return;
     window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
       if (drag.current.pointerId === -1 && momentumFrame.current === undefined) selectClosest();
-    }, 180);
+    }, 110);
   };
 
   const move = (direction: number) => {
-    const index = options.indexOf(value);
+    const index = options.indexOf(currentValue.current);
     const next = options[Math.min(options.length - 1, Math.max(0, index + direction))];
     chooseOption(next);
   };
@@ -231,6 +268,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
       }
       const before = element.scrollLeft;
       element.scrollLeft += drag.current.velocity * elapsed;
+      updateClosest();
       if (Math.abs(element.scrollLeft - before) < 0.1) {
         finish();
         return;
@@ -276,6 +314,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
             if (event.pointerType !== 'mouse' || event.button !== 0 || !ref.current) return;
             window.clearTimeout(settleTimer.current);
             window.clearTimeout(centerTimer.current);
+            programmaticTarget.current = null;
             if (momentumFrame.current !== undefined) {
               window.cancelAnimationFrame(momentumFrame.current);
               momentumFrame.current = undefined;
@@ -294,6 +333,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
             if (drag.current.moved) {
               event.preventDefault();
               ref.current.scrollLeft -= movement;
+              updateClosest();
               const instantaneousVelocity = -movement / elapsed;
               drag.current.velocity = drag.current.velocity * 0.35 + instantaneousVelocity * 0.65;
             }
@@ -381,33 +421,55 @@ function nearestColor(rgb: [number, number, number], candidates: MunsellColor[])
   return best;
 }
 
-function mapUniqueColors(centers: number[][], candidates: MunsellColor[]) {
-  const centerLabs = centers.map((center) => rgbToOklab(center as [number, number, number]));
-  const candidateLabs = candidates.map(labForColor);
-  const pairs: { cluster: number; candidate: number; distance: number }[] = [];
-  centerLabs.forEach((source, cluster) => {
-    candidateLabs.forEach((target, candidate) => {
-      pairs.push({
-        cluster,
-        candidate,
-        distance: (source[0] - target[0]) ** 2 + (source[1] - target[1]) ** 2 + (source[2] - target[2]) ** 2,
-      });
-    });
-  });
-  pairs.sort((a, b) => a.distance - b.distance);
-  const mapped: (MunsellColor | undefined)[] = Array(centers.length);
-  const used = new Set<number>();
-  for (const pair of pairs) {
-    if (mapped[pair.cluster] || used.has(pair.candidate)) continue;
-    mapped[pair.cluster] = candidates[pair.candidate];
-    used.add(pair.candidate);
-    if (used.size === centers.length) break;
-  }
-  return mapped.map((color, cluster) => color ?? nearestColor(centers[cluster] as [number, number, number], candidates));
+function perceptualDistance(a: MunsellColor, b: MunsellColor) {
+  const first = labForColor(a);
+  const second = labForColor(b);
+  return Math.sqrt((first[0] - second[0]) ** 2 + (first[1] - second[1]) ** 2 + (first[2] - second[2]) ** 2);
 }
 
-function chooseCoherentSample(labels: Uint8Array, width: number, height: number, mapped: MunsellColor[]) {
-  const radius = Math.max(3, Math.round(Math.min(width, height) * 0.014));
+function contextColorsFor(target: MunsellColor, exercise: Exercise, familyHue: string) {
+  const isTarget = (color: MunsellColor) => color.h === target.h && color.v === target.v && color.c === target.c;
+  let candidates: MunsellColor[];
+  if (exercise === 'hue') {
+    candidates = HUE_TRAINING_POOL.filter((color) => !isTarget(color));
+  } else if (exercise === 'value') {
+    candidates = VALUE_TRAINING_POOL.filter((color) => !isTarget(color) && Math.abs(color.v - target.v) <= 2);
+  } else if (exercise === 'chroma') {
+    candidates = IMAGE_COLOR_POOL.filter((color) => !isTarget(color) && color.h === target.h && Math.abs(color.v - target.v) <= 1 && color.c >= 2);
+  } else if (exercise === 'family') {
+    candidates = IMAGE_COLOR_POOL.filter((color) => !isTarget(color) && color.h === familyHue && color.c >= 2);
+  } else {
+    candidates = SWATCH_POOL.filter((color) => !isTarget(color));
+  }
+
+  const scored = candidates.map((color) => {
+    const score = exercise === 'hue'
+      ? hueDistance(color.h, target.h) * 0.2 + Math.abs(color.v - target.v) * 0.25 + Math.abs(color.c - target.c) * 0.06
+      : exercise === 'value'
+        ? Math.abs(color.v - target.v) * 0.3 + perceptualDistance(color, target) * 0.4
+        : exercise === 'chroma'
+          ? Math.abs(color.c - target.c) * 0.16 + Math.abs(color.v - target.v) * 0.45
+          : exercise === 'family'
+            ? Math.abs(color.v - target.v) * 0.28 + Math.abs(color.c - target.c) * 0.1
+            : perceptualDistance(color, target) * 3.2;
+    return { color, score: score + Math.random() * 1.2 };
+  }).sort((a, b) => a.score - b.score);
+
+  const selected = scored.slice(0, 8).map((entry) => entry.color);
+  if (selected.length < 8) {
+    const used = new Set(selected.map(notation));
+    for (const color of SWATCH_POOL) {
+      if (isTarget(color) || used.has(notation(color))) continue;
+      selected.push(color);
+      used.add(notation(color));
+      if (selected.length === 8) break;
+    }
+  }
+  return selected;
+}
+
+function chooseLocalSample(pixels: Uint8ClampedArray, width: number, height: number) {
+  const radius = Math.max(3, Math.round(Math.min(width, height) * 0.012));
   const offsets = [
     [0, 0], [radius, 0], [-radius, 0], [0, radius], [0, -radius],
     [radius, radius], [radius, -radius], [-radius, radius], [-radius, -radius],
@@ -415,28 +477,46 @@ function chooseCoherentSample(labels: Uint8Array, width: number, height: number,
   ];
   const marginX = Math.max(radius * 3, Math.round(width * 0.1));
   const marginY = Math.max(radius * 3, Math.round(height * 0.1));
-  let best = { x: Math.round(width / 2), y: Math.round(height / 2), cluster: labels[Math.round(height / 2) * width + Math.round(width / 2)], score: -1 };
-  for (let index = 0; index < 220; index++) {
+  let best: { x: number; y: number; rgb: [number, number, number]; score: number } | null = null;
+  for (let index = 0; index < 280; index++) {
     const x = Math.round(marginX + Math.random() * Math.max(1, width - marginX * 2 - 1));
     const y = Math.round(marginY + Math.random() * Math.max(1, height - marginY * 2 - 1));
-    const cluster = labels[y * width + x];
-    const matches = offsets.reduce((sum, [dx, dy]) => {
+    const samples = offsets.map(([dx, dy]) => {
       const sampleX = Math.min(width - 1, Math.max(0, x + dx));
       const sampleY = Math.min(height - 1, Math.max(0, y + dy));
-      return sum + Number(labels[sampleY * width + sampleX] === cluster);
-    }, 0);
-    const purity = matches / offsets.length;
+      const offset = (sampleY * width + sampleX) * 4;
+      return [pixels[offset], pixels[offset + 1], pixels[offset + 2]] as [number, number, number];
+    });
+    const rgb = samples.reduce<[number, number, number]>((sum, sample) => (
+      [sum[0] + sample[0], sum[1] + sample[1], sum[2] + sample[2]]
+    ), [0, 0, 0]).map((channel) => Math.round(channel / samples.length)) as [number, number, number];
+    const labs = samples.map(rgbToOklab);
+    const mean = labs.reduce<[number, number, number]>((sum, lab) => (
+      [sum[0] + lab[0], sum[1] + lab[1], sum[2] + lab[2]]
+    ), [0, 0, 0]).map((channel) => channel / labs.length) as [number, number, number];
+    const variance = labs.reduce((sum, lab) => (
+      sum + (lab[0] - mean[0]) ** 2 + (lab[1] - mean[1]) ** 2 + (lab[2] - mean[2]) ** 2
+    ), 0) / labs.length;
+    const lightness = labs.map((lab) => lab[0]);
+    const tonalRange = Math.max(...lightness) - Math.min(...lightness);
     const centerDistance = Math.hypot(x / width - 0.5, y / height - 0.5);
-    const score = purity - centerDistance * 0.08 + Math.random() * 0.035;
-    if (score > best.score) best = { x, y, cluster, score };
+    const extremePenalty = mean[0] < 0.08 || mean[0] > 0.96 ? 0.02 : 0;
+    const score = variance + tonalRange ** 2 * 0.035 + centerDistance * 0.0015 + extremePenalty + Math.random() * 0.0003;
+    if (!best || score < best.score) best = { x, y, rgb, score };
   }
-  return { x: best.x / width * 100, y: best.y / height * 100, color: mapped[best.cluster] };
+  const fallback = best ?? { x: Math.round(width / 2), y: Math.round(height / 2), rgb: [127, 127, 127] as [number, number, number] };
+  return {
+    x: fallback.x / width * 100,
+    y: fallback.y / height * 100,
+    color: nearestColor(fallback.rgb, IMAGE_COLOR_POOL),
+  };
 }
 
-function PosterizedImage({ prompt, exercise, questionKey, onColor, onError, correct = false }: {
+function PracticeImage({ prompt, exercise, questionKey, monochrome, onColor, onError, correct = false }: {
   prompt: ImagePrompt;
   exercise: Exercise;
   questionKey: number;
+  monochrome: boolean;
   onColor: (color: MunsellColor) => void;
   onError: () => void;
   correct?: boolean;
@@ -468,58 +548,10 @@ function PosterizedImage({ prompt, exercise, questionKey, onColor, onError, corr
       canvas.height = height;
       const context = canvas.getContext('2d', { willReadFrequently: true });
       if (!context) return;
-      context.save();
-      context.filter = 'blur(.65px)';
       context.drawImage(image, 0, 0, width, height);
-      context.restore();
       const data = context.getImageData(0, 0, width, height);
-      const pixels = data.data;
-      const count = width * height;
-      const clusterCount = exercise === 'value' ? 9 : 28;
-      const centers: number[][] = [];
-      for (let index = 0; index < clusterCount; index++) {
-        const seedPoint = (0.071 + index * 0.61803398875) % 1;
-        const pixel = Math.min(count - 1, Math.floor(count * seedPoint)) * 4;
-        centers.push([pixels[pixel], pixels[pixel + 1], pixels[pixel + 2]]);
-      }
-      const sampleStride = Math.max(3, Math.floor(count / 30000));
-      for (let iteration = 0; iteration < 5; iteration++) {
-        const sums = Array.from({ length: clusterCount }, () => [0, 0, 0, 0]);
-        for (let pixel = 0; pixel < count; pixel += sampleStride) {
-          const offset = pixel * 4;
-          let best = 0;
-          let distance = Number.POSITIVE_INFINITY;
-          for (let cluster = 0; cluster < clusterCount; cluster++) {
-            const center = centers[cluster];
-            const next = (pixels[offset] - center[0]) ** 2 + (pixels[offset + 1] - center[1]) ** 2 + (pixels[offset + 2] - center[2]) ** 2;
-            if (next < distance) { distance = next; best = cluster; }
-          }
-          const sum = sums[best];
-          sum[0] += pixels[offset]; sum[1] += pixels[offset + 1]; sum[2] += pixels[offset + 2]; sum[3] += 1;
-        }
-        sums.forEach((sum, index) => {
-          if (sum[3]) centers[index] = [sum[0] / sum[3], sum[1] / sum[3], sum[2] / sum[3]];
-        });
-      }
-      const candidates = exercise === 'value' ? NEUTRALS : IMAGE_COLOR_POOL;
-      const mapped = mapUniqueColors(centers, candidates);
-      const labels = new Uint8Array(count);
-      for (let pixel = 0; pixel < count; pixel++) {
-        const offset = pixel * 4;
-        let best = 0;
-        let distance = Number.POSITIVE_INFINITY;
-        for (let cluster = 0; cluster < clusterCount; cluster++) {
-          const center = centers[cluster];
-          const next = (pixels[offset] - center[0]) ** 2 + (pixels[offset + 1] - center[1]) ** 2 + (pixels[offset + 2] - center[2]) ** 2;
-          if (next < distance) { distance = next; best = cluster; }
-        }
-        labels[pixel] = best;
-        const color = mapped[best].rgb;
-        pixels[offset] = color[0]; pixels[offset + 1] = color[1]; pixels[offset + 2] = color[2];
-      }
-      context.putImageData(data, 0, 0);
       if (!cancelled) {
-        const nextSample = chooseCoherentSample(labels, width, height, mapped);
+        const nextSample = chooseLocalSample(data.data, width, height);
         setSample(nextSample);
         onColor(nextSample.color);
         setLoading(false);
@@ -536,13 +568,13 @@ function PosterizedImage({ prompt, exercise, questionKey, onColor, onError, corr
   return (
     <div className={`image-stage ${correct ? 'is-correct' : ''}`}>
       <div className="canvas-wrap">
-        <canvas ref={canvasRef} aria-label={`Munsell-mapped ${prompt.title}`} />
+        <canvas className={monochrome && exercise === 'value' ? 'monochrome' : ''} ref={canvasRef} aria-label={`Practice image: ${prompt.title}`} />
         {loading && <div className="image-loading">Preparing image…</div>}
         {!loading && sample && (
           <div
             className="sample-marker"
             aria-label={`Target sample: ${notation(sample.color)}`}
-            style={{ background: rgbCss(sample.color), left: `${sample.x}%`, top: `${sample.y}%` }}
+            style={{ background: rgbCss(monochrome && exercise === 'value' ? NEUTRALS[sample.color.v - 1] : sample.color), left: `${sample.x}%`, top: `${sample.y}%` }}
           />
         )}
       </div>
@@ -598,13 +630,15 @@ function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: Mu
 function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) => void }) {
   const wheelRef = useRef<HTMLDivElement>(null);
   const activeIndex = Math.max(0, HUE_ORDER.indexOf(value as (typeof HUE_ORDER)[number]));
+  const selectedIndex = useRef(activeIndex);
   const [rotation, setRotation] = useState(0);
   const momentumFrame = useRef<number | undefined>(undefined);
   const suppressClick = useRef(false);
   const drag = useRef({ pointerId: -1, lastAngle: 0, lastAt: 0, total: 0, velocity: 0, moved: false });
+  const stepAngle = 360 / HUE_ORDER.length;
 
   useEffect(() => () => {
-    if (momentumFrame.current) window.cancelAnimationFrame(momentumFrame.current);
+    if (momentumFrame.current !== undefined) window.cancelAnimationFrame(momentumFrame.current);
   }, []);
 
   const angleAt = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -613,11 +647,26 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
     return Math.atan2(event.clientY - (bounds.top + bounds.height / 2), event.clientX - (bounds.left + bounds.width / 2)) * 180 / Math.PI;
   };
 
-  const settleRotation = useCallback((total: number) => {
-    const steps = Math.round(total / (360 / HUE_ORDER.length));
-    onChange(HUE_ORDER[wrapIndex(activeIndex - steps, HUE_ORDER.length)]);
+  const applyRotation = (total: number) => {
+    const crossed = Math.round(total / stepAngle);
+    let residual = total;
+    if (crossed) {
+      selectedIndex.current = wrapIndex(selectedIndex.current - crossed, HUE_ORDER.length);
+      residual -= crossed * stepAngle;
+      onChange(HUE_ORDER[selectedIndex.current]);
+    }
+    drag.current.total = residual;
+    setRotation(residual);
+  };
+
+  const selectHue = (hue: string) => {
+    const index = HUE_ORDER.indexOf(hue as (typeof HUE_ORDER)[number]);
+    if (index < 0) return;
+    selectedIndex.current = index;
+    drag.current.total = 0;
     setRotation(0);
-  }, [activeIndex, onChange]);
+    onChange(hue);
+  };
 
   const endDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     const wheel = wheelRef.current;
@@ -625,6 +674,7 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
     if (wheel.hasPointerCapture(event.pointerId)) wheel.releasePointerCapture(event.pointerId);
     drag.current.pointerId = -1;
     if (!drag.current.moved) {
+      drag.current.total = 0;
       setRotation(0);
       return;
     }
@@ -632,19 +682,23 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
     window.setTimeout(() => { suppressClick.current = false; }, 160);
     const glide = () => {
       drag.current.velocity *= 0.94;
-      drag.current.total += drag.current.velocity * 16;
-      setRotation(drag.current.total);
+      applyRotation(drag.current.total + drag.current.velocity * 16);
       if (Math.abs(drag.current.velocity) < 0.012) {
-        settleRotation(drag.current.total);
+        momentumFrame.current = undefined;
+        drag.current.total = 0;
+        setRotation(0);
         return;
       }
       momentumFrame.current = window.requestAnimationFrame(glide);
     };
     if (Math.abs(drag.current.velocity) >= 0.012) momentumFrame.current = window.requestAnimationFrame(glide);
-    else settleRotation(drag.current.total);
+    else {
+      drag.current.total = 0;
+      setRotation(0);
+    }
   };
 
-  const move = (amount: number) => onChange(HUE_ORDER[wrapIndex(activeIndex + amount, HUE_ORDER.length)]);
+  const move = (amount: number) => selectHue(HUE_ORDER[wrapIndex(selectedIndex.current + amount, HUE_ORDER.length)]);
 
   return (
     <div
@@ -664,7 +718,10 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
       }}
       onPointerDown={(event) => {
         if (event.button !== 0 || !wheelRef.current) return;
-        if (momentumFrame.current) window.cancelAnimationFrame(momentumFrame.current);
+        if (momentumFrame.current !== undefined) {
+          window.cancelAnimationFrame(momentumFrame.current);
+          momentumFrame.current = undefined;
+        }
         wheelRef.current.setPointerCapture(event.pointerId);
         drag.current = { pointerId: event.pointerId, lastAngle: angleAt(event), lastAt: event.timeStamp, total: 0, velocity: 0, moved: false };
       }}
@@ -676,9 +733,8 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
         if (Math.abs(delta) > 0.2) drag.current.moved = true;
         if (drag.current.moved) {
           event.preventDefault();
-          drag.current.total += delta;
           drag.current.velocity = delta / elapsed;
-          setRotation(drag.current.total);
+          applyRotation(drag.current.total + delta);
         }
         drag.current.lastAngle = nextAngle;
         drag.current.lastAt = event.timeStamp;
@@ -696,7 +752,7 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
             aria-selected={hue === value}
             className="hue-wheel-chip"
             key={hue}
-            onClick={() => onChange(hue)}
+            onClick={() => selectHue(hue)}
             role="option"
             style={{ '--position': `${position}deg`, '--chip-color': rgbCss(color) } as CSSProperties}
             tabIndex={-1}
@@ -737,7 +793,7 @@ function ReferenceView() {
       <div className="reference-intro">
         <span className="eyebrow">Reference</span>
         <h1 id="reference-title">Munsell Hues</h1>
-        <p>Rotate the wheel, then study one constant-hue page. Value rises vertically; chroma moves outward from neutral.</p>
+        <p>Rotate the wheel and the hue page follows the chip crossing the top marker. Value rises vertically; chroma moves outward from neutral.</p>
       </div>
 
       <HueWheel value={hue} onChange={changeHue} />
@@ -792,9 +848,11 @@ function ReferenceView() {
 export default function Home() {
   const [view, setView] = useState<AppView>('practice');
   const [source, setSource] = useState<SourceMode>('swatch');
+  const [swatchPresentation, setSwatchPresentation] = useState<SwatchPresentation>('isolated');
   const [exercise, setExercise] = useState<Exercise>('value');
+  const [valueMonochrome, setValueMonochrome] = useState(false);
   const [familyHue, setFamilyHue] = useState('5BG');
-  const [target, setTarget] = useState<MunsellColor>(NEUTRALS[4]);
+  const [target, setTarget] = useState<MunsellColor>(INITIAL_VALUE_COLOR);
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
   const [remoteImages, setRemoteImages] = useState<ImagePrompt[]>([]);
   const [imageReady, setImageReady] = useState(true);
@@ -809,6 +867,9 @@ export default function Home() {
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const recentTargetKeys = useRef<string[]>([]);
+  const answerHLive = useRef('5BG');
+  const answerVLive = useRef('5');
+  const answerCLive = useRef('6');
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -862,6 +923,9 @@ export default function Home() {
   }, []);
 
   const resetAnswer = useCallback(() => {
+    answerHLive.current = '5BG';
+    answerVLive.current = '5';
+    answerCLive.current = '6';
     setAnswerH('5BG');
     setAnswerV('5');
     setAnswerC('6');
@@ -879,7 +943,7 @@ export default function Home() {
       setImageReady(false);
     } else {
       const pool = nextExercise === 'value'
-        ? NEUTRALS
+        ? VALUE_TRAINING_POOL
         : nextExercise === 'hue'
           ? HUE_TRAINING_POOL
           : nextExercise === 'family'
@@ -896,11 +960,16 @@ export default function Home() {
     }
   }, [attempts, exercise, familyHue, imagePrompt.src, remoteImages, resetAnswer, source]);
 
-  const changeSource = (next: SourceMode) => {
-    const nextExercise = next === 'image' && exercise === 'family' ? 'full' : exercise;
+  const presentation = source === 'image' ? 'image' : swatchPresentation;
+
+  const changePresentation = (next: SwatchPresentation | 'image') => {
+    if (next === presentation) return;
+    const nextSource: SourceMode = next === 'image' ? 'image' : 'swatch';
+    const nextExercise = nextSource === 'image' && exercise === 'family' ? 'full' : exercise;
     if (nextExercise !== exercise) setExercise(nextExercise);
-    setSource(next);
-    nextQuestion(next, nextExercise, familyHue);
+    if (next !== 'image') setSwatchPresentation(next);
+    setSource(nextSource);
+    nextQuestion(nextSource, nextExercise, familyHue);
   };
 
   const changeExercise = (next: Exercise) => {
@@ -925,11 +994,29 @@ export default function Home() {
     nextQuestion('image', exercise, familyHue);
   }, [exercise, familyHue, nextQuestion]);
 
+  const changeAnswerH = useCallback((next: string) => {
+    answerHLive.current = next;
+    setAnswerH(next);
+  }, []);
+
+  const changeAnswerV = useCallback((next: string) => {
+    answerVLive.current = next;
+    setAnswerV(next);
+  }, []);
+
+  const changeAnswerC = useCallback((next: string) => {
+    answerCLive.current = next;
+    setAnswerC(next);
+  }, []);
+
   const submit = async () => {
     if (!imageReady || submitted) return;
-    const hueError = target.h === 'N' || exercise === 'family' ? 0 : hueDistance(answerH, target.h);
-    const valueError = Math.abs(Number(answerV) - target.v);
-    const chromaError = target.c === 0 ? 0 : Math.abs(Number(answerC) - target.c) / 2;
+    const submittedH = answerHLive.current;
+    const submittedV = answerVLive.current;
+    const submittedC = answerCLive.current;
+    const hueError = target.h === 'N' || exercise === 'family' ? 0 : hueDistance(submittedH, target.h);
+    const valueError = Math.abs(Number(submittedV) - target.v);
+    const chromaError = target.c === 0 ? 0 : Math.abs(Number(submittedC) - target.c) / 2;
     const exact = exercise === 'value'
       ? valueError === 0
       : exercise === 'hue'
@@ -946,9 +1033,9 @@ export default function Home() {
       targetH: target.h,
       targetV: target.v,
       targetC: target.c,
-      answerH: exercise === 'family' ? familyHue : answerH,
-      answerV: Number(answerV),
-      answerC: Number(answerC),
+      answerH: exercise === 'family' ? familyHue : submittedH,
+      answerV: Number(submittedV),
+      answerC: Number(submittedC),
       hueError,
       valueError,
       chromaError,
@@ -963,7 +1050,7 @@ export default function Home() {
 
   const focusFirstAnswer = useCallback(() => {
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
-      answerPanelRef.current?.querySelector<HTMLElement>('.picker')?.focus();
+      answerPanelRef.current?.querySelector<HTMLElement>('.picker')?.focus({ preventScroll: true });
     }));
   }, []);
 
@@ -988,7 +1075,7 @@ export default function Home() {
           const nextIndex = event.shiftKey
             ? (activeIndex <= 0 ? pickers.length - 1 : activeIndex - 1)
             : (activeIndex + 1) % pickers.length;
-          pickers[nextIndex].focus();
+          pickers[nextIndex].focus({ preventScroll: true });
         }
         return;
       }
@@ -1011,15 +1098,18 @@ export default function Home() {
         : exercise === 'family'
           ? `Identify value & chroma within ${familyHue}`
           : 'Identify hue, value & chroma';
+  const resolvedAnswerH = submitted?.answerH ?? answerH;
+  const resolvedAnswerV = String(submitted?.answerV ?? answerV);
+  const resolvedAnswerC = String(submitted?.answerC ?? answerC);
   const visibleAnswer = exercise === 'value'
-    ? `N${answerV}`
+    ? `N${resolvedAnswerV}`
     : exercise === 'hue'
-      ? answerH
+      ? resolvedAnswerH
       : exercise === 'chroma'
-        ? `/${answerC}`
+        ? `/${resolvedAnswerC}`
         : exercise === 'family'
-          ? `${familyHue} ${answerV}/${answerC}`
-          : `${answerH} ${answerV}/${answerC}`;
+          ? `${familyHue} ${resolvedAnswerV}/${resolvedAnswerC}`
+          : `${resolvedAnswerH} ${resolvedAnswerV}/${resolvedAnswerC}`;
   const visibleTarget = exercise === 'value'
     ? `N${target.v}`
     : exercise === 'hue'
@@ -1028,12 +1118,12 @@ export default function Home() {
         ? `/${target.c}`
         : notation(target);
   const guessedColor = useMemo(() => {
-    if (exercise === 'value') return nearestNotationColor('N', Number(answerV), 0);
-    if (exercise === 'hue') return nearestNotationColor(answerH, target.v, target.c) ?? target;
-    if (exercise === 'chroma') return nearestNotationColor(target.h, target.v, Number(answerC)) ?? target;
-    if (exercise === 'family') return nearestNotationColor(familyHue, Number(answerV), Number(answerC)) ?? target;
-    return nearestNotationColor(answerH, Number(answerV), Number(answerC)) ?? target;
-  }, [answerC, answerH, answerV, exercise, familyHue, target]);
+    if (exercise === 'value') return nearestNotationColor('N', Number(resolvedAnswerV), 0);
+    if (exercise === 'hue') return nearestNotationColor(resolvedAnswerH, target.v, target.c) ?? target;
+    if (exercise === 'chroma') return nearestNotationColor(target.h, target.v, Number(resolvedAnswerC)) ?? target;
+    if (exercise === 'family') return nearestNotationColor(familyHue, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? target;
+    return nearestNotationColor(resolvedAnswerH, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? target;
+  }, [exercise, familyHue, resolvedAnswerC, resolvedAnswerH, resolvedAnswerV, target]);
   const missPrompt = submitted ? MISS_PROMPTS[Math.floor(submitted.createdAt / 1000) % MISS_PROMPTS.length] : MISS_PROMPTS[0];
   const exerciseOptions: [Exercise, string][] = [
     ['value', 'Value'],
@@ -1042,6 +1132,13 @@ export default function Home() {
     ...(source === 'swatch' ? [['family', 'Family'] as [Exercise, string]] : []),
     ['full', 'Full H/V/C'],
   ];
+  const contextColors = useMemo(() => contextColorsFor(target, exercise, familyHue), [exercise, familyHue, target]);
+  const contextGrid = useMemo(() => [
+    ...contextColors.slice(0, 4),
+    target,
+    ...contextColors.slice(4, 8),
+  ], [contextColors, target]);
+  const displayColor = (color: MunsellColor) => exercise === 'value' && valueMonochrome ? NEUTRALS[color.v - 1] : color;
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -1095,15 +1192,19 @@ export default function Home() {
       {view === 'practice' ? (
         <section className="workspace" aria-label="Color identification practice">
         <div className="mode-row">
-          <div className="segmented" aria-label="Question source">
-            {(['swatch', 'image'] as SourceMode[]).map((mode) => (
+          <div className="segmented display-segmented" aria-label="Question presentation">
+            {([
+              { id: 'isolated', label: 'Swatch' },
+              { id: 'context', label: 'Context' },
+              { id: 'image', label: 'Image' },
+            ] as const).map((mode) => (
               <button
-                className={source === mode ? 'active' : ''}
-                key={mode}
-                onClick={() => changeSource(mode)}
+                className={presentation === mode.id ? 'active' : ''}
+                key={mode.id}
+                onClick={() => changePresentation(mode.id)}
                 type="button"
               >
-                {mode === 'swatch' ? 'Swatch' : 'Image'}
+                {mode.label}
               </button>
             ))}
           </div>
@@ -1132,16 +1233,37 @@ export default function Home() {
           <div>
             <span>{promptText}</span>
           </div>
-          <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
+          <div className="prompt-settings">
+            <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : 'C2–C12'}</span>
+            {exercise === 'value' && (
+              <div className="segmented value-display-toggle" aria-label="Value question appearance">
+                <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
+                <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
+              </div>
+            )}
+          </div>
         </div>
 
         {source === 'swatch' ? (
           <div className={`swatch-stage ${submitted?.exact ? 'is-correct' : ''}`} aria-label="Color swatch">
-            <div className="swatch" key={`${sessionCount}-${notation(target)}`} style={{ background: rgbCss(target) }} />
+            {swatchPresentation === 'context' ? (
+              <div className="context-grid" key={`${sessionCount}-${notation(target)}`}>
+                {contextGrid.map((color, index) => (
+                  <span
+                    aria-label={index === 4 ? 'Target swatch' : undefined}
+                    className={`context-chip ${index === 4 ? 'target' : ''}`}
+                    key={`${notation(color)}-${index}`}
+                    style={{ background: rgbCss(displayColor(color)) }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="swatch" key={`${sessionCount}-${notation(target)}`} style={{ background: rgbCss(displayColor(target)) }} />
+            )}
           </div>
         ) : (
           <>
-            <PosterizedImage key={`${imagePrompt.id}-${exercise}-${sessionCount}`} prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} onColor={handleImageColor} onError={handleImageError} correct={Boolean(submitted?.exact)} />
+            <PracticeImage key={`${imagePrompt.id}-${exercise}-${sessionCount}`} prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} monochrome={valueMonochrome} onColor={handleImageColor} onError={handleImageError} correct={Boolean(submitted?.exact)} />
             <div className="image-caption">
               <span><strong>{imagePrompt.title}</strong> · {imagePrompt.category}</span>
               <a href={imagePrompt.source} target="_blank" rel="noreferrer">{imagePrompt.credit}</a>
@@ -1158,42 +1280,44 @@ export default function Home() {
           >
             {submitted ? 'Next' : imageReady ? 'Check answer' : 'Preparing image…'}
           </button>
-          {!submitted ? (
-            <>
-              <p>Your answer</p>
-              <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
-                {(exercise === 'hue' || exercise === 'full') && <HuePickers value={answerH} onChange={setAnswerH} compact={exercise === 'full'} />}
-                {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={setAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
-                {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={setAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
-              </div>
-            </>
-          ) : submitted.exact ? (
-            <div className="feedback correct" role="status" aria-live="polite">
-              <div className="correct-reward">
-                <span className="reward-mark" aria-hidden="true">✓</span>
-                <div>
-                  <strong>Correct</strong>
-                  <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
+          <div className={`answer-state ${exercise}`}>
+            {!submitted ? (
+              <>
+                <p>Your answer</p>
+                <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
+                  {(exercise === 'hue' || exercise === 'full') && <HuePickers value={answerH} onChange={changeAnswerH} compact={exercise === 'full'} />}
+                  {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={changeAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
+                  {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={changeAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
+                </div>
+              </>
+            ) : submitted.exact ? (
+              <div className="feedback correct" role="status" aria-live="polite">
+                <div className="correct-reward">
+                  <span className="reward-mark" aria-hidden="true">✓</span>
+                  <div>
+                    <strong>Correct</strong>
+                    <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="feedback" role="status" aria-live="polite">
-              <div className="feedback-head">
-                <div>
-                  <span className="feedback-kicker" key={submitted.createdAt}>{missPrompt}</span>
-                  <strong>{hueMiss && exercise === 'hue' ? 'Hue comparison' : visibleTarget}</strong>
+            ) : (
+              <div className="feedback" role="status" aria-live="polite">
+                <div className="feedback-head">
+                  <div>
+                    <span className="feedback-kicker" key={submitted.createdAt}>{missPrompt}</span>
+                    <strong>{hueMiss && exercise === 'hue' ? 'Hue comparison' : visibleTarget}</strong>
+                  </div>
+                  <AlbersComparison correct={displayColor(target)} guess={guessedColor} />
                 </div>
-                <AlbersComparison correct={target} guess={guessedColor} />
+                {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
+                {hueMiss && <HueMissMap target={target.h} guess={resolvedAnswerH} />}
+                <div className="feedback-detail">
+                  <strong>{feedbackErrors.join(' · ')}</strong>
+                  {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
+                </div>
               </div>
-              {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
-              {hueMiss && <HueMissMap target={target.h} guess={answerH} />}
-              <div className="feedback-detail">
-                <strong>{feedbackErrors.join(' · ')}</strong>
-                {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </section>
         </section>
       ) : <ReferenceView />}

@@ -60,6 +60,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .segmented button.active { background: var(--panel); box-shadow: 0 1px 5px rgba(29,29,27,.09); font-weight: 650; }
 .segmented button:disabled { cursor: default; opacity: .32; }
 .segmented.small button { min-width: 48px; padding: 7px 12px; }
+.display-segmented button { min-width: 68px; }
 .question-count { color: var(--muted); font-size: 12px; }
 .question-meta { align-items: flex-end; display: flex; flex-direction: column; gap: 2px; }
 .streak-count { color: var(--correct); font-size: 9px; font-weight: 680; letter-spacing: .05em; text-transform: uppercase; }
@@ -75,6 +76,9 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .prompt-copy > div { display: flex; flex-direction: column; gap: 3px; }
 .prompt-copy small { color: var(--muted); font-size: 11px; font-weight: 450; text-transform: capitalize; }
 .difficulty { color: var(--muted); font-size: 10px; font-weight: 550; letter-spacing: .08em; }
+.prompt-settings { align-items: flex-end; }
+.value-display-toggle { margin-top: 4px; padding: 2px; }
+.value-display-toggle button { font-size: 9px; min-width: 38px; padding: 5px 8px; }
 .swatch-stage {
   align-items: center;
   background: var(--surround);
@@ -94,6 +98,16 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
   transition: background .22s ease;
   width: 62%;
 }
+.context-grid {
+  animation: swatch-arrive .32s cubic-bezier(.2,.75,.25,1) both;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 300px;
+  width: min(78%, 300px);
+}
+.context-chip { aspect-ratio: 1; box-shadow: 0 1px 0 rgba(255,255,255,.14) inset; }
+.context-chip.target { position: relative; }
 .image-stage {
   align-items: center;
   background: var(--surround);
@@ -106,13 +120,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 }
 .canvas-wrap { line-height: 0; max-width: 100%; position: relative; width: fit-content; }
 .image-stage canvas { display: block; height: auto; max-height: 440px; max-width: 100%; }
+.image-stage canvas.monochrome { filter: grayscale(1); }
 .image-loading { color: rgba(29,29,27,.66); font-size: 12px; position: absolute; }
 .sample-marker {
   aspect-ratio: 1;
   border: 1.5px solid rgba(255,255,255,.98);
   border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(29,29,27,.78), 0 1px 6px rgba(0,0,0,.22);
-  height: clamp(11px, 1.15vw, 14px);
+  height: clamp(14px, 1.35vw, 18px);
   pointer-events: none;
   position: absolute;
   transform: translate(-50%, -50%);
@@ -123,15 +138,18 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .image-caption a { max-width: 45%; text-align: right; text-decoration: none; }
 .image-caption a:hover { text-decoration: underline; }
 .answer-panel { padding-top: 16px; }
-.answer-panel > p { color: var(--muted); font-size: 10px; letter-spacing: .1em; margin: 0 0 9px; text-align: center; text-transform: uppercase; }
+.answer-state { min-height: 92px; }
+.answer-state.family, .answer-state.hue { min-height: 96px; }
+.answer-state.full { min-height: 108px; }
+.answer-state > p { color: var(--muted); font-size: 10px; letter-spacing: .1em; margin: 0 0 9px; text-align: center; text-transform: uppercase; }
 .picker-grid { margin: 0 auto; max-width: 600px; }
 .picker-grid.full { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 680px; }
 .picker-grid.family { display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); max-width: 500px; }
 .picker-grid.hue { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 500px; }
-.answer-picker { min-width: 0; }
+.answer-picker { min-width: 0; overflow: hidden; width: 100%; }
 .picker-label { color: var(--muted); display: block; font-size: 10px; font-weight: 450; margin-bottom: 2px; text-align: center; transition: color .12s ease, font-weight .12s ease; }
 .answer-picker:focus-within .picker-label { color: var(--ink); font-weight: 760; }
-.picker-window { overflow: hidden; position: relative; }
+.picker-window { min-width: 0; overflow: hidden; position: relative; width: 100%; }
 .picker-focus {
   border-left: 1px solid rgba(29,29,27,.22);
   border-right: 1px solid rgba(29,29,27,.22);
@@ -149,7 +167,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
   gap: 14px;
   overscroll-behavior-x: contain;
   overflow-x: auto;
-  padding: 10px calc(50% - 31px);
+  padding: 10px calc(50% - 27px);
   scrollbar-width: none;
   touch-action: pan-x pan-y pinch-zoom;
   user-select: none;
@@ -166,15 +184,13 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
   font-size: 16px;
   padding: 8px 0;
   transform: scale(1);
-  transition: color .12s ease, transform .12s ease;
+  transition: color .055s ease, transform .055s ease;
   will-change: transform;
 }
 .picker button.selected { color: var(--ink); font-weight: 680; transform: scale(1.28); }
-.picker.dragging button.selected { color: var(--faint); font-weight: 400; transform: scale(1); }
-.answer-picker.compact .picker { gap: 8px; padding-inline: calc(50% - 28px); }
+.answer-picker.compact .picker { gap: 8px; padding-inline: calc(50% - 24px); }
 .answer-picker.compact .picker button { flex-basis: 48px; font-size: 14px; }
 .answer-picker.compact .picker button.selected { transform: scale(1.25); }
-.answer-picker.compact .picker.dragging button.selected { transform: scale(1); }
 .answer-picker.compact .picker-focus { left: calc(50% - 31px); width: 62px; }
 .check-button {
   background: var(--ink);
@@ -234,7 +250,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .correct-reward small { color: var(--muted); font-size: 10px; }
 .reward-mark { align-items: center; animation: reward-pop .42s cubic-bezier(.2,.85,.25,1.35) both; background: var(--correct); border-radius: 50%; color: white; display: flex; font-size: 20px; height: 38px; justify-content: center; width: 38px; }
 .swatch-stage.is-correct::after, .image-stage.is-correct::after { align-items: center; animation: success-flash .5s ease both; background: rgba(66,107,78,.9); border-radius: 50%; color: white; content: '✓'; display: flex; font-size: 22px; height: 44px; justify-content: center; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 44px; z-index: 4; }
-.swatch-stage.is-correct .swatch, .image-stage.is-correct canvas { animation: correct-turn .5s cubic-bezier(.2,.75,.25,1) both; }
+.swatch-stage.is-correct .swatch, .swatch-stage.is-correct .context-grid, .image-stage.is-correct canvas { animation: correct-turn .5s cubic-bezier(.2,.75,.25,1) both; }
 
 @keyframes swatch-arrive { from { opacity: 0; transform: rotate(-2deg) scale(.96); } to { opacity: 1; transform: rotate(0) scale(1); } }
 @keyframes correct-turn { 0% { transform: rotate(0) scale(1); } 45% { transform: rotate(2deg) scale(.975); } 100% { transform: rotate(0) scale(1); } }
@@ -361,11 +377,14 @@ button.chart-chip { cursor: pointer; }
   .swatch { max-width: 180px; width: 58%; }
   .image-stage { border-radius: 14px; min-height: 260px; }
   .image-stage canvas { max-height: 360px; }
-  .family-hue-grid, .picker-grid.full, .picker-grid.family, .picker-grid.hue { gap: 8px; grid-template-columns: 1fr; }
-  .answer-picker.compact .picker { gap: 4px; padding-inline: calc(50% - 25px); }
+  .family-hue-grid, .picker-grid.full, .picker-grid.family, .picker-grid.hue { gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .answer-picker.compact .picker { gap: 4px; padding-inline: calc(50% - 22px); }
   .answer-picker.compact .picker button { flex-basis: 44px; font-size: 12px; }
   .answer-picker.compact .picker-focus { left: calc(50% - 27px); width: 54px; }
   .answer-panel { padding-top: 14px; }
+  .answer-state.full { min-height: 174px; }
+  .answer-state.family, .answer-state.hue { min-height: 92px; }
+  .context-grid { gap: 4px; max-width: 228px; width: min(84%, 228px); }
   .feedback-detail { flex-direction: column; gap: 4px; }
   .hue-miss-map { grid-template-columns: 92px 1fr; padding-inline: 12px; }
   .mini-hue-wheel { width: 88px; }
