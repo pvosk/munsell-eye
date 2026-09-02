@@ -31,7 +31,13 @@ type ImagePrompt = {
   category: string;
   credit: string;
   source: string;
-  region: Region;
+  region?: Region;
+  provider?: 'local' | 'openverse' | 'unsplash';
+};
+
+type ImageBankResponse = {
+  images?: ImagePrompt[];
+  providers?: { openverse?: boolean; unsplash?: boolean };
 };
 
 const IMAGE_PROMPTS: ImagePrompt[] = [
@@ -70,6 +76,9 @@ const ACTIVE_IMAGE_BANK = IMAGE_PROMPTS.filter((prompt, index, prompts) => (
 ));
 
 const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'Look once more'];
+const IMAGE_BANK_BATCHES = [0, 1, 2, 3, 4, 5];
+const IMAGE_BANK_CACHE_KEY = 'munsell-eye-image-bank-v1';
+const IMAGE_BANK_CACHE_TTL = 24 * 60 * 60 * 1000;
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
 const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
@@ -424,23 +433,28 @@ function chooseCoherentSample(labels: Uint8Array, width: number, height: number,
   return { x: best.x / width * 100, y: best.y / height * 100, color: mapped[best.cluster] };
 }
 
-function PosterizedImage({ prompt, exercise, questionKey, onColor, correct = false }: {
+function PosterizedImage({ prompt, exercise, questionKey, onColor, onError, correct = false }: {
   prompt: ImagePrompt;
   exercise: Exercise;
   questionKey: number;
   onColor: (color: MunsellColor) => void;
+  onError: () => void;
   correct?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onErrorRef = useRef(onError);
   const [loading, setLoading] = useState(true);
   const [sample, setSample] = useState<{ x: number; y: number; color: MunsellColor } | null>(null);
 
   useEffect(() => {
+    onErrorRef.current = onError;
+  }, [onError]);
+
+  useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setSample(null);
     const image = new Image();
     image.decoding = 'async';
+    image.crossOrigin = 'anonymous';
     image.src = prompt.src;
     image.onload = () => {
       if (cancelled || !canvasRef.current) return;
@@ -511,7 +525,11 @@ function PosterizedImage({ prompt, exercise, questionKey, onColor, correct = fal
         setLoading(false);
       }
     };
-    image.onerror = () => setLoading(false);
+    image.onerror = () => {
+      if (cancelled) return;
+      setLoading(false);
+      onErrorRef.current();
+    };
     return () => { cancelled = true; };
   }, [exercise, onColor, prompt, questionKey]);
 
@@ -778,6 +796,7 @@ export default function Home() {
   const [familyHue, setFamilyHue] = useState('5BG');
   const [target, setTarget] = useState<MunsellColor>(NEUTRALS[4]);
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
+  const [remoteImages, setRemoteImages] = useState<ImagePrompt[]>([]);
   const [imageReady, setImageReady] = useState(true);
   const [answerH, setAnswerH] = useState('5BG');
   const [answerV, setAnswerV] = useState('5');
@@ -797,6 +816,51 @@ export default function Home() {
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const loadImageBank = async () => {
+      try {
+        const cached = window.localStorage.getItem(IMAGE_BANK_CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached) as { expires?: number; images?: ImagePrompt[] };
+          if ((parsed.expires ?? 0) > Date.now() && parsed.images?.length) {
+            setRemoteImages(parsed.images);
+            return;
+          }
+        }
+      } catch {
+        // Private browsing and strict storage settings can disable localStorage.
+      }
+      const batches: PromiseSettledResult<ImagePrompt[]>[] = [];
+      for (let index = 0; index < IMAGE_BANK_BATCHES.length; index += 2) {
+        const pair = IMAGE_BANK_BATCHES.slice(index, index + 2);
+        const results = await Promise.allSettled(pair.map(async (batch) => {
+          const response = await fetch(`/api/practice-images?batch=${batch}`);
+          if (!response.ok) return [];
+          const payload = await response.json() as ImageBankResponse;
+          return payload.images ?? [];
+        }));
+        batches.push(...results);
+      }
+      if (cancelled) return;
+      const images = batches.flatMap((batch) => batch.status === 'fulfilled' ? batch.value : []);
+      const unique = [...new Map(images.map((image) => [image.id, image])).values()];
+      if (unique.length) {
+        setRemoteImages(unique);
+        try {
+          window.localStorage.setItem(IMAGE_BANK_CACHE_KEY, JSON.stringify({
+            expires: Date.now() + IMAGE_BANK_CACHE_TTL,
+            images: unique,
+          }));
+        } catch {
+          // The live bank still works when storage is unavailable.
+        }
+      }
+    };
+    void loadImageBank();
+    return () => { cancelled = true; };
+  }, []);
+
   const resetAnswer = useCallback(() => {
     setAnswerH('5BG');
     setAnswerV('5');
@@ -808,9 +872,9 @@ export default function Home() {
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue) => {
     resetAnswer();
     if (nextSource === 'image' && nextExercise !== 'family') {
-      const choices = ACTIVE_IMAGE_BANK.filter((prompt) => prompt.src !== imagePrompt.src);
-      const figureChoices = choices.filter((prompt) => prompt.category === 'Figure');
-      const bank = figureChoices.length && Math.random() < 0.65 ? figureChoices : choices;
+      const choices = [...remoteImages, ...ACTIVE_IMAGE_BANK].filter((prompt) => prompt.src !== imagePrompt.src);
+      const figureChoices = choices.filter((prompt) => /figure|portrait|candid|street|studio/i.test(prompt.category));
+      const bank = figureChoices.length && Math.random() < 0.86 ? figureChoices : choices;
       setImagePrompt(bank[Math.floor(Math.random() * bank.length)] ?? ACTIVE_IMAGE_BANK[0]);
       setImageReady(false);
     } else {
@@ -830,7 +894,7 @@ export default function Home() {
       setTarget(nextTarget);
       setImageReady(true);
     }
-  }, [attempts, exercise, familyHue, imagePrompt.src, resetAnswer, source]);
+  }, [attempts, exercise, familyHue, imagePrompt.src, remoteImages, resetAnswer, source]);
 
   const changeSource = (next: SourceMode) => {
     const nextExercise = next === 'image' && exercise === 'family' ? 'full' : exercise;
@@ -855,6 +919,11 @@ export default function Home() {
     setTarget(color);
     setImageReady(true);
   }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageReady(false);
+    nextQuestion('image', exercise, familyHue);
+  }, [exercise, familyHue, nextQuestion]);
 
   const submit = async () => {
     if (!imageReady || submitted) return;
@@ -1072,7 +1141,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <PosterizedImage prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} onColor={handleImageColor} correct={Boolean(submitted?.exact)} />
+            <PosterizedImage key={`${imagePrompt.id}-${exercise}-${sessionCount}`} prompt={imagePrompt} exercise={exercise} questionKey={sessionCount} onColor={handleImageColor} onError={handleImageError} correct={Boolean(submitted?.exact)} />
             <div className="image-caption">
               <span><strong>{imagePrompt.title}</strong> · {imagePrompt.category}</span>
               <a href={imagePrompt.source} target="_blank" rel="noreferrer">{imagePrompt.credit}</a>
