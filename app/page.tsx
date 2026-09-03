@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_COLORS, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
+import {
+  DEFAULT_PALETTE_IDS,
+  PAINTS,
+  PAINT_CATEGORIES,
+  PALETTE_PRESETS,
+  suggestPaintRecipe,
+  type PaintRecipe,
+} from './paint-mixing';
 import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, type SourceMode } from './progress-db';
+import curatedImageData from './data/practice-images.json';
 import StudioView from './studio';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
@@ -50,11 +59,6 @@ type ImagePrompt = {
   provider?: 'local' | 'openverse' | 'unsplash';
 };
 
-type ImageBankResponse = {
-  images?: ImagePrompt[];
-  providers?: { openverse?: boolean; unsplash?: boolean };
-};
-
 const IMAGE_PROMPTS: ImagePrompt[] = [
   { id: 'model-face', src: '/practice/model-study.jpg', title: 'Study of a Model', category: 'Figure', credit: 'Edvard Munch · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Edvard_Munch_-_Study_of_a_Model_(70.1926).jpg', region: { x: 49, y: 24, w: 18, h: 13, name: 'face plane' } },
   { id: 'model-curtain', src: '/practice/model-study.jpg', title: 'Study of a Model', category: 'Figure', credit: 'Edvard Munch · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Edvard_Munch_-_Study_of_a_Model_(70.1926).jpg', region: { x: 78, y: 39, w: 20, h: 20, name: 'curtain mass' } },
@@ -83,17 +87,35 @@ const IMAGE_PROMPTS: ImagePrompt[] = [
   { id: 'quilter-face', src: '/practice/figure-quilter.webp', title: 'The State Quilt', category: 'Figure', credit: 'Russell Lee / Library of Congress · Public domain', source: 'https://commons.wikimedia.org/wiki/File:Mrs._Bill_Stagg_with_state_quilt_1a34161v.jpg', region: { x: 22, y: 41, w: 6, h: 6, name: 'face plane' } },
 ];
 
-// One entry per source image. The FSA set is deliberately out of rotation while
-// it is replaced by a modern, color-faithful figure library.
-const ACTIVE_IMAGE_BANK = IMAGE_PROMPTS.filter((prompt, index, prompts) => (
-  !prompt.src.startsWith('/practice/figure-')
+const CURATED_IMAGE_BANK = curatedImageData as ImagePrompt[];
+const MASTER_PAINTING_BANK = IMAGE_PROMPTS.filter((prompt, index, prompts) => (
+  ['model-face', 'studio-coat'].includes(prompt.id)
   && prompts.findIndex((candidate) => candidate.src === prompt.src) === index
 ));
+const ACTIVE_IMAGE_BANK = [...CURATED_IMAGE_BANK, ...MASTER_PAINTING_BANK];
 
 const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'Look once more'];
-const IMAGE_BANK_BATCHES = [0, 1, 2, 3, 4, 5];
-const IMAGE_BANK_CACHE_KEY = 'munsell-eye-image-bank-v2';
-const IMAGE_BANK_CACHE_TTL = 24 * 60 * 60 * 1000;
+const PALETTE_STORAGE_KEY = 'munsell-eye-palette-v1';
+
+function shuffled<T>(items: readonly T[]) {
+  const copy = [...items];
+  for (let index = copy.length - 1; index > 0; index--) {
+    const swap = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[swap]] = [copy[swap], copy[index]];
+  }
+  return copy;
+}
+
+function initialPaletteIds() {
+  if (typeof window === 'undefined') return DEFAULT_PALETTE_IDS;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PALETTE_STORAGE_KEY) ?? '[]') as string[];
+    const valid = stored.filter((id) => PAINTS.some((paint) => paint.id === id));
+    return valid.length ? [...new Set(valid)] : DEFAULT_PALETTE_IDS;
+  } catch {
+    return DEFAULT_PALETTE_IDS;
+  }
+}
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
 const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
@@ -135,7 +157,31 @@ function weaknessWeight(color: MunsellColor, exercise: Exercise, attempts: Attem
     return sum + attempt.valueError + attempt.hueError + attempt.chromaError;
   }, 0) / recent.length;
   const misses = recent.filter((attempt) => !attempt.exact).length / recent.length;
-  return 1 + error * 0.25 + misses * 0.7;
+  return Math.min(2.15, 1 + error * 0.12 + misses * 0.4);
+}
+
+function targetKey(color: MunsellColor, exercise: Exercise) {
+  if (exercise === 'value') return `value:${color.v}`;
+  if (exercise === 'chroma') return `chroma:${color.c}`;
+  if (exercise === 'hue') return `hue:${color.h}`;
+  if (exercise === 'family') return `family:${color.v}/${color.c}`;
+  return `full:${notation(color)}`;
+}
+
+function chooseTrainingTarget(pool: MunsellColor[], exercise: Exercise, attempts: Attempt[], blocked: string[]) {
+  const groups = new Map<string, MunsellColor[]>();
+  for (const color of pool) {
+    const key = targetKey(color, exercise);
+    groups.set(key, [...(groups.get(key) ?? []), color]);
+  }
+  const availableKeys = [...groups.keys()].filter((key) => !blocked.includes(key));
+  const keys = availableKeys.length ? availableKeys : [...groups.keys()];
+  const key = weightedChoice(keys, (entry) => {
+    const members = groups.get(entry) ?? [];
+    return members.length ? members.reduce((sum, color) => sum + weaknessWeight(color, exercise, attempts), 0) / members.length : 1;
+  });
+  const members = groups.get(key) ?? pool;
+  return members[Math.floor(Math.random() * members.length)];
 }
 
 function Picker({ label, options, value, onChange, compact = false }: {
@@ -484,9 +530,9 @@ function chooseLocalSample(
   pixels: Uint8ClampedArray,
   width: number,
   height: number,
-  reduceDarkTargets: boolean,
   allowValueOne: boolean,
   subjectBiased: boolean,
+  region?: Region,
 ) {
   const radius = Math.max(3, Math.round(Math.min(width, height) * 0.012));
   const offsets = [
@@ -499,8 +545,12 @@ function chooseLocalSample(
     [ringRadius, 0], [-ringRadius, 0], [0, ringRadius], [0, -ringRadius],
     [ringRadius, ringRadius], [ringRadius, -ringRadius], [-ringRadius, ringRadius], [-ringRadius, -ringRadius],
   ];
-  const marginX = Math.max(radius * 3, Math.round(width * 0.1));
-  const marginY = Math.max(radius * 3, Math.round(height * 0.1));
+  const marginX = Math.max(radius * 3, Math.round(width * 0.08));
+  const marginY = Math.max(radius * 3, Math.round(height * 0.08));
+  const regionLeft = region ? Math.max(marginX, Math.round((region.x - region.w / 2) / 100 * width)) : marginX;
+  const regionRight = region ? Math.min(width - marginX, Math.round((region.x + region.w / 2) / 100 * width)) : width - marginX;
+  const regionTop = region ? Math.max(marginY, Math.round((region.y - region.h / 2) / 100 * height)) : marginY;
+  const regionBottom = region ? Math.min(height - marginY, Math.round((region.y + region.h / 2) / 100 * height)) : height - marginY;
   const globalSamples: [number, number, number][] = [];
   for (let row = 1; row <= 9; row++) {
     for (let column = 1; column <= 12; column++) {
@@ -518,8 +568,8 @@ function chooseLocalSample(
   );
   const candidates: { x: number; y: number; rgb: [number, number, number]; score: number }[] = [];
   for (let index = 0; index < 280; index++) {
-    const x = Math.round(marginX + Math.random() * Math.max(1, width - marginX * 2 - 1));
-    const y = Math.round(marginY + Math.random() * Math.max(1, height - marginY * 2 - 1));
+    const x = Math.round(regionLeft + Math.random() * Math.max(1, regionRight - regionLeft - 1));
+    const y = Math.round(regionTop + Math.random() * Math.max(1, regionBottom - regionTop - 1));
     const samples = offsets.map(([dx, dy]) => {
       const sampleX = Math.min(width - 1, Math.max(0, x + dx));
       const sampleY = Math.min(height - 1, Math.max(0, y + dy));
@@ -572,16 +622,14 @@ function chooseLocalSample(
     color: nearestColor([127, 127, 127], IMAGE_COLOR_POOL),
   };
 
-  if (reduceDarkTargets) {
-    const valueOne = mapped.find((candidate) => candidate.color.v === 1);
-    const valueTwo = mapped.find((candidate) => candidate.color.v === 2);
-    const practical = mapped.find((candidate) => candidate.color.v >= 3);
+  const valueOne = mapped.find((candidate) => candidate.color.v === 1);
+  const valueTwo = mapped.find((candidate) => candidate.color.v === 2);
+  const practical = mapped.find((candidate) => candidate.color.v >= 3);
 
-    if (allowValueOne && valueOne) selected = valueOne;
-    else if (valueTwo && Math.random() < VALUE_TWO_CHANCE) selected = valueTwo;
-    else if (practical) selected = practical;
-    else return null;
-  }
+  if (allowValueOne && valueOne) selected = valueOne;
+  else if (valueTwo && Math.random() < VALUE_TWO_CHANCE) selected = valueTwo;
+  else if (practical) selected = practical;
+  else return null;
 
   return {
     x: selected.x / width * 100,
@@ -634,9 +682,9 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, allowValueOn
           data.data,
           width,
           height,
-          exercise !== 'value',
           allowValueOne,
           /figure|portrait|candid|street|studio|people/i.test(prompt.category),
+          prompt.region,
         );
         if (!nextSample) {
           setLoading(false);
@@ -701,12 +749,12 @@ function ComparisonMap({ question, choice }: { question: CompareQuestion; choice
   if (question.dimension === 'hue') {
     const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
     return (
-      <div className="comparison-map hue" aria-label="All four choices mapped around the Munsell hue wheel">
+      <div className="comparison-map hue" aria-label="Correct and selected colors mapped around the Munsell hue wheel">
         <div className="mini-hue-wheel" aria-hidden="true">
           {HUE_EDGE_COLORS.map((color, index) => (
             <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
           ))}
-          {question.colors.map((color, index) => (
+          {question.colors.map((color, index) => (index === question.correctIndex || index === choice) && (
             <span
               className={`comparison-map-marker ${index === question.correctIndex ? 'answer' : ''} ${index === choice ? 'guess' : ''}`}
               key={`${color.h}-${index}`}
@@ -715,7 +763,7 @@ function ComparisonMap({ question, choice }: { question: CompareQuestion; choice
           ))}
         </div>
         <div className="comparison-map-copy">
-          <span>All four choices</span>
+          <span>Correct / your choice</span>
           <strong>{notation(question.colors[question.correctIndex])}</strong>
           <small>Correct · your choice {notation(question.colors[choice])}</small>
         </div>
@@ -729,10 +777,11 @@ function ComparisonMap({ question, choice }: { question: CompareQuestion; choice
   const high = Math.min(question.dimension === 'value' ? 9 : PRACTICE_CHROMA_MAX, Math.max(...values) + step);
   const position = (value: number) => `${((value - low) / Math.max(step, high - low)) * 100}%`;
   return (
-    <div className="comparison-map axis" aria-label={`All four choices mapped by ${question.dimension}`}>
+    <div className="comparison-map axis" aria-label={`Correct and selected colors mapped by ${question.dimension}`}>
       <div className="comparison-axis">
         <span className="comparison-axis-line" />
         {question.colors.map((color, index) => {
+          if (index !== question.correctIndex && index !== choice) return null;
           const value = question.dimension === 'value' ? color.v : color.c;
           return (
             <span
@@ -780,33 +829,22 @@ function shuffledComparison(prompt: string, colors: MunsellColor[], correct: Mun
 function createCompareQuestion(dimension: CompareDimension): CompareQuestion {
   if (dimension === 'value') {
     const lighter = Math.random() < .5;
-    const groups = new Map<string, MunsellColor[]>();
-    for (const color of SWATCH_POOL.filter((entry) => entry.c >= 2 && entry.c <= 10)) {
-      const key = `${color.h}:${color.c}`;
-      groups.set(key, [...(groups.get(key) ?? []), color]);
-    }
-    const eligible = [...groups.values()].map((colors) => [...colors].sort((a, b) => a.v - b.v)).filter((colors) => new Set(colors.map((color) => color.v)).size >= 4);
-    const group = eligible[Math.floor(Math.random() * eligible.length)];
-    const unique = [...new Map(group.map((color) => [color.v, color])).values()];
-    const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
-    const colors = unique.slice(start, start + 4);
-    const correct = lighter ? colors[colors.length - 1] : colors[0];
+    const start = 2 + Math.floor(Math.random() * 4);
+    const values = [start, start + 1, start + 2, start + 3];
+    const hueChoices = shuffled(HUE_ORDER).slice(0, 4);
+    const chromaChoices = shuffled([4, 6, 8, 10]);
+    const colors = values.map((value, index) => nearestNotationColor(hueChoices[index], value, chromaChoices[index])).filter((color): color is MunsellColor => Boolean(color));
+    const correct = [...colors].sort((a, b) => a.v - b.v)[lighter ? colors.length - 1 : 0];
     return shuffledComparison(lighter ? 'Which color is lighter?' : 'Which color is darker?', colors, correct, 'value');
   }
 
   if (dimension === 'chroma') {
     const moreChromatic = Math.random() < .5;
-    const groups = new Map<string, MunsellColor[]>();
-    for (const color of SWATCH_POOL) {
-      const key = `${color.h}:${color.v}`;
-      groups.set(key, [...(groups.get(key) ?? []), color]);
-    }
-    const eligible = [...groups.values()].map((colors) => [...colors].sort((a, b) => a.c - b.c)).filter((colors) => new Set(colors.map((color) => color.c)).size >= 4);
-    const group = eligible[Math.floor(Math.random() * eligible.length)];
-    const unique = [...new Map(group.map((color) => [color.c, color])).values()];
-    const start = Math.floor(Math.random() * Math.max(1, unique.length - 3));
-    const colors = unique.slice(start, start + 4);
-    const correct = moreChromatic ? colors[colors.length - 1] : colors[0];
+    const chromas = Math.random() < .5 ? [2, 4, 6, 8] : [4, 6, 8, 10];
+    const hueChoices = shuffled(HUE_ORDER).slice(0, 4);
+    const valueChoices = shuffled([4, 5, 5, 6]);
+    const colors = chromas.map((chroma, index) => nearestNotationColor(hueChoices[index], valueChoices[index], chroma)).filter((color): color is MunsellColor => Boolean(color));
+    const correct = [...colors].sort((a, b) => a.c - b.c)[moreChromatic ? colors.length - 1 : 0];
     return shuffledComparison(moreChromatic ? 'Which color is more chromatic?' : 'Which color is more neutral?', colors, correct, 'chroma');
   }
 
@@ -857,6 +895,95 @@ function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: Mu
       style={{ background: rgbCss(correct) }}
     >
       <span className="albers-guess" style={{ background: rgbCss(guess) }} />
+    </div>
+  );
+}
+
+function PaintRecipeCard({ target, recipe, paletteSize }: { target: MunsellColor; recipe: PaintRecipe | null; paletteSize: number }) {
+  if (!recipe) return null;
+  const outside = recipe.quality === 'Outside palette gamut';
+  return (
+    <section className={`paint-recipe ${outside ? 'outside' : ''}`} aria-label="Suggested oil paint mixture">
+      <div className="paint-recipe-head">
+        <div>
+          <span className="feedback-kicker">From your {paletteSize}-paint palette</span>
+          <strong>Suggested starting mix</strong>
+        </div>
+        <div className="mix-comparison" aria-label="Ideal target beside the closest obtainable mixture">
+          <span style={{ background: rgbCss(target) }}><small>Ideal</small></span>
+          <span style={{ background: `rgb(${recipe.rgb.join(',')})` }}><small>Mix</small></span>
+        </div>
+      </div>
+      <ol className="recipe-parts">
+        {recipe.ingredients.map(({ paint, parts }) => (
+          <li key={paint.id}>
+            <i style={{ background: `rgb(${paint.rgb.join(',')})` }} />
+            <span>{paint.name}<small>{paint.pigment}</small></span>
+            <strong>{parts} {parts === 1 ? 'part' : 'parts'}</strong>
+          </li>
+        ))}
+      </ol>
+      <div className="recipe-foot">
+        <strong>{recipe.quality}</strong>
+        <span>{outside ? 'This palette cannot reach the target hue exactly; this is its nearest useful direction.' : 'Practical starting estimate. Adjust by eye for your paint film, brand, and light.'}</span>
+      </div>
+    </section>
+  );
+}
+
+function PaletteSheet({ selectedIds, onChange, onClose }: {
+  selectedIds: string[];
+  onChange: (ids: string[]) => void;
+  onClose: () => void;
+}) {
+  const selected = new Set(selectedIds);
+  const toggle = (id: string) => {
+    if (selected.has(id)) {
+      if (selected.size === 1) return;
+      onChange(selectedIds.filter((paintId) => paintId !== id));
+    } else {
+      onChange([...selectedIds, id]);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="progress-sheet palette-sheet" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+        <div className="sheet-head">
+          <div><span className="eyebrow">Saved on this device</span><h2 id="palette-title">Your paint box</h2></div>
+          <button className="close-button" onClick={onClose} type="button" aria-label="Close palette">×</button>
+        </div>
+        <p className="palette-intro">Choose the tubes you actually own. Recipes will use no more than four and favor the simplest close match.</p>
+        <div className="palette-presets" aria-label="Palette presets">
+          {Object.entries(PALETTE_PRESETS).map(([name, ids]) => (
+            <button className={ids.length === selectedIds.length && ids.every((id) => selected.has(id)) ? 'active' : ''} key={name} onClick={() => onChange([...ids])} type="button">{name}</button>
+          ))}
+        </div>
+        <div className="paint-catalog">
+          {PAINT_CATEGORIES.map((category) => {
+            const paints = PAINTS.filter((paint) => paint.category === category);
+            if (!paints.length) return null;
+            return (
+              <section key={category}>
+                <header><strong>{category}</strong><span>{paints.filter((paint) => selected.has(paint.id)).length}/{paints.length}</span></header>
+                <div className="paint-options">
+                  {paints.map((paint) => (
+                    <button aria-pressed={selected.has(paint.id)} className={selected.has(paint.id) ? 'selected' : ''} key={paint.id} onClick={() => toggle(paint.id)} type="button">
+                      <i style={{ background: `rgb(${paint.rgb.join(',')})` }} />
+                      <span><strong>{paint.name}</strong><small>{paint.pigment} · {paint.brands ?? 'Gamblin'} · {paint.opacity.replace('-', ' ')}</small></span>
+                      <b aria-hidden="true">{selected.has(paint.id) ? '✓' : '+'}</b>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+        <div className="palette-summary">
+          <strong>{selectedIds.length} paints selected</strong>
+          <span>{PAINTS.length} practical Gamblin / Winsor &amp; Newton paints · screen-based estimate</span>
+        </div>
+      </section>
     </div>
   );
 }
@@ -1088,8 +1215,7 @@ export default function Home() {
   const [valueMonochrome, setValueMonochrome] = useState(false);
   const [familyHue, setFamilyHue] = useState('5BG');
   const [target, setTarget] = useState<MunsellColor>(INITIAL_VALUE_COLOR);
-  const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(IMAGE_PROMPTS[0]);
-  const [remoteImages, setRemoteImages] = useState<ImagePrompt[]>([]);
+  const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(ACTIVE_IMAGE_BANK[0] ?? IMAGE_PROMPTS[0]);
   const [imageReady, setImageReady] = useState(true);
   const [allowValueOneImageTarget, setAllowValueOneImageTarget] = useState(false);
   const [answerH, setAnswerH] = useState('5BG');
@@ -1098,6 +1224,8 @@ export default function Home() {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [selectedPaintIds, setSelectedPaintIds] = useState<string[]>(initialPaletteIds);
   const [sessionCount, setSessionCount] = useState(1);
   const [streak, setStreak] = useState(0);
   const [compareDimension, setCompareDimension] = useState<CompareDimension>('value');
@@ -1112,7 +1240,8 @@ export default function Home() {
   const answerPanelRef = useRef<HTMLElement>(null);
   const compareAdvanceTimer = useRef<number | undefined>(undefined);
   const lastStandardExercise = useRef<Exclude<Exercise, 'compare'>>('value');
-  const warmedImageIds = useRef(new Set<string>());
+  const imageDeck = useRef<ImagePrompt[]>(shuffled(ACTIVE_IMAGE_BANK));
+  const recentImageIds = useRef<string[]>([]);
   const recentTargetKeys = useRef<string[]>([]);
   const recentImageTargetValues = useRef<number[]>([]);
   const recordedImageQuestion = useRef('');
@@ -1126,63 +1255,25 @@ export default function Home() {
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   }, []);
 
+  const changeSelectedPaints = useCallback((ids: string[]) => {
+    const valid = [...new Set(ids)].filter((id) => PAINTS.some((paint) => paint.id === id));
+    if (!valid.length) return;
+    setSelectedPaintIds(valid);
+    try { window.localStorage.setItem(PALETTE_STORAGE_KEY, JSON.stringify(valid)); } catch { /* Keep the selection for this session. */ }
+  }, []);
+
   useEffect(() => () => {
     if (compareAdvanceTimer.current !== undefined) window.clearTimeout(compareAdvanceTimer.current);
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const loadImageBank = async () => {
-      try {
-        const cached = window.localStorage.getItem(IMAGE_BANK_CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached) as { expires?: number; images?: ImagePrompt[] };
-          if ((parsed.expires ?? 0) > Date.now() && parsed.images?.length) {
-            setRemoteImages(parsed.images);
-            return;
-          }
-        }
-      } catch {
-        // Private browsing and strict storage settings can disable localStorage.
-      }
-      const batches = await Promise.allSettled(IMAGE_BANK_BATCHES.map(async (batch) => {
-          const response = await fetch(`/api/practice-images?batch=${batch}`);
-          if (!response.ok) return [];
-          const payload = await response.json() as ImageBankResponse;
-          return payload.images ?? [];
-      }));
-      if (cancelled) return;
-      const images = batches.flatMap((batch) => batch.status === 'fulfilled' ? batch.value : []);
-      const unique = [...new Map(images.map((image) => [image.id, image])).values()];
-      if (unique.length) {
-        setRemoteImages(unique);
-        try {
-          window.localStorage.setItem(IMAGE_BANK_CACHE_KEY, JSON.stringify({
-            expires: Date.now() + IMAGE_BANK_CACHE_TTL,
-            images: unique,
-          }));
-        } catch {
-          // The live bank still works when storage is unavailable.
-        }
-      }
-    };
-    void loadImageBank();
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    const portraits = remoteImages
-      .filter((prompt) => /portrait|figure|candid|street|studio|people/i.test(prompt.category))
-      .slice(0, 24);
-    portraits.forEach((prompt) => {
-      if (warmedImageIds.current.has(prompt.id)) return;
+    imageDeck.current.slice(0, 2).forEach((prompt) => {
       const image = new Image();
       image.decoding = 'async';
       image.crossOrigin = 'anonymous';
-      image.onload = () => warmedImageIds.current.add(prompt.id);
       image.src = prompt.src;
     });
-  }, [remoteImages]);
+  }, [imagePrompt]);
 
   const resetAnswer = useCallback(() => {
     answerHLive.current = '5BG';
@@ -1205,13 +1296,15 @@ export default function Home() {
     }
     if (nextSource === 'image' && nextExercise !== 'family') {
       const recentlyUsedValueOne = recentImageTargetValues.current.slice(-VALUE_ONE_COOLDOWN).includes(1);
-      setAllowValueOneImageTarget(nextExercise !== 'value' && !recentlyUsedValueOne && Math.random() < VALUE_ONE_CHANCE);
-      const choices = [...remoteImages, ...ACTIVE_IMAGE_BANK].filter((prompt) => prompt.src !== imagePrompt.src);
-      const figureChoices = choices.filter((prompt) => /figure|portrait|candid|street|studio/i.test(prompt.category));
-      const bank = figureChoices.length && Math.random() < 0.86 ? figureChoices : choices;
-      const warm = bank.filter((prompt) => warmedImageIds.current.has(prompt.id));
-      const readyBank = warm.length >= 4 && Math.random() < .78 ? warm : bank;
-      setImagePrompt(readyBank[Math.floor(Math.random() * readyBank.length)] ?? ACTIVE_IMAGE_BANK[0]);
+      setAllowValueOneImageTarget(!recentlyUsedValueOne && Math.random() < VALUE_ONE_CHANCE);
+      const blockedImages = new Set([...recentImageIds.current.slice(-18), imagePrompt.id]);
+      if (!imageDeck.current.length || !imageDeck.current.some((prompt) => !blockedImages.has(prompt.id))) {
+        imageDeck.current = shuffled(ACTIVE_IMAGE_BANK.filter((prompt) => !blockedImages.has(prompt.id)));
+      }
+      const nextImage = imageDeck.current.find((prompt) => !blockedImages.has(prompt.id)) ?? ACTIVE_IMAGE_BANK[0];
+      imageDeck.current = imageDeck.current.filter((prompt) => prompt.id !== nextImage.id);
+      recentImageIds.current = [...recentImageIds.current, nextImage.id].slice(-24);
+      setImagePrompt(nextImage);
       setImageReady(false);
     } else {
       const pool = nextExercise === 'value'
@@ -1221,16 +1314,14 @@ export default function Home() {
           : nextExercise === 'family'
             ? IMAGE_COLOR_POOL.filter((color) => color.h === nextFamilyHue)
             : SWATCH_POOL;
-      const cooldown = nextExercise === 'value' ? 3 : nextExercise === 'chroma' ? 2 : 6;
+      const cooldown = nextExercise === 'value' ? 4 : nextExercise === 'chroma' ? 3 : 8;
       const blocked = recentTargetKeys.current.slice(-cooldown);
-      const eligible = pool.filter((color) => !blocked.includes(`${nextExercise}:${notation(color)}`));
-      const choicePool = eligible.length ? eligible : pool;
-      const nextTarget = weightedChoice(choicePool, (color) => weaknessWeight(color, nextExercise, attempts));
-      recentTargetKeys.current = [...recentTargetKeys.current, `${nextExercise}:${notation(nextTarget)}`].slice(-10);
+      const nextTarget = chooseTrainingTarget(pool, nextExercise, attempts, blocked);
+      recentTargetKeys.current = [...recentTargetKeys.current, targetKey(nextTarget, nextExercise)].slice(-16);
       setTarget(nextTarget);
       setImageReady(true);
     }
-  }, [attempts, compareDimension, exercise, familyHue, imagePrompt.src, remoteImages, resetAnswer, source]);
+  }, [attempts, compareDimension, exercise, familyHue, imagePrompt.id, resetAnswer, source]);
 
   const presentation: SwatchPresentation | 'image' | 'contrast' = exercise === 'compare' ? 'contrast' : source === 'image' ? 'image' : swatchPresentation;
 
@@ -1292,7 +1383,7 @@ export default function Home() {
 
   const handleImageColor = useCallback((color: MunsellColor) => {
     const questionId = `${imagePrompt.id}:${exercise}:${sessionCount}`;
-    if (exercise !== 'value' && recordedImageQuestion.current !== questionId) {
+    if (recordedImageQuestion.current !== questionId) {
       recordedImageQuestion.current = questionId;
       recentImageTargetValues.current = [...recentImageTargetValues.current, color.v].slice(-(VALUE_ONE_COOLDOWN + 1));
     }
@@ -1394,6 +1485,7 @@ export default function Home() {
   };
 
   const focusFirstAnswer = useCallback(() => {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches || window.innerWidth < 700) return;
     window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
       answerPanelRef.current?.querySelector<HTMLElement>('.picker')?.focus({ preventScroll: true });
     }));
@@ -1412,7 +1504,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
-      if (progressOpen || view !== 'practice') return;
+      if (progressOpen || paletteOpen || view !== 'practice') return;
       const element = event.target as HTMLElement | null;
       if (exercise === 'compare') {
         if (compareChoice === null && ['1', '2', '3', '4'].includes(event.key)) {
@@ -1479,7 +1571,7 @@ export default function Home() {
         ? `/${target.c}`
         : notation(target);
   const guessedColor = useMemo(() => {
-    if (exercise === 'value') return nearestNotationColor('N', Number(resolvedAnswerV), 0);
+    if (exercise === 'value') return nearestNotationColor(target.h, Number(resolvedAnswerV), target.c) ?? NEUTRALS[Number(resolvedAnswerV) - 1];
     if (exercise === 'hue') return nearestNotationColor(resolvedAnswerH, target.v, target.c) ?? target;
     if (exercise === 'chroma') return nearestNotationColor(target.h, target.v, Number(resolvedAnswerC)) ?? target;
     if (exercise === 'family') return nearestNotationColor(familyHue, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? target;
@@ -1500,6 +1592,10 @@ export default function Home() {
     ...contextColors.slice(4, 8),
   ], [contextColors, target]);
   const displayColor = (color: MunsellColor) => exercise === 'value' && valueMonochrome ? NEUTRALS[color.v - 1] : color;
+  const paintRecipe = useMemo(
+    () => submitted ? suggestPaintRecipe(target, selectedPaintIds) : null,
+    [selectedPaintIds, submitted, target],
+  );
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -1547,13 +1643,14 @@ export default function Home() {
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
-          <button className="quiet-button" type="button" onClick={() => setProgressOpen(true)}>Progress</button>
+          <button className={paletteOpen ? 'active' : ''} type="button" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }}>Palette</button>
+          <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
       </header>
 
       {view === 'practice' ? (
         <section className="workspace" aria-label="Color identification practice">
-        <div className="mode-row">
+        <div className="mode-row desktop-practice-controls">
           <div className="segmented display-segmented" aria-label="Question presentation">
             {([
               { id: 'isolated', label: 'Swatch' },
@@ -1577,21 +1674,72 @@ export default function Home() {
           </div>
         </div>
 
-        {exercise === 'compare' ? (
-          <nav className="exercise-tabs contrast-tabs" aria-label="Contrast dimension">
-            {(['value', 'hue', 'chroma'] as CompareDimension[]).map((dimension) => (
-              <button className={compareDimension === dimension ? 'active' : ''} key={dimension} onClick={() => changeCompareDimension(dimension)} type="button">
-                {dimension[0].toUpperCase() + dimension.slice(1)}
-              </button>
-            ))}
-          </nav>
-        ) : (
-          <nav className="exercise-tabs" aria-label="Exercise">
-            {exerciseOptions.map(([mode, label]) => (
-              <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
-            ))}
-          </nav>
-        )}
+        <div className="mobile-practice-controls" aria-label="Practice controls">
+          <label>
+            <span>View</span>
+            <select value={presentation} onChange={(event) => changePresentation(event.target.value as SwatchPresentation | 'image' | 'contrast')}>
+              <option value="isolated">Swatch</option>
+              <option value="context">Context</option>
+              <option value="image">Image</option>
+              <option value="contrast">Contrast</option>
+            </select>
+          </label>
+          <label>
+            <span>Skill</span>
+            {exercise === 'compare' ? (
+              <select value={compareDimension} onChange={(event) => changeCompareDimension(event.target.value as CompareDimension)}>
+                <option value="value">Value</option>
+                <option value="hue">Hue</option>
+                <option value="chroma">Chroma</option>
+              </select>
+            ) : (
+              <select value={exercise} onChange={(event) => changeExercise(event.target.value as Exercise)}>
+                {exerciseOptions.map(([mode, label]) => <option key={mode} value={mode}>{label}</option>)}
+              </select>
+            )}
+          </label>
+          {exercise === 'value' ? (
+            <div className="segmented value-display-toggle" aria-label="Value question appearance">
+              <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
+              <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
+            </div>
+          ) : exercise === 'hue' && source === 'swatch' ? (
+            <div className="segmented value-display-toggle" aria-label="Hue question appearance">
+              <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
+              <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
+            </div>
+          ) : <span className="mobile-question-count">#{sessionCount}</span>}
+        </div>
+
+        <div className="exercise-control-row desktop-practice-controls">
+          {exercise === 'compare' ? (
+            <nav className="exercise-tabs contrast-tabs" aria-label="Contrast dimension">
+              {(['value', 'hue', 'chroma'] as CompareDimension[]).map((dimension) => (
+                <button className={compareDimension === dimension ? 'active' : ''} key={dimension} onClick={() => changeCompareDimension(dimension)} type="button">
+                  {dimension[0].toUpperCase() + dimension.slice(1)}
+                </button>
+              ))}
+            </nav>
+          ) : (
+            <nav className="exercise-tabs" aria-label="Exercise">
+              {exerciseOptions.map(([mode, label]) => (
+                <button className={exercise === mode ? 'active' : ''} key={mode} onClick={() => changeExercise(mode)} type="button">{label}</button>
+              ))}
+            </nav>
+          )}
+          {exercise === 'value' && (
+            <div className="segmented value-display-toggle" aria-label="Value question appearance">
+              <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
+              <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
+            </div>
+          )}
+          {exercise === 'hue' && source === 'swatch' && (
+            <div className="segmented value-display-toggle" aria-label="Hue question appearance">
+              <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
+              <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
+            </div>
+          )}
+        </div>
 
         {exercise === 'family' && (
           <div className="family-control">
@@ -1602,24 +1750,12 @@ export default function Home() {
           </div>
         )}
 
-        <div className="prompt-copy">
+        <div className={`prompt-copy ${exercise === 'compare' ? 'contrast-prompt' : 'standard-prompt'}`}>
           <div>
             <span>{promptText}</span>
           </div>
           <div className="prompt-settings">
             <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? huePresentation === 'slice' ? '40 HUE SLICES' : '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : exercise === 'compare' ? '4 CLOSE CHIPS' : 'C2–C12'}</span>
-            {exercise === 'value' && (
-              <div className="segmented value-display-toggle" aria-label="Value question appearance">
-                <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
-                <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
-              </div>
-            )}
-            {exercise === 'hue' && source === 'swatch' && (
-              <div className="segmented value-display-toggle" aria-label="Hue question appearance">
-                <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
-                <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -1717,6 +1853,7 @@ export default function Home() {
                     <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
                   </div>
                 </div>
+                <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             ) : (
               <div className="feedback" role="status" aria-live="polite">
@@ -1725,7 +1862,7 @@ export default function Home() {
                     <span className="feedback-kicker" key={submitted.createdAt}>{missPrompt}</span>
                     <strong>{hueMiss && exercise === 'hue' ? 'Hue comparison' : visibleTarget}</strong>
                   </div>
-                  <AlbersComparison correct={displayColor(target)} guess={guessedColor} />
+                  <AlbersComparison correct={displayColor(target)} guess={displayColor(guessedColor)} />
                 </div>
                 {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
                 {hueMiss && <HueMissMap target={target.h} guess={resolvedAnswerH} />}
@@ -1733,6 +1870,7 @@ export default function Home() {
                   <strong>{feedbackErrors.join(' · ')}</strong>
                   {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
                 </div>
+                <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             )}
           </div>
@@ -1740,6 +1878,8 @@ export default function Home() {
         )}
         </section>
       ) : view === 'studio' ? <StudioView /> : <ReferenceView />}
+
+      {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
       {progressOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setProgressOpen(false); }}>
