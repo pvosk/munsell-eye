@@ -2,6 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_COLORS, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
+import {
+  DEFAULT_PALETTE_IDS,
+  PAINTS,
+  PAINT_CATEGORIES,
+  PALETTE_PRESETS,
+  suggestPaintRecipe,
+  type PaintRecipe,
+} from './paint-mixing';
 import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, type SourceMode } from './progress-db';
 import StudioView from './studio';
 
@@ -94,6 +102,18 @@ const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'L
 const IMAGE_BANK_BATCHES = [0, 1, 2, 3, 4, 5];
 const IMAGE_BANK_CACHE_KEY = 'munsell-eye-image-bank-v2';
 const IMAGE_BANK_CACHE_TTL = 24 * 60 * 60 * 1000;
+const PALETTE_STORAGE_KEY = 'munsell-eye-palette-v1';
+
+function initialPaletteIds() {
+  if (typeof window === 'undefined') return DEFAULT_PALETTE_IDS;
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(PALETTE_STORAGE_KEY) ?? '[]') as string[];
+    const valid = stored.filter((id) => PAINTS.some((paint) => paint.id === id));
+    return valid.length ? [...new Set(valid)] : DEFAULT_PALETTE_IDS;
+  } catch {
+    return DEFAULT_PALETTE_IDS;
+  }
+}
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
 const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
@@ -861,6 +881,95 @@ function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: Mu
   );
 }
 
+function PaintRecipeCard({ target, recipe, paletteSize }: { target: MunsellColor; recipe: PaintRecipe | null; paletteSize: number }) {
+  if (!recipe) return null;
+  const outside = recipe.quality === 'Outside palette gamut';
+  return (
+    <section className={`paint-recipe ${outside ? 'outside' : ''}`} aria-label="Suggested oil paint mixture">
+      <div className="paint-recipe-head">
+        <div>
+          <span className="feedback-kicker">From your {paletteSize}-paint palette</span>
+          <strong>Suggested starting mix</strong>
+        </div>
+        <div className="mix-comparison" aria-label="Ideal target beside the closest obtainable mixture">
+          <span style={{ background: rgbCss(target) }}><small>Ideal</small></span>
+          <span style={{ background: `rgb(${recipe.rgb.join(',')})` }}><small>Mix</small></span>
+        </div>
+      </div>
+      <ol className="recipe-parts">
+        {recipe.ingredients.map(({ paint, parts }) => (
+          <li key={paint.id}>
+            <i style={{ background: `rgb(${paint.rgb.join(',')})` }} />
+            <span>{paint.name}<small>{paint.pigment}</small></span>
+            <strong>{parts} {parts === 1 ? 'part' : 'parts'}</strong>
+          </li>
+        ))}
+      </ol>
+      <div className="recipe-foot">
+        <strong>{recipe.quality}</strong>
+        <span>{outside ? 'This palette cannot reach the target hue exactly; this is its nearest useful direction.' : 'Approximate spectral match. Adjust by eye for your paint film and light.'}</span>
+      </div>
+    </section>
+  );
+}
+
+function PaletteSheet({ selectedIds, onChange, onClose }: {
+  selectedIds: string[];
+  onChange: (ids: string[]) => void;
+  onClose: () => void;
+}) {
+  const selected = new Set(selectedIds);
+  const toggle = (id: string) => {
+    if (selected.has(id)) {
+      if (selected.size === 1) return;
+      onChange(selectedIds.filter((paintId) => paintId !== id));
+    } else {
+      onChange([...selectedIds, id]);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="progress-sheet palette-sheet" role="dialog" aria-modal="true" aria-labelledby="palette-title">
+        <div className="sheet-head">
+          <div><span className="eyebrow">Saved on this device</span><h2 id="palette-title">Your paint box</h2></div>
+          <button className="close-button" onClick={onClose} type="button" aria-label="Close palette">×</button>
+        </div>
+        <p className="palette-intro">Choose the tubes you actually own. Recipes will use no more than four and favor the simplest close match.</p>
+        <div className="palette-presets" aria-label="Palette presets">
+          {Object.entries(PALETTE_PRESETS).map(([name, ids]) => (
+            <button className={ids.length === selectedIds.length && ids.every((id) => selected.has(id)) ? 'active' : ''} key={name} onClick={() => onChange([...ids])} type="button">{name}</button>
+          ))}
+        </div>
+        <div className="paint-catalog">
+          {PAINT_CATEGORIES.map((category) => {
+            const paints = PAINTS.filter((paint) => paint.category === category);
+            if (!paints.length) return null;
+            return (
+              <section key={category}>
+                <header><strong>{category}</strong><span>{paints.filter((paint) => selected.has(paint.id)).length}/{paints.length}</span></header>
+                <div className="paint-options">
+                  {paints.map((paint) => (
+                    <button aria-pressed={selected.has(paint.id)} className={selected.has(paint.id) ? 'selected' : ''} key={paint.id} onClick={() => toggle(paint.id)} type="button">
+                      <i style={{ background: `rgb(${paint.rgb.join(',')})` }} />
+                      <span><strong>{paint.name}</strong><small>{paint.pigment} · {paint.opacity.replace('-', ' ')}</small></span>
+                      <b aria-hidden="true">{selected.has(paint.id) ? '✓' : '+'}</b>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+        <div className="palette-summary">
+          <strong>{selectedIds.length} paints selected</strong>
+          <span>Gamblin masstone positions · screen-based mixing estimate</span>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) => void }) {
   const wheelRef = useRef<HTMLDivElement>(null);
   const activeIndex = Math.max(0, HUE_ORDER.indexOf(value as (typeof HUE_ORDER)[number]));
@@ -1098,6 +1207,8 @@ export default function Home() {
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [selectedPaintIds, setSelectedPaintIds] = useState<string[]>(initialPaletteIds);
   const [sessionCount, setSessionCount] = useState(1);
   const [streak, setStreak] = useState(0);
   const [compareDimension, setCompareDimension] = useState<CompareDimension>('value');
@@ -1124,6 +1235,13 @@ export default function Home() {
     startedAt.current = Date.now();
     readAttempts().then(setAttempts).catch(() => undefined);
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+  }, []);
+
+  const changeSelectedPaints = useCallback((ids: string[]) => {
+    const valid = [...new Set(ids)].filter((id) => PAINTS.some((paint) => paint.id === id));
+    if (!valid.length) return;
+    setSelectedPaintIds(valid);
+    try { window.localStorage.setItem(PALETTE_STORAGE_KEY, JSON.stringify(valid)); } catch { /* Keep the selection for this session. */ }
   }, []);
 
   useEffect(() => () => {
@@ -1412,7 +1530,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyboard = (event: KeyboardEvent) => {
-      if (progressOpen || view !== 'practice') return;
+      if (progressOpen || paletteOpen || view !== 'practice') return;
       const element = event.target as HTMLElement | null;
       if (exercise === 'compare') {
         if (compareChoice === null && ['1', '2', '3', '4'].includes(event.key)) {
@@ -1500,6 +1618,10 @@ export default function Home() {
     ...contextColors.slice(4, 8),
   ], [contextColors, target]);
   const displayColor = (color: MunsellColor) => exercise === 'value' && valueMonochrome ? NEUTRALS[color.v - 1] : color;
+  const paintRecipe = useMemo(
+    () => submitted ? suggestPaintRecipe(target, selectedPaintIds) : null,
+    [selectedPaintIds, submitted, target],
+  );
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -1547,7 +1669,8 @@ export default function Home() {
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
-          <button className="quiet-button" type="button" onClick={() => setProgressOpen(true)}>Progress</button>
+          <button className={paletteOpen ? 'active' : ''} type="button" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }}>Palette</button>
+          <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
       </header>
 
@@ -1717,6 +1840,7 @@ export default function Home() {
                     <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
                   </div>
                 </div>
+                <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             ) : (
               <div className="feedback" role="status" aria-live="polite">
@@ -1733,6 +1857,7 @@ export default function Home() {
                   <strong>{feedbackErrors.join(' · ')}</strong>
                   {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
                 </div>
+                <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             )}
           </div>
@@ -1740,6 +1865,8 @@ export default function Home() {
         )}
         </section>
       ) : view === 'studio' ? <StudioView /> : <ReferenceView />}
+
+      {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
       {progressOpen && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setProgressOpen(false); }}>

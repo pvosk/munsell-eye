@@ -17,6 +17,12 @@ The Reference view contains the 40-step hue wheel and constant-hue chip pages. P
 
 Progress and adaptive weighting are stored only in the current browser with IndexedDB. There are no accounts.
 
+## Paint recipes
+
+The Palette sheet contains 30 representative Gamblin Artist's Oil Colors and Basic, Figure, and Full presets. Custom selections are stored in the current browser. After each standard quiz answer, the app searches mixtures of up to four selected paints, favors simpler recipes when their match is comparable, and shows the ideal target beside the closest estimated mixture.
+
+Recipes use Gamblin's published Munsell masstone positions plus a lightweight spectral Kubelka–Munk approximation. They are practical starting ratios rather than laboratory formulas; paint film, lighting, and real tube strength still require adjustment by eye.
+
 ## Color data
 
 The discrete chip set is generated from the RIT Munsell Renotation `real.dat` dataset (Illuminant C), adapted to D65 sRGB. Screen colors are useful training approximations, not replacements for calibrated physical Munsell chips; display gamut and calibration affect every rendered swatch.
