@@ -8,6 +8,7 @@ type PaintSpec = {
   name: string;
   pigment: string;
   category: PaintCategory;
+  brands?: string;
   h?: string;
   v: number;
   c?: number;
@@ -63,6 +64,61 @@ const SPECS: PaintSpec[] = [
   { id: 'viridian', name: 'Viridian', pigment: 'PG18', category: 'Green', h: '7.5BG', v: 2, c: 4, strength: .78, opacity: 'transparent' },
   { id: 'chromium-oxide-green', name: 'Chromium Oxide Green', pigment: 'PG17', category: 'Green', h: '2.5G', v: 4, c: 4, strength: .58, opacity: 'opaque' },
   { id: 'ivory-black', name: 'Ivory Black', pigment: 'PBk9', category: 'Black', v: 1, strength: 1.08, opacity: 'semi-transparent' },
+  { id: 'flake-white-replacement', name: 'Flake White Replacement', pigment: 'PW6/PW4', category: 'White', brands: 'Gamblin', v: 9.5, strength: .86, opacity: 'opaque' },
+  { id: 'radiant-white', name: 'Radiant White', pigment: 'PW6', category: 'White', brands: 'Gamblin', v: 9.5, strength: .72, opacity: 'opaque' },
+  { id: 'zinc-white', name: 'Zinc White', pigment: 'PW4', category: 'White', brands: 'Gamblin · Winsor & Newton', v: 9.5, strength: .48, opacity: 'transparent' },
+  { id: 'warm-white', name: 'Warm White', pigment: 'PW6/PY42', category: 'White', brands: 'Gamblin', v: 9, strength: .8, opacity: 'opaque' },
+  { id: 'transparent-white', name: 'Transparent White', pigment: 'PW4', category: 'White', brands: 'Winsor & Newton', v: 9.5, strength: .42, opacity: 'transparent' },
+  { id: 'cadmium-yellow-medium', name: 'Cadmium Yellow Medium', pigment: 'PY35', category: 'Yellow', brands: 'Gamblin · Winsor & Newton', h: '2.5Y', v: 8.5, c: 12, strength: .8, opacity: 'opaque' },
+  { id: 'cadmium-yellow-deep', name: 'Cadmium Yellow Deep', pigment: 'PY35', category: 'Yellow', brands: 'Gamblin · Winsor & Newton', h: '10YR', v: 8, c: 14, strength: .82, opacity: 'opaque' },
+  { id: 'cadmium-lemon', name: 'Cadmium Lemon', pigment: 'PY35', category: 'Yellow', brands: 'Winsor & Newton', h: '10Y', v: 9, c: 12, strength: .76, opacity: 'opaque' },
+  { id: 'bismuth-yellow', name: 'Bismuth Yellow', pigment: 'PY184', category: 'Yellow', brands: 'Gamblin', h: '10Y', v: 9, c: 12, strength: .72, opacity: 'opaque' },
+  { id: 'nickel-titanate-yellow', name: 'Nickel Titanate Yellow', pigment: 'PY53', category: 'Yellow', brands: 'Gamblin', h: '7.5Y', v: 8, c: 6, strength: .58, opacity: 'opaque' },
+  { id: 'naples-yellow', name: 'Naples Yellow Hue', pigment: 'PW6/PY42/PY83', category: 'Yellow', brands: 'Gamblin · Winsor & Newton', h: '5Y', v: 8, c: 6, strength: .65, opacity: 'opaque' },
+  { id: 'radiant-lemon', name: 'Radiant Lemon', pigment: 'PW6/PY3', category: 'Yellow', brands: 'Gamblin', h: '10Y', v: 9, c: 8, strength: .6, opacity: 'opaque' },
+  { id: 'indian-yellow-deep', name: 'Indian Yellow Deep', pigment: 'PY110/PY139', category: 'Yellow', brands: 'Winsor & Newton', h: '5YR', v: 6, c: 12, strength: 1.02, opacity: 'transparent' },
+  { id: 'winsor-yellow-deep', name: 'Winsor Yellow Deep', pigment: 'PY65', category: 'Yellow', brands: 'Winsor & Newton', h: '10YR', v: 8, c: 14, strength: .94, opacity: 'semi-transparent' },
+  { id: 'permanent-orange', name: 'Permanent Orange', pigment: 'PO62', category: 'Orange', brands: 'Gamblin', h: '10R', v: 6, c: 16, strength: 1, opacity: 'semi-transparent' },
+  { id: 'pyrrole-orange', name: 'Pyrrole Orange', pigment: 'PO73', category: 'Orange', brands: 'Gamblin', h: '7.5R', v: 6, c: 16, strength: 1.05, opacity: 'semi-opaque' },
+  { id: 'mars-orange', name: 'Mars Orange', pigment: 'PR101', category: 'Orange', brands: 'Winsor & Newton', h: '5YR', v: 5, c: 10, strength: .7, opacity: 'opaque' },
+  { id: 'chrome-titanate-yellow', name: 'Chrome Titanate Yellow', pigment: 'PBr24', category: 'Orange', brands: 'Gamblin', h: '2.5Y', v: 7, c: 8, strength: .62, opacity: 'opaque' },
+  { id: 'raw-sienna', name: 'Raw Sienna', pigment: 'PBr7', category: 'Earth', brands: 'Gamblin · Winsor & Newton', h: '10YR', v: 5, c: 6, strength: .58, opacity: 'semi-transparent' },
+  { id: 'raw-umber', name: 'Raw Umber', pigment: 'PBr7', category: 'Earth', brands: 'Gamblin · Winsor & Newton', h: '2.5Y', v: 2, c: 2, strength: .7, opacity: 'semi-transparent' },
+  { id: 'venetian-red', name: 'Venetian Red', pigment: 'PR101', category: 'Earth', brands: 'Gamblin · Winsor & Newton', h: '10R', v: 4, c: 8, strength: .72, opacity: 'opaque' },
+  { id: 'indian-red', name: 'Indian Red', pigment: 'PR101', category: 'Earth', brands: 'Gamblin · Winsor & Newton', h: '5R', v: 3, c: 6, strength: .76, opacity: 'opaque' },
+  { id: 'mars-yellow', name: 'Mars Yellow', pigment: 'PY42', category: 'Earth', brands: 'Gamblin', h: '10YR', v: 5, c: 8, strength: .68, opacity: 'opaque' },
+  { id: 'mars-red', name: 'Mars Red', pigment: 'PR101', category: 'Earth', brands: 'Gamblin', h: '7.5R', v: 3, c: 8, strength: .78, opacity: 'opaque' },
+  { id: 'green-earth', name: 'Terre Verte', pigment: 'PG23', category: 'Earth', brands: 'Gamblin · Winsor & Newton', h: '5G', v: 4, c: 2, strength: .46, opacity: 'semi-transparent' },
+  { id: 'transparent-earth-orange', name: 'Transparent Earth Orange', pigment: 'PY42/PR101', category: 'Earth', brands: 'Gamblin', h: '5YR', v: 3, c: 6, strength: .82, opacity: 'transparent' },
+  { id: 'cadmium-red-medium', name: 'Cadmium Red Medium', pigment: 'PR108', category: 'Red', brands: 'Gamblin · Winsor & Newton', h: '5R', v: 4, c: 16, strength: .88, opacity: 'opaque' },
+  { id: 'cadmium-red-deep', name: 'Cadmium Red Deep', pigment: 'PR108', category: 'Red', brands: 'Gamblin · Winsor & Newton', h: '2.5R', v: 3, c: 12, strength: .9, opacity: 'opaque' },
+  { id: 'permanent-red', name: 'Permanent Red', pigment: 'PR254', category: 'Red', brands: 'Winsor & Newton', h: '7.5R', v: 4, c: 16, strength: 1.04, opacity: 'semi-opaque' },
+  { id: 'quinacridone-red', name: 'Quinacridone Red', pigment: 'PV19', category: 'Red', brands: 'Gamblin', h: '10RP', v: 4, c: 14, strength: 1.08, opacity: 'transparent' },
+  { id: 'quinacridone-rose', name: 'Quinacridone Rose', pigment: 'PV19', category: 'Red', brands: 'Winsor & Newton', h: '2.5RP', v: 4, c: 12, strength: 1.08, opacity: 'transparent' },
+  { id: 'permanent-rose', name: 'Permanent Rose', pigment: 'PV19', category: 'Red', brands: 'Winsor & Newton', h: '5RP', v: 4, c: 12, strength: 1.05, opacity: 'transparent' },
+  { id: 'perylene-maroon', name: 'Perylene Maroon', pigment: 'PR179', category: 'Red', brands: 'Gamblin · Winsor & Newton', h: '10RP', v: 2, c: 6, strength: 1.12, opacity: 'transparent' },
+  { id: 'alizarin-crimson', name: 'Alizarin Crimson', pigment: 'PR83', category: 'Red', brands: 'Winsor & Newton', h: '10RP', v: 2, c: 8, strength: 1.04, opacity: 'transparent' },
+  { id: 'winsor-red', name: 'Winsor Red', pigment: 'PR255', category: 'Red', brands: 'Winsor & Newton', h: '7.5R', v: 4, c: 16, strength: 1.08, opacity: 'semi-transparent' },
+  { id: 'cobalt-violet', name: 'Cobalt Violet', pigment: 'PV14', category: 'Violet', brands: 'Gamblin · Winsor & Newton', h: '7.5P', v: 3, c: 10, strength: .58, opacity: 'semi-opaque' },
+  { id: 'manganese-violet', name: 'Manganese Violet', pigment: 'PV16', category: 'Violet', brands: 'Gamblin · Winsor & Newton', h: '10P', v: 3, c: 8, strength: .66, opacity: 'semi-opaque' },
+  { id: 'quinacridone-violet', name: 'Quinacridone Violet', pigment: 'PV19', category: 'Violet', brands: 'Gamblin', h: '10P', v: 3, c: 10, strength: 1.1, opacity: 'transparent' },
+  { id: 'radiant-violet', name: 'Radiant Violet', pigment: 'PW6/PV23', category: 'Violet', brands: 'Gamblin', h: '7.5P', v: 6, c: 8, strength: .62, opacity: 'opaque' },
+  { id: 'phthalo-blue-green', name: 'Phthalo Blue (Green Shade)', pigment: 'PB15:3', category: 'Blue', brands: 'Gamblin · Winsor & Newton', h: '10B', v: 2, c: 10, strength: 1.4, opacity: 'transparent' },
+  { id: 'prussian-blue', name: 'Prussian Blue', pigment: 'PB27', category: 'Blue', brands: 'Winsor & Newton', h: '5PB', v: 2, c: 6, strength: 1.22, opacity: 'transparent' },
+  { id: 'cerulean-blue-hue', name: 'Cerulean Blue Hue', pigment: 'PB15:3/PW6', category: 'Blue', brands: 'Gamblin · Winsor & Newton', h: '2.5PB', v: 5, c: 10, strength: .68, opacity: 'semi-opaque' },
+  { id: 'manganese-blue-hue', name: 'Manganese Blue Hue', pigment: 'PB15:3/PW6', category: 'Blue', brands: 'Gamblin', h: '7.5B', v: 5, c: 10, strength: .7, opacity: 'semi-transparent' },
+  { id: 'radiant-turquoise', name: 'Radiant Turquoise', pigment: 'PW6/PB15:3/PG7', category: 'Blue', brands: 'Gamblin', h: '5B', v: 7, c: 8, strength: .62, opacity: 'opaque' },
+  { id: 'kings-blue', name: 'King’s Blue', pigment: 'PW6/PB29', category: 'Blue', brands: 'Winsor & Newton', h: '5PB', v: 6, c: 8, strength: .58, opacity: 'opaque' },
+  { id: 'cobalt-turquoise', name: 'Cobalt Turquoise Light', pigment: 'PG50', category: 'Blue', brands: 'Winsor & Newton', h: '10BG', v: 6, c: 10, strength: .58, opacity: 'opaque' },
+  { id: 'indigo', name: 'Indigo', pigment: 'PB66/PBk6', category: 'Blue', brands: 'Winsor & Newton', h: '7.5PB', v: 1, c: 4, strength: 1.16, opacity: 'semi-transparent' },
+  { id: 'phthalo-green-yellow', name: 'Phthalo Green (Yellow Shade)', pigment: 'PG36', category: 'Green', brands: 'Gamblin · Winsor & Newton', h: '10G', v: 3, c: 10, strength: 1.34, opacity: 'transparent' },
+  { id: 'permanent-green-light', name: 'Permanent Green Light', pigment: 'PG7/PY74', category: 'Green', brands: 'Gamblin · Winsor & Newton', h: '5G', v: 6, c: 12, strength: .94, opacity: 'semi-transparent' },
+  { id: 'sap-green', name: 'Sap Green', pigment: 'PG36/PY110', category: 'Green', brands: 'Gamblin · Winsor & Newton', h: '5G', v: 3, c: 6, strength: .9, opacity: 'transparent' },
+  { id: 'olive-green', name: 'Olive Green', pigment: 'PBk6/PY42', category: 'Green', brands: 'Winsor & Newton', h: '10GY', v: 3, c: 4, strength: .78, opacity: 'semi-transparent' },
+  { id: 'cobalt-green', name: 'Cobalt Green', pigment: 'PG19', category: 'Green', brands: 'Winsor & Newton', h: '10G', v: 5, c: 8, strength: .58, opacity: 'semi-opaque' },
+  { id: 'radiant-green', name: 'Radiant Green', pigment: 'PW6/PG7/PY3', category: 'Green', brands: 'Gamblin', h: '5G', v: 7, c: 8, strength: .62, opacity: 'opaque' },
+  { id: 'terre-verte', name: 'Terre Verte', pigment: 'PG23', category: 'Green', brands: 'Winsor & Newton', h: '5G', v: 4, c: 2, strength: .46, opacity: 'semi-transparent' },
+  { id: 'phthalo-emerald', name: 'Phthalo Emerald', pigment: 'PG36', category: 'Green', brands: 'Gamblin', h: '7.5G', v: 3, c: 10, strength: 1.3, opacity: 'transparent' },
 ];
 
 function supportedHue(hue: string) {
@@ -102,7 +158,15 @@ export const PAINT_CATEGORIES: PaintCategory[] = ['White', 'Yellow', 'Orange', '
 export const PALETTE_PRESETS = {
   'Basic 8': ['titanium-white', 'hansa-yellow-medium', 'yellow-ochre', 'cadmium-red-light', 'transparent-earth-red', 'quinacridone-magenta', 'ultramarine-blue', 'phthalo-green'],
   'Figure 10': ['titanium-white', 'hansa-yellow-light', 'yellow-ochre', 'burnt-sienna', 'transparent-earth-red', 'cadmium-red-light', 'quinacridone-magenta', 'ultramarine-blue', 'cobalt-blue', 'viridian'],
-  'Full 30': SPECS.map((paint) => paint.id),
+  'Zorn 4': ['titanium-white', 'yellow-ochre', 'cadmium-red-light', 'ivory-black'],
+  'Iron Triad 4': ['titanium-white', 'prussian-blue', 'yellow-ochre', 'venetian-red'],
+  'UB + TRO + White': ['titanium-white', 'transparent-earth-red', 'ultramarine-blue'],
+  'French Impressionist 9': ['flake-white-replacement', 'cadmium-yellow-light', 'cadmium-yellow-medium', 'cadmium-red-light', 'alizarin-permanent', 'ultramarine-blue', 'cerulean-blue-hue', 'viridian', 'ivory-black'],
+  'Modern Chromatic 12': ['hansa-yellow-light', 'hansa-yellow-medium', 'hansa-yellow-deep', 'permanent-orange', 'naphthol-scarlet', 'quinacridone-red', 'quinacridone-violet', 'dioxazine-purple', 'phthalo-blue', 'manganese-blue-hue', 'phthalo-green', 'phthalo-emerald'],
+  'Rembrandt-inspired 9': ['titanium-white', 'yellow-ochre', 'raw-umber', 'burnt-sienna', 'venetian-red', 'indian-red', 'ultramarine-blue', 'green-earth', 'ivory-black'],
+  'CMY + B/W': ['titanium-white', 'ivory-black', 'hansa-yellow-medium', 'quinacridone-magenta', 'phthalo-blue-green'],
+  'RGB + B/W': ['titanium-white', 'ivory-black', 'cadmium-red-light', 'phthalo-green', 'ultramarine-blue'],
+  'Core 30': SPECS.slice(0, 30).map((paint) => paint.id),
 } as const;
 
 export const DEFAULT_PALETTE_IDS = [...PALETTE_PRESETS['Basic 8']];

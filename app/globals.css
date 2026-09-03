@@ -55,6 +55,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .quiet-button { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 10px 0 10px 14px; }
 .workspace { margin: 0 auto; max-width: 720px; padding: 20px 24px 40px; }
 .mode-row { align-items: center; display: flex; justify-content: space-between; margin-bottom: 18px; }
+.mobile-practice-controls { display: none; }
+.exercise-control-row { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 18px; justify-content: space-between; }
+.exercise-control-row .exercise-tabs { border-bottom: 0; flex: 1; }
+.exercise-control-row .value-display-toggle { flex: 0 0 auto; margin-bottom: 6px; margin-top: 0; }
 .segmented { background: rgba(29,29,27,.07); border-radius: 999px; display: flex; padding: 3px; }
 .segmented button { background: transparent; border: 0; border-radius: 999px; cursor: pointer; font-size: 13px; min-width: 78px; padding: 8px 14px; transition: background .18s ease, box-shadow .18s ease; }
 .segmented button.active { background: var(--panel); box-shadow: 0 1px 5px rgba(29,29,27,.09); font-weight: 650; }
@@ -269,8 +273,8 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .feedback-kicker { animation: prompt-arrive .34s cubic-bezier(.2,.75,.25,1) both; color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
 .feedback.correct .feedback-kicker { color: var(--correct); }
 .feedback-head strong { font-size: 22px; font-weight: 680; letter-spacing: -.03em; }
-.albers-compare { border: 1px solid rgba(255,255,255,.96); box-shadow: 0 0 0 1px rgba(29,29,27,.18); display: grid; height: 58px; place-items: center; width: 58px; }
-.albers-guess { border: 1px solid rgba(29,29,27,.82); display: block; height: 31px; width: 31px; }
+.albers-compare { border: 1px solid rgba(255,255,255,.96); box-shadow: 0 0 0 1px rgba(29,29,27,.18); height: 58px; position: relative; width: 58px; }
+.albers-guess { border: 1px solid rgba(29,29,27,.82); display: block; height: 31px; left: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 31px; }
 .feedback-guess { align-items: center; background: rgba(29,29,27,.045); border-radius: 9px; display: flex; justify-content: space-between; margin-top: 13px; padding: 10px 12px; }
 .feedback-guess span { color: var(--muted); font-size: 9px; letter-spacing: .07em; text-transform: uppercase; }
 .feedback-guess strong { font-size: 15px; font-weight: 680; }
@@ -514,20 +518,35 @@ button.chart-chip { cursor: pointer; }
   .top-actions { gap: 12px; }
   .top-actions button { font-size: 11px; }
   .quiet-button { padding-left: 0; }
-  .workspace { padding: 14px 16px 28px; }
-  .mode-row { align-items: flex-start; margin-bottom: 14px; }
+  .workspace { padding: 10px 16px 24px; }
+  .desktop-practice-controls { display: none; }
+  .mobile-practice-controls { align-items: end; display: grid; gap: 7px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; margin-bottom: 8px; }
+  .mobile-practice-controls label { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .mobile-practice-controls label > span { color: var(--muted); font-size: 8px; letter-spacing: .08em; padding-left: 8px; text-transform: uppercase; }
+  .mobile-practice-controls select { appearance: none; background: rgba(29,29,27,.065); border: 0; border-radius: 999px; color: var(--ink); font: inherit; font-size: 11px; font-weight: 650; height: 35px; min-width: 0; padding: 0 25px 0 11px; width: 100%; }
+  .mobile-practice-controls label { position: relative; }
+  .mobile-practice-controls label::after { color: var(--muted); content: '⌄'; font-size: 13px; pointer-events: none; position: absolute; right: 9px; top: 21px; }
+  .mobile-practice-controls .value-display-toggle { align-self: end; height: 35px; margin: 0; }
+  .mobile-practice-controls .value-display-toggle button { height: 31px; min-width: 39px; padding-inline: 7px; }
+  .mobile-question-count { align-items: center; color: var(--muted); display: flex; font-size: 10px; height: 35px; justify-content: center; min-width: 42px; }
   .display-segmented button { font-size: 10px; min-width: 54px; padding-inline: 9px; }
   .exercise-tabs { gap: 22px; }
-  .prompt-copy { padding-top: 14px; }
-  .swatch-stage { border-radius: 14px; min-height: min(30dvh, 250px); padding: 20px; }
+  .prompt-copy.standard-prompt { height: 0; overflow: hidden; padding: 0; }
+  .prompt-copy.contrast-prompt { padding: 8px 0; }
+  .swatch-stage { border-radius: 14px; min-height: min(28dvh, 232px); padding: 18px; }
   .swatch { max-width: 180px; width: 58%; }
-  .image-stage { border-radius: 14px; min-height: 260px; }
-  .image-stage canvas { max-height: 360px; }
+  .image-stage { border-radius: 14px; min-height: 210px; }
+  .image-stage canvas { max-height: min(40dvh, 306px); }
+  .image-caption { gap: 8px; padding-top: 6px; }
+  .image-caption span, .image-caption a { font-size: 8px; }
+  .image-caption span { max-width: 64%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .image-caption a { max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .family-hue-grid, .picker-grid.full, .picker-grid.family, .picker-grid.hue { gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .answer-picker.compact .picker { gap: 4px; padding-inline: calc(50% - 22px); }
   .answer-picker.compact .picker button { flex-basis: 44px; font-size: 12px; }
   .answer-picker.compact .picker-focus { left: calc(50% - 27px); width: 54px; }
-  .answer-panel { padding-top: 14px; }
+  .answer-panel { padding-top: 8px; }
+  .practice-action { margin-bottom: 8px; margin-top: 0; padding-block: 11px; }
   .answer-state.full { min-height: 174px; }
   .answer-state.family, .answer-state.hue { min-height: 92px; }
   .context-grid { gap: 4px; max-width: 228px; width: min(84%, 228px); }
