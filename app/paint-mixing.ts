@@ -167,6 +167,7 @@ export const PALETTE_PRESETS = {
   'CMY + B/W': ['titanium-white', 'ivory-black', 'hansa-yellow-medium', 'quinacridone-magenta', 'phthalo-blue-green'],
   'RGB + B/W': ['titanium-white', 'ivory-black', 'cadmium-red-light', 'phthalo-green', 'ultramarine-blue'],
   'Core 30': SPECS.slice(0, 30).map((paint) => paint.id),
+  'Full catalogue': SPECS.map((paint) => paint.id),
 } as const;
 
 export const DEFAULT_PALETTE_IDS = [...PALETTE_PRESETS['Basic 8']];
@@ -212,9 +213,11 @@ function combinations<T>(items: T[], size: number, start = 0, prefix: T[] = []):
 }
 
 function simplifyParts(parts: number[]) {
+  const rounded = parts.map((part) => Math.max(.5, Math.round(part * 2) / 2));
+  if (!rounded.every(Number.isInteger)) return rounded;
   const gcd = (a: number, b: number): number => b ? gcd(b, a % b) : a;
-  const divisor = parts.reduce((current, part) => gcd(current, part));
-  return parts.map((part) => part / Math.max(1, divisor));
+  const divisor = rounded.reduce((current, part) => gcd(current, part));
+  return rounded.map((part) => part / Math.max(1, divisor));
 }
 
 function evaluate(paints: PaintColor[], parts: number[], targetLab: number[]): Candidate {
@@ -237,30 +240,68 @@ export function suggestPaintRecipe(target: MunsellColor, selectedIds: string[]):
   if (!palette.length) return null;
 
   const targetLab = new Color(target.rgb).OKLab;
-  const singles = palette.map((paint) => evaluate([paint], [1], targetLab)).sort((a, b) => a.distance - b.distance);
+  // Product names stay distinct in the catalogue, while visually equivalent
+  // records share one search profile. This keeps an all-paints palette fast.
+  const uniquePalette = [...new Map(palette.map((paint) => [
+    `${paint.rgb.join(',')}:${paint.strength.toFixed(2)}:${paint.opacity}`,
+    paint,
+  ])).values()];
+  const singles = uniquePalette.map((paint) => evaluate([paint], [1], targetLab)).sort((a, b) => a.distance - b.distance);
   const candidates: Candidate[] = [...singles];
 
-  if (palette.length > 1) {
-    const pairParts = compositions(6, 2);
-    for (const pair of combinations(palette, 2)) {
+  const hueIndex = (hue?: string) => hue ? HUE_ORDER.indexOf(supportedHue(hue) as (typeof HUE_ORDER)[number]) : -1;
+  const circularDistance = (first: number, second: number) => {
+    if (first < 0 || second < 0) return HUE_ORDER.length;
+    const distance = Math.abs(first - second);
+    return Math.min(distance, HUE_ORDER.length - distance);
+  };
+  const targetHueIndex = hueIndex(target.h);
+  const complementIndex = targetHueIndex < 0 ? -1 : (targetHueIndex + HUE_ORDER.length / 2) % HUE_ORDER.length;
+  const paintFor = (candidate: Candidate) => uniquePalette.find((paint) => paint.id === candidate.ids[0]);
+  const orderedWorking: PaintColor[] = [];
+  const addWorking = (paint?: PaintColor) => {
+    if (paint && !orderedWorking.some((entry) => entry.id === paint.id)) orderedWorking.push(paint);
+  };
+
+  singles.slice(0, 12).forEach((candidate) => addWorking(paintFor(candidate)));
+  uniquePalette
+    .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), targetHueIndex) <= 3)
+    .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
+    .slice(0, 3)
+    .forEach(addWorking);
+  uniquePalette
+    .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), complementIndex) <= 2)
+    .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
+    .slice(0, 2)
+    .forEach(addWorking);
+  singles
+    .map((candidate) => paintFor(candidate))
+    .filter((paint): paint is PaintColor => Boolean(paint && (paint.category === 'White' || paint.category === 'Black')))
+    .slice(0, 3)
+    .forEach(addWorking);
+  const workingPalette = orderedWorking.slice(0, 20);
+
+  if (workingPalette.length > 1) {
+    const pairParts = Array.from({ length: 11 }, (_, index) => [(index + 1) / 2, (11 - index) / 2]);
+    for (const pair of combinations(workingPalette, 2)) {
       for (const parts of pairParts) candidates.push(evaluate(pair, parts, targetLab));
     }
   }
 
   const additiveIds = new Set(singles.slice(0, 8).flatMap((candidate) => candidate.ids));
   ['titanium-white', 'ivory-black'].forEach((id) => { if (selectedIds.includes(id)) additiveIds.add(id); });
-  const additives = palette.filter((paint) => additiveIds.has(paint.id));
+  const additives = workingPalette.filter((paint) => additiveIds.has(paint.id));
   const bestPairs = candidates.filter((candidate) => candidate.ids.length === 2).sort((a, b) => a.distance - b.distance).slice(0, 12);
   for (const pair of bestPairs) {
-    const pairPaints = pair.ids.map((id) => palette.find((paint) => paint.id === id)!);
+    const pairPaints = pair.ids.map((id) => workingPalette.find((paint) => paint.id === id)!);
     for (const additive of additives.filter((paint) => !pair.ids.includes(paint.id))) {
-      for (const amount of [1, 2]) candidates.push(evaluate([...pairPaints, additive], [...pair.parts, amount], targetLab));
+      for (const amount of [.5, 1, 2]) candidates.push(evaluate([...pairPaints, additive], [...pair.parts, amount], targetLab));
     }
   }
 
   const bestTriples = candidates.filter((candidate) => candidate.ids.length === 3).sort((a, b) => a.distance - b.distance).slice(0, 10);
   for (const triple of bestTriples) {
-    const triplePaints = triple.ids.map((id) => palette.find((paint) => paint.id === id)!);
+    const triplePaints = triple.ids.map((id) => workingPalette.find((paint) => paint.id === id)!);
     for (const additive of additives.slice(0, 6).filter((paint) => !triple.ids.includes(paint.id))) {
       candidates.push(evaluate([...triplePaints, additive], [...triple.parts, 1], targetLab));
     }
@@ -278,4 +319,47 @@ export function suggestPaintRecipe(target: MunsellColor, selectedIds: string[]):
     distance: practical.distance,
     quality: recipeQuality(practical.distance),
   };
+}
+
+export type PaintPathPoint = {
+  rgb: [number, number, number];
+  progress: number;
+  label: string;
+};
+
+function pathColor(paints: PaintColor[], weights: number[]) {
+  const active = paints
+    .map((paint, index) => [paint, weights[index]] as const)
+    .filter((entry) => entry[1] > 0);
+  const result = active.length === 1
+    ? spectralPaint(active[0][0])
+    : mix(...active.map(([paint, weight]) => [spectralPaint(paint), weight] as [Color, number]));
+  return result.sRGB.map((channel) => Math.max(0, Math.min(255, Math.round(channel)))) as [number, number, number];
+}
+
+export function recipeMixPath(recipe: PaintRecipe, steps = 13): PaintPathPoint[] {
+  const ingredients = [...recipe.ingredients].sort((a, b) => b.parts - a.parts);
+  const paints = ingredients.map((entry) => entry.paint);
+  return Array.from({ length: steps }, (_, index) => {
+    const progress = steps <= 1 ? 1 : index / (steps - 1);
+    const weights = ingredients.map((entry, ingredientIndex) => ingredientIndex === 0 ? entry.parts : entry.parts * progress);
+    return {
+      rgb: pathColor(paints, weights),
+      progress,
+      label: index === 0 ? paints[0].name : index === steps - 1 ? 'Recommended mix' : `${Math.round(progress * 100)}% additions`,
+    };
+  });
+}
+
+export function paintPairPath(firstId: string, secondId: string, steps = 13): PaintPathPoint[] {
+  const first = PAINTS.find((paint) => paint.id === firstId) ?? PAINTS[0];
+  const second = PAINTS.find((paint) => paint.id === secondId) ?? PAINTS[1];
+  return Array.from({ length: steps }, (_, index) => {
+    const progress = steps <= 1 ? 1 : index / (steps - 1);
+    return {
+      rgb: pathColor([first, second], [1 - progress, progress]),
+      progress,
+      label: `${Math.round((1 - progress) * 100)} / ${Math.round(progress * 100)}`,
+    };
+  });
 }
