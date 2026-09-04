@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsell-data';
 
-const FAMILIES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'] as const;
-type Family = (typeof FAMILIES)[number];
-type Study = 'harmony' | 'albers' | 'klee' | 'ostwald' | 'vanderpoel' | 'gartside';
+type Family = 'R' | 'YR' | 'Y' | 'GY' | 'G' | 'BG' | 'B' | 'PB' | 'P' | 'RP';
+type Study = 'harmony' | 'flow' | 'albers' | 'klee' | 'ostwald' | 'vanderpoel' | 'gartside';
 
 const STUDIES: { id: Study; name: string; eyebrow: string; description: string }[] = [
   { id: 'harmony', name: 'Munsell harmonies', eyebrow: 'Create and export', description: 'Build familiar harmony structures while keeping value and chroma visible. Every screen color resolves to a discrete Munsell chip that can be sent directly to Mix.' },
+  { id: 'flow', name: 'Color pond', eyebrow: 'Touch and watch', description: 'Drop bright Munsell colors into a field of white chips. Rings spread, overlap and slowly share color with their neighbors.' },
   { id: 'albers', name: 'Relativity', eyebrow: 'After Josef Albers', description: 'One identical square is nested inside two different grounds. The three-color study isolates how context changes appearance.' },
   { id: 'klee', name: 'Color movement', eyebrow: 'After Paul Klee', description: 'A field of stepped hue, value and chroma rhythms. Every transition is built from discrete Munsell chips.' },
   { id: 'ostwald', name: 'Complement field', eyebrow: 'After Wilhelm Ostwald', description: 'Diametrically opposed hues share a diamond field. White content rises, black content falls and chromatic strength moves toward either edge.' },
@@ -247,20 +247,20 @@ function downloadHarmony(colors: MunsellColor[]) {
   link.click();
 }
 
-function HarmonyStudy({ family, onSendToMixer }: { family: Family | 'Any'; onSendToMixer?: (color: MunsellColor) => void }) {
+function maxChromaFor(hue: string, value: number) {
+  return Math.max(2, ...MUNSELL_COLORS.filter((color) => color.h === hue && color.v === value).map((color) => color.c));
+}
+
+function HarmonyStudy({ onSendToMixer }: { onSendToMixer?: (color: MunsellColor) => void }) {
   const [harmony, setHarmony] = useState<Harmony>('split');
-  const [baseHue, setBaseHue] = useState('5YR');
+  const [baseHueIndex, setBaseHueIndex] = useState(Math.max(0, HUE_ORDER.indexOf('5YR')));
   const [value, setValue] = useState(6);
   const [chroma, setChroma] = useState(8);
   const definition = HARMONIES.find((entry) => entry.id === harmony) ?? HARMONIES[0];
-  const familyHues = family === 'Any' ? HUE_ORDER : HUE_ORDER.filter((hue) => hue.endsWith(family));
-
-  useEffect(() => {
-    if (!familyHues.includes(baseHue as (typeof HUE_ORDER)[number])) setBaseHue(familyHues[Math.floor(familyHues.length / 2)] ?? HUE_ORDER[0]);
-  }, [baseHue, familyHues]);
+  const baseHue = HUE_ORDER[baseHueIndex] ?? HUE_ORDER[0];
 
   const colors = useMemo(() => {
-    const base = HUE_ORDER.indexOf(baseHue as (typeof HUE_ORDER)[number]);
+    const base = HUE_ORDER.indexOf(baseHue);
     return definition.offsets.map((offset, index) => {
       const hue = HUE_ORDER[wrap(base + offset)];
       if (harmony === 'monochromatic') return closestChip(hue, Math.max(2, Math.min(8, value - 2 + index)), Math.max(2, chroma - Math.abs(2 - index) * 2));
@@ -279,16 +279,19 @@ function HarmonyStudy({ family, onSendToMixer }: { family: Family | 'Any'; onSen
         <div className="harmony-wheel" aria-label={`${definition.label} Munsell harmony`}>
           {colors.map((color, index) => {
             const hueIndex = HUE_ORDER.indexOf(color.h as (typeof HUE_ORDER)[number]);
-            return <button aria-label={`${notation(color)}, send to Mix`} key={`${notation(color)}-${index}`} onClick={() => onSendToMixer?.(color)} style={{ '--harmony-angle': `${hueIndex * 9}deg`, '--harmony-color': rgb(color) } as CSSProperties} title={`Send ${notation(color)} to Mix`} type="button" />;
+            const angle = hueIndex / HUE_ORDER.length * Math.PI * 2 - Math.PI / 2;
+            const radial = 11 + 37 * color.c / maxChromaFor(color.h, color.v);
+            return <button aria-label={`${notation(color)}, send to Mix`} key={`${notation(color)}-${index}`} onClick={() => onSendToMixer?.(color)} style={{ '--harmony-left': `${50 + Math.cos(angle) * radial}%`, '--harmony-top': `${50 + Math.sin(angle) * radial}%`, '--harmony-color': rgb(color) } as CSSProperties} title={`Send ${notation(color)} to Mix`} type="button" />;
           })}
-          <span><small>{definition.label}</small><strong>{baseHue}</strong></span>
+          <i className="harmony-axis horizontal" /><i className="harmony-axis vertical" />
+          <span><small>{definition.label}</small><strong>{baseHue}</strong><em>V{value} / C{chroma}</em></span>
         </div>
         <div className="harmony-controls">
           <div className="harmony-types">
             {HARMONIES.map((entry) => <button className={entry.id === harmony ? 'active' : ''} key={entry.id} onClick={() => setHarmony(entry.id)} type="button">{entry.label}</button>)}
           </div>
           <div className="harmony-sliders">
-            <label><span>Base hue</span><select onChange={(event) => setBaseHue(event.target.value)} value={baseHue}>{familyHues.map((hue) => <option key={hue}>{hue}</option>)}</select></label>
+            <label><span>Hue <strong>{baseHue}</strong></span><input aria-label="Base Munsell hue" max={HUE_ORDER.length - 1} min="0" onChange={(event) => setBaseHueIndex(Number(event.target.value))} type="range" value={baseHueIndex} /></label>
             <label><span>Value <strong>{value}</strong></span><input max="8" min="2" onChange={(event) => setValue(Number(event.target.value))} type="range" value={value} /></label>
             <label><span>Chroma <strong>{chroma}</strong></span><input max="12" min="2" onChange={(event) => setChroma(Number(event.target.value))} step="2" type="range" value={chroma} /></label>
           </div>
@@ -306,11 +309,128 @@ function HarmonyStudy({ family, onSendToMixer }: { family: Family | 'Any'; onSen
   );
 }
 
+const FLOW_COLUMNS = 100;
+const FLOW_ROWS = 60;
+const FLOW_CELL = 6;
+
+function FlowStudy() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const colorsRef = useRef<Float32Array | null>(null);
+  const dropsRef = useRef<{ x: number; y: number; rgb: [number, number, number]; born: number }[]>([]);
+  const draggingRef = useRef(false);
+  const lastDropRef = useRef(0);
+  const [hueIndex, setHueIndex] = useState(Math.max(0, HUE_ORDER.indexOf('5BG')));
+  const hue = HUE_ORDER[hueIndex] ?? HUE_ORDER[0];
+  const dropColor = useMemo(() => {
+    const candidates = MUNSELL_COLORS.filter((color) => color.h === hue);
+    return [...candidates].sort((a, b) => b.c - a.c || b.v - a.v)[0] ?? MUNSELL_COLORS[0];
+  }, [hue]);
+
+  const clear = useCallback(() => {
+    const field = new Float32Array(FLOW_COLUMNS * FLOW_ROWS * 3);
+    for (let index = 0; index < field.length; index += 3) {
+      field[index] = 246; field[index + 1] = 245; field[index + 2] = 240;
+    }
+    colorsRef.current = field;
+    dropsRef.current = [];
+  }, []);
+
+  useEffect(() => {
+    clear();
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext('2d');
+    if (!canvas || !context) return;
+    let frame = 0;
+    let lastFrame = 0;
+    let cancelled = false;
+    const render = (now: number) => {
+      if (cancelled) return;
+      frame = window.requestAnimationFrame(render);
+      if (now - lastFrame < 32) return;
+      lastFrame = now;
+      const field = colorsRef.current;
+      if (!field) return;
+      const liveDrops = dropsRef.current.filter((drop) => now - drop.born < 6200);
+      dropsRef.current = liveDrops;
+      liveDrops.forEach((drop) => {
+        const age = (now - drop.born) / 1000;
+        const ringRadius = age * 15;
+        const decay = Math.exp(-age * .27);
+        for (let row = 0; row < FLOW_ROWS; row++) for (let column = 0; column < FLOW_COLUMNS; column++) {
+          const distance = Math.hypot(column - drop.x, row - drop.y);
+          const ringDistance = (distance - ringRadius) / 2.8;
+          const ring = Math.exp(-(ringDistance ** 2)) * .12 * decay;
+          const wake = Math.max(0, 1 - distance / Math.max(5, ringRadius + 5)) * .008 * decay;
+          const influence = ring + wake;
+          if (influence < .0005) continue;
+          const offset = (row * FLOW_COLUMNS + column) * 3;
+          field[offset] += (drop.rgb[0] - field[offset]) * influence;
+          field[offset + 1] += (drop.rgb[1] - field[offset + 1]) * influence;
+          field[offset + 2] += (drop.rgb[2] - field[offset + 2]) * influence;
+        }
+      });
+      if (liveDrops.length && Math.round(now / 32) % 2 === 0) {
+        const source = field.slice();
+        for (let row = 1; row < FLOW_ROWS - 1; row++) for (let column = 1; column < FLOW_COLUMNS - 1; column++) {
+          const offset = (row * FLOW_COLUMNS + column) * 3;
+          for (let channel = 0; channel < 3; channel++) {
+            const average = (source[offset - 3 + channel] + source[offset + 3 + channel] + source[offset - FLOW_COLUMNS * 3 + channel] + source[offset + FLOW_COLUMNS * 3 + channel]) / 4;
+            field[offset + channel] += (average - field[offset + channel]) * .025;
+          }
+        }
+      }
+      context.fillStyle = '#eeede8';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      for (let row = 0; row < FLOW_ROWS; row++) for (let column = 0; column < FLOW_COLUMNS; column++) {
+        const offset = (row * FLOW_COLUMNS + column) * 3;
+        context.fillStyle = `rgb(${Math.round(field[offset])},${Math.round(field[offset + 1])},${Math.round(field[offset + 2])})`;
+        context.fillRect(column * FLOW_CELL, row * FLOW_CELL, FLOW_CELL - .7, FLOW_CELL - .7);
+      }
+    };
+    frame = window.requestAnimationFrame(render);
+    return () => { cancelled = true; window.cancelAnimationFrame(frame); };
+  }, [clear]);
+
+  const dropAt = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const now = performance.now();
+    if (now - lastDropRef.current < 70) return;
+    lastDropRef.current = now;
+    dropsRef.current = [...dropsRef.current.slice(-13), {
+      x: (event.clientX - rect.left) / rect.width * FLOW_COLUMNS,
+      y: (event.clientY - rect.top) / rect.height * FLOW_ROWS,
+      rgb: dropColor.rgb,
+      born: now,
+    }];
+  };
+
+  return (
+    <div className="flow-study">
+      <div className="flow-toolbar">
+        <label><span>Drop color <strong>{hue}</strong></span><input aria-label="Flow drop hue" max={HUE_ORDER.length - 1} min="0" onChange={(event) => setHueIndex(Number(event.target.value))} type="range" value={hueIndex} /></label>
+        <span className="flow-color" style={{ background: rgb(dropColor) }} title={notation(dropColor)} />
+        <button className="outline-button" onClick={clear} type="button">Clear</button>
+      </div>
+      <canvas
+        aria-label="Interactive color ripple field"
+        className="flow-canvas"
+        height={FLOW_ROWS * FLOW_CELL}
+        onPointerCancel={() => { draggingRef.current = false; }}
+        onPointerDown={(event) => { draggingRef.current = true; event.currentTarget.setPointerCapture(event.pointerId); dropAt(event); }}
+        onPointerMove={(event) => { if (draggingRef.current) dropAt(event); }}
+        onPointerUp={(event) => { draggingRef.current = false; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
+        ref={canvasRef}
+        width={FLOW_COLUMNS * FLOW_CELL}
+      />
+      <small className="flow-note">Tap or drag across the pond. New rings mingle with color already in the field.</small>
+    </div>
+  );
+}
+
 export default function StudioView({ onSendToMixer }: { onSendToMixer?: (color: MunsellColor) => void }) {
   const [study, setStudy] = useState<Study>('harmony');
-  const [family, setFamily] = useState<Family | 'Any'>('Any');
   const [seed, setSeed] = useState(4);
-  const colors = useMemo(() => paletteFor(family, seed), [family, seed]);
+  const colors = useMemo(() => paletteFor('Any', seed), [seed]);
   const current = STUDIES.find((entry) => entry.id === study) ?? STUDIES[0];
 
   return (
@@ -325,31 +445,23 @@ export default function StudioView({ onSendToMixer }: { onSendToMixer?: (color: 
         {STUDIES.map((entry) => <button className={study === entry.id ? 'active' : ''} key={entry.id} onClick={() => setStudy(entry.id)} type="button">{entry.id === 'vanderpoel' ? 'Vanderpoel' : entry.id === 'harmony' ? 'Harmonies' : entry.id[0].toUpperCase() + entry.id.slice(1)}</button>)}
       </nav>
 
-      <div className="studio-controls">
-        <label>
-          <span>Hue family</span>
-          <select value={family} onChange={(event) => setFamily(event.target.value as Family | 'Any')}>
-            <option value="Any">All families</option>
-            {FAMILIES.map((entry) => <option value={entry} key={entry}>{entry}</option>)}
-          </select>
-        </label>
-        {study !== 'harmony' && <button type="button" onClick={() => setSeed((currentSeed) => randomSeed(currentSeed))}>New variation</button>}
-      </div>
+      {study !== 'harmony' && study !== 'flow' && <div className="studio-controls single-action"><button type="button" onClick={() => setSeed((currentSeed) => randomSeed(currentSeed))}>New variation</button></div>}
 
       <article className="study-card">
         <header>
           <div><span className="eyebrow">{current.eyebrow}</span><h2>{current.name}</h2></div>
           <p>{current.description}</p>
         </header>
-        {study === 'harmony' && <HarmonyStudy family={family} onSendToMixer={onSendToMixer} />}
+        {study === 'harmony' && <HarmonyStudy onSendToMixer={onSendToMixer} />}
+        {study === 'flow' && <FlowStudy />}
         {study === 'albers' && <AlbersStudy colors={colors} />}
-        {study === 'klee' && <KleeStudy family={family} seed={seed} />}
-        {study === 'ostwald' && <OstwaldStudy family={family} seed={seed} />}
+        {study === 'klee' && <KleeStudy family="Any" seed={seed} />}
+        {study === 'ostwald' && <OstwaldStudy family="Any" seed={seed} />}
         {study === 'vanderpoel' && <VanderpoelStudy colors={colors} seed={seed} />}
         {study === 'gartside' && <GartsideStudy colors={colors} seed={seed} />}
         {study === 'albers' && <PaletteLegend colors={[colors[0], colors[1], colors[3]]} />}
         {['vanderpoel', 'gartside'].includes(study) && <PaletteLegend colors={colors} />}
-        <small className="study-method-note">Generated from discrete Munsell chips · representative notation shown in the palette</small>
+        {study !== 'flow' && <small className="study-method-note">Generated from discrete Munsell chips · representative notation shown in the palette</small>}
       </article>
     </section>
   );

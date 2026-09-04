@@ -14,6 +14,7 @@ import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, 
 import curatedImageData from './data/practice-images.json';
 import StudioView from './studio';
 import MixerView from './mixer';
+import ImageLab from './image-lab';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
@@ -37,7 +38,7 @@ const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CH
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
-type AppView = 'practice' | 'explore' | 'mix' | 'reference';
+type AppView = 'practice' | 'image' | 'mix' | 'explore' | 'reference';
 type SwatchPresentation = 'isolated' | 'context';
 type HuePresentation = 'swatch' | 'slice';
 type CompareDimension = 'value' | 'chroma' | 'hue';
@@ -453,11 +454,13 @@ function MobileChoiceRail<T extends string>({ label, value, options, open, hidde
   const current = options.find((option) => option.id === value) ?? options[0];
   return (
     <div className={`mobile-choice-rail ${open ? 'open' : ''} ${hidden ? 'hidden' : ''}`}>
-      <span>{label}</span>
-      <div>
-        {open ? options.map((option) => (
-          <button className={option.id === value ? 'active' : ''} key={option.id} onClick={() => onChange(option.id)} type="button">{option.label}</button>
-        )) : <button className="current" onClick={onToggle} type="button">{current.label}<i aria-hidden="true">›</i></button>}
+      <button aria-expanded={open} className="mobile-choice-trigger" onClick={onToggle} type="button">
+        <span>{label}</span><strong>{current.label}</strong><i aria-hidden="true">›</i>
+      </button>
+      <div className="mobile-choice-options" aria-label={`${label} options`}>
+        {options.map((option) => (
+          <button className={option.id === value ? 'active' : ''} key={option.id} onClick={() => onChange(option.id)} tabIndex={open ? 0 : -1} type="button">{option.label}</button>
+        ))}
       </div>
     </div>
   );
@@ -624,7 +627,7 @@ function chooseLocalSample(
     const globalSeparation = distance(mean, globalMean);
     const centerDistance = Math.hypot(x / width - 0.5, y / height - 0.5);
     const extremePenalty = mean[0] < 0.08 || mean[0] > 0.96 ? 0.02 : 0;
-    const centerWeight = subjectBiased ? 0.0036 : 0.0022;
+    const centerWeight = region ? 0.001 : subjectBiased ? 0.016 : 0.008;
     const saliencyReward = Math.min(localSeparation, 0.2) * 0.007 + Math.min(globalSeparation, 0.28) * 0.002;
     const score = variance + tonalRange ** 2 * 0.035 + centerDistance * centerWeight + extremePenalty - saliencyReward + Math.random() * 0.0003;
     candidates.push({ x, y, rgb, score });
@@ -645,9 +648,14 @@ function chooseLocalSample(
     color: nearestColor([127, 127, 127], IMAGE_COLOR_POOL),
   };
 
-  const valueOne = mapped.find((candidate) => candidate.color.v === 1);
-  const valueTwo = mapped.find((candidate) => candidate.color.v === 2);
-  const practical = mapped.find((candidate) => candidate.color.v >= 3);
+  const central = mapped.filter((candidate) => Math.hypot(
+    (candidate.x / width - .5) / .47,
+    (candidate.y / height - .5) / .42,
+  ) <= 1);
+  const selectionPool = !region && central.length >= 4 && Math.random() < .78 ? central : mapped;
+  const valueOne = selectionPool.find((candidate) => candidate.color.v === 1);
+  const valueTwo = selectionPool.find((candidate) => candidate.color.v === 2);
+  const practical = selectionPool.find((candidate) => candidate.color.v >= 3);
 
   if (allowValueOne && valueOne) selected = valueOne;
   else if (valueTwo && Math.random() < VALUE_TWO_CHANCE) selected = valueTwo;
@@ -776,19 +784,19 @@ function HueMissMap({ target, guess }: { target: string; guess: string }) {
 function ComparisonMap({ question, choice }: { question: CompareQuestion; choice: number }) {
   if (question.dimension === 'hue') {
     const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
+    const answerHueIndex = HUE_ORDER.indexOf(question.colors[question.correctIndex].h as (typeof HUE_ORDER)[number]);
+    const guessHueIndex = HUE_ORDER.indexOf(question.colors[choice].h as (typeof HUE_ORDER)[number]);
+    const rawDelta = answerHueIndex - guessHueIndex;
+    const delta = rawDelta > HUE_ORDER.length / 2 ? rawDelta - HUE_ORDER.length : rawDelta < -HUE_ORDER.length / 2 ? rawDelta + HUE_ORDER.length : rawDelta;
+    const steps = Math.abs(delta);
     return (
       <div className="comparison-map hue" aria-label="Correct and selected colors mapped around the Munsell hue wheel">
         <div className="mini-hue-wheel" aria-hidden="true">
           {HUE_EDGE_COLORS.map((color, index) => (
             <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
           ))}
-          {question.colors.map((color, index) => (index === question.correctIndex || index === choice) && (
-            <span
-              className={`comparison-map-marker ${index === question.correctIndex ? 'answer' : ''} ${index === choice ? 'guess' : ''}`}
-              key={`${color.h}-${index}`}
-              style={{ '--position': position(HUE_ORDER.indexOf(color.h as (typeof HUE_ORDER)[number])) } as CSSProperties}
-            >{index + 1}</span>
-          ))}
+          <span className="comparison-map-marker answer travelling" style={{ '--from-position': position(guessHueIndex), '--to-position': position(guessHueIndex + delta), '--travel-duration': steps <= 2 ? '760ms' : '500ms', '--travel-delay': steps <= 2 ? '150ms' : '20ms' } as CSSProperties}>{question.correctIndex + 1}</span>
+          <span className="comparison-map-marker guess" style={{ '--position': position(guessHueIndex) } as CSSProperties}>{choice + 1}</span>
         </div>
         <div className="comparison-map-copy">
           <span>Correct / your choice</span>
@@ -804,21 +812,15 @@ function ComparisonMap({ question, choice }: { question: CompareQuestion; choice
   const low = Math.max(question.dimension === 'value' ? 1 : 0, Math.min(...values) - step);
   const high = Math.min(question.dimension === 'value' ? 9 : PRACTICE_CHROMA_MAX, Math.max(...values) + step);
   const position = (value: number) => `${((value - low) / Math.max(step, high - low)) * 100}%`;
+  const answerValue = question.dimension === 'value' ? question.colors[question.correctIndex].v : question.colors[question.correctIndex].c;
+  const guessValue = question.dimension === 'value' ? question.colors[choice].v : question.colors[choice].c;
+  const missedSteps = Math.abs(answerValue - guessValue) / step;
   return (
     <div className="comparison-map axis" aria-label={`Correct and selected colors mapped by ${question.dimension}`}>
       <div className="comparison-axis">
         <span className="comparison-axis-line" />
-        {question.colors.map((color, index) => {
-          if (index !== question.correctIndex && index !== choice) return null;
-          const value = question.dimension === 'value' ? color.v : color.c;
-          return (
-            <span
-              className={`comparison-axis-marker ${index === question.correctIndex ? 'answer' : ''} ${index === choice ? 'guess' : ''}`}
-              key={`${notation(color)}-${index}`}
-              style={{ left: position(value) }}
-            >{index + 1}</span>
-          );
-        })}
+        <span className="comparison-axis-marker answer travelling" style={{ '--from-left': position(guessValue), left: position(answerValue), '--travel-duration': missedSteps <= 1 ? '720ms' : '480ms', '--travel-delay': missedSteps <= 1 ? '140ms' : '20ms' } as CSSProperties}>{question.correctIndex + 1}</span>
+        <span className="comparison-axis-marker guess" style={{ left: position(guessValue) }}>{choice + 1}</span>
         <small className="axis-low">{low}</small>
         <small className="axis-high">{high}</small>
       </div>
@@ -1191,21 +1193,16 @@ function ReferenceView() {
         <p>Rotate the wheel and the hue page follows the chip crossing the top marker. Value rises vertically; chroma moves outward from neutral.</p>
       </div>
 
-      <HueWheel value={hue} onChange={changeHue} />
-
-      <div className="reference-readout" aria-live="polite">
-        <div>
-          <span>Selected chip</span>
-          <strong>{notation(selectedChip)}</strong>
+      <div className="reference-workbench">
+        <div className="reference-wheel-column">
+          <HueWheel value={hue} onChange={changeHue} />
+          <div className="reference-readout" aria-live="polite">
+            <div><span>Selected chip</span><strong>{notation(selectedChip)}</strong></div>
+            <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
+            <div><span>Hue practice</span><strong>Highest in-gamut chroma</strong></div>
+          </div>
         </div>
-        <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
-        <div>
-          <span>Hue practice</span>
-          <strong>Highest in-gamut chroma</strong>
-        </div>
-      </div>
-
-      <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
+        <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
         <div className="hue-page-head">
           <div><span className="eyebrow">Constant hue</span><h2>{hue}</h2></div>
           <span>Practice C2–C12 · extended chips included</span>
@@ -1235,7 +1232,8 @@ function ReferenceView() {
             ))}
           </div>
         </div>
-      </section>
+        </section>
+      </div>
     </section>
   );
 }
@@ -1288,9 +1286,10 @@ export default function Home() {
 
   useEffect(() => {
     startedAt.current = Date.now();
-    setTarget(VALUE_TRAINING_POOL[Math.floor(Math.random() * VALUE_TRAINING_POOL.length)] ?? INITIAL_VALUE_COLOR);
+    const targetTimer = window.setTimeout(() => setTarget(VALUE_TRAINING_POOL[Math.floor(Math.random() * VALUE_TRAINING_POOL.length)] ?? INITIAL_VALUE_COLOR), 0);
     readAttempts().then(setAttempts).catch(() => undefined);
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    return () => window.clearTimeout(targetTimer);
   }, []);
 
   const changeSelectedPaints = useCallback((ids: string[]) => {
@@ -1689,10 +1688,12 @@ export default function Home() {
           <span className="brand-mark" aria-hidden="true" />
           <span>Munsell Eye</span>
         </div>
+        <button aria-label="Open paint palette" className="palette-access" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }} title="Paint palette" type="button"><i /><i /><i /></button>
         <nav className="top-actions" aria-label="App sections">
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
-          <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
+          <button className={view === 'image' ? 'active' : ''} onClick={() => setView('image')} type="button">Image</button>
           <button className={view === 'mix' ? 'active' : ''} onClick={() => setView('mix')} type="button">Mix</button>
+          <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
@@ -1737,7 +1738,7 @@ export default function Home() {
           <MobileChoiceRail<string>
             hidden={mobileRail === 'view'}
             label="Skill"
-            onChange={(next) => { exercise === 'compare' ? changeCompareDimension(next as CompareDimension) : changeExercise(next as Exercise); setMobileRail(null); }}
+            onChange={(next) => { if (exercise === 'compare') changeCompareDimension(next as CompareDimension); else changeExercise(next as Exercise); setMobileRail(null); }}
             onToggle={() => setMobileRail((current) => current === 'skill' ? null : 'skill')}
             open={mobileRail === 'skill'}
             options={exercise === 'compare'
@@ -1870,7 +1871,7 @@ export default function Home() {
                 </div>
               </section>
             )}
-            {lastCompareTarget && lastCompareRecipe && compareChoice !== null && (
+            {lastCompareTarget && lastCompareRecipe && compareChoice !== null && compareChoice !== compareQuestion.correctIndex && (
               <div className="contrast-recipe">
                 <PaintRecipeCard target={lastCompareTarget} recipe={lastCompareRecipe} paletteSize={selectedPaintIds.length} />
               </div>
@@ -1929,10 +1930,12 @@ export default function Home() {
         </section>
         )}
         </section>
-      ) : view === 'explore' ? (
-        <StudioView onSendToMixer={openMixerWith} />
+      ) : view === 'image' ? (
+        <div className="image-view-shell"><ImageLab onSendToMixer={openMixerWith} selectedPaintIds={selectedPaintIds} /></div>
       ) : view === 'mix' ? (
         <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />
+      ) : view === 'explore' ? (
+        <StudioView onSendToMixer={openMixerWith} />
       ) : (
         <ReferenceView />
       )}

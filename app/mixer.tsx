@@ -10,9 +10,7 @@ import {
   type PaintPathPoint,
   type PaintRecipe,
 } from './paint-mixing';
-import ImageLab from './image-lab';
-
-type MixerMode = 'target' | 'image' | 'path';
+type MixerMode = 'target' | 'path';
 type RGB = [number, number, number];
 
 const rgbCss = (rgb: RGB) => `rgb(${rgb.join(',')})`;
@@ -151,10 +149,16 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
   const [firstPaint, setFirstPaint] = useState(selectedPaintIds[0] ?? PAINTS[0].id);
   const [secondPaint, setSecondPaint] = useState(selectedPaintIds[1] ?? PAINTS[1].id);
 
-  useEffect(() => { setTarget(initialTarget); }, [initialTarget]);
   useEffect(() => {
-    if (!selectedPaintIds.includes(firstPaint)) setFirstPaint(selectedPaintIds[0] ?? PAINTS[0].id);
-    if (!selectedPaintIds.includes(secondPaint) || firstPaint === secondPaint) setSecondPaint(selectedPaintIds.find((id) => id !== firstPaint) ?? selectedPaintIds[0] ?? PAINTS[1].id);
+    const timer = window.setTimeout(() => setTarget(initialTarget), 0);
+    return () => window.clearTimeout(timer);
+  }, [initialTarget]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (!selectedPaintIds.includes(firstPaint)) setFirstPaint(selectedPaintIds[0] ?? PAINTS[0].id);
+      if (!selectedPaintIds.includes(secondPaint) || firstPaint === secondPaint) setSecondPaint(selectedPaintIds.find((id) => id !== firstPaint) ?? selectedPaintIds[0] ?? PAINTS[1].id);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [firstPaint, secondPaint, selectedPaintIds]);
 
   const recipe = useMemo(() => suggestPaintRecipe(deferredTarget, selectedPaintIds), [deferredTarget, selectedPaintIds]);
@@ -168,8 +172,6 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
     setTarget(nearestChip(rgb));
   };
 
-  const sendImageColor = (color: MunsellColor) => { setTarget(color); setMode('target'); };
-
   return (
     <section className="mixer-view" aria-labelledby="mixer-title">
       <div className="reference-intro mixer-intro">
@@ -180,14 +182,14 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
 
       <div className="mixer-nav-row">
         <nav className="study-tabs mixer-tabs" aria-label="Mix workspace">
-          {([['target', 'Find a mix'], ['image', 'Image block-in'], ['path', 'Explore a path']] as const).map(([id, label]) => (
+          {([['target', 'Find a mix'], ['path', 'Explore a path']] as const).map(([id, label]) => (
             <button className={mode === id ? 'active' : ''} key={id} onClick={() => setMode(id)} type="button">{label}</button>
                    ))}
         </nav>
         <button className="palette-setting" onClick={onOpenPalette} type="button"><span>{paletteLabel}</span><strong>Change</strong></button>
       </div>
 
-      {mode === 'image' ? <ImageLab selectedPaintIds={selectedPaintIds} onSendToMixer={sendImageColor} /> : mode === 'path' ? (
+      {mode === 'path' ? (
         <section className="path-workspace">
           <header>
             <div><span className="eyebrow">Two-paint path</span><h2>See what happens between the tubes</h2></div>
