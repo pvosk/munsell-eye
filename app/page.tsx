@@ -1705,8 +1705,8 @@ export default function Home() {
             {([
               { id: 'isolated', label: 'Swatch' },
               { id: 'context', label: 'Context' },
-              { id: 'image', label: 'Image' },
               { id: 'contrast', label: 'Contrast' },
+              { id: 'image', label: 'Image' },
             ] as const).map((mode) => (
               <button
                 className={presentation === mode.id ? 'active' : ''}
@@ -1731,7 +1731,7 @@ export default function Home() {
             onChange={(next) => { changePresentation(next as SwatchPresentation | 'image' | 'contrast'); setMobileRail(null); }}
             onToggle={() => setMobileRail((current) => current === 'view' ? null : 'view')}
             open={mobileRail === 'view'}
-            options={[{ id: 'isolated', label: 'Swatch' }, { id: 'context', label: 'Context' }, { id: 'image', label: 'Image' }, { id: 'contrast', label: 'Contrast' }]}
+            options={[{ id: 'isolated', label: 'Swatch' }, { id: 'context', label: 'Context' }, { id: 'contrast', label: 'Contrast' }, { id: 'image', label: 'Image' }]}
             value={presentation}
           />
           <MobileChoiceRail<string>
