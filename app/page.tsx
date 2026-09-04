@@ -13,6 +13,7 @@ import {
 import { clearAttempts, readAttempts, saveAttempt, type Attempt, type Exercise, type SourceMode } from './progress-db';
 import curatedImageData from './data/practice-images.json';
 import StudioView from './studio';
+import MixerView from './mixer';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
@@ -36,7 +37,7 @@ const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CH
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
-type AppView = 'practice' | 'studio' | 'reference';
+type AppView = 'practice' | 'explore' | 'mix' | 'reference';
 type SwatchPresentation = 'isolated' | 'context';
 type HuePresentation = 'swatch' | 'slice';
 type CompareDimension = 'value' | 'chroma' | 'hue';
@@ -440,6 +441,28 @@ function HuePickers({ value, onChange, compact = false }: {
   );
 }
 
+function MobileChoiceRail<T extends string>({ label, value, options, open, hidden, onToggle, onChange }: {
+  label: string;
+  value: T;
+  options: readonly { id: T; label: string }[];
+  open: boolean;
+  hidden?: boolean;
+  onToggle: () => void;
+  onChange: (value: T) => void;
+}) {
+  const current = options.find((option) => option.id === value) ?? options[0];
+  return (
+    <div className={`mobile-choice-rail ${open ? 'open' : ''} ${hidden ? 'hidden' : ''}`}>
+      <span>{label}</span>
+      <div>
+        {open ? options.map((option) => (
+          <button className={option.id === value ? 'active' : ''} key={option.id} onClick={() => onChange(option.id)} type="button">{option.label}</button>
+        )) : <button className="current" onClick={onToggle} type="button">{current.label}<i aria-hidden="true">›</i></button>}
+      </div>
+    </div>
+  );
+}
+
 function rgbToOklab(rgb: [number, number, number]) {
   const linear = rgb.map((channel) => {
     const value = channel / 255;
@@ -728,13 +751,18 @@ function HueMissMap({ target, guess }: { target: string; guess: string }) {
   const targetIndex = Math.max(0, HUE_ORDER.indexOf(target as (typeof HUE_ORDER)[number]));
   const guessIndex = Math.max(0, HUE_ORDER.indexOf(guess as (typeof HUE_ORDER)[number]));
   const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
+  const rawDelta = targetIndex - guessIndex;
+  const signedDelta = Math.abs(rawDelta) <= HUE_ORDER.length / 2
+    ? rawDelta
+    : rawDelta > 0 ? rawDelta - HUE_ORDER.length : rawDelta + HUE_ORDER.length;
+  const travelPosition = `${(guessIndex + signedDelta) * (360 / HUE_ORDER.length)}deg`;
   return (
     <div className="hue-miss-map" aria-label={`Correct hue ${target}; guessed ${guess}`}>
       <div className="mini-hue-wheel" aria-hidden="true">
         {HUE_EDGE_COLORS.map((color, index) => (
           <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
         ))}
-        <span className="hue-miss-marker answer" style={{ '--position': position(targetIndex) } as CSSProperties} />
+        <span className="hue-miss-marker answer travelling" style={{ '--from-position': position(guessIndex), '--to-position': travelPosition } as CSSProperties} />
         <span className="hue-miss-marker guess" style={{ '--position': position(guessIndex) } as CSSProperties} />
       </div>
       <div className="hue-miss-legend">
@@ -848,16 +876,22 @@ function createCompareQuestion(dimension: CompareDimension): CompareQuestion {
     return shuffledComparison(moreChromatic ? 'Which color is more chromatic?' : 'Which color is more neutral?', colors, correct, 'chroma');
   }
 
-  const familyIndex = Math.floor(Math.random() * BASIC_HUES.length);
-  const family = BASIC_HUES[familyIndex];
-  const correctHue = `5${family}`;
-  const center = HUE_ORDER.indexOf(correctHue as (typeof HUE_ORDER)[number]);
-  const offsets = [-3, -1, 0, 2];
+  const center = Math.floor(Math.random() * HUE_ORDER.length);
+  const correctHue = HUE_ORDER[center];
+  const family = familyOf(correctHue);
+  const patterns = [
+    [-4, -1, 0, 2],   // flanked
+    [0, 1, 3, 6],     // answer at the beginning of the arc
+    [-7, -4, -2, 0],  // answer at the end of the arc
+    [0, 6, 8, 10],    // answer outside a close cluster
+    [-5, -2, 0, 1],   // asymmetric close interval
+  ];
+  const offsets = patterns[Math.floor(Math.random() * patterns.length)];
   const colors = offsets
     .map((offset) => nearestNotationColor(HUE_ORDER[wrapIndex(center + offset, HUE_ORDER.length)], 5, 6))
     .filter((color): color is MunsellColor => Boolean(color));
   const correct = colors.find((color) => color.h === correctHue) ?? colors[0];
-  return shuffledComparison(`Which color is closest to ${HUE_FAMILY_NAMES[family]}?`, colors, correct, 'hue');
+  return shuffledComparison(`Which color is closest to ${correctHue} ${HUE_FAMILY_NAMES[family]}?`, colors, correct, 'hue');
 }
 
 function HueSlice({ hue }: { hue: string }) {
@@ -901,9 +935,9 @@ function AlbersComparison({ correct, guess }: { correct: MunsellColor; guess: Mu
 
 function PaintRecipeCard({ target, recipe, paletteSize }: { target: MunsellColor; recipe: PaintRecipe | null; paletteSize: number }) {
   if (!recipe) return null;
-  const outside = recipe.quality === 'Outside palette gamut';
+  const formatParts = (parts: number) => parts === .5 ? '½' : Number.isInteger(parts) ? String(parts) : parts.toFixed(1);
   return (
-    <section className={`paint-recipe ${outside ? 'outside' : ''}`} aria-label="Suggested oil paint mixture">
+    <section className="paint-recipe" aria-label="Suggested oil paint mixture">
       <div className="paint-recipe-head">
         <div>
           <span className="feedback-kicker">From your {paletteSize}-paint palette</span>
@@ -919,13 +953,13 @@ function PaintRecipeCard({ target, recipe, paletteSize }: { target: MunsellColor
           <li key={paint.id}>
             <i style={{ background: `rgb(${paint.rgb.join(',')})` }} />
             <span>{paint.name}<small>{paint.pigment}</small></span>
-            <strong>{parts} {parts === 1 ? 'part' : 'parts'}</strong>
+            <strong>{formatParts(parts)} {parts === 1 ? 'part' : 'parts'}</strong>
           </li>
         ))}
       </ol>
       <div className="recipe-foot">
-        <strong>{recipe.quality}</strong>
-        <span>{outside ? 'This palette cannot reach the target hue exactly; this is its nearest useful direction.' : 'Practical starting estimate. Adjust by eye for your paint film, brand, and light.'}</span>
+        <strong>Closest from this palette</strong>
+        <span>Practical starting estimate. Adjust by eye for your paint film, brand, and light.</span>
       </div>
     </section>
   );
@@ -1215,6 +1249,7 @@ export default function Home() {
   const [valueMonochrome, setValueMonochrome] = useState(false);
   const [familyHue, setFamilyHue] = useState('5BG');
   const [target, setTarget] = useState<MunsellColor>(INITIAL_VALUE_COLOR);
+  const [mixerTarget, setMixerTarget] = useState<MunsellColor>(INITIAL_VALUE_COLOR);
   const [imagePrompt, setImagePrompt] = useState<ImagePrompt>(ACTIVE_IMAGE_BANK[0] ?? IMAGE_PROMPTS[0]);
   const [imageReady, setImageReady] = useState(true);
   const [allowValueOneImageTarget, setAllowValueOneImageTarget] = useState(false);
@@ -1236,6 +1271,8 @@ export default function Home() {
     dimension: 'value',
   }));
   const [compareChoice, setCompareChoice] = useState<number | null>(null);
+  const [lastCompareTarget, setLastCompareTarget] = useState<MunsellColor | null>(null);
+  const [mobileRail, setMobileRail] = useState<'view' | 'skill' | null>(null);
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const compareAdvanceTimer = useRef<number | undefined>(undefined);
@@ -1251,6 +1288,7 @@ export default function Home() {
 
   useEffect(() => {
     startedAt.current = Date.now();
+    setTarget(VALUE_TRAINING_POOL[Math.floor(Math.random() * VALUE_TRAINING_POOL.length)] ?? INITIAL_VALUE_COLOR);
     readAttempts().then(setAttempts).catch(() => undefined);
     if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') navigator.serviceWorker.register('/sw.js').catch(() => undefined);
   }, []);
@@ -1433,6 +1471,7 @@ export default function Home() {
       responseMs: Date.now() - startedAt.current,
     };
     setCompareChoice(index);
+    setLastCompareTarget(correct);
     setStreak((current) => exact ? current + 1 : 0);
     setAttempts((current) => [...current, attempt].slice(-600));
     if (exact) {
@@ -1596,6 +1635,10 @@ export default function Home() {
     () => submitted ? suggestPaintRecipe(target, selectedPaintIds) : null,
     [selectedPaintIds, submitted, target],
   );
+  const lastCompareRecipe = useMemo(
+    () => lastCompareTarget ? suggestPaintRecipe(lastCompareTarget, selectedPaintIds) : null,
+    [lastCompareTarget, selectedPaintIds],
+  );
 
   const statistics = useMemo(() => {
     const total = attempts.length;
@@ -1632,6 +1675,13 @@ export default function Home() {
       : null,
   ].filter((message): message is string => Boolean(message)) : [];
 
+  const openMixerWith = (color: MunsellColor) => {
+    setMixerTarget(color);
+    setPaletteOpen(false);
+    setProgressOpen(false);
+    setView('mix');
+  };
+
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -1641,9 +1691,9 @@ export default function Home() {
         </div>
         <nav className="top-actions" aria-label="App sections">
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
+          <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
+          <button className={view === 'mix' ? 'active' : ''} onClick={() => setView('mix')} type="button">Mix</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
-          <button className={view === 'studio' ? 'active' : ''} onClick={() => setView('studio')} type="button">Studio</button>
-          <button className={paletteOpen ? 'active' : ''} type="button" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }}>Palette</button>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
       </header>
@@ -1655,8 +1705,8 @@ export default function Home() {
             {([
               { id: 'isolated', label: 'Swatch' },
               { id: 'context', label: 'Context' },
-              { id: 'image', label: 'Image' },
               { id: 'contrast', label: 'Contrast' },
+              { id: 'image', label: 'Image' },
             ] as const).map((mode) => (
               <button
                 className={presentation === mode.id ? 'active' : ''}
@@ -1674,41 +1724,38 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mobile-practice-controls" aria-label="Practice controls">
-          <label>
-            <span>View</span>
-            <select value={presentation} onChange={(event) => changePresentation(event.target.value as SwatchPresentation | 'image' | 'contrast')}>
-              <option value="isolated">Swatch</option>
-              <option value="context">Context</option>
-              <option value="image">Image</option>
-              <option value="contrast">Contrast</option>
-            </select>
-          </label>
-          <label>
-            <span>Skill</span>
-            {exercise === 'compare' ? (
-              <select value={compareDimension} onChange={(event) => changeCompareDimension(event.target.value as CompareDimension)}>
-                <option value="value">Value</option>
-                <option value="hue">Hue</option>
-                <option value="chroma">Chroma</option>
-              </select>
-            ) : (
-              <select value={exercise} onChange={(event) => changeExercise(event.target.value as Exercise)}>
-                {exerciseOptions.map(([mode, label]) => <option key={mode} value={mode}>{label}</option>)}
-              </select>
-            )}
-          </label>
+        <div className={`mobile-practice-controls ${mobileRail ? 'has-expanded' : ''}`} aria-label="Practice controls">
+          <MobileChoiceRail<string>
+            hidden={mobileRail === 'skill'}
+            label="View"
+            onChange={(next) => { changePresentation(next as SwatchPresentation | 'image' | 'contrast'); setMobileRail(null); }}
+            onToggle={() => setMobileRail((current) => current === 'view' ? null : 'view')}
+            open={mobileRail === 'view'}
+            options={[{ id: 'isolated', label: 'Swatch' }, { id: 'context', label: 'Context' }, { id: 'contrast', label: 'Contrast' }, { id: 'image', label: 'Image' }]}
+            value={presentation}
+          />
+          <MobileChoiceRail<string>
+            hidden={mobileRail === 'view'}
+            label="Skill"
+            onChange={(next) => { exercise === 'compare' ? changeCompareDimension(next as CompareDimension) : changeExercise(next as Exercise); setMobileRail(null); }}
+            onToggle={() => setMobileRail((current) => current === 'skill' ? null : 'skill')}
+            open={mobileRail === 'skill'}
+            options={exercise === 'compare'
+              ? [{ id: 'value', label: 'Value' }, { id: 'hue', label: 'Hue' }, { id: 'chroma', label: 'Chroma' }]
+              : exerciseOptions.map(([id, label]) => ({ id, label }))}
+            value={exercise === 'compare' ? compareDimension : exercise}
+          />
           {exercise === 'value' ? (
-            <div className="segmented value-display-toggle" aria-label="Value question appearance">
+            <div className={`segmented value-display-toggle ${mobileRail ? 'mobile-toggle-hidden' : ''}`} aria-label="Value question appearance">
               <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
               <button className={valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(true)} type="button">B&amp;W</button>
             </div>
           ) : exercise === 'hue' && source === 'swatch' ? (
-            <div className="segmented value-display-toggle" aria-label="Hue question appearance">
+            <div className={`segmented value-display-toggle ${mobileRail ? 'mobile-toggle-hidden' : ''}`} aria-label="Hue question appearance">
               <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
               <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
             </div>
-          ) : <span className="mobile-question-count">#{sessionCount}</span>}
+          ) : <span className={`mobile-question-count ${mobileRail ? 'mobile-toggle-hidden' : ''}`}>#{sessionCount}</span>}
         </div>
 
         <div className="exercise-control-row desktop-practice-controls">
@@ -1823,6 +1870,11 @@ export default function Home() {
                 </div>
               </section>
             )}
+            {lastCompareTarget && lastCompareRecipe && compareChoice !== null && (
+              <div className="contrast-recipe">
+                <PaintRecipeCard target={lastCompareTarget} recipe={lastCompareRecipe} paletteSize={selectedPaintIds.length} />
+              </div>
+            )}
           </div>
         ) : (
         <section className="answer-panel" aria-label="Your answer" ref={answerPanelRef}>
@@ -1877,7 +1929,13 @@ export default function Home() {
         </section>
         )}
         </section>
-      ) : view === 'studio' ? <StudioView /> : <ReferenceView />}
+      ) : view === 'explore' ? (
+        <StudioView onSendToMixer={openMixerWith} />
+      ) : view === 'mix' ? (
+        <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />
+      ) : (
+        <ReferenceView />
+      )}
 
       {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
