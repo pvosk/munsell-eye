@@ -191,18 +191,14 @@ function spectralPaint(paint: PaintColor) {
 }
 
 function perceptualDistance(first: number[], second: number[]) {
+  const firstChroma = Math.hypot(first[1], first[2]);
+  const secondChroma = Math.hypot(second[1], second[2]);
   return Math.sqrt(
-    (first[0] - second[0]) ** 2 * 1.15
+    (first[0] - second[0]) ** 2 * 1.3
     + (first[1] - second[1]) ** 2
-    + (first[2] - second[2]) ** 2,
+    + (first[2] - second[2]) ** 2
+    + (firstChroma - secondChroma) ** 2 * .35,
   );
-}
-
-function compositions(total: number, count: number, prefix: number[] = []): number[][] {
-  if (count === 1) return [[...prefix, total]];
-  const rows: number[][] = [];
-  for (let value = 1; value <= total - count + 1; value++) rows.push(...compositions(total - value, count - 1, [...prefix, value]));
-  return rows;
 }
 
 function combinations<T>(items: T[], size: number, start = 0, prefix: T[] = []): T[][] {
@@ -221,11 +217,12 @@ function simplifyParts(parts: number[]) {
 }
 
 function evaluate(paints: PaintColor[], parts: number[], targetLab: number[]): Candidate {
+  const practicalParts = simplifyParts(parts);
   const result = paints.length === 1
     ? spectralPaint(paints[0])
-    : mix(...paints.map((paint, index) => [spectralPaint(paint), parts[index]] as [Color, number]));
+    : mix(...paints.map((paint, index) => [spectralPaint(paint), practicalParts[index]] as [Color, number]));
   const rgb = result.sRGB.map((channel) => Math.max(0, Math.min(255, Math.round(channel)))) as [number, number, number];
-  return { ids: paints.map((paint) => paint.id), parts: simplifyParts(parts), rgb, distance: perceptualDistance(result.OKLab, targetLab) };
+  return { ids: paints.map((paint) => paint.id), parts: practicalParts, rgb, distance: perceptualDistance(result.OKLab, targetLab) };
 }
 
 function recipeQuality(distance: number): PaintRecipe['quality'] {
@@ -263,52 +260,92 @@ export function suggestPaintRecipe(target: MunsellColor, selectedIds: string[]):
     if (paint && !orderedWorking.some((entry) => entry.id === paint.id)) orderedWorking.push(paint);
   };
 
-  singles.slice(0, 12).forEach((candidate) => addWorking(paintFor(candidate)));
-  uniquePalette
-    .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), targetHueIndex) <= 3)
-    .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
-    .slice(0, 3)
-    .forEach(addWorking);
-  uniquePalette
-    .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), complementIndex) <= 2)
-    .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
-    .slice(0, 2)
-    .forEach(addWorking);
-  singles
-    .map((candidate) => paintFor(candidate))
-    .filter((paint): paint is PaintColor => Boolean(paint && (paint.category === 'White' || paint.category === 'Black')))
-    .slice(0, 3)
-    .forEach(addWorking);
-  const workingPalette = orderedWorking.slice(0, 20);
+  let workingPalette: PaintColor[];
+  if (uniquePalette.length <= 30) {
+    // A normal studio palette is small enough to search as a whole. This avoids
+    // losing an unintuitive but useful neutralizer before recipe evaluation.
+    workingPalette = uniquePalette;
+  } else {
+    singles.slice(0, 10).forEach((candidate) => addWorking(paintFor(candidate)));
+    const versatileCore = new Set<string>([
+      ...PALETTE_PRESETS['Basic 8'],
+      ...PALETTE_PRESETS['Figure 10'],
+    ]);
+    uniquePalette.filter((paint) => versatileCore.has(paint.id)).forEach(addWorking);
+    uniquePalette
+      .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), targetHueIndex) <= 3)
+      .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
+      .slice(0, 4)
+      .forEach(addWorking);
+    uniquePalette
+      .filter((paint) => paint.h && circularDistance(hueIndex(paint.h), complementIndex) <= 2)
+      .sort((a, b) => (b.c ?? 0) - (a.c ?? 0))
+      .slice(0, 3)
+      .forEach(addWorking);
+    singles
+      .map((candidate) => paintFor(candidate))
+      .filter((paint): paint is PaintColor => Boolean(paint && (paint.category === 'White' || paint.category === 'Black')))
+      .slice(0, 3)
+      .forEach(addWorking);
+    workingPalette = orderedWorking.slice(0, 30);
+  }
 
-  if (workingPalette.length > 1) {
+  const searchMixtures = (mixPalette: PaintColor[], mixAdditives: PaintColor[]) => {
+    const pairCandidates: Candidate[] = [];
     const pairParts = Array.from({ length: 11 }, (_, index) => [(index + 1) / 2, (11 - index) / 2]);
-    for (const pair of combinations(workingPalette, 2)) {
-      for (const parts of pairParts) candidates.push(evaluate(pair, parts, targetLab));
+    for (const pair of combinations(mixPalette, 2)) {
+      for (const parts of pairParts) {
+        const candidate = evaluate(pair, parts, targetLab);
+        pairCandidates.push(candidate);
+        candidates.push(candidate);
+      }
     }
-  }
 
-  const additiveIds = new Set(singles.slice(0, 8).flatMap((candidate) => candidate.ids));
+    const tripleCandidates: Candidate[] = [];
+    const bestPairs = pairCandidates.sort((a, b) => a.distance - b.distance).slice(0, 96);
+    for (const pair of bestPairs) {
+      const pairPaints = pair.ids.map((id) => mixPalette.find((paint) => paint.id === id)!);
+      for (const additive of mixAdditives.filter((paint) => !pair.ids.includes(paint.id))) {
+        for (const amount of [.5, 1, 2]) {
+          const candidate = evaluate([...pairPaints, additive], [...pair.parts, amount], targetLab);
+          tripleCandidates.push(candidate);
+          candidates.push(candidate);
+        }
+      }
+    }
+
+    for (const triple of tripleCandidates.sort((a, b) => a.distance - b.distance).slice(0, 12)) {
+      const triplePaints = triple.ids.map((id) => mixPalette.find((paint) => paint.id === id)!);
+      for (const additive of mixAdditives.slice(0, 8).filter((paint) => !triple.ids.includes(paint.id))) {
+        candidates.push(evaluate([...triplePaints, additive], [...triple.parts, 1], targetLab));
+      }
+    }
+  };
+
+  const additiveIds = new Set(singles.slice(0, 10).flatMap((candidate) => candidate.ids));
+  workingPalette
+    .filter((paint) => paint.h && (
+      circularDistance(hueIndex(paint.h), targetHueIndex) <= 3
+      || circularDistance(hueIndex(paint.h), complementIndex) <= 2
+    ))
+    .forEach((paint) => additiveIds.add(paint.id));
   ['titanium-white', 'ivory-black'].forEach((id) => { if (selectedIds.includes(id)) additiveIds.add(id); });
-  const additives = workingPalette.filter((paint) => additiveIds.has(paint.id));
-  const bestPairs = candidates.filter((candidate) => candidate.ids.length === 2).sort((a, b) => a.distance - b.distance).slice(0, 12);
-  for (const pair of bestPairs) {
-    const pairPaints = pair.ids.map((id) => workingPalette.find((paint) => paint.id === id)!);
-    for (const additive of additives.filter((paint) => !pair.ids.includes(paint.id))) {
-      for (const amount of [.5, 1, 2]) candidates.push(evaluate([...pairPaints, additive], [...pair.parts, amount], targetLab));
-    }
-  }
+  const additives = uniquePalette.length <= 30 ? workingPalette : workingPalette.filter((paint) => additiveIds.has(paint.id));
+  if (workingPalette.length > 1) searchMixtures(workingPalette, additives);
 
-  const bestTriples = candidates.filter((candidate) => candidate.ids.length === 3).sort((a, b) => a.distance - b.distance).slice(0, 10);
-  for (const triple of bestTriples) {
-    const triplePaints = triple.ids.map((id) => workingPalette.find((paint) => paint.id === id)!);
-    for (const additive of additives.slice(0, 6).filter((paint) => !triple.ids.includes(paint.id))) {
-      candidates.push(evaluate([...triplePaints, additive], [...triple.parts, 1], targetLab));
-    }
+  if (uniquePalette.length > 30) {
+    // Keep the large catalogue monotonic with the established core: adding
+    // paints should never make the best available route worse.
+    const coreIds = new Set(PALETTE_PRESETS['Core 30']);
+    const corePalette = uniquePalette.filter((paint) => coreIds.has(paint.id));
+    if (corePalette.length > 1) searchMixtures(corePalette, corePalette);
   }
 
   const closest = [...candidates].sort((a, b) => a.distance - b.distance)[0];
-  const tolerance = Math.max(.012, closest.distance * .18);
+  // Prefer a simpler recipe only when its perceptual loss is small enough to be
+  // practically invisible. The previous, wider band could hide a better
+  // yellow/green/white route behind a visibly poorer two-paint result.
+  const tolerance = Math.min(.0045, Math.max(.0015, closest.distance * .07));
   const practical = candidates
     .filter((candidate) => candidate.distance <= closest.distance + tolerance)
     .sort((a, b) => a.ids.length - b.ids.length || a.distance - b.distance)[0] ?? closest;
