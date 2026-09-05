@@ -466,6 +466,8 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 button.chart-chip { cursor: pointer; }
 .chart-chip.selected { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--ink); position: relative; z-index: 2; }
 .chart-chip.empty { background: rgba(29,29,27,.025); border-style: dashed; }
+.reference-hue-chart .chart-chip { transition: background-color .16s ease, border-color .16s ease, opacity .16s ease; }
+.reference-hue-chart .chart-chip.empty { background: transparent; border-color: transparent; opacity: 0; pointer-events: none; }
 
 .studio-view { margin: 0 auto; max-width: 1040px; padding: 48px 24px 72px; }
 .studio-intro { margin-bottom: 26px; }
