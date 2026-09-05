@@ -17,7 +17,6 @@ import MixerView from './mixer';
 import ImageLab from './image-lab';
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
-const HUE_NUMBERS = ['2.5', '5', '7.5', '10'];
 const HUE_FAMILY_NAMES: Record<string, string> = {
   R: 'red', YR: 'yellow-red', Y: 'yellow', GY: 'green-yellow', G: 'green',
   BG: 'blue-green', B: 'blue', PB: 'purple-blue', P: 'purple', RP: 'red-purple',
@@ -28,6 +27,7 @@ const VALUE_ONE_CHANCE = 1 / 30;
 const VALUE_ONE_COOLDOWN = 29;
 const VALUE_TWO_CHANCE = 0.16;
 const ALL_CHROMA_OPTIONS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
+const DEFAULT_CHROMA = '6';
 const REFERENCE_CHROMAS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 + 1 }, (_, index) => index * 2);
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
@@ -121,7 +121,6 @@ function initialPaletteIds() {
 }
 
 const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
-const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
 const rgbCss = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 
@@ -134,6 +133,12 @@ function chromaOptionsFor(hue: string, value?: number) {
 
 function nearestChromaOption(options: readonly string[], preferred = 6) {
   return [...options].sort((a, b) => Math.abs(Number(a) - preferred) - Math.abs(Number(b) - preferred))[0] ?? '2';
+}
+
+function stableChromaOption(options: readonly string[]) {
+  if (options.includes(DEFAULT_CHROMA)) return DEFAULT_CHROMA;
+  if (options.includes('4')) return '4';
+  return nearestChromaOption(options, Number(DEFAULT_CHROMA));
 }
 
 function maximumChroma(options: readonly string[]) {
@@ -446,19 +451,11 @@ function Picker({ label, options, value, onChange, compact = false }: {
   );
 }
 
-function HuePickers({ value, onChange, compact = false }: {
+function HuePicker({ value, onChange }: {
   value: string;
   onChange: (value: string) => void;
-  compact?: boolean;
 }) {
-  const family = familyOf(value);
-  const number = numberOf(value);
-  return (
-    <>
-      <Picker label="Hue family" options={BASIC_HUES} value={family} onChange={(next) => onChange(`${number}${next}`)} compact={compact} />
-      <Picker label="Hue number" options={HUE_NUMBERS} value={number} onChange={(next) => onChange(`${next}${family}`)} compact={compact} />
-    </>
-  );
+  return <Picker label="Hue" options={HUE_ORDER} value={value} onChange={onChange} />;
 }
 
 function MobileChoiceRail<T extends string>({ label, value, options, open, compressed, onToggle, onChange }: {
@@ -1416,11 +1413,11 @@ export default function Home() {
       recentTargetKeys.current = [...recentTargetKeys.current, targetKey(nextTarget, nextExercise)].slice(-16);
       setTarget(nextTarget);
       if (nextExercise === 'chroma') {
-        setChromaAnswer(nearestChromaOption(chromaOptionsFor(nextTarget.h, nextTarget.v)));
+        setChromaAnswer(stableChromaOption(chromaOptionsFor(nextTarget.h, nextTarget.v)));
       } else if (nextExercise === 'family') {
-        setChromaAnswer(nearestChromaOption(chromaOptionsFor(nextFamilyHue, 5)));
+        setChromaAnswer(stableChromaOption(chromaOptionsFor(nextFamilyHue, 5)));
       } else if (nextExercise === 'full') {
-        setChromaAnswer(nearestChromaOption(chromaOptionsFor('5BG', 5)));
+        setChromaAnswer(stableChromaOption(chromaOptionsFor('5BG', 5)));
       }
       setImageReady(true);
     }
@@ -1491,7 +1488,7 @@ export default function Home() {
       recentImageTargetValues.current = [...recentImageTargetValues.current, color.v].slice(-(VALUE_ONE_COOLDOWN + 1));
     }
     setTarget(color);
-    if (exercise === 'chroma') setChromaAnswer(nearestChromaOption(chromaOptionsFor(color.h, color.v)));
+    if (exercise === 'chroma') setChromaAnswer(stableChromaOption(chromaOptionsFor(color.h, color.v)));
     setImageReady(true);
   }, [exercise, imagePrompt.id, sessionCount, setChromaAnswer]);
 
@@ -1505,7 +1502,7 @@ export default function Home() {
     setAnswerH(next);
     if (exercise === 'full') {
       const options = chromaOptionsFor(next, Number(answerVLive.current));
-      if (!options.includes(answerCLive.current)) setChromaAnswer(nearestChromaOption(options, Number(answerCLive.current)));
+      if (!options.includes(answerCLive.current)) setChromaAnswer(stableChromaOption(options));
     }
   }, [exercise, setChromaAnswer]);
 
@@ -1515,7 +1512,7 @@ export default function Home() {
     if (exercise === 'full' || exercise === 'family') {
       const hue = exercise === 'family' ? familyHue : answerHLive.current;
       const options = chromaOptionsFor(hue, Number(next));
-      if (!options.includes(answerCLive.current)) setChromaAnswer(nearestChromaOption(options, Number(answerCLive.current)));
+      if (!options.includes(answerCLive.current)) setChromaAnswer(stableChromaOption(options));
     }
   }, [exercise, familyHue, setChromaAnswer]);
 
@@ -1878,7 +1875,7 @@ export default function Home() {
         {exercise === 'family' && (
           <div className="family-control">
             <div className="family-hue-grid">
-              <HuePickers value={familyHue} onChange={changeFamilyHue} />
+              <HuePicker value={familyHue} onChange={changeFamilyHue} />
             </div>
             <small>All valid V1–V9 chips across this hue’s full in-gamut chroma range.</small>
           </div>
@@ -1978,7 +1975,7 @@ export default function Home() {
               <>
                 <p>Your answer</p>
                 <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
-                  {(exercise === 'hue' || exercise === 'full') && <HuePickers value={answerH} onChange={changeAnswerH} compact={exercise === 'full'} />}
+                  {(exercise === 'hue' || exercise === 'full') && <HuePicker value={answerH} onChange={changeAnswerH} />}
                   {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={changeAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
                   {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={chromaPickerOptions} value={answerC} onChange={changeAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
                 </div>
