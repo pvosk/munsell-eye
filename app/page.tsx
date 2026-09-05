@@ -23,18 +23,18 @@ const HUE_FAMILY_NAMES: Record<string, string> = {
   BG: 'blue-green', B: 'blue', PB: 'purple-blue', P: 'purple', RP: 'red-purple',
 };
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
-const PRACTICE_CHROMA_MAX = 12;
+const MAX_MUNSELL_CHROMA = Math.max(...MUNSELL_COLORS.map((color) => color.c));
 const VALUE_ONE_CHANCE = 1 / 30;
 const VALUE_ONE_COOLDOWN = 29;
 const VALUE_TWO_CHANCE = 0.16;
-const CHROMA_OPTIONS = Array.from({ length: PRACTICE_CHROMA_MAX / 2 }, (_, index) => String((index + 1) * 2));
+const ALL_CHROMA_OPTIONS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
   return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
 }).filter((color): color is MunsellColor => Boolean(color));
 const HUE_TRAINING_POOL = HUE_EDGE_COLORS;
-const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8 && color.c <= 12);
-const IMAGE_COLOR_POOL = MUNSELL_COLORS.filter((color) => color.c <= PRACTICE_CHROMA_MAX);
+const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8);
+const IMAGE_COLOR_POOL = MUNSELL_COLORS;
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
@@ -124,6 +124,21 @@ const numberOf = (hue: string) => hue.match(/[\d.]+/)?.[0] ?? '5';
 const rgbCss = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 
+function chromaOptionsFor(hue: string, value?: number) {
+  const exact = MUNSELL_COLORS.filter((color) => color.h === hue && (value === undefined || color.v === value));
+  const candidates = exact.length ? exact : MUNSELL_COLORS.filter((color) => color.h === hue);
+  const options = [...new Set(candidates.map((color) => color.c))].sort((a, b) => a - b).map(String);
+  return options.length ? options : ALL_CHROMA_OPTIONS;
+}
+
+function nearestChromaOption(options: readonly string[], preferred = 6) {
+  return [...options].sort((a, b) => Math.abs(Number(a) - preferred) - Math.abs(Number(b) - preferred))[0] ?? '2';
+}
+
+function maximumChroma(options: readonly string[]) {
+  return Number(options[options.length - 1] ?? 2);
+}
+
 function hueDistance(a: string, b: string) {
   const ai = HUE_ORDER.indexOf(a as (typeof HUE_ORDER)[number]);
   const bi = HUE_ORDER.indexOf(b as (typeof HUE_ORDER)[number]);
@@ -180,7 +195,10 @@ function chooseTrainingTarget(pool: MunsellColor[], exercise: Exercise, attempts
   const keys = availableKeys.length ? availableKeys : [...groups.keys()];
   const key = weightedChoice(keys, (entry) => {
     const members = groups.get(entry) ?? [];
-    return members.length ? members.reduce((sum, color) => sum + weaknessWeight(color, exercise, attempts), 0) / members.length : 1;
+    return members.length ? members.reduce((sum, color) => {
+      const chromaExposure = exercise === 'full' || exercise === 'family' ? 1 + color.c / MAX_MUNSELL_CHROMA * .65 : 1;
+      return sum + weaknessWeight(color, exercise, attempts) * chromaExposure;
+    }, 0) / members.length : 1;
   });
   const members = groups.get(key) ?? pool;
   return members[Math.floor(Math.random() * members.length)];
@@ -810,7 +828,7 @@ function ComparisonMap({ question, choice }: { question: CompareQuestion; choice
   const values = question.colors.map((color) => question.dimension === 'value' ? color.v : color.c);
   const step = question.dimension === 'value' ? 1 : 2;
   const low = Math.max(question.dimension === 'value' ? 1 : 0, Math.min(...values) - step);
-  const high = Math.min(question.dimension === 'value' ? 9 : PRACTICE_CHROMA_MAX, Math.max(...values) + step);
+  const high = Math.min(question.dimension === 'value' ? 9 : MAX_MUNSELL_CHROMA, Math.max(...values) + step);
   const position = (value: number) => `${((value - low) / Math.max(step, high - low)) * 100}%`;
   const answerValue = question.dimension === 'value' ? question.colors[question.correctIndex].v : question.colors[question.correctIndex].c;
   const guessValue = question.dimension === 'value' ? question.colors[choice].v : question.colors[choice].c;
@@ -1205,7 +1223,7 @@ function ReferenceView() {
         <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
         <div className="hue-page-head">
           <div><span className="eyebrow">Constant hue</span><h2>{hue}</h2></div>
-          <span>Practice C2–C12 · extended chips included</span>
+          <span>Full in-gamut range · up to C{MAX_MUNSELL_CHROMA}</span>
         </div>
         <div className="hue-chart-scroll">
           <div className="hue-chart" style={{ '--chart-columns': chromas.length } as CSSProperties}>
@@ -1312,16 +1330,20 @@ export default function Home() {
     });
   }, [imagePrompt]);
 
+  const setChromaAnswer = useCallback((next: string) => {
+    answerCLive.current = next;
+    setAnswerC(next);
+  }, []);
+
   const resetAnswer = useCallback(() => {
     answerHLive.current = '5BG';
     answerVLive.current = '5';
-    answerCLive.current = '6';
     setAnswerH('5BG');
     setAnswerV('5');
-    setAnswerC('6');
+    setChromaAnswer('6');
     setSubmitted(null);
     startedAt.current = Date.now();
-  }, []);
+  }, [setChromaAnswer]);
 
   const nextQuestion = useCallback((nextSource = source, nextExercise = exercise, nextFamilyHue = familyHue, nextCompareDimension = compareDimension) => {
     resetAnswer();
@@ -1356,9 +1378,16 @@ export default function Home() {
       const nextTarget = chooseTrainingTarget(pool, nextExercise, attempts, blocked);
       recentTargetKeys.current = [...recentTargetKeys.current, targetKey(nextTarget, nextExercise)].slice(-16);
       setTarget(nextTarget);
+      if (nextExercise === 'chroma') {
+        setChromaAnswer(nearestChromaOption(chromaOptionsFor(nextTarget.h, nextTarget.v)));
+      } else if (nextExercise === 'family') {
+        setChromaAnswer(nearestChromaOption(chromaOptionsFor(nextFamilyHue, 5)));
+      } else if (nextExercise === 'full') {
+        setChromaAnswer(nearestChromaOption(chromaOptionsFor('5BG', 5)));
+      }
       setImageReady(true);
     }
-  }, [attempts, compareDimension, exercise, familyHue, imagePrompt.id, resetAnswer, source]);
+  }, [attempts, compareDimension, exercise, familyHue, imagePrompt.id, resetAnswer, setChromaAnswer, source]);
 
   const presentation: SwatchPresentation | 'image' | 'contrast' = exercise === 'compare' ? 'contrast' : source === 'image' ? 'image' : swatchPresentation;
 
@@ -1425,8 +1454,9 @@ export default function Home() {
       recentImageTargetValues.current = [...recentImageTargetValues.current, color.v].slice(-(VALUE_ONE_COOLDOWN + 1));
     }
     setTarget(color);
+    if (exercise === 'chroma') setChromaAnswer(nearestChromaOption(chromaOptionsFor(color.h, color.v)));
     setImageReady(true);
-  }, [exercise, imagePrompt.id, sessionCount]);
+  }, [exercise, imagePrompt.id, sessionCount, setChromaAnswer]);
 
   const handleImageError = useCallback(() => {
     setImageReady(false);
@@ -1436,17 +1466,25 @@ export default function Home() {
   const changeAnswerH = useCallback((next: string) => {
     answerHLive.current = next;
     setAnswerH(next);
-  }, []);
+    if (exercise === 'full') {
+      const options = chromaOptionsFor(next, Number(answerVLive.current));
+      if (!options.includes(answerCLive.current)) setChromaAnswer(nearestChromaOption(options, Number(answerCLive.current)));
+    }
+  }, [exercise, setChromaAnswer]);
 
   const changeAnswerV = useCallback((next: string) => {
     answerVLive.current = next;
     setAnswerV(next);
-  }, []);
+    if (exercise === 'full' || exercise === 'family') {
+      const hue = exercise === 'family' ? familyHue : answerHLive.current;
+      const options = chromaOptionsFor(hue, Number(next));
+      if (!options.includes(answerCLive.current)) setChromaAnswer(nearestChromaOption(options, Number(answerCLive.current)));
+    }
+  }, [exercise, familyHue, setChromaAnswer]);
 
   const changeAnswerC = useCallback((next: string) => {
-    answerCLive.current = next;
-    setAnswerC(next);
-  }, []);
+    setChromaAnswer(next);
+  }, [setChromaAnswer]);
 
   const chooseComparison = async (index: number) => {
     if (compareChoice !== null) return;
@@ -1589,6 +1627,13 @@ export default function Home() {
           : exercise === 'compare'
             ? compareQuestion.prompt
             : 'Identify hue, value & chroma';
+  const chromaPickerOptions = useMemo(() => {
+    if (exercise === 'chroma') return chromaOptionsFor(target.h, target.v);
+    if (exercise === 'family') return chromaOptionsFor(familyHue, Number(answerV));
+    if (exercise === 'full') return chromaOptionsFor(answerH, Number(answerV));
+    return ALL_CHROMA_OPTIONS;
+  }, [answerH, answerV, exercise, familyHue, target.h, target.v]);
+  const chromaRange = `C2–C${maximumChroma(chromaPickerOptions)}`;
   const resolvedAnswerH = submitted?.answerH ?? answerH;
   const resolvedAnswerV = String(submitted?.answerV ?? answerV);
   const resolvedAnswerC = String(submitted?.answerC ?? answerC);
@@ -1791,7 +1836,7 @@ export default function Home() {
             <div className="family-hue-grid">
               <HuePickers value={familyHue} onChange={changeFamilyHue} />
             </div>
-            <small>All valid V1–V9 chips through C12 in this hue.</small>
+            <small>All valid V1–V9 chips across this hue’s full in-gamut chroma range.</small>
           </div>
         )}
 
@@ -1800,7 +1845,7 @@ export default function Home() {
             <span>{promptText}</span>
           </div>
           <div className="prompt-settings">
-            <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? huePresentation === 'slice' ? '40 HUE SLICES' : '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · C2–C12` : exercise === 'full' ? 'H / V / C · C2–C12' : exercise === 'compare' ? '4 CLOSE CHIPS' : 'C2–C12'}</span>
+            <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? huePresentation === 'slice' ? '40 HUE SLICES' : '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · ${chromaRange}` : exercise === 'full' ? `${answerH} V${answerV} · ${chromaRange}` : exercise === 'compare' ? '4 CLOSE CHIPS' : chromaRange}</span>
           </div>
         </div>
 
@@ -1891,7 +1936,7 @@ export default function Home() {
                 <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
                   {(exercise === 'hue' || exercise === 'full') && <HuePickers value={answerH} onChange={changeAnswerH} compact={exercise === 'full'} />}
                   {(exercise === 'value' || exercise === 'family' || exercise === 'full') && <Picker label="Value" options={VALUE_OPTIONS} value={answerV} onChange={changeAnswerV} compact={exercise === 'full' || exercise === 'family'} />}
-                  {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={CHROMA_OPTIONS} value={answerC} onChange={changeAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
+                  {(exercise === 'chroma' || exercise === 'family' || exercise === 'full') && <Picker label="Chroma" options={chromaPickerOptions} value={answerC} onChange={changeAnswerC} compact={exercise === 'full' || exercise === 'family'} />}
                 </div>
               </>
             ) : submitted.exact ? (
