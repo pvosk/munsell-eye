@@ -484,6 +484,39 @@ function MobileChoiceRail<T extends string>({ label, value, options, open, compr
   );
 }
 
+const APP_SECTIONS: readonly { id: AppView; label: string }[] = [
+  { id: 'practice', label: 'Practice' },
+  { id: 'image', label: 'Image' },
+  { id: 'mix', label: 'Mix' },
+  { id: 'explore', label: 'Explore' },
+  { id: 'reference', label: 'Reference' },
+];
+
+function MobileSectionNav({ view, open, onToggle, onChange, onProgress }: {
+  view: AppView;
+  open: boolean;
+  onToggle: () => void;
+  onChange: (view: AppView) => void;
+  onProgress: () => void;
+}) {
+  const current = APP_SECTIONS.find((section) => section.id === view) ?? APP_SECTIONS[0];
+  return (
+    <div className={`mobile-section-nav ${open ? 'open' : ''}`} onBlur={(event) => {
+      if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) onToggle();
+    }}>
+      <button aria-controls="mobile-section-menu" aria-expanded={open} className="mobile-section-trigger" onClick={onToggle} type="button">
+        <strong>{current.label}</strong><i aria-hidden="true">›</i>
+      </button>
+      <nav aria-hidden={!open} aria-label="App sections" className="mobile-section-options" id="mobile-section-menu">
+        {APP_SECTIONS.map((section) => (
+          <button className={section.id === view ? 'active' : ''} key={section.id} onClick={() => onChange(section.id)} tabIndex={open ? 0 : -1} type="button">{section.label}</button>
+        ))}
+        <button onClick={onProgress} tabIndex={open ? 0 : -1} type="button">Progress</button>
+      </nav>
+    </div>
+  );
+}
+
 function rgbToOklab(rgb: [number, number, number]) {
   const linear = rgb.map((channel) => {
     const value = channel / 255;
@@ -1289,6 +1322,7 @@ export default function Home() {
   const [compareChoice, setCompareChoice] = useState<number | null>(null);
   const [lastCompareTarget, setLastCompareTarget] = useState<MunsellColor | null>(null);
   const [mobileRail, setMobileRail] = useState<'view' | 'skill' | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const startedAt = useRef(0);
   const answerPanelRef = useRef<HTMLElement>(null);
   const compareAdvanceTimer = useRef<number | undefined>(undefined);
@@ -1742,6 +1776,13 @@ export default function Home() {
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
+        <MobileSectionNav
+          onChange={(next) => { setView(next); setMobileNavOpen(false); setPaletteOpen(false); setProgressOpen(false); }}
+          onProgress={() => { setMobileNavOpen(false); setPaletteOpen(false); setProgressOpen(true); }}
+          onToggle={() => setMobileNavOpen((current) => !current)}
+          open={mobileNavOpen}
+          view={view}
+        />
       </header>
 
       {view === 'practice' ? (
