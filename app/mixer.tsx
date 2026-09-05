@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeferredValue, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsell-data';
 import {
   PAINTS,
@@ -85,36 +85,93 @@ function MiniHueFamily({ target }: { target: MunsellColor }) {
   );
 }
 
-function PathVisual({ points }: { points: PaintPathPoint[] }) {
-  const plotted = useMemo(() => points.map((point) => {
-    const lab = rgbToOklab(point.rgb);
-    return { ...point, x: 50 + lab[1] / .33 * 43, y: 50 - lab[2] / .33 * 43 };
+function PathVisual({ points, interactive = false, compact = false }: { points: PaintPathPoint[]; interactive?: boolean; compact?: boolean }) {
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(1);
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
+  const samples = useMemo(() => points.map((point) => {
+    const [l, a, b] = rgbToOklab(point.rgb);
+    return { ...point, l, a, b };
   }), [points]);
+  const chromaticPlot = useMemo(() => {
+    const minA = Math.min(...samples.map((point) => point.a)); const maxA = Math.max(...samples.map((point) => point.a));
+    const minB = Math.min(...samples.map((point) => point.b)); const maxB = Math.max(...samples.map((point) => point.b));
+    const centerA = (minA + maxA) / 2; const centerB = (minB + maxB) / 2;
+    const span = Math.max(maxA - minA, maxB - minB, .045) * 1.45 / zoom;
+    return samples.map((point) => ({ ...point, x: 50 + (point.a - centerA) / span * 100, y: 50 - (point.b - centerB) / span * 100 }));
+  }, [samples, zoom]);
+  const valuePlot = useMemo(() => {
+    const min = Math.min(...samples.map((point) => point.l)); const max = Math.max(...samples.map((point) => point.l));
+    const center = (min + max) / 2; const span = Math.max(max - min, .07) * 1.4 / zoom;
+    return samples.map((point, index) => ({ ...point, x: 8 + (points.length <= 1 ? .5 : index / (points.length - 1)) * 84, y: 50 - (point.l - center) / span * 86 }));
+  }, [points.length, samples, zoom]);
+  const updateZoom = useCallback((requested: number) => {
+    const next = Math.max(1, Math.min(3, requested));
+    zoomRef.current = next;
+    setZoom(next);
+  }, []);
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface || !interactive) return;
+    const wheel = (event: WheelEvent) => {
+      const next = zoomRef.current * Math.exp(-event.deltaY * .0024);
+      if ((zoomRef.current <= 1 && next <= 1) || (zoomRef.current >= 3 && next >= 3)) return;
+      event.preventDefault();
+      updateZoom(next);
+    };
+    surface.addEventListener('wheel', wheel, { passive: false });
+    return () => surface.removeEventListener('wheel', wheel);
+  }, [interactive, updateZoom]);
+  const pointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!interactive || event.pointerType !== 'touch') return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (pointersRef.current.size >= 2) {
+      const [first, second] = [...pointersRef.current.values()];
+      pinchRef.current = { distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)), zoom: zoomRef.current };
+    }
+  };
+  const pointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!interactive || !pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointersRef.current.size < 2 || !pinchRef.current) return;
+    event.preventDefault();
+    const [first, second] = [...pointersRef.current.values()];
+    updateZoom(pinchRef.current.zoom * Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)) / pinchRef.current.distance);
+  };
+  const pointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const segments = (plot: typeof chromaticPlot, prefix: string) => plot.slice(0, -1).map((point, index) => {
+    const next = plot[index + 1]; const dx = next.x - point.x; const dy = next.y - point.y;
+    return <span className="mix-map-segment" key={`${prefix}-${index}`} style={{ left: `${point.x}%`, top: `${point.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }} />;
+  });
+  const dots = (plot: typeof chromaticPlot, prefix: string) => plot.map((point, index) => (
+    <span aria-label={point.label} className={`mix-path-point ${index === 0 || index === plot.length - 1 ? 'endpoint' : ''}`} key={`${prefix}-${index}`} role="img" style={{ background: rgbCss(point.rgb), left: `${point.x}%`, top: `${point.y}%` }} title={point.label} />
+  ));
   return (
-    <div className="mix-path-visual">
+    <div className={`mix-path-visual ${compact ? 'compact' : ''}`}>
       <div className="mix-path-strip" aria-label="Mixing path swatches">
         {points.map((point, index) => <span key={index} style={{ background: rgbCss(point.rgb) }} title={point.label} />)}
       </div>
-      <div className="mix-polar-map" aria-label="Mixing path in a perceptual hue and chroma plane">
-        <span className="mix-map-axis horizontal" /><span className="mix-map-axis vertical" />
-        <span className="mix-map-ring one" /><span className="mix-map-ring two" />
-        {plotted.slice(0, -1).map((point, index) => {
-          const next = plotted[index + 1];
-          const dx = next.x - point.x; const dy = next.y - point.y;
-          return <span className="mix-map-segment" key={`line-${index}`} style={{ left: `${point.x}%`, top: `${point.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }} />;
-        })}
-        {plotted.map((point, index) => (
-          <button
-            aria-label={point.label}
-            className={index === 0 || index === plotted.length - 1 ? 'endpoint' : ''}
-            key={`point-${index}`}
-            style={{ background: rgbCss(point.rgb), left: `${point.x}%`, top: `${point.y}%` }}
-            title={point.label}
-            type="button"
-          />
-        ))}
-        <small className="map-label top">yellow</small><small className="map-label right">magenta</small><small className="map-label bottom">blue</small><small className="map-label left">green</small>
+      <div className={`mix-path-projections ${interactive ? 'interactive' : ''}`} onPointerCancel={pointerEnd} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} ref={surfaceRef}>
+        <section className="mix-projection"><header><strong>Hue + chroma</strong><small>Chromatic plane</small></header><div className="mix-coordinate-map" aria-label="Auto-framed mixing path in a perceptual hue and chroma plane">
+          <span className="mix-map-axis horizontal" /><span className="mix-map-axis vertical" />
+          <span className="mix-map-grid x-one" /><span className="mix-map-grid x-two" /><span className="mix-map-grid y-one" /><span className="mix-map-grid y-two" />
+          {segments(chromaticPlot, 'chroma-line')}{dots(chromaticPlot, 'chroma-point')}
+          <small className="map-label top">yellow</small><small className="map-label right">magenta</small><small className="map-label bottom">blue</small><small className="map-label left">green</small>
+        </div></section>
+        <section className="mix-projection"><header><strong>Value</strong><small>Across the mix</small></header><div className="mix-coordinate-map value-map" aria-label="Auto-framed value change across the mixing path">
+          <span className="mix-map-axis horizontal" /><span className="mix-map-grid y-one" /><span className="mix-map-grid y-two" />
+          {segments(valuePlot, 'value-line')}{dots(valuePlot, 'value-point')}
+          <small className="map-label top">lighter</small><small className="map-label bottom">darker</small><small className="map-label left">first</small><small className="map-label right">second</small>
+        </div></section>
       </div>
+      {interactive && <small className="mix-gesture-hint">Auto-framed · pinch or wheel to inspect the curve{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
     </div>
   );
 }
@@ -203,7 +260,7 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
               </select>
             </div>
           </header>
-          <PathVisual points={pairPath} />
+          <PathVisual interactive points={pairPath} />
         </section>
       ) : recipe && (
         <div className="target-mixer-grid">
@@ -233,7 +290,7 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
             <MiniHueFamily target={target} />
             <section className="recipe-path-card">
               <header><span className="eyebrow">Recommended path</span><strong>{recipe.ingredients.length} paint{recipe.ingredients.length === 1 ? '' : 's'}</strong></header>
-              <PathVisual points={recipePath} />
+              <PathVisual compact points={recipePath} />
             </section>
           </aside>
         </div>
