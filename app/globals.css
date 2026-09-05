@@ -81,7 +81,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .exercise-tabs button.active { color: var(--ink); font-weight: 680; }
 .exercise-tabs button.active::after { background: var(--ink); bottom: -1px; content: ''; height: 2px; left: 0; position: absolute; right: 0; }
 .family-control { border-bottom: 1px solid var(--line); padding: 15px 0 11px; }
-.family-hue-grid { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0 auto; max-width: 500px; }
+.family-hue-grid { margin: 0 auto; max-width: 600px; }
 .family-control small { color: var(--muted); display: block; font-size: 9px; margin-top: 3px; text-align: center; }
 .prompt-copy { align-items: flex-end; display: flex; font-size: 14px; font-weight: 650; justify-content: space-between; padding: 17px 0 10px; }
 .prompt-copy > div { display: flex; flex-direction: column; gap: 3px; }
@@ -203,9 +203,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .answer-state.full { min-height: 108px; }
 .answer-state > p { color: var(--muted); font-size: 10px; letter-spacing: .1em; margin: 0 0 9px; text-align: center; text-transform: uppercase; }
 .picker-grid { margin: 0 auto; max-width: 600px; }
-.picker-grid.full { display: grid; gap: 8px; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 680px; }
+.picker-grid.full { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 680px; }
+.picker-grid.full > .answer-picker:first-child { grid-column: 1 / -1; }
 .picker-grid.family { display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); max-width: 500px; }
-.picker-grid.hue { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 500px; }
+.picker-grid.hue { max-width: 600px; }
 .answer-picker { min-width: 0; overflow: hidden; width: 100%; }
 .picker-label { color: var(--muted); display: block; font-size: 10px; font-weight: 450; margin-bottom: 2px; text-align: center; transition: color .12s ease, font-weight .12s ease; }
 .answer-picker:focus-within .picker-label { color: var(--ink); font-weight: 760; }
@@ -758,13 +759,13 @@ button.chart-chip { cursor: pointer; }
   .image-caption span, .image-caption a { font-size: 8px; }
   .image-caption span { max-width: 64%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .image-caption a { max-width: 34%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .family-hue-grid, .picker-grid.full, .picker-grid.family, .picker-grid.hue { gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .picker-grid.full, .picker-grid.family { gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .answer-picker.compact .picker { gap: 4px; padding-inline: calc(50% - 22px); }
   .answer-picker.compact .picker button { flex-basis: 44px; font-size: 12px; }
   .answer-picker.compact .picker-focus { left: calc(50% - 27px); width: 54px; }
   .answer-panel { padding-top: 8px; }
   .practice-action { margin-bottom: 8px; margin-top: 0; padding-block: 11px; }
-  .answer-state.full { min-height: 174px; }
+  .answer-state.full { min-height: 150px; }
   .answer-state.family, .answer-state.hue { min-height: 92px; }
   .context-grid { gap: 4px; max-width: 228px; width: min(84%, 228px); }
   .compare-stage { border-radius: 14px; gap: 5px; padding: 18px; }
