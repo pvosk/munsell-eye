@@ -21,6 +21,7 @@ type PaletteCandidate = {
   color: MunsellColor;
   lab: [number, number, number];
   coverage: number;
+  largestCoverage: number;
   coherence: number;
 };
 
@@ -185,6 +186,7 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       color: nearestChipFromLab(lab),
       lab: [lab[0], lab[1], lab[2]],
       coverage: coherentCount / samples.length,
+      largestCoverage: largestRegions[index] / samples.length,
       coherence: coherentCount / counts[index],
     }];
   });
@@ -221,7 +223,13 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
     sampleWeights[sampleIndex] = .82 + .18 * rarity;
   });
 
-  const reliabilityOf = (candidate: PaletteCandidate) => .45 + .55 * Math.min(1, candidate.coherence);
+  const dominantShareOf = (candidate: PaletteCandidate) => Math.min(1, candidate.largestCoverage / Math.max(.0001, candidate.coverage));
+  const reliabilityOf = (candidate: PaletteCandidate) => .42
+    + .4 * Math.min(1, candidate.coherence)
+    + .18 * Math.sqrt(dominantShareOf(candidate));
+  const massOf = (candidate: PaletteCandidate) => Math.sqrt(Math.min(1,
+    (candidate.largestCoverage * .7 + candidate.coverage * .3) * 5,
+  ));
   const colorIdentityNovelty = (candidate: PaletteCandidate, references = selected) => {
     const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
     const chromaticReferences = references.filter((entry) => Math.hypot(entry.lab[1], entry.lab[2]) > .025);
@@ -232,8 +240,23 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       const hueDifference = circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])) / Math.PI;
       const valueDifference = Math.min(1, Math.abs(candidate.lab[0] - entry.lab[0]) / .28);
       const chromaDifference = Math.min(1, Math.abs(chroma - entryChroma) / .12);
-      return Math.sqrt(.55 * hueDifference ** 2 + .28 * valueDifference ** 2 + .17 * chromaDifference ** 2);
+      return Math.sqrt(.42 * hueDifference ** 2 + .28 * valueDifference ** 2 + .3 * chromaDifference ** 2);
     })));
+  };
+  const chromaticApexOf = (candidate: PaletteCandidate) => {
+    const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
+    if (chroma <= .025) return 0;
+    const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
+    const nearbyChroma = pool
+      .filter((entry) => {
+        const entryChroma = Math.hypot(entry.lab[1], entry.lab[2]);
+        return entryChroma > .025
+          && circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])) <= Math.PI / 8;
+      })
+      .reduce((maximum, entry) => Math.max(maximum, Math.hypot(entry.lab[1], entry.lab[2])), chroma);
+    const relativeChroma = Math.min(1, chroma / Math.max(.025, nearbyChroma));
+    const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
+    return relativeChroma ** 1.5 * chromaConfidence;
   };
 
   // Begin with the best single-mass explanation of the whole image.
@@ -242,7 +265,7 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
   for (const candidate of pool) {
     const error = samples.reduce((sum, index, sampleIndex) => (
       sum + paintingDistance(labs.subarray(index * 3, index * 3 + 3), candidate.lab) * sampleWeights[sampleIndex]
-    ), 0) / (.86 + .1 * reliabilityOf(candidate) + .04 * Math.sqrt(Math.min(1, candidate.coverage * 4)));
+    ), 0) / (.86 + .1 * reliabilityOf(candidate) + .04 * massOf(candidate));
     if (error < firstError) { firstCandidate = candidate; firstError = error; }
   }
   addCandidate(firstCandidate);
@@ -274,11 +297,13 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
       const identityNovelty = colorIdentityNovelty(candidate);
       const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
-      const mass = Math.sqrt(Math.min(1, candidate.coverage * 5));
+      const mass = massOf(candidate);
+      const chromaticApex = chromaticApexOf(candidate);
       let score = reliabilityOf(candidate) * (
         .74 * (totalError > 0 ? gain / totalError : 0)
         + .15 * valueNovelty * (.35 + .65 * mass)
         + .11 * identityNovelty * chromaConfidence * (.35 + .65 * mass)
+        + .06 * chromaticApex * (.3 + .7 * mass)
       );
 
       const selectedShadows = selected.filter(isShadowCandidate);
