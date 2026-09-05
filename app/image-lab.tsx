@@ -163,6 +163,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const rawDataRef = useRef<ImageData | null>(null);
   const labFieldRef = useRef<Float32Array | null>(null);
@@ -170,9 +171,10 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const objectUrlRef = useRef<string | null>(null);
   const pressRef = useRef<{ id: number; x: number; y: number; moved: boolean } | null>(null);
   const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
-  const pinchRef = useRef<{ distance: number; zoom: number; x: number; y: number } | null>(null);
+  const pinchRef = useRef<{ distance: number; zoom: number; anchorX: number; anchorY: number } | null>(null);
   const pinchingRef = useRef(false);
   const zoomRef = useRef(1);
+  const zoomFrameRef = useRef<number | undefined>(undefined);
   const chipPressRef = useRef<number | undefined>(undefined);
   const chipRemovedRef = useRef(false);
   const [mode, setMode] = useState<ImageMode>('block');
@@ -217,6 +219,15 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       setSample(null);
       zoomRef.current = 1;
       setZoom(1);
+      if (canvasWrapRef.current) canvasWrapRef.current.style.width = '100%';
+      if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
+      zoomFrameRef.current = window.requestAnimationFrame(() => {
+        if (viewportRef.current) {
+          viewportRef.current.scrollLeft = 0;
+          viewportRef.current.scrollTop = 0;
+        }
+        zoomFrameRef.current = undefined;
+      });
       setSourceVersion((version) => version + 1);
       setLoading(false);
     };
@@ -226,7 +237,11 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
 
   useEffect(() => {
     const timer = window.setTimeout(() => loadSource('/practice/still-life-fruit.jpg', 'Fruit study example'), 0);
-    return () => { window.clearTimeout(timer); if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current); };
+    return () => {
+      window.clearTimeout(timer);
+      if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
   }, [loadSource]);
 
   useEffect(() => {
@@ -264,25 +279,34 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const recipe = useMemo(() => suggestPaintRecipe(selectedColor, selectedPaintIds), [selectedColor, selectedPaintIds]);
   const representedValues = useMemo(() => [...new Set(paletteRows.filter((entry) => entry.count).map((entry) => entry.color.v))].sort((a, b) => b - a), [paletteRows]);
 
-  const setImageZoom = useCallback((requested: number, clientX?: number, clientY?: number) => {
+  const setImageZoom = useCallback((requested: number, clientX?: number, clientY?: number, fixedAnchor?: { x: number; y: number }) => {
     const next = Math.max(1, Math.min(3, requested));
     const previous = zoomRef.current;
-    if (Math.abs(next - previous) < .002) return;
     const viewport = viewportRef.current;
-    let anchor: { x: number; y: number; viewportX: number; viewportY: number } | null = null;
+    const canvasWrap = canvasWrapRef.current;
+    let scrollTarget: { left: number; top: number } | null = null;
     if (viewport && clientX !== undefined && clientY !== undefined) {
       const rect = viewport.getBoundingClientRect();
       const viewportX = clientX - rect.left;
       const viewportY = clientY - rect.top;
-      anchor = { x: viewport.scrollLeft + viewportX, y: viewport.scrollTop + viewportY, viewportX, viewportY };
+      const anchorX = fixedAnchor?.x ?? (viewport.scrollLeft + viewportX) / previous;
+      const anchorY = fixedAnchor?.y ?? (viewport.scrollTop + viewportY) / previous;
+      scrollTarget = { left: anchorX * next - viewportX, top: anchorY * next - viewportY };
     }
+    if (Math.abs(next - previous) < .002 && !fixedAnchor) return;
     zoomRef.current = next;
+    if (canvasWrap) canvasWrap.style.width = `${next * 100}%`;
     setZoom(next);
-    if (viewport && anchor) window.requestAnimationFrame(() => {
-      const ratio = next / previous;
-      viewport.scrollLeft = anchor.x * ratio - anchor.viewportX;
-      viewport.scrollTop = anchor.y * ratio - anchor.viewportY;
-    });
+    if (viewport && scrollTarget) {
+      viewport.scrollLeft = scrollTarget.left;
+      viewport.scrollTop = scrollTarget.top;
+      if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
+      zoomFrameRef.current = window.requestAnimationFrame(() => {
+        viewport.scrollLeft = scrollTarget.left;
+        viewport.scrollTop = scrollTarget.top;
+        zoomFrameRef.current = undefined;
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -328,7 +352,18 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     event.currentTarget.setPointerCapture(event.pointerId);
     if (activePointersRef.current.size >= 2) {
       const [first, second] = [...activePointersRef.current.values()];
-      pinchRef.current = { distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)), zoom: zoomRef.current, x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+      const viewport = viewportRef.current;
+      const rect = viewport?.getBoundingClientRect();
+      const x = (first.x + second.x) / 2;
+      const y = (first.y + second.y) / 2;
+      const viewportX = x - (rect?.left ?? 0);
+      const viewportY = y - (rect?.top ?? 0);
+      pinchRef.current = {
+        distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+        zoom: zoomRef.current,
+        anchorX: ((viewport?.scrollLeft ?? 0) + viewportX) / zoomRef.current,
+        anchorY: ((viewport?.scrollTop ?? 0) + viewportY) / zoomRef.current,
+      };
       pinchingRef.current = true;
       pressRef.current = null;
       return;
@@ -346,10 +381,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       const x = (first.x + second.x) / 2; const y = (first.y + second.y) / 2;
       const pinch = pinchRef.current;
       if (pinch) {
-        const viewport = viewportRef.current;
-        if (viewport) { viewport.scrollLeft -= x - pinch.x; viewport.scrollTop -= y - pinch.y; }
-        setImageZoom(pinch.zoom * distance / pinch.distance, x, y);
-        pinchRef.current = { ...pinch, x, y };
+        setImageZoom(pinch.zoom * distance / pinch.distance, x, y, { x: pinch.anchorX, y: pinch.anchorY });
       }
       return;
     }
@@ -408,7 +440,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         <span className="sr-only" aria-live="polite">Image zoom {Math.round(zoom * 100)} percent</span>
       </div>
       <div className="image-lab-stage">
-        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && <span className="image-lab-sample" style={{ background: chipCss(sample.color), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` }} />}</div></div>
+        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && <span className="image-lab-sample" style={{ background: chipCss(sample.color), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` }} />}</div></div>
         {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap to add · drag to inspect · pinch or wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
