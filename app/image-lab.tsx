@@ -192,18 +192,42 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
   const pool = candidates.length >= INITIAL_CHIP_COUNT ? candidates : allCandidates;
   if (!pool.length) return [NEUTRALS[4]];
 
+  const lightnesses = samples.map((index) => labs[index * 3]).sort((a, b) => a - b);
+  const shadowCutoff = Math.min(.48, quantile(lightnesses, .3));
+  const isShadowCandidate = (candidate: PaletteCandidate) => candidate.color.v <= 3
+    || (candidate.color.v <= 4 && candidate.lab[0] <= shadowCutoff);
   const selected: PaletteCandidate[] = [];
   const selectedNotations = new Set<string>();
+  const canSelect = (candidate: PaletteCandidate) => !selectedNotations.has(notation(candidate.color))
+    && (!isShadowCandidate(candidate) || !selected.some(isShadowCandidate));
   const addCandidate = (candidate: PaletteCandidate) => {
     const key = notation(candidate.color);
-    if (selectedNotations.has(key)) return false;
+    if (!canSelect(candidate)) return false;
     selected.push(candidate); selectedNotations.add(key); return true;
   };
 
-  // Four representative tonal anchors form the painting's value scaffold.
-  const lightnesses = samples.map((index) => labs[index * 3]).sort((a, b) => a - b);
-  for (const target of [.12, .38, .62, .88].map((position) => quantile(lightnesses, position))) {
-    const available = pool.filter((candidate) => !selectedNotations.has(notation(candidate.color)));
+  // Collapse the image's shadow family into one robust block-in mass.
+  const shadowPool = pool.filter(isShadowCandidate);
+  const shadowCoverage = shadowPool.reduce((sum, candidate) => sum + candidate.coverage, 0);
+  let hasShadowAnchor = false;
+  if (shadowPool.length && shadowCoverage >= .018) {
+    const target = quantile(lightnesses, .18);
+    const shadowAnchor = shadowPool.reduce((winner, candidate) => {
+      const score = Math.exp(-Math.abs(candidate.lab[0] - target) / .08)
+        * (.16 + Math.sqrt(candidate.coverage))
+        * (.45 + .55 * Math.min(1, candidate.coherence));
+      const winnerScore = Math.exp(-Math.abs(winner.lab[0] - target) / .08)
+        * (.16 + Math.sqrt(winner.coverage))
+        * (.45 + .55 * Math.min(1, winner.coherence));
+      return score > winnerScore ? candidate : winner;
+    });
+    hasShadowAnchor = addCandidate(shadowAnchor);
+  }
+
+  // Add broad halftone and light anchors; a high-key image gets a third tonal anchor instead of a false dark.
+  const tonalPositions = hasShadowAnchor ? [.5, .82] : [.2, .52, .84];
+  for (const target of tonalPositions.map((position) => quantile(lightnesses, position))) {
+    const available = pool.filter(canSelect);
     if (!available.length) break;
     const best = available.reduce((winner, candidate) => {
       const score = Math.exp(-Math.abs(candidate.lab[0] - target) / .075)
@@ -217,22 +241,29 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
     addCandidate(best);
   }
 
-  // Reserve one coherent chromatic mass when it is materially distinct from the value anchors.
-  const hueCandidate = pool
-    .filter((candidate) => !selectedNotations.has(notation(candidate.color)) && candidate.coverage >= .006)
-    .map((candidate) => {
-      const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
-      const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
-      const chromaticSelected = selected.filter((entry) => Math.hypot(entry.lab[1], entry.lab[2]) > .025);
-      const hueNovelty = chromaticSelected.length
-        ? Math.min(...chromaticSelected.map((entry) => circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])))) / Math.PI
-        : 1;
-      const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
-      const score = hueNovelty * chromaConfidence * Math.sqrt(candidate.coverage) * (.45 + .55 * Math.min(1, candidate.coherence));
-      return { candidate, score };
-    })
-    .sort((a, b) => b.score - a.score)[0];
-  if (hueCandidate?.score > .025) addCandidate(hueCandidate.candidate);
+  // Reserve two coherent local-color identities, such as both red fruit and yellow bananas.
+  for (let colorAnchor = 0; colorAnchor < 2; colorAnchor++) {
+    const hueCandidate = pool
+      .filter((candidate) => canSelect(candidate) && candidate.color.h !== 'N' && candidate.coverage >= .006)
+      .map((candidate) => {
+        const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
+        const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
+        const chromaticSelected = selected.filter((entry) => Math.hypot(entry.lab[1], entry.lab[2]) > .025);
+        const identityNovelty = chromaticSelected.length ? Math.min(1, Math.min(...chromaticSelected.map((entry) => {
+          const entryChroma = Math.hypot(entry.lab[1], entry.lab[2]);
+          const hueDifference = circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])) / Math.PI;
+          const valueDifference = Math.min(1, Math.abs(candidate.lab[0] - entry.lab[0]) / .28);
+          const chromaDifference = Math.min(1, Math.abs(chroma - entryChroma) / .12);
+          return Math.sqrt(.55 * hueDifference ** 2 + .28 * valueDifference ** 2 + .17 * chromaDifference ** 2);
+        }))) : 1;
+        const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
+        const score = (.28 + .72 * identityNovelty) * chromaConfidence * Math.sqrt(candidate.coverage)
+          * (.45 + .55 * Math.min(1, candidate.coherence));
+        return { candidate, score };
+      })
+      .sort((a, b) => b.score - a.score)[0];
+    if (!hueCandidate || hueCandidate.score <= .02 || !addCandidate(hueCandidate.candidate)) break;
+  }
 
   // Fill the remaining slots by reconstruction gain, with value carrying the largest distance weight.
   const currentErrors = new Float32Array(samples.length);
@@ -246,7 +277,7 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
   };
   refreshErrors();
   while (selected.length < INITIAL_CHIP_COUNT) {
-    const available = pool.filter((candidate) => !selectedNotations.has(notation(candidate.color)));
+    const available = pool.filter(canSelect);
     if (!available.length) break;
     const totalError = currentErrors.reduce((sum, error) => sum + error, 0);
     let best: PaletteCandidate | null = null; let bestScore = -1;
