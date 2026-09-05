@@ -28,6 +28,7 @@ const VALUE_ONE_CHANCE = 1 / 30;
 const VALUE_ONE_COOLDOWN = 29;
 const VALUE_TWO_CHANCE = 0.16;
 const ALL_CHROMA_OPTIONS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
+const REFERENCE_CHROMAS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 + 1 }, (_, index) => index * 2);
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
   return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
@@ -1226,8 +1227,6 @@ function ReferenceView() {
   const [hue, setHue] = useState('7.5Y');
   const hueColors = useMemo(() => MUNSELL_COLORS.filter((color) => color.h === hue), [hue]);
   const [selectedChip, setSelectedChip] = useState<MunsellColor>(() => HUE_TRAINING_POOL.find((color) => color.h === '7.5Y') ?? HUE_TRAINING_POOL[0]);
-  const maxChroma = Math.max(2, ...hueColors.map((color) => color.c));
-  const chromas = Array.from({ length: maxChroma / 2 + 1 }, (_, index) => index * 2);
 
   const changeHue = (nextHue: string) => {
     const nextColors = MUNSELL_COLORS.filter((color) => color.h === nextHue);
@@ -1259,25 +1258,29 @@ function ReferenceView() {
           <span>Full in-gamut range · up to C{MAX_MUNSELL_CHROMA}</span>
         </div>
         <div className="hue-chart-scroll">
-          <div className="hue-chart" style={{ '--chart-columns': chromas.length } as CSSProperties}>
+          <div className="hue-chart reference-hue-chart" style={{ '--chart-columns': REFERENCE_CHROMAS.length } as CSSProperties}>
             <span className="chart-corner">V/C</span>
-            {chromas.map((chroma) => <span className="chart-label" key={`head-${chroma}`}>{chroma === 0 ? 'N' : `/${chroma}`}</span>)}
+            {REFERENCE_CHROMAS.map((chroma) => <span className="chart-label" key={`head-${chroma}`}>{chroma === 0 ? 'N' : `/${chroma}`}</span>)}
             {[9, 8, 7, 6, 5, 4, 3, 2, 1].map((value) => (
               <div className="chart-row" key={value}>
                 <span className="chart-value">{value}</span>
-                {chromas.map((chroma) => {
+                {REFERENCE_CHROMAS.map((chroma) => {
                   const color = chroma === 0 ? NEUTRALS[value - 1] : hueColors.find((entry) => entry.v === value && entry.c === chroma);
-                  return color ? (
+                  const isSelected = Boolean(color && selectedChip.h === color.h && selectedChip.v === color.v && selectedChip.c === color.c);
+                  return (
                     <button
-                      aria-label={notation(color)}
-                      className={`chart-chip ${selectedChip.h === color.h && selectedChip.v === color.v && selectedChip.c === color.c ? 'selected' : ''}`}
+                      aria-hidden={!color}
+                      aria-label={color ? notation(color) : undefined}
+                      className={`chart-chip ${color ? '' : 'empty'} ${isSelected ? 'selected' : ''}`}
+                      disabled={!color}
                       key={`${value}-${chroma}`}
-                      onClick={() => setSelectedChip(color)}
-                      style={{ background: rgbCss(color) }}
-                      title={notation(color)}
+                      onClick={() => { if (color) setSelectedChip(color); }}
+                      style={color ? { background: rgbCss(color) } : undefined}
+                      tabIndex={color ? 0 : -1}
+                      title={color ? notation(color) : undefined}
                       type="button"
                     />
-                  ) : <span className="chart-chip empty" key={`${value}-${chroma}`} />;
+                  );
                 })}
               </div>
             ))}
