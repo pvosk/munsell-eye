@@ -442,22 +442,22 @@ function HuePickers({ value, onChange, compact = false }: {
   );
 }
 
-function MobileChoiceRail<T extends string>({ label, value, options, open, hidden, onToggle, onChange }: {
+function MobileChoiceRail<T extends string>({ label, value, options, open, compressed, onToggle, onChange }: {
   label: string;
   value: T;
   options: readonly { id: T; label: string }[];
   open: boolean;
-  hidden?: boolean;
+  compressed?: boolean;
   onToggle: () => void;
   onChange: (value: T) => void;
 }) {
   const current = options.find((option) => option.id === value) ?? options[0];
   return (
-    <div className={`mobile-choice-rail ${open ? 'open' : ''} ${hidden ? 'hidden' : ''}`}>
+    <div className={`mobile-choice-rail ${open ? 'open' : ''} ${compressed ? 'compressed' : ''}`} style={{ '--choice-basis': `${Math.min(148, 72 + current.label.length * 6)}px` } as CSSProperties}>
       <button aria-expanded={open} className="mobile-choice-trigger" onClick={onToggle} type="button">
         <span>{label}</span><strong>{current.label}</strong><i aria-hidden="true">›</i>
       </button>
-      <div className="mobile-choice-options" aria-label={`${label} options`}>
+      <div aria-hidden={!open} className="mobile-choice-options" aria-label={`${label} options`}>
         {options.map((option) => (
           <button className={option.id === value ? 'active' : ''} key={option.id} onClick={() => onChange(option.id)} tabIndex={open ? 0 : -1} type="button">{option.label}</button>
         ))}
@@ -1688,7 +1688,7 @@ export default function Home() {
           <span className="brand-mark" aria-hidden="true" />
           <span>Munsell Eye</span>
         </div>
-        <button aria-label="Open paint palette" className="palette-access" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }} title="Paint palette" type="button"><i /><i /><i /></button>
+        <button aria-label="Open paint palette" className="palette-access" onClick={() => { setProgressOpen(false); setPaletteOpen(true); }} title="Paint palette" type="button"><span>Palette</span><i /><i /><i /></button>
         <nav className="top-actions" aria-label="App sections">
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
           <button className={view === 'image' ? 'active' : ''} onClick={() => setView('image')} type="button">Image</button>
@@ -1719,15 +1719,12 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <div className="question-meta">
-            <span className="question-count">Practice {sessionCount}</span>
-            {streak > 1 && <span className="streak-count">{streak} in a row</span>}
-          </div>
+          {streak > 1 && <div className="question-meta"><span className="streak-count">{streak} in a row</span></div>}
         </div>
 
-        <div className={`mobile-practice-controls ${mobileRail ? 'has-expanded' : ''}`} aria-label="Practice controls">
+        <div className="mobile-practice-controls" aria-label="Practice controls">
           <MobileChoiceRail<string>
-            hidden={mobileRail === 'skill'}
+            compressed={mobileRail === 'skill'}
             label="View"
             onChange={(next) => { changePresentation(next as SwatchPresentation | 'image' | 'contrast'); setMobileRail(null); }}
             onToggle={() => setMobileRail((current) => current === 'view' ? null : 'view')}
@@ -1736,7 +1733,7 @@ export default function Home() {
             value={presentation}
           />
           <MobileChoiceRail<string>
-            hidden={mobileRail === 'view'}
+            compressed={mobileRail === 'view'}
             label="Skill"
             onChange={(next) => { if (exercise === 'compare') changeCompareDimension(next as CompareDimension); else changeExercise(next as Exercise); setMobileRail(null); }}
             onToggle={() => setMobileRail((current) => current === 'skill' ? null : 'skill')}
@@ -1756,7 +1753,7 @@ export default function Home() {
               <button className={huePresentation === 'swatch' ? 'active' : ''} onClick={() => changeHuePresentation('swatch')} type="button">Swatch</button>
               <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
             </div>
-          ) : <span className={`mobile-question-count ${mobileRail ? 'mobile-toggle-hidden' : ''}`}>#{sessionCount}</span>}
+          ) : null}
         </div>
 
         <div className="exercise-control-row desktop-practice-controls">
