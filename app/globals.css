@@ -658,7 +658,8 @@ button.chart-chip { cursor: pointer; }
 .image-lab-toolbar { align-items: center; display: flex; gap: 22px; justify-content: flex-start; padding: 18px 0 12px; }
 .image-mode-switch button { min-width: 74px; }
 .image-lab-stage { -webkit-touch-callout: none; -webkit-user-select: none; background: var(--surround); border-radius: 16px; overflow: hidden; position: relative; user-select: none; }
-.image-lab-viewport { max-height: min(64dvh, 650px); overflow: auto; padding-bottom: 32px; width: 100%; }
+.image-lab-viewport { max-height: min(64dvh, 650px); overscroll-behavior: contain; overflow: auto; padding-bottom: 32px; scrollbar-width: none; touch-action: none; width: 100%; }
+.image-lab-viewport::-webkit-scrollbar { display: none; }
 .image-lab-canvas-wrap { line-height: 0; margin: 0 auto; min-width: 100%; position: relative; }
 .image-lab-stage canvas { -webkit-user-drag: none; cursor: crosshair; display: block; height: auto; touch-action: none; user-select: none; width: 100%; }
 .image-lab-loading { background: rgba(248,247,243,.88); border-radius: 999px; font-size: 9px; left: 50%; padding: 7px 10px; position: absolute; top: 50%; transform: translate(-50%, -50%); }
