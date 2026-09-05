@@ -17,9 +17,17 @@ type Lab = readonly [number, number, number];
 type ImageMode = 'original' | 'block' | 'value';
 type QuantizedImage = { width: number; height: number; labels: Uint8Array; counts: number[] };
 type Sample = { x: number; y: number; rgb: RGB; color: MunsellColor };
+type PaletteCandidate = {
+  color: MunsellColor;
+  lab: [number, number, number];
+  coverage: number;
+  coherence: number;
+};
 
 const INITIAL_CHIP_COUNT = 7;
 const MAX_CHIP_COUNT = 18;
+const ANALYSIS_SAMPLE_LIMIT = 15000;
+const PROVISIONAL_CLUSTER_COUNT = 22;
 const rgbCss = (rgb: RGB) => `rgb(${rgb.join(',')})`;
 const chipCss = (color: MunsellColor) => rgbCss(color.rgb);
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
@@ -46,6 +54,21 @@ function labDistance(first: ArrayLike<number>, second: ArrayLike<number>) {
   return (first[0] - second[0]) ** 2 * 1.2 + (first[1] - second[1]) ** 2 + (first[2] - second[2]) ** 2;
 }
 
+function paintingDistance(first: ArrayLike<number>, second: ArrayLike<number>) {
+  return (first[0] - second[0]) ** 2 * 3.2 + (first[1] - second[1]) ** 2 + (first[2] - second[2]) ** 2;
+}
+
+function circularAngleDistance(first: number, second: number) {
+  const distance = Math.abs(first - second) % (Math.PI * 2);
+  return Math.min(distance, Math.PI * 2 - distance);
+}
+
+function quantile(sorted: number[], position: number) {
+  if (!sorted.length) return .5;
+  const index = Math.max(0, Math.min(sorted.length - 1, Math.round((sorted.length - 1) * position)));
+  return sorted[index];
+}
+
 function nearestChipFromLab(lab: ArrayLike<number>) {
   return CHIP_LABS.reduce((best, entry) => {
     const distance = labDistance(lab, entry.lab);
@@ -69,16 +92,24 @@ function buildLabField(data: ImageData) {
 
 function initialPalette(labs: Float32Array, width: number, height: number) {
   const pixels = width * height;
-  const stride = Math.max(1, Math.ceil(pixels / 14000));
+  const step = Math.max(1, Math.ceil(Math.sqrt(pixels / ANALYSIS_SAMPLE_LIMIT)));
+  const sampleWidth = Math.ceil(width / step);
+  const sampleHeight = Math.ceil(height / step);
   const samples: number[] = [];
-  for (let index = 0; index < pixels; index += stride) samples.push(index);
+  for (let gridY = 0; gridY < sampleHeight; gridY++) {
+    const y = Math.min(height - 1, gridY * step + Math.floor(step / 2));
+    for (let gridX = 0; gridX < sampleWidth; gridX++) {
+      const x = Math.min(width - 1, gridX * step + Math.floor(step / 2));
+      samples.push(y * width + x);
+    }
+  }
   const mean = samples.reduce<[number, number, number]>((sum, index) => [
     sum[0] + labs[index * 3], sum[1] + labs[index * 3 + 1], sum[2] + labs[index * 3 + 2],
   ], [0, 0, 0]).map((channel) => channel / samples.length) as [number, number, number];
   const first = samples.reduce((best, index) => labDistance(mean, labs.subarray(index * 3, index * 3 + 3)) < labDistance(mean, labs.subarray(best * 3, best * 3 + 3)) ? index : best, samples[0]);
   const centroids: number[][] = [[labs[first * 3], labs[first * 3 + 1], labs[first * 3 + 2]]];
 
-  while (centroids.length < 14) {
+  while (centroids.length < Math.min(PROVISIONAL_CLUSTER_COUNT, samples.length)) {
     let farthest = samples[0]; let farthestDistance = -1;
     for (const index of samples) {
       const sample = labs.subarray(index * 3, index * 3 + 3);
@@ -88,39 +119,160 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
     centroids.push([labs[farthest * 3], labs[farthest * 3 + 1], labs[farthest * 3 + 2]]);
   }
 
+  const assignments = new Uint8Array(samples.length);
   let counts = new Array(centroids.length).fill(0);
   for (let iteration = 0; iteration < 6; iteration++) {
     const sums = centroids.map(() => [0, 0, 0]);
     counts = new Array(centroids.length).fill(0);
-    for (const index of samples) {
+    samples.forEach((index, sampleIndex) => {
       const sample = labs.subarray(index * 3, index * 3 + 3);
       let nearest = 0; let distance = Number.POSITIVE_INFINITY;
       centroids.forEach((centroid, centroidIndex) => {
         const next = labDistance(sample, centroid);
         if (next < distance) { nearest = centroidIndex; distance = next; }
       });
+      assignments[sampleIndex] = nearest;
       sums[nearest][0] += sample[0]; sums[nearest][1] += sample[1]; sums[nearest][2] += sample[2]; counts[nearest] += 1;
-    }
+    });
     centroids.forEach((centroid, index) => {
       if (!counts[index]) return;
       centroid[0] = sums[index][0] / counts[index]; centroid[1] = sums[index][1] / counts[index]; centroid[2] = sums[index][2] / counts[index];
     });
   }
 
-  const candidates = [...new Map(centroids.map((lab, index) => {
-    const color = nearestChipFromLab(lab);
-    return [notation(color), { color, count: counts[index], lab: rgbToOklab(color.rgb) }] as const;
-  })).values()].sort((a, b) => b.count - a.count);
-  const selected = candidates.length ? [candidates.shift()!] : [{ color: NEUTRALS[4], count: 1, lab: rgbToOklab(NEUTRALS[4].rgb) }];
-  while (selected.length < INITIAL_CHIP_COUNT && candidates.length) {
-    let bestIndex = 0; let bestScore = -1;
-    candidates.forEach((candidate, index) => {
-      const separation = Math.min(...selected.map((entry) => labDistance(candidate.lab, entry.lab)));
-      const coverage = Math.pow(candidate.count / Math.max(1, samples.length), .55);
-      const score = coverage * (.025 + separation);
-      if (score > bestScore) { bestIndex = index; bestScore = score; }
+  // Reassign once after the final centroid update so spatial regions use the settled colors.
+  counts = new Array(centroids.length).fill(0);
+  samples.forEach((index, sampleIndex) => {
+    const sample = labs.subarray(index * 3, index * 3 + 3);
+    let nearest = 0; let distance = Number.POSITIVE_INFINITY;
+    centroids.forEach((centroid, centroidIndex) => {
+      const next = labDistance(sample, centroid);
+      if (next < distance) { nearest = centroidIndex; distance = next; }
     });
-    selected.push(candidates.splice(bestIndex, 1)[0]);
+    assignments[sampleIndex] = nearest;
+    counts[nearest] += 1;
+  });
+
+  // Keep colors that form meaningful connected masses, not isolated saturated pixels.
+  const visited = new Uint8Array(assignments.length);
+  const queue = new Int32Array(assignments.length);
+  const coherentCounts = new Int32Array(centroids.length);
+  const largestRegions = new Int32Array(centroids.length);
+  const minimumRegion = Math.max(4, Math.round(samples.length * .0015));
+  for (let start = 0; start < assignments.length; start++) {
+    if (visited[start]) continue;
+    const label = assignments[start];
+    let head = 0; let tail = 0;
+    queue[tail++] = start; visited[start] = 1;
+    while (head < tail) {
+      const current = queue[head++];
+      const x = current % sampleWidth; const y = Math.floor(current / sampleWidth);
+      const left = current - 1; const right = current + 1;
+      const above = current - sampleWidth; const below = current + sampleWidth;
+      if (x > 0 && !visited[left] && assignments[left] === label) { visited[left] = 1; queue[tail++] = left; }
+      if (x + 1 < sampleWidth && !visited[right] && assignments[right] === label) { visited[right] = 1; queue[tail++] = right; }
+      if (y > 0 && !visited[above] && assignments[above] === label) { visited[above] = 1; queue[tail++] = above; }
+      if (y + 1 < sampleHeight && !visited[below] && assignments[below] === label) { visited[below] = 1; queue[tail++] = below; }
+    }
+    largestRegions[label] = Math.max(largestRegions[label], tail);
+    if (tail >= minimumRegion) coherentCounts[label] += tail;
+  }
+
+  const allCandidates: PaletteCandidate[] = centroids.flatMap((lab, index) => {
+    if (!counts[index]) return [];
+    const coherentCount = coherentCounts[index] || largestRegions[index];
+    return [{
+      color: nearestChipFromLab(lab),
+      lab: [lab[0], lab[1], lab[2]],
+      coverage: coherentCount / samples.length,
+      coherence: coherentCount / counts[index],
+    }];
+  });
+  const candidates = allCandidates.filter((candidate) => candidate.coverage >= .0015);
+  const pool = candidates.length >= INITIAL_CHIP_COUNT ? candidates : allCandidates;
+  if (!pool.length) return [NEUTRALS[4]];
+
+  const selected: PaletteCandidate[] = [];
+  const selectedNotations = new Set<string>();
+  const addCandidate = (candidate: PaletteCandidate) => {
+    const key = notation(candidate.color);
+    if (selectedNotations.has(key)) return false;
+    selected.push(candidate); selectedNotations.add(key); return true;
+  };
+
+  // Four representative tonal anchors form the painting's value scaffold.
+  const lightnesses = samples.map((index) => labs[index * 3]).sort((a, b) => a - b);
+  for (const target of [.12, .38, .62, .88].map((position) => quantile(lightnesses, position))) {
+    const available = pool.filter((candidate) => !selectedNotations.has(notation(candidate.color)));
+    if (!available.length) break;
+    const best = available.reduce((winner, candidate) => {
+      const score = Math.exp(-Math.abs(candidate.lab[0] - target) / .075)
+        * (.16 + Math.sqrt(candidate.coverage))
+        * (.45 + .55 * Math.min(1, candidate.coherence));
+      const winnerScore = Math.exp(-Math.abs(winner.lab[0] - target) / .075)
+        * (.16 + Math.sqrt(winner.coverage))
+        * (.45 + .55 * Math.min(1, winner.coherence));
+      return score > winnerScore ? candidate : winner;
+    });
+    addCandidate(best);
+  }
+
+  // Reserve one coherent chromatic mass when it is materially distinct from the value anchors.
+  const hueCandidate = pool
+    .filter((candidate) => !selectedNotations.has(notation(candidate.color)) && candidate.coverage >= .006)
+    .map((candidate) => {
+      const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
+      const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
+      const chromaticSelected = selected.filter((entry) => Math.hypot(entry.lab[1], entry.lab[2]) > .025);
+      const hueNovelty = chromaticSelected.length
+        ? Math.min(...chromaticSelected.map((entry) => circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])))) / Math.PI
+        : 1;
+      const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
+      const score = hueNovelty * chromaConfidence * Math.sqrt(candidate.coverage) * (.45 + .55 * Math.min(1, candidate.coherence));
+      return { candidate, score };
+    })
+    .sort((a, b) => b.score - a.score)[0];
+  if (hueCandidate?.score > .025) addCandidate(hueCandidate.candidate);
+
+  // Fill the remaining slots by reconstruction gain, with value carrying the largest distance weight.
+  const currentErrors = new Float32Array(samples.length);
+  const refreshErrors = () => {
+    samples.forEach((index, sampleIndex) => {
+      const sample = labs.subarray(index * 3, index * 3 + 3);
+      currentErrors[sampleIndex] = selected.length
+        ? Math.min(...selected.map((entry) => paintingDistance(sample, entry.lab)))
+        : Number.POSITIVE_INFINITY;
+    });
+  };
+  refreshErrors();
+  while (selected.length < INITIAL_CHIP_COUNT) {
+    const available = pool.filter((candidate) => !selectedNotations.has(notation(candidate.color)));
+    if (!available.length) break;
+    const totalError = currentErrors.reduce((sum, error) => sum + error, 0);
+    let best: PaletteCandidate | null = null; let bestScore = -1;
+    for (const candidate of available) {
+      let gain = 0;
+      samples.forEach((index, sampleIndex) => {
+        const distance = paintingDistance(labs.subarray(index * 3, index * 3 + 3), candidate.lab);
+        gain += Math.max(0, currentErrors[sampleIndex] - distance);
+      });
+      const valueNovelty = selected.length ? Math.min(1, Math.min(...selected.map((entry) => Math.abs(entry.lab[0] - candidate.lab[0]))) / .24) : 1;
+      const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
+      const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
+      const chromaticSelected = selected.filter((entry) => Math.hypot(entry.lab[1], entry.lab[2]) > .025);
+      const hueNovelty = chromaticSelected.length ? Math.min(...chromaticSelected.map((entry) => circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])))) / Math.PI : 1;
+      const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
+      const mass = Math.sqrt(Math.min(1, candidate.coverage * 4));
+      const reliability = .45 + .55 * Math.min(1, candidate.coherence);
+      const score = reliability * (
+        .66 * (totalError > 0 ? gain / totalError : 0)
+        + .22 * valueNovelty * mass
+        + .12 * hueNovelty * chromaConfidence * mass
+      );
+      if (score > bestScore) { best = candidate; bestScore = score; }
+    }
+    if (!best || !addCandidate(best)) break;
+    refreshErrors();
   }
   return selected.map((entry) => entry.color);
 }
