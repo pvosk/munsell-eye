@@ -16,7 +16,7 @@ type RGB = [number, number, number];
 const rgbCss = (rgb: RGB) => `rgb(${rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 const rgbHex = (rgb: RGB) => `#${rgb.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
-const MIXER_HUE_OPTIONS = ['N', ...HUE_ORDER];
+const MIXER_HUE_OPTIONS = HUE_ORDER;
 const MIXER_VALUE_OPTIONS = ['1','2','3','4','5','6','7','8','9'];
 
 function rgbToOklab(rgb: RGB) {
@@ -87,30 +87,52 @@ function MiniHueFamily({ target }: { target: MunsellColor }) {
   );
 }
 
-function MixerScrollPicker({ label, options, value, onChange, disabled = false }: {
+function MixerScrollPicker({ label, options, value, onChange, disabled = false, cyclic = false, fast = false }: {
   label: string;
   options: readonly string[];
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  cyclic?: boolean;
+  fast?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const frame = useRef<number | undefined>(undefined);
   const settling = useRef<number | undefined>(undefined);
+  const scrollSettle = useRef<number | undefined>(undefined);
   const programmatic = useRef(false);
   const localSelection = useRef<string | null>(null);
   const suppressClick = useRef(false);
   const drag = useRef({ id: -1, x: 0, scroll: 0, moved: false });
+  const renderedOptions = useMemo(() => cyclic ? [...options, ...options, ...options] : [...options], [cyclic, options]);
 
-  const center = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
+  const normalizeCyclicScroll = useCallback(() => {
     const container = ref.current;
-    const item = container?.querySelector<HTMLButtonElement>(`[data-mixer-value="${CSS.escape(option)}"]`);
-    if (!container || !item) return;
+    if (!cyclic || !container) return;
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>('button'));
+    if (buttons.length < options.length * 3) return;
+    const middleStart = buttons[options.length].offsetLeft;
+    const finalStart = buttons[options.length * 2].offsetLeft;
+    const cycleWidth = finalStart - middleStart;
+    const middle = container.scrollLeft + container.clientWidth / 2;
+    if (middle < middleStart) container.scrollLeft += cycleWidth;
+    else if (middle >= finalStart) container.scrollLeft -= cycleWidth;
+  }, [cyclic, options.length]);
+
+  const center = useCallback((option: string, behavior: ScrollBehavior = 'smooth', preferMiddle = false) => {
+    const container = ref.current;
+    if (!container) return;
+    const items = Array.from(container.querySelectorAll<HTMLButtonElement>(`[data-mixer-value="${CSS.escape(option)}"]`));
+    const middle = container.scrollLeft + container.clientWidth / 2;
+    const item = preferMiddle && cyclic
+      ? items[Math.floor(items.length / 2)]
+      : items.reduce((best, candidate) => Math.abs(candidate.offsetLeft + candidate.offsetWidth / 2 - middle) < Math.abs(best.offsetLeft + best.offsetWidth / 2 - middle) ? candidate : best, items[0]);
+    if (!item) return;
     programmatic.current = true;
     container.scrollTo({ left: item.offsetLeft + item.offsetWidth / 2 - container.clientWidth / 2, behavior });
     window.clearTimeout(settling.current);
     settling.current = window.setTimeout(() => { programmatic.current = false; }, behavior === 'smooth' ? 260 : 0);
-  }, []);
+  }, [cyclic]);
 
   const closest = useCallback(() => {
     const container = ref.current;
@@ -128,20 +150,24 @@ function MixerScrollPicker({ label, options, value, onChange, disabled = false }
       return;
     }
     window.cancelAnimationFrame(frame.current ?? 0);
-    frame.current = window.requestAnimationFrame(() => center(value, 'auto'));
+    frame.current = window.requestAnimationFrame(() => center(value, 'auto', cyclic));
     return () => window.cancelAnimationFrame(frame.current ?? 0);
-  }, [center, options, value]);
+  }, [center, cyclic, options, value]);
 
-  useEffect(() => () => window.clearTimeout(settling.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(settling.current);
+    window.clearTimeout(scrollSettle.current);
+  }, []);
 
   const move = (direction: number) => {
     const index = Math.max(0, options.indexOf(value));
-    const next = options[Math.max(0, Math.min(options.length - 1, index + direction))];
+    const raw = index + direction;
+    const next = cyclic ? options[(raw + options.length) % options.length] : options[Math.max(0, Math.min(options.length - 1, raw))];
     if (next !== undefined) { localSelection.current = next; onChange(next); center(next); }
   };
 
   return (
-    <div className={`answer-picker mixer-scroll-picker ${disabled ? 'disabled' : ''}`}>
+    <div className={`answer-picker mixer-scroll-picker ${disabled ? 'disabled' : ''} ${cyclic ? 'cyclic' : ''} ${fast ? 'fast' : ''}`}>
       <span className="picker-label">{label}</span>
       <div className="picker-window">
         <span className="picker-focus" aria-hidden="true" />
@@ -167,7 +193,7 @@ function MixerScrollPicker({ label, options, value, onChange, disabled = false }
           }}
           onPointerMove={(event) => {
             if (!ref.current || drag.current.id !== event.pointerId) return;
-            const distance = event.clientX - drag.current.x;
+            const distance = (event.clientX - drag.current.x) * (fast ? 1.32 : 1);
             if (Math.abs(distance) > 3) drag.current.moved = true;
             if (drag.current.moved) { event.preventDefault(); ref.current.scrollLeft = drag.current.scroll - distance; }
           }}
@@ -175,6 +201,7 @@ function MixerScrollPicker({ label, options, value, onChange, disabled = false }
             if (!ref.current || drag.current.id !== event.pointerId) return;
             if (ref.current.hasPointerCapture(event.pointerId)) ref.current.releasePointerCapture(event.pointerId);
             ref.current.classList.remove('dragging');
+            normalizeCyclicScroll();
             if (drag.current.moved) {
               suppressClick.current = true;
               window.setTimeout(() => { suppressClick.current = false; }, 160);
@@ -185,17 +212,23 @@ function MixerScrollPicker({ label, options, value, onChange, disabled = false }
           }}
           onScroll={() => {
             if (disabled || programmatic.current) return;
+            normalizeCyclicScroll();
             window.cancelAnimationFrame(frame.current ?? 0);
             frame.current = window.requestAnimationFrame(() => {
               const next = closest();
               if (next && next !== value) { localSelection.current = next; onChange(next); }
             });
+            window.clearTimeout(scrollSettle.current);
+            scrollSettle.current = window.setTimeout(() => {
+              const next = closest();
+              if (next) center(next);
+            }, 110);
           }}
           ref={ref}
           role="listbox"
           tabIndex={disabled ? -1 : 0}
         >
-          {options.map((option) => <button aria-selected={option === value} className={option === value ? 'selected' : ''} data-mixer-value={option} key={option} onClick={() => { if (!disabled) { localSelection.current = option; onChange(option); center(option); } }} role="option" tabIndex={-1} type="button">{option}</button>)}
+          {renderedOptions.map((option, index) => <button aria-selected={option === value} className={option === value ? 'selected' : ''} data-mixer-value={option} key={`${option}-${index}`} onClick={() => { if (!disabled) { localSelection.current = option; onChange(option); center(option); } }} role="option" tabIndex={-1} type="button">{option}</button>)}
         </div>
       </div>
     </div>
@@ -204,30 +237,52 @@ function MixerScrollPicker({ label, options, value, onChange, disabled = false }
 
 function PathVisual({ points, interactive = false, compact = false, sequence = false }: { points: PaintPathPoint[]; interactive?: boolean; compact?: boolean; sequence?: boolean }) {
   const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
   const zoomRef = useRef(1);
+  const panRef = useRef({ x: 0, y: 0 });
   const surfaceRef = useRef<HTMLDivElement>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
-  const samples = useMemo(() => points.map((point) => {
-    const [l, a, b] = rgbToOklab(point.rgb);
-    return { ...point, l, a, b };
-  }), [points]);
+  const panDragRef = useRef<{ id: number; x: number; y: number; panX: number; panY: number } | null>(null);
+  const samples = useMemo(() => {
+    return points.reduce<Array<PaintPathPoint & { l: number; a: number; b: number; hue: number; chroma: number }>>((result, point) => {
+      const [l, a, b] = rgbToOklab(point.rgb);
+      const chroma = Math.hypot(a, b);
+      const previousHue = result.at(-1)?.hue ?? null;
+      let hue = chroma < .004 && previousHue !== null ? previousHue : Math.atan2(b, a);
+      if (previousHue !== null) {
+        while (hue - previousHue > Math.PI) hue -= Math.PI * 2;
+        while (hue - previousHue < -Math.PI) hue += Math.PI * 2;
+      }
+      return [...result, { ...point, l, a, b, hue, chroma }];
+    }, []);
+  }, [points]);
   const chromaticPlot = useMemo(() => {
-    const minA = Math.min(...samples.map((point) => point.a)); const maxA = Math.max(...samples.map((point) => point.a));
-    const minB = Math.min(...samples.map((point) => point.b)); const maxB = Math.max(...samples.map((point) => point.b));
-    const centerA = (minA + maxA) / 2; const centerB = (minB + maxB) / 2;
-    const span = Math.max(maxA - minA, maxB - minB, .045) * 1.45 / zoom;
-    return samples.map((point) => ({ ...point, x: 50 + (point.a - centerA) / span * 100, y: 50 - (point.b - centerB) / span * 100 }));
-  }, [samples, zoom]);
+    const minHue = Math.min(...samples.map((point) => point.hue)); const maxHue = Math.max(...samples.map((point) => point.hue));
+    const minChroma = Math.min(...samples.map((point) => point.chroma)); const maxChroma = Math.max(...samples.map((point) => point.chroma));
+    const centerHue = (minHue + maxHue) / 2; const centerChroma = (minChroma + maxChroma) / 2;
+    const hueSpan = Math.max(maxHue - minHue, interactive ? .035 : .075) * 1.3 / zoom;
+    const chromaSpan = Math.max(maxChroma - minChroma, interactive ? .006 : .014) * 1.3 / zoom;
+    return samples.map((point) => ({
+      ...point,
+      x: 50 + (point.hue - centerHue) / hueSpan * 82 + pan.x,
+      y: 50 - (point.chroma - centerChroma) / chromaSpan * 82 + pan.y,
+    }));
+  }, [interactive, pan, samples, zoom]);
   const valuePlot = useMemo(() => {
     const min = Math.min(...samples.map((point) => point.l)); const max = Math.max(...samples.map((point) => point.l));
-    const center = (min + max) / 2; const span = Math.max(max - min, .07) * 1.4 / zoom;
-    return samples.map((point, index) => ({ ...point, x: 8 + (points.length <= 1 ? .5 : index / (points.length - 1)) * 84, y: 50 - (point.l - center) / span * 86 }));
-  }, [points.length, samples, zoom]);
+    const center = (min + max) / 2; const span = Math.max(max - min, interactive ? .018 : .05) * 1.3 / zoom;
+    return samples.map((point, index) => ({ ...point, x: 8 + (points.length <= 1 ? .5 : index / (points.length - 1)) * 84 + pan.x, y: 50 - (point.l - center) / span * 82 + pan.y }));
+  }, [interactive, pan, points.length, samples, zoom]);
   const updateZoom = useCallback((requested: number) => {
     const next = Math.max(1, Math.min(3, requested));
     zoomRef.current = next;
     setZoom(next);
+  }, []);
+  const updatePan = useCallback((x: number, y: number) => {
+    const next = { x: Math.max(-34, Math.min(34, x)), y: Math.max(-34, Math.min(34, y)) };
+    panRef.current = next;
+    setPan(next);
   }, []);
   useEffect(() => {
     const surface = surfaceRef.current;
@@ -242,25 +297,38 @@ function PathVisual({ points, interactive = false, compact = false, sequence = f
     return () => surface.removeEventListener('wheel', wheel);
   }, [interactive, updateZoom]);
   const pointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!interactive || event.pointerType !== 'touch') return;
+    if (!interactive || (event.pointerType === 'mouse' && event.button !== 0)) return;
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
+    if (pointersRef.current.size === 1) {
+      panDragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, panX: panRef.current.x, panY: panRef.current.y };
+    }
     if (pointersRef.current.size >= 2) {
       const [first, second] = [...pointersRef.current.values()];
       pinchRef.current = { distance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)), zoom: zoomRef.current };
+      panDragRef.current = null;
     }
   };
   const pointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!interactive || !pointersRef.current.has(event.pointerId)) return;
     pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointersRef.current.size < 2 || !pinchRef.current) return;
-    event.preventDefault();
-    const [first, second] = [...pointersRef.current.values()];
-    updateZoom(pinchRef.current.zoom * Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)) / pinchRef.current.distance);
+    if (pointersRef.current.size >= 2 && pinchRef.current) {
+      event.preventDefault();
+      const [first, second] = [...pointersRef.current.values()];
+      updateZoom(pinchRef.current.zoom * Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)) / pinchRef.current.distance);
+      return;
+    }
+    const drag = panDragRef.current;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (drag?.id === event.pointerId && bounds.width && bounds.height) {
+      event.preventDefault();
+      updatePan(drag.panX + (event.clientX - drag.x) / bounds.width * 100, drag.panY + (event.clientY - drag.y) / bounds.height * 100);
+    }
   };
   const pointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {
     pointersRef.current.delete(event.pointerId);
     if (pointersRef.current.size < 2) pinchRef.current = null;
+    if (panDragRef.current?.id === event.pointerId) panDragRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const segments = (plot: typeof chromaticPlot, prefix: string) => plot.slice(0, -1).map((point, index) => {
@@ -276,11 +344,11 @@ function PathVisual({ points, interactive = false, compact = false, sequence = f
         {points.map((point, index) => <span key={index} style={{ background: rgbCss(point.rgb) }} title={point.label} />)}
       </div>
       <div className={`mix-path-projections ${interactive ? 'interactive' : ''}`} onPointerCancel={pointerEnd} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} ref={surfaceRef}>
-        <section className="mix-projection"><header><strong>Hue + chroma</strong><small>Chromatic plane</small></header><div className="mix-coordinate-map" aria-label="Auto-framed mixing path in a perceptual hue and chroma plane">
+        <section className="mix-projection"><header><strong>Hue + Chroma</strong><small>Hue Across · Chroma Up</small></header><div className="mix-coordinate-map" aria-label="Auto-framed mixing path with hue on the horizontal axis and chroma on the vertical axis">
           <span className="mix-map-axis horizontal" /><span className="mix-map-axis vertical" />
           <span className="mix-map-grid x-one" /><span className="mix-map-grid x-two" /><span className="mix-map-grid y-one" /><span className="mix-map-grid y-two" />
           {segments(chromaticPlot, 'chroma-line')}{dots(chromaticPlot, 'chroma-point')}
-          <small className="map-label top">yellow</small><small className="map-label right">magenta</small><small className="map-label bottom">blue</small><small className="map-label left">green</small>
+          <small className="map-label top">More Chroma</small><small className="map-label right">Hue +</small><small className="map-label bottom">Neutral</small><small className="map-label left">Hue −</small>
         </div></section>
         <section className="mix-projection"><header><strong>Value</strong><small>Across the mix</small></header><div className="mix-coordinate-map value-map" aria-label="Auto-framed value change across the mixing path">
           <span className="mix-map-axis horizontal" /><span className="mix-map-grid y-one" /><span className="mix-map-grid y-two" />
@@ -288,7 +356,7 @@ function PathVisual({ points, interactive = false, compact = false, sequence = f
           <small className="map-label top">lighter</small><small className="map-label bottom">darker</small><small className="map-label left">{sequence ? 'base' : 'first'}</small><small className="map-label right">{sequence ? 'target' : 'second'}</small>
         </div></section>
       </div>
-      {interactive && <small className="mix-gesture-hint">Auto-framed · pinch or wheel to inspect the curve{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
+      {interactive && <small className="mix-gesture-hint">Auto-framed · drag to pan · pinch or wheel to zoom{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
     </div>
   );
 }
@@ -300,11 +368,19 @@ function RecipeTrajectory({ recipe, target }: { recipe: PaintRecipe; target: Mun
     { rgb: target.rgb, progress: 1, label: `Target ${notation(target)}`, role: 'target' as const },
   ], [recipe, target]);
   const total = ingredients.reduce((sum, ingredient) => sum + ingredient.parts, 0);
+  const stagePositions = ingredients.map((_, index) => (
+    index === 0 ? 0 : ingredients.slice(0, index).reduce((sum, ingredient) => sum + ingredient.parts, 0) / Math.max(total, 1) * 100
+  ));
   return (
     <section className="recipe-path-card">
       <header><span className="eyebrow">Mixing Trajectory</span><strong>{ingredients.length} Stage{ingredients.length === 1 ? '' : 's'}</strong></header>
-      <div className="ingredient-ratio-strip" aria-label="Recipe proportions">
-        {ingredients.map(({ paint, parts }) => <span key={paint.id} style={{ background: rgbCss(paint.rgb), flexGrow: parts }} title={`${paint.name}: ${parts} of ${total} parts`} />)}
+      <div className="ingredient-ratio-track">
+        <div className="ingredient-ratio-strip" aria-label="Recipe proportions">
+          {ingredients.map(({ paint, parts }) => <span key={paint.id} style={{ background: rgbCss(paint.rgb), flexGrow: parts }} title={`${paint.name}: ${parts} of ${total} parts`} />)}
+        </div>
+        <div className="ingredient-stage-markers" aria-hidden="true">
+          {stagePositions.map((position, index) => <i key={index} style={{ left: `${Math.max(2.5, Math.min(94, position))}%` }}>{index + 1}</i>)}
+        </div>
       </div>
       <ol className="trajectory-steps">
         {ingredients.map(({ paint }, index) => <li key={paint.id}><i>{index + 1}</i><span>{index ? 'Add' : 'Begin with'} {paint.name}</span></li>)}
@@ -419,7 +495,7 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
               </div>
               <div className="target-controls">
                 <label className="screen-color-control"><span>Screen color</span><input aria-label="Choose a screen color" onChange={(event) => pickScreenColor(event.target.value)} type="color" value={rgbHex(target.rgb)} /></label>
-                <MixerScrollPicker label="Hue" onChange={(hue) => updateTarget(hue, target.v, target.c)} options={MIXER_HUE_OPTIONS} value={target.h} />
+                <MixerScrollPicker cyclic fast label="Hue" onChange={(hue) => updateTarget(hue, target.v, target.c)} options={MIXER_HUE_OPTIONS} value={target.h} />
                 <MixerScrollPicker label="Value" onChange={(value) => updateTarget(target.h, Number(value), target.c)} options={MIXER_VALUE_OPTIONS} value={String(target.v)} />
                 <MixerScrollPicker disabled={target.h === 'N'} label="Chroma" onChange={(chroma) => updateTarget(target.h, target.v, Number(chroma))} options={chromaOptions} value={String(target.c)} />
               </div>

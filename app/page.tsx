@@ -26,16 +26,27 @@ const MAX_MUNSELL_CHROMA = Math.max(...MUNSELL_COLORS.map((color) => color.c));
 const VALUE_ONE_CHANCE = 1 / 30;
 const VALUE_ONE_COOLDOWN = 29;
 const VALUE_TWO_CHANCE = 0.16;
-const ALL_CHROMA_OPTIONS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
+// Keep the complete renotation tree in Reference, but train against a more
+// useful painter's gamut. The renotation contains valid displayable P/PB
+// coordinates through C24 that are unusually difficult to approach in paint.
+const TRAINING_CHROMA_CAP: Partial<Record<string, number>> = { B: 10, PB: 12, P: 12, RP: 16 };
+const practicalTrainingColor = (color: MunsellColor) => color.c <= (TRAINING_CHROMA_CAP[color.h.replace(/[\d.]/g, '')] ?? MAX_MUNSELL_CHROMA);
+const PRACTICE_COLORS = MUNSELL_COLORS.filter(practicalTrainingColor);
+const PRACTICE_MAX_CHROMA = Math.max(...PRACTICE_COLORS.map((color) => color.c));
+const ALL_CHROMA_OPTIONS = Array.from({ length: PRACTICE_MAX_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
 const DEFAULT_CHROMA = '6';
 const REFERENCE_CHROMAS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 + 1 }, (_, index) => index * 2);
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
+  const colors = PRACTICE_COLORS.filter((color) => color.h === hue);
+  return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
+}).filter((color): color is MunsellColor => Boolean(color));
+const REFERENCE_HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
   const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
   return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
 }).filter((color): color is MunsellColor => Boolean(color));
 const HUE_TRAINING_POOL = HUE_EDGE_COLORS;
-const SWATCH_POOL = MUNSELL_COLORS.filter((color) => color.v >= 2 && color.v <= 8);
-const IMAGE_COLOR_POOL = MUNSELL_COLORS;
+const SWATCH_POOL = PRACTICE_COLORS.filter((color) => color.v >= 2 && color.v <= 8);
+const IMAGE_COLOR_POOL = PRACTICE_COLORS;
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
@@ -43,7 +54,7 @@ type AppView = 'practice' | 'image' | 'mix' | 'explore' | 'reference';
 type SwatchPresentation = 'isolated' | 'context' | 'hunt';
 type HuePresentation = 'swatch' | 'slice';
 type RGB = [number, number, number];
-type HuntPick = { rgb: RGB; color: MunsellColor };
+type HuntPick = { rgb: RGB; color: MunsellColor; value: number; point: { x: number; y: number } };
 type CompareDimension = 'value' | 'chroma' | 'hue';
 type CompareQuestion = {
   prompt: string;
@@ -156,12 +167,13 @@ for (const color of MUNSELL_COLORS) {
   HUNT_CHIPS_BY_HUE_VALUE.set(key, [...(HUNT_CHIPS_BY_HUE_VALUE.get(key) ?? []), color].sort((a, b) => a.c - b.c));
 }
 
-function nearestMunsellColor(rgb: RGB) {
+function nearestMunsellColor(rgb: RGB, value?: number) {
   const lab = rgbArrayToOklab(rgb);
-  return MUNSELL_LABS.reduce((best, entry) => {
+  const candidates = value === undefined ? MUNSELL_LABS : MUNSELL_LABS.filter((entry) => entry.color.v === value);
+  return candidates.reduce((best, entry) => {
     const distance = Math.hypot(lab[0] - entry.lab[0], lab[1] - entry.lab[1], lab[2] - entry.lab[2]);
     return distance < best.distance ? { color: entry.color, distance } : best;
-  }, { color: MUNSELL_LABS[0].color, distance: Number.POSITIVE_INFINITY }).color;
+  }, { color: candidates[0]?.color ?? MUNSELL_LABS[0].color, distance: Number.POSITIVE_INFINITY }).color;
 }
 
 function localPerceptualStep(target: MunsellColor) {
@@ -174,8 +186,8 @@ function localPerceptualStep(target: MunsellColor) {
 }
 
 function chromaOptionsFor(hue: string, value?: number) {
-  const exact = MUNSELL_COLORS.filter((color) => color.h === hue && (value === undefined || color.v === value));
-  const candidates = exact.length ? exact : MUNSELL_COLORS.filter((color) => color.h === hue);
+  const exact = PRACTICE_COLORS.filter((color) => color.h === hue && (value === undefined || color.v === value));
+  const candidates = exact.length ? exact : PRACTICE_COLORS.filter((color) => color.h === hue);
   const options = [...new Set(candidates.map((color) => color.c))].sort((a, b) => a - b).map(String);
   return options.length ? options : ALL_CHROMA_OPTIONS;
 }
@@ -259,12 +271,14 @@ function chooseTrainingTarget(pool: MunsellColor[], exercise: Exercise, attempts
   return members[Math.floor(Math.random() * members.length)];
 }
 
-function Picker({ label, options, value, onChange, compact = false }: {
+function Picker({ label, options, value, onChange, compact = false, cyclic = false, fast = false }: {
   label: string;
   options: readonly string[];
   value: string;
   onChange: (value: string) => void;
   compact?: boolean;
+  cyclic?: boolean;
+  fast?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<number | undefined>(undefined);
@@ -276,14 +290,33 @@ function Picker({ label, options, value, onChange, compact = false }: {
   const programmaticTarget = useRef<string | null>(null);
   const drag = useRef({ pointerId: -1, lastX: 0, lastAt: 0, velocity: 0, distance: 0, moved: false });
   const suppressClick = useRef(false);
+  const renderedOptions = useMemo(() => cyclic ? [...options, ...options, ...options] : [...options], [cyclic, options]);
 
-  const centerOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
+  const normalizeCyclicScroll = useCallback(() => {
     const container = ref.current;
-    const element = container?.querySelector<HTMLButtonElement>(`[data-value="${CSS.escape(option)}"]`);
-    if (!container || !element) return;
+    if (!cyclic || !container) return;
+    const buttons = Array.from(container.querySelectorAll<HTMLButtonElement>('button'));
+    if (buttons.length < options.length * 3) return;
+    const middleStart = buttons[options.length].offsetLeft;
+    const finalStart = buttons[options.length * 2].offsetLeft;
+    const cycleWidth = finalStart - middleStart;
+    const center = container.scrollLeft + container.clientWidth / 2;
+    if (center < middleStart) container.scrollLeft += cycleWidth;
+    else if (center >= finalStart) container.scrollLeft -= cycleWidth;
+  }, [cyclic, options.length]);
+
+  const centerOption = useCallback((option: string, behavior: ScrollBehavior = 'smooth', preferMiddle = false) => {
+    const container = ref.current;
+    if (!container) return;
+    const elements = Array.from(container.querySelectorAll<HTMLButtonElement>(`[data-value="${CSS.escape(option)}"]`));
+    const center = container.scrollLeft + container.clientWidth / 2;
+    const element = preferMiddle && cyclic
+      ? elements[Math.floor(elements.length / 2)]
+      : elements.reduce((best, item) => Math.abs(item.offsetLeft + item.offsetWidth / 2 - center) < Math.abs(best.offsetLeft + best.offsetWidth / 2 - center) ? item : best, elements[0]);
+    if (!element) return;
     const left = element.offsetLeft + element.offsetWidth / 2 - container.clientWidth / 2;
     container.scrollTo({ left, behavior });
-  }, []);
+  }, [cyclic]);
 
   const closestOption = useCallback(() => {
     const container = ref.current;
@@ -340,12 +373,12 @@ function Picker({ label, options, value, onChange, compact = false }: {
     programmaticTarget.current = value;
     centerFrame.current = window.requestAnimationFrame(() => {
       centerFrame.current = window.requestAnimationFrame(() => {
-        if (drag.current.pointerId === -1 && momentumFrame.current === undefined) centerOption(value, 'auto');
+        if (drag.current.pointerId === -1 && momentumFrame.current === undefined) centerOption(value, 'auto', cyclic);
         clearProgrammaticTarget();
       });
     });
     return () => window.cancelAnimationFrame(centerFrame.current ?? 0);
-  }, [centerOption, clearProgrammaticTarget, value, options]);
+  }, [centerOption, clearProgrammaticTarget, cyclic, value, options]);
 
   useEffect(() => () => {
     window.clearTimeout(settleTimer.current);
@@ -355,6 +388,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
   }, []);
 
   const settle = () => {
+    normalizeCyclicScroll();
     updateClosest();
     if (programmaticTarget.current || drag.current.pointerId !== -1 || momentumFrame.current !== undefined) return;
     window.clearTimeout(settleTimer.current);
@@ -365,7 +399,8 @@ function Picker({ label, options, value, onChange, compact = false }: {
 
   const move = (direction: number) => {
     const index = options.indexOf(currentValue.current);
-    const next = options[Math.min(options.length - 1, Math.max(0, index + direction))];
+    const raw = index + direction;
+    const next = cyclic ? options[(raw + options.length) % options.length] : options[Math.min(options.length - 1, Math.max(0, raw))];
     chooseOption(next);
   };
 
@@ -400,7 +435,8 @@ function Picker({ label, options, value, onChange, compact = false }: {
         return;
       }
       const before = element.scrollLeft;
-      element.scrollLeft += drag.current.velocity * elapsed;
+      element.scrollLeft += drag.current.velocity * elapsed * (fast ? 1.32 : 1);
+      normalizeCyclicScroll();
       updateClosest();
       if (Math.abs(element.scrollLeft - before) < 0.1) {
         finish();
@@ -427,7 +463,7 @@ function Picker({ label, options, value, onChange, compact = false }: {
   };
 
   return (
-    <div className={`answer-picker ${compact ? 'compact' : ''}`}>
+    <div className={`answer-picker ${compact ? 'compact' : ''} ${cyclic ? 'cyclic' : ''} ${fast ? 'fast' : ''}`}>
       <span className="picker-label">{label}</span>
       <div className="picker-window">
         <span className="picker-focus" aria-hidden="true" />
@@ -465,9 +501,10 @@ function Picker({ label, options, value, onChange, compact = false }: {
             if (drag.current.distance > 3) drag.current.moved = true;
             if (drag.current.moved) {
               event.preventDefault();
-              ref.current.scrollLeft -= movement;
+              ref.current.scrollLeft -= movement * (fast ? 1.32 : 1);
+              normalizeCyclicScroll();
               updateClosest();
-              const instantaneousVelocity = -movement / elapsed;
+              const instantaneousVelocity = -movement / elapsed * (fast ? 1.32 : 1);
               drag.current.velocity = drag.current.velocity * 0.35 + instantaneousVelocity * 0.65;
             }
             drag.current.lastX = event.clientX;
@@ -480,11 +517,11 @@ function Picker({ label, options, value, onChange, compact = false }: {
             if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); move(1); }
           }}
         >
-          {options.map((option) => (
+          {renderedOptions.map((option, index) => (
             <button
               className={value === option ? 'selected' : ''}
               data-value={option}
-              key={option}
+              key={`${option}-${index}`}
               onClick={() => chooseOption(option)}
               role="option"
               aria-selected={value === option}
@@ -504,21 +541,22 @@ function HuePicker({ value, onChange }: {
   value: string;
   onChange: (value: string) => void;
 }) {
-  return <Picker label="Hue" options={HUE_ORDER} value={value} onChange={onChange} />;
+  return <Picker cyclic fast label="Hue" options={HUE_ORDER} value={value} onChange={onChange} />;
 }
 
-function MobileChoiceRail<T extends string>({ label, value, options, open, compressed, onToggle, onChange }: {
+function MobileChoiceRail<T extends string>({ label, value, options, open, compressed, compact, onToggle, onChange }: {
   label: string;
   value: T;
   options: readonly { id: T; label: string }[];
   open: boolean;
   compressed?: boolean;
+  compact?: boolean;
   onToggle: () => void;
   onChange: (value: T) => void;
 }) {
   const current = options.find((option) => option.id === value) ?? options[0];
   return (
-    <div className={`mobile-choice-rail ${open ? 'open' : ''} ${compressed ? 'compressed' : ''}`} style={{ '--choice-basis': `${Math.min(148, 72 + current.label.length * 6)}px` } as CSSProperties}>
+    <div className={`mobile-choice-rail ${open ? 'open' : ''} ${compressed ? 'compressed' : ''} ${compact ? 'compact' : ''}`} style={{ '--choice-basis': `${Math.min(148, 72 + current.label.length * 6)}px` } as CSSProperties}>
       <button aria-expanded={open} className="mobile-choice-trigger" onClick={onToggle} type="button">
         <span>{label}</span><strong>{current.label}</strong><i aria-hidden="true">›</i>
       </button>
@@ -853,19 +891,44 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, allowValueOn
 const wrapIndex = (index: number, length: number) => ((index % length) + length) % length;
 const normalizeAngle = (angle: number) => ((angle + 180) % 360 + 360) % 360 - 180;
 
-function HuntSurface({ target, questionKey, onPick }: {
+function HuntSurface({ target, questionKey, onPick, submitted }: {
   target: MunsellColor;
   questionKey: number;
   onPick: (pick: HuntPick) => void;
+  submitted: Attempt | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [value, setValue] = useState(5);
   const [point, setPoint] = useState({ x: .5, y: .5 });
+  const [guessRgb, setGuessRgb] = useState<RGB>([92, 156, 145]);
+  const [replaying, setReplaying] = useState(false);
   const dragging = useRef(false);
+  const valueRef = useRef(5);
+  const replayFrame = useRef<number | undefined>(undefined);
+  const replayTimer = useRef<number | undefined>(undefined);
+  const valueChromaMaximums = useRef(new Map<number, number>());
 
-  const maxChromaAt = useCallback((hue: string, nextValue: number) => (
-    HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${nextValue}`)?.at(-1)?.c ?? 0
-  ), []);
+  const valueParts = useCallback((nextValue: number) => {
+    const bounded = Math.max(1, Math.min(9, nextValue));
+    const low = Math.floor(bounded); const high = Math.ceil(bounded);
+    return { low, high, mix: bounded - low };
+  }, []);
+
+  const maxChromaAt = useCallback((hue: string, nextValue: number) => {
+    const { low, high, mix } = valueParts(nextValue);
+    const first = HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${low}`)?.at(-1)?.c ?? 0;
+    const second = HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${high}`)?.at(-1)?.c ?? first;
+    return first * (1 - mix) + second * mix;
+  }, [valueParts]);
+
+  const largestChromaAtValue = useCallback((nextValue: number) => {
+    const key = Math.round(nextValue * 100) / 100;
+    const cached = valueChromaMaximums.current.get(key);
+    if (cached !== undefined) return cached;
+    const maximum = Math.max(2, ...HUE_ORDER.map((hue) => maxChromaAt(hue, nextValue)));
+    valueChromaMaximums.current.set(key, maximum);
+    return maximum;
+  }, [maxChromaAt]);
 
   const fieldSample = useCallback((normalX: number, normalY: number, nextValue: number) => {
     const dx = normalX - .5; const dy = normalY - .5;
@@ -873,39 +936,64 @@ function HuntSurface({ target, questionKey, onPick }: {
     const huePosition = angle * HUE_ORDER.length;
     const hueIndex = Math.floor(huePosition) % HUE_ORDER.length;
     const nextHueIndex = (hueIndex + 1) % HUE_ORDER.length;
-    const mix = huePosition - Math.floor(huePosition);
+    const linearMix = huePosition - Math.floor(huePosition);
+    const mix = .5 - .5 * Math.cos(Math.PI * linearMix);
     const firstHue = HUE_ORDER[hueIndex]; const secondHue = HUE_ORDER[nextHueIndex];
     const firstMax = maxChromaAt(firstHue, nextValue); const secondMax = maxChromaAt(secondHue, nextValue);
     const maxChroma = firstMax * (1 - mix) + secondMax * mix;
-    const boundary = .15 + .31 * (maxChroma / MAX_MUNSELL_CHROMA);
+    const boundary = .23 + .24 * (maxChroma / largestChromaAtValue(nextValue));
     const distance = Math.hypot(dx, dy);
-    if (distance > boundary) return null;
+    if (distance > boundary + .006) return null;
     const chroma = boundary ? Math.max(0, distance / boundary * maxChroma) : 0;
-    const neutral = NEUTRALS[nextValue - 1];
-    const colorFor = (hue: string) => {
-      const available = HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${nextValue}`) ?? [];
-      if (!available.length || chroma < 1) return neutral.rgb;
+    const { low, high, mix: valueMix } = valueParts(nextValue);
+    const neutral = NEUTRALS[low - 1].rgb.map((channel, index) => (
+      channel * (1 - valueMix) + NEUTRALS[high - 1].rgb[index] * valueMix
+    ));
+    const colorAtIntegerValue = (hue: string, integerValue: number) => {
+      const available = HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${integerValue}`) ?? [];
+      if (!available.length || chroma < .4) return NEUTRALS[integerValue - 1].rgb;
       const chip = available.reduce((best, color) => Math.abs(color.c - chroma) < Math.abs(best.c - chroma) ? color : best, available[0]);
       const amount = Math.min(1, chroma / Math.max(1, chip.c));
-      return chip.rgb.map((channel, index) => neutral.rgb[index] + (channel - neutral.rgb[index]) * amount);
+      return chip.rgb.map((channel, index) => NEUTRALS[integerValue - 1].rgb[index] + (channel - NEUTRALS[integerValue - 1].rgb[index]) * amount);
+    };
+    const colorFor = (hue: string) => {
+      const first = colorAtIntegerValue(hue, low); const second = colorAtIntegerValue(hue, high);
+      return first.map((channel, index) => channel * (1 - valueMix) + second[index] * valueMix);
     };
     const first = colorFor(firstHue); const second = colorFor(secondHue);
-    return first.map((channel, index) => Math.round(channel * (1 - mix) + second[index] * mix)) as RGB;
-  }, [maxChromaAt]);
+    const rgb = first.map((channel, index) => Math.round((channel * (1 - mix) + second[index] * mix) * .97 + neutral[index] * .03)) as RGB;
+    const alpha = Math.max(0, Math.min(1, (boundary + .006 - distance) / .009));
+    return { rgb, alpha, boundary };
+  }, [largestChromaAtValue, maxChromaAt, valueParts]);
+
+  const targetPoint = useCallback((color: MunsellColor, nextValue: number) => {
+    const hueIndex = Math.max(0, HUE_ORDER.indexOf(color.h as (typeof HUE_ORDER)[number]));
+    const angle = hueIndex / HUE_ORDER.length * Math.PI * 2;
+    const maxChroma = Math.max(1, maxChromaAt(color.h, nextValue));
+    const boundary = .23 + .24 * (maxChroma / largestChromaAtValue(nextValue));
+    const radius = Math.min(boundary, boundary * color.c / maxChroma);
+    return { x: .5 + Math.sin(angle) * radius, y: .5 - Math.cos(angle) * radius };
+  }, [largestChromaAtValue, maxChromaAt]);
+
+  const emitPick = useCallback((rgb: RGB, nextValue: number, nextPoint: { x: number; y: number }) => {
+    const bucket = Math.max(1, Math.min(9, Math.round(nextValue)));
+    setGuessRgb(rgb);
+    onPick({ rgb, color: nearestMunsellColor(rgb, bucket), value: nextValue, point: nextPoint });
+  }, [onPick]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const size = 280;
+    const size = 320;
     canvas.width = size; canvas.height = size;
     const context = canvas.getContext('2d');
     if (!context) return;
     const image = context.createImageData(size, size);
     for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      const rgb = fieldSample((x + .5) / size, (y + .5) / size, value);
+      const sampled = fieldSample((x + .5) / size, (y + .5) / size, value);
       const offset = (y * size + x) * 4;
-      if (rgb) {
-        image.data[offset] = rgb[0]; image.data[offset + 1] = rgb[1]; image.data[offset + 2] = rgb[2]; image.data[offset + 3] = 255;
+      if (sampled) {
+        image.data[offset] = sampled.rgb[0]; image.data[offset + 1] = sampled.rgb[1]; image.data[offset + 2] = sampled.rgb[2]; image.data[offset + 3] = Math.round(sampled.alpha * 255);
       } else {
         image.data[offset] = 238; image.data[offset + 1] = 237; image.data[offset + 2] = 232; image.data[offset + 3] = 0;
       }
@@ -919,48 +1007,99 @@ function HuntSurface({ target, questionKey, onPick }: {
     const rect = canvas.getBoundingClientRect();
     let x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     let y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
-    let rgb = fieldSample(x, y, value);
-    if (!rgb) {
+    let sampled = fieldSample(x, y, value);
+    if (!sampled) {
       const dx = x - .5; const dy = y - .5;
       const angle = Math.atan2(dy, dx);
       let radius = Math.hypot(dx, dy);
-      while (!rgb && radius > 0) {
+      while (!sampled && radius > 0) {
         radius -= .004;
         x = .5 + Math.cos(angle) * radius; y = .5 + Math.sin(angle) * radius;
-        rgb = fieldSample(x, y, value);
+        sampled = fieldSample(x, y, value);
       }
     }
-    if (!rgb) rgb = [...NEUTRALS[value - 1].rgb] as RGB;
-    setPoint({ x, y });
-    onPick({ rgb, color: nearestMunsellColor(rgb) });
-  }, [fieldSample, onPick, value]);
+    const nextPoint = sampled ? { x, y } : { x: .5, y: .5 };
+    const rgb = sampled?.rgb ?? [...NEUTRALS[Math.round(value) - 1].rgb] as RGB;
+    setPoint(nextPoint);
+    emitPick(rgb, value, nextPoint);
+  }, [emitPick, fieldSample, value]);
 
   useEffect(() => {
     const initial = nearestNotationColor('5BG', 5, 6) ?? NEUTRALS[4];
-    onPick({ rgb: [...initial.rgb] as RGB, color: initial });
-  }, [onPick, questionKey]);
+    const initialPoint = targetPoint(initial, 5);
+    const frame = window.requestAnimationFrame(() => {
+      setPoint(initialPoint);
+      setGuessRgb([...initial.rgb] as RGB);
+      onPick({ rgb: [...initial.rgb] as RGB, color: initial, value: 5, point: initialPoint });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [onPick, questionKey, targetPoint]);
+
+  useEffect(() => {
+    if (!submitted || submitted.exact) return;
+    const startValue = valueRef.current;
+    const startTime = performance.now();
+    const duration = 420;
+    const animateValue = (time: number) => {
+      const progress = Math.min(1, (time - startTime) / duration);
+      const eased = progress ** 3;
+      const nextValue = startValue + (target.v - startValue) * eased;
+      valueRef.current = nextValue;
+      setValue(nextValue);
+      if (progress < 1) replayFrame.current = window.requestAnimationFrame(animateValue);
+      else {
+        setReplaying(true);
+        replayFrame.current = window.requestAnimationFrame(() => setPoint(targetPoint(target, target.v)));
+        replayTimer.current = window.setTimeout(() => setReplaying(false), 760);
+      }
+    };
+    replayFrame.current = window.requestAnimationFrame(animateValue);
+    return () => {
+      if (replayFrame.current !== undefined) window.cancelAnimationFrame(replayFrame.current);
+      if (replayTimer.current !== undefined) window.clearTimeout(replayTimer.current);
+    };
+  }, [submitted, target, targetPoint]);
+
+  const changeValue = (next: number) => {
+    valueRef.current = next;
+    setValue(next);
+    let nextPoint = point;
+    let sampled = fieldSample(point.x, point.y, next);
+    if (!sampled) {
+      const dx = point.x - .5; const dy = point.y - .5; const angle = Math.atan2(dy, dx);
+      let radius = Math.hypot(dx, dy);
+      while (!sampled && radius > 0) {
+        radius -= .004;
+        nextPoint = { x: .5 + Math.cos(angle) * radius, y: .5 + Math.sin(angle) * radius };
+        sampled = fieldSample(nextPoint.x, nextPoint.y, next);
+      }
+      setPoint(nextPoint);
+    }
+    const rgb = sampled?.rgb ?? [...NEUTRALS[Math.round(next) - 1].rgb] as RGB;
+    emitPick(rgb, next, nextPoint);
+  };
 
   return (
     <section className="hunt-stage" aria-label={`Find ${notation(target)} in the color field`}>
-      <header><span>Find This Munsell Chip</span><strong>{notation(target)}</strong></header>
+      <header><span>Find</span><strong>{notation(target)}</strong></header>
       <div className="hunt-field-wrap">
         <div className="hunt-field">
           <canvas
             aria-label={`Hue and chroma field at value ${value}`}
-            onPointerDown={(event) => { dragging.current = true; event.currentTarget.setPointerCapture(event.pointerId); choosePoint(event.clientX, event.clientY); }}
-            onPointerMove={(event) => { if (dragging.current) choosePoint(event.clientX, event.clientY); }}
+            onPointerDown={(event) => { if (submitted) return; dragging.current = true; event.currentTarget.setPointerCapture(event.pointerId); choosePoint(event.clientX, event.clientY); }}
+            onPointerMove={(event) => { if (!submitted && dragging.current) choosePoint(event.clientX, event.clientY); }}
             onPointerUp={(event) => { dragging.current = false; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
             ref={canvasRef}
           />
-          <i className="hunt-cursor" style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }} />
+          <i className={`hunt-cursor ${replaying ? 'replaying' : ''}`} style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }} />
+          <span className="hunt-current"><small>Your Guess</small><i style={{ background: `rgb(${guessRgb.join(',')})` }} /></span>
         </div>
         <label className="hunt-value">
-          <span>N{value}</span>
-          <input aria-label="Munsell value" max="9" min="1" onChange={(event) => { const next = Number(event.target.value); setValue(next); const sampled = fieldSample(point.x, point.y, next); const rgb = sampled ?? [...NEUTRALS[next - 1].rgb] as RGB; if (!sampled) setPoint({ x: .5, y: .5 }); onPick({ rgb, color: nearestMunsellColor(rgb) }); }} step="1" type="range" value={value} />
           <small>Value</small>
+          <input aria-label="Munsell value" disabled={Boolean(submitted)} max="9.49" min=".5" onChange={(event) => changeValue(Number(event.target.value))} step=".01" type="range" value={value} />
+          <span>N{Math.max(1, Math.min(9, Math.round(value)))}</span>
         </label>
       </div>
-      <p>Drag through hue and chroma; move the value rail from black to white.</p>
     </section>
   );
 }
@@ -980,12 +1119,59 @@ function HueMissMap({ target, guess }: { target: string; guess: string }) {
         {HUE_EDGE_COLORS.map((color, index) => (
           <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
         ))}
-        <span className="hue-miss-marker answer travelling" style={{ '--from-position': position(guessIndex), '--to-position': travelPosition } as CSSProperties} />
         <span className="hue-miss-marker guess" style={{ '--position': position(guessIndex) } as CSSProperties} />
+        <span className="hue-miss-marker answer travelling" style={{ '--position': travelPosition, '--from-position': position(guessIndex), '--to-position': travelPosition } as CSSProperties} />
       </div>
       <div className="hue-miss-legend">
         <span><i className="answer" />Correct <strong>{target}</strong></span>
         <span><i className="guess" />Your guess <strong>{guess}</strong></span>
+      </div>
+    </div>
+  );
+}
+
+function HueAnswerMap({ target }: { target: string }) {
+  const targetIndex = Math.max(0, HUE_ORDER.indexOf(target as (typeof HUE_ORDER)[number]));
+  const position = (index: number) => `${index * (360 / HUE_ORDER.length)}deg`;
+  return (
+    <div className="hue-miss-map hue-answer-map" aria-label={`Correct hue ${target}`}>
+      <div className="mini-hue-wheel" aria-hidden="true">
+        {HUE_EDGE_COLORS.map((color, index) => (
+          <span className="mini-hue-chip" key={color.h} style={{ '--position': position(index), '--chip-color': rgbCss(color) } as CSSProperties} />
+        ))}
+        <span className="hue-miss-marker answer" style={{ '--position': position(targetIndex) } as CSSProperties} />
+      </div>
+      <div className="hue-miss-legend single">
+        <span><i className="answer" />Correct <strong>{target}</strong></span>
+      </div>
+    </div>
+  );
+}
+
+function DimensionMissMap({ dimension, target, guess }: {
+  dimension: 'value' | 'chroma';
+  target: MunsellColor;
+  guess: MunsellColor;
+}) {
+  const minimum = dimension === 'value' ? 1 : 0;
+  const available = dimension === 'chroma' ? chromaOptionsFor(target.h, target.v).map(Number) : [];
+  const maximum = dimension === 'value' ? 9 : Math.max(target.c, guess.c, ...available, 2);
+  const targetValue = dimension === 'value' ? target.v : target.c;
+  const guessValue = dimension === 'value' ? guess.v : guess.c;
+  const position = (value: number) => `${Math.max(0, Math.min(100, (value - minimum) / Math.max(1, maximum - minimum) * 100))}%`;
+  const strongest = dimension === 'chroma'
+    ? nearestNotationColor(target.h, target.v, maximum) ?? target
+    : NEUTRALS[8];
+  const weakest = dimension === 'chroma' ? NEUTRALS[target.v - 1] : NEUTRALS[0];
+  return (
+    <div className={`dimension-miss-map ${dimension}`} aria-label={`Correct ${dimension} ${targetValue}; guessed ${guessValue}`}>
+      <div className="dimension-miss-axis" style={{ '--axis-start': rgbCss(weakest), '--axis-end': rgbCss(strongest) } as CSSProperties}>
+        <i className="dimension-miss-marker guess" style={{ '--position': position(guessValue) } as CSSProperties} />
+        <i className="dimension-miss-marker answer travelling" style={{ '--from-position': position(guessValue), '--position': position(targetValue) } as CSSProperties} />
+      </div>
+      <div className="dimension-miss-copy">
+        <span><i className="answer" />Correct <strong>{dimension === 'value' ? `N${targetValue}` : `/${targetValue}`}</strong></span>
+        <span><i className="guess" />Your guess <strong>{dimension === 'value' ? `N${guessValue}` : `/${guessValue}`}</strong></span>
       </div>
     </div>
   );
@@ -1107,7 +1293,7 @@ function createCompareQuestion(dimension: CompareDimension): CompareQuestion {
 }
 
 function HueSlice({ hue }: { hue: string }) {
-  const hueColors = MUNSELL_COLORS.filter((color) => color.h === hue);
+  const hueColors = PRACTICE_COLORS.filter((color) => color.h === hue);
   const maxChroma = Math.max(2, ...hueColors.map((color) => color.c));
   const chromas = Array.from({ length: maxChroma / 2 + 1 }, (_, index) => index * 2);
   return (
@@ -1340,8 +1526,8 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
         if (Math.abs(delta) > 0.2) drag.current.moved = true;
         if (drag.current.moved) {
           event.preventDefault();
-          drag.current.velocity = delta / elapsed;
-          applyRotation(drag.current.total + delta);
+          drag.current.velocity = delta / elapsed * 1.18;
+          applyRotation(drag.current.total + delta * 1.18);
         }
         drag.current.lastAngle = nextAngle;
         drag.current.lastAt = event.timeStamp;
@@ -1352,7 +1538,7 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
       {HUE_ORDER.map((hue, index) => {
         const relative = normalizeAngle((index - activeIndex) * (360 / HUE_ORDER.length));
         const position = relative + rotation;
-        const color = HUE_EDGE_COLORS[index];
+        const color = REFERENCE_HUE_EDGE_COLORS[index];
         return (
           <button
             aria-label={`Select hue ${hue}`}
@@ -1384,11 +1570,11 @@ function HueWheel({ value, onChange }: { value: string; onChange: (hue: string) 
 function ReferenceView() {
   const [hue, setHue] = useState('7.5Y');
   const hueColors = useMemo(() => MUNSELL_COLORS.filter((color) => color.h === hue), [hue]);
-  const [selectedChip, setSelectedChip] = useState<MunsellColor>(() => HUE_TRAINING_POOL.find((color) => color.h === '7.5Y') ?? HUE_TRAINING_POOL[0]);
+  const [selectedChip, setSelectedChip] = useState<MunsellColor>(() => REFERENCE_HUE_EDGE_COLORS.find((color) => color.h === '7.5Y') ?? REFERENCE_HUE_EDGE_COLORS[0]);
 
   const changeHue = (nextHue: string) => {
     const nextColors = MUNSELL_COLORS.filter((color) => color.h === nextHue);
-    const nextChip = HUE_EDGE_COLORS.find((color) => color.h === nextHue) ?? nextColors[0];
+    const nextChip = REFERENCE_HUE_EDGE_COLORS.find((color) => color.h === nextHue) ?? nextColors[0];
     setHue(nextHue);
     if (nextChip) setSelectedChip(nextChip);
   };
@@ -1961,6 +2147,7 @@ export default function Home() {
   }, [attempts]);
 
   const hueMiss = Boolean(!isHunt && submitted && (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0);
+  const dimensionMiss = Boolean(!isHunt && submitted && (exercise === 'value' || exercise === 'chroma'));
   const huntMatch = isHunt && submitted?.perceptualError !== undefined
     ? Math.max(0, Math.round(100 * Math.exp(-submitted.perceptualError / Math.max(.02, localPerceptualStep(target) * 2.4))))
     : null;
@@ -2034,6 +2221,7 @@ export default function Home() {
 
         <div className="mobile-practice-controls" aria-label="Practice controls">
           <MobileChoiceRail<string>
+            compact={isHunt}
             compressed={mobileRail === 'skill'}
             label="View"
             onChange={(next) => { changePresentation(next as SwatchPresentation | 'image' | 'contrast'); setMobileRail(null); }}
@@ -2135,7 +2323,7 @@ export default function Home() {
             })}
           </div>
         ) : isHunt ? (
-          <HuntSurface key={sessionCount} onPick={setHuntPick} questionKey={sessionCount} target={target} />
+          <HuntSurface key={sessionCount} onPick={setHuntPick} questionKey={sessionCount} submitted={submitted} target={target} />
         ) : source === 'swatch' ? (
           <div className={`swatch-stage ${submitted?.exact ? 'is-correct' : ''}`} aria-label="Color swatch">
             {exercise === 'hue' && huePresentation === 'slice' ? (
@@ -2215,6 +2403,7 @@ export default function Home() {
                     <small>{huntMatch !== null ? `${huntMatch}% perceptual match` : streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
                   </div>
                 </div>
+                {exercise === 'hue' && <HueAnswerMap target={target.h} />}
                 <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             ) : submitted.grade === 'close' ? (
@@ -2223,7 +2412,11 @@ export default function Home() {
                   <div><span className="feedback-kicker">Within One Perceptual Step</span><strong>Close</strong></div>
                   <AlbersComparison correct={displayColor(target)} guess={displayColor(guessedColor)} />
                 </div>
-                <div className="feedback-guess"><span>Nearest Chip</span><strong>{visibleAnswer}</strong></div>
+                {hueMiss
+                  ? <HueMissMap target={target.h} guess={resolvedAnswerH} />
+                  : dimensionMiss
+                  ? <DimensionMissMap dimension={exercise as 'value' | 'chroma'} guess={guessedColor} target={target} />
+                  : <div className="feedback-guess"><span>Nearest Chip</span><strong>{visibleAnswer}</strong></div>}
                 <div className="feedback-detail"><strong>{feedbackErrors.join(' · ') || `Target ${visibleTarget}`}</strong><small>{huntMatch !== null ? `${huntMatch}% perceptual match · ` : ''}This will return, but less aggressively than a full miss.</small></div>
                 <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
@@ -2236,7 +2429,9 @@ export default function Home() {
                   </div>
                   <AlbersComparison correct={displayColor(target)} guess={displayColor(guessedColor)} />
                 </div>
-                {!hueMiss && <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>}
+                {!hueMiss && (dimensionMiss
+                  ? <DimensionMissMap dimension={exercise as 'value' | 'chroma'} guess={guessedColor} target={target} />
+                  : <div className="feedback-guess"><span>Your guess</span><strong>{visibleAnswer}</strong></div>)}
                 {hueMiss && <HueMissMap target={target.h} guess={resolvedAnswerH} />}
                 <div className="feedback-detail">
                   <strong>{feedbackErrors.join(' · ')}</strong>

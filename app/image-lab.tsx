@@ -17,7 +17,7 @@ type RGB = [number, number, number];
 type Lab = readonly [number, number, number];
 type ImageMode = 'original' | 'block' | 'value';
 type QuantizedImage = { width: number; height: number; labels: Uint8Array; counts: number[] };
-type Sample = { x: number; y: number; rgb: RGB; color: MunsellColor };
+type Sample = { x: number; y: number; rgb: RGB; displayRgb: RGB; color: MunsellColor };
 type PaletteCandidate = {
   color: MunsellColor;
   lab: [number, number, number];
@@ -577,9 +577,11 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         for (let index = 0; index < quantized.labels.length; index++) {
           const offset = index * 4;
           if (quantized.labels[index] !== highlightedIndex) {
-            display.data[offset] = Math.round(display.data[offset] * .38 + 238 * .2);
-            display.data[offset + 1] = Math.round(display.data[offset + 1] * .38 + 237 * .2);
-            display.data[offset + 2] = Math.round(display.data[offset + 2] * .38 + 232 * .2);
+            const luminance = display.data[offset] * .2126 + display.data[offset + 1] * .7152 + display.data[offset + 2] * .0722;
+            const flattened = 150 + (luminance - 150) * .24;
+            display.data[offset] = Math.round(flattened + 2);
+            display.data[offset + 1] = Math.round(flattened + 1);
+            display.data[offset + 2] = Math.round(flattened - 2);
           } else {
             const x = index % quantized.width; const y = Math.floor(index / quantized.width);
             const boundary = x === 0 || y === 0 || x === quantized.width - 1 || y === quantized.height - 1
@@ -659,9 +661,17 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       r += raw.data[offset]; g += raw.data[offset + 1]; b += raw.data[offset + 2]; count += 1;
     }
     const rgb = [Math.round(r / count), Math.round(g / count), Math.round(b / count)] as RGB;
-    const next = { x: x / raw.width, y: y / raw.height, rgb, color: nearestChip(rgb) };
+    const label = quantized?.labels[y * raw.width + x];
+    const blockColor = label === undefined ? null : palette[label] ?? null;
+    const color = mode === 'original' ? nearestChip(rgb) : blockColor ?? nearestChip(rgb);
+    const displayRgb = mode === 'original'
+      ? rgb
+      : mode === 'value'
+        ? [...NEUTRALS[Math.max(0, Math.min(8, color.v - 1))].rgb] as RGB
+        : [...color.rgb] as RGB;
+    const next = { x: x / raw.width, y: y / raw.height, rgb, displayRgb, color };
     setHighlightedKey(''); setSample(next); setSelectedKey(notation(next.color)); return next;
-  }, []);
+  }, [mode, palette, quantized]);
 
   const addChip = useCallback((color = sample?.color) => {
     if (!color) return;
@@ -783,11 +793,11 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         <div><input accept="image/*" hidden onChange={chooseFile} ref={fileRef} type="file" /><button className="outline-button" onClick={() => fileRef.current?.click()} type="button">Choose image</button></div>
       </header>
       <div className="image-lab-toolbar">
-        <div className="segmented image-mode-switch" aria-label="Image view">{([['original', 'Original'], ['block', 'Block-in'], ['value', 'Value']] as const).map(([id, label]) => <button className={mode === id ? 'active' : ''} key={id} onClick={() => setMode(id)} type="button">{label}</button>)}</div>
+        <div className="segmented image-mode-switch" aria-label="Image view">{([['original', 'Original'], ['block', 'Block-in'], ['value', 'Value']] as const).map(([id, label]) => <button className={mode === id ? 'active' : ''} key={id} onClick={() => { setMode(id); setSample(null); }} type="button">{label}</button>)}</div>
         <span className="sr-only" aria-live="polite">Image zoom {Math.round(zoom * 100)} percent</span>
       </div>
       <div className="image-lab-stage">
-        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -54 : 54; const offsetY = sample.y < .2 ? 38 : -38; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.rgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
+        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -36 : 36; const offsetY = sample.y < .2 ? 26 : -26; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.displayRgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
         {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
@@ -796,7 +806,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       </div>
       <p className="mass-dock-note">{palette.length} Munsell chips · tap to show its mass · hold to remove</p>
       <div className="sample-sheet">
-        <div className="sample-identity"><div className="sample-swatches">{sample && <span className="sample-large raw" style={{ background: rgbCss(sample.rgb) }} title="Sampled screen color" />}<span className="sample-large" style={{ background: chipCss(selectedColor) }} title="Nearest Munsell chip" /></div><div className="sample-copy"><span className="eyebrow">{sample ? 'Sampled RGB → Munsell' : 'Closest Munsell Chip'}</span><strong>{notation(selectedColor)}</strong>{sample && <small>{sample.rgb.join(', ')}</small>}</div></div>
+        <div className="sample-identity"><div className="sample-swatches">{sample && <span className="sample-large raw" style={{ background: rgbCss(sample.displayRgb) }} title={mode === 'original' ? 'Sampled screen color' : mode === 'block' ? 'Block-in color' : 'Munsell value'} />}<span className="sample-large" style={{ background: chipCss(selectedColor) }} title="Nearest Munsell chip" /></div><div className="sample-copy"><span className="eyebrow">{sample ? mode === 'original' ? 'Screen RGB → Munsell' : mode === 'block' ? 'Block-In Chip' : `Munsell Value N${selectedColor.v}` : 'Closest Munsell Chip'}</span><strong>{notation(selectedColor)}</strong>{sample && mode === 'original' && <small>{sample.rgb.join(', ')}</small>}</div></div>
         <div className="sample-actions"><button className="outline-button" disabled={!sample || palette.some((color) => notation(color) === notation(sample.color))} onClick={() => addChip()} type="button">Add chip</button><button className="dark-button" onClick={() => onSendToMixer(selectedColor)} type="button">Send to Mix</button></div>
         {recipe && <div className="sample-paint-match"><span style={{ background: rgbCss(recipe.rgb) }} /><small>Closest from active palette</small><strong>{recipe.ingredients.map(({ paint, parts }) => `${parts} ${paint.name}`).join(' · ')}</strong></div>}
       </div>
