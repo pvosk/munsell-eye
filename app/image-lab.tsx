@@ -24,14 +24,58 @@ type PaletteCandidate = {
   largestCoverage: number;
   coherence: number;
 };
+type StoredImageWorkspace = {
+  blob: Blob;
+  mode: ImageMode;
+  name: string;
+  palette: string[];
+};
 
-const INITIAL_CHIP_COUNT = 7;
+const INITIAL_CHIP_COUNT = 10;
 const MAX_CHIP_COUNT = 18;
 const ANALYSIS_SAMPLE_LIMIT = 15000;
 const PROVISIONAL_CLUSTER_COUNT = 22;
+const IMAGE_WORKSPACE_DB = 'munsell-eye-image-workspace-v1';
+const IMAGE_WORKSPACE_STORE = 'workspace';
+const IMAGE_WORKSPACE_KEY = 'current';
 const rgbCss = (rgb: RGB) => `rgb(${rgb.join(',')})`;
 const chipCss = (color: MunsellColor) => rgbCss(color.rgb);
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
+const COLOR_BY_NOTATION = new Map([...MUNSELL_COLORS, ...NEUTRALS].map((color) => [notation(color), color]));
+
+function openImageWorkspaceDb() {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(IMAGE_WORKSPACE_DB, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(IMAGE_WORKSPACE_STORE);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function readImageWorkspace() {
+  try {
+    const database = await openImageWorkspaceDb();
+    return await new Promise<StoredImageWorkspace | null>((resolve) => {
+      const transaction = database.transaction(IMAGE_WORKSPACE_STORE, 'readonly');
+      const request = transaction.objectStore(IMAGE_WORKSPACE_STORE).get(IMAGE_WORKSPACE_KEY);
+      request.onsuccess = () => resolve((request.result as StoredImageWorkspace | undefined) ?? null);
+      request.onerror = () => resolve(null);
+      transaction.oncomplete = () => database.close();
+    });
+  } catch { return null; }
+}
+
+async function writeImageWorkspace(workspace: StoredImageWorkspace) {
+  try {
+    const database = await openImageWorkspaceDb();
+    await new Promise<void>((resolve) => {
+      const transaction = database.transaction(IMAGE_WORKSPACE_STORE, 'readwrite');
+      transaction.objectStore(IMAGE_WORKSPACE_STORE).put(workspace, IMAGE_WORKSPACE_KEY);
+      transaction.oncomplete = () => { database.close(); resolve(); };
+      transaction.onerror = () => { database.close(); resolve(); };
+    });
+  } catch { /* Device storage can be unavailable in private browsing. */ }
+}
 
 function rgbToOklab(rgb: RGB): Lab {
   const linear = rgb.map((channel) => {
@@ -387,7 +431,9 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const labFieldRef = useRef<Float32Array | null>(null);
   const originalCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
-  const pressRef = useRef<{ id: number; x: number; y: number; moved: boolean } | null>(null);
+  const sourceBlobRef = useRef<Blob | null>(null);
+  const pressRef = useRef<{ id: number; x: number; y: number; moved: boolean; triggered: boolean; color: MunsellColor } | null>(null);
+  const addPressTimerRef = useRef<number | undefined>(undefined);
   const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{ distance: number; zoom: number; anchorX: number; anchorY: number } | null>(null);
   const pinchingRef = useRef(false);
@@ -405,7 +451,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const [sample, setSample] = useState<Sample | null>(null);
   const [zoom, setZoom] = useState(1);
 
-  const loadSource = useCallback((src: string, name: string) => {
+  const loadSource = useCallback((src: string, name: string, restoredPalette: MunsellColor[] = []) => {
     setLoading(true);
     const image = new Image();
     image.decoding = 'async';
@@ -427,7 +473,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       softContext.filter = `blur(${Math.max(.8, Math.min(1.6, Math.min(width, height) / 300))}px)`;
       softContext.drawImage(rawCanvas, 0, 0);
       const labs = buildLabField(softContext.getImageData(0, 0, width, height));
-      const nextPalette = initialPalette(labs, width, height);
+      const nextPalette = restoredPalette.length ? restoredPalette : initialPalette(labs, width, height);
       rawDataRef.current = raw;
       labFieldRef.current = labs;
       originalCanvasRef.current = rawCanvas;
@@ -454,13 +500,37 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => loadSource('/practice/still-life-fruit.jpg', 'Fruit study example'), 0);
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void readImageWorkspace().then((workspace) => {
+        if (!active) return;
+        if (workspace?.blob) {
+          sourceBlobRef.current = workspace.blob;
+          objectUrlRef.current = URL.createObjectURL(workspace.blob);
+          setMode(workspace.mode ?? 'block');
+          const restoredPalette = workspace.palette.map((entry) => COLOR_BY_NOTATION.get(entry)).filter((color): color is MunsellColor => Boolean(color));
+          loadSource(objectUrlRef.current, workspace.name, restoredPalette);
+        } else {
+          loadSource('/practice/still-life-fruit.jpg', 'Fruit study example');
+        }
+      });
+    }, 0);
     return () => {
+      active = false;
       window.clearTimeout(timer);
+      window.clearTimeout(addPressTimerRef.current);
       if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
       if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
   }, [loadSource]);
+
+  useEffect(() => {
+    if (!sourceBlobRef.current || !sourceVersion || !palette.length) return;
+    const timer = window.setTimeout(() => {
+      if (sourceBlobRef.current) void writeImageWorkspace({ blob: sourceBlobRef.current, mode, name: sourceName, palette: palette.map(notation) });
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [mode, palette, sourceName, sourceVersion]);
 
   useEffect(() => {
     const raw = rawDataRef.current;
@@ -564,8 +634,14 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     setSelectedKey(notation(color));
   }, [sample]);
 
+  const cancelAddHold = () => {
+    window.clearTimeout(addPressTimerRef.current);
+    addPressTimerRef.current = undefined;
+  };
+
   const pointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     event.preventDefault();
+    cancelAddHold();
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
     if (activePointersRef.current.size >= 2) {
@@ -584,10 +660,18 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       };
       pinchingRef.current = true;
       pressRef.current = null;
+      cancelAddHold();
       return;
     }
-    sampleAt(event.clientX, event.clientY);
-    pressRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+    const next = sampleAt(event.clientX, event.clientY);
+    if (!next) return;
+    pressRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false, triggered: false, color: next.color };
+    addPressTimerRef.current = window.setTimeout(() => {
+      const press = pressRef.current;
+      if (!press || press.id !== event.pointerId || press.moved || pinchingRef.current) return;
+      press.triggered = true;
+      addChip(press.color);
+    }, 480);
   };
   const pointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (!activePointersRef.current.has(event.pointerId)) return;
@@ -604,24 +688,24 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       return;
     }
     const press = pressRef.current; if (!press || press.id !== event.pointerId || pinchingRef.current) return;
-    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 5) press.moved = true;
-    sampleAt(event.clientX, event.clientY);
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) {
+      press.moved = true;
+      cancelAddHold();
+    }
+    const next = sampleAt(event.clientX, event.clientY);
+    if (next) press.color = next.color;
   };
   const pointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     event.preventDefault();
-    const wasPinching = pinchingRef.current;
+    cancelAddHold();
     activePointersRef.current.delete(event.pointerId);
-    const press = pressRef.current;
-    if (!wasPinching && press?.id === event.pointerId) {
-      const next = sampleAt(event.clientX, event.clientY);
-      if (!press.moved && next) addChip(next.color);
-    }
     if (!activePointersRef.current.size) pinchingRef.current = false;
     if (activePointersRef.current.size < 2) pinchRef.current = null;
     pressRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const pointerCancel = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    cancelAddHold();
     activePointersRef.current.delete(event.pointerId);
     if (!activePointersRef.current.size) pinchingRef.current = false;
     if (activePointersRef.current.size < 2) pinchRef.current = null;
@@ -644,13 +728,14 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const chooseFile = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]; if (!file) return;
     if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    sourceBlobRef.current = file;
     objectUrlRef.current = URL.createObjectURL(file); loadSource(objectUrlRef.current, file.name.replace(/\.[^.]+$/, '')); event.target.value = '';
   };
 
   return (
     <section className="image-lab" aria-labelledby="image-lab-title">
       <header className="image-lab-head">
-        <div><span className="eyebrow">Image</span><h1 id="image-lab-title">Build a Munsell Block-In</h1><p>Begin with seven large color masses, then add only the chips the painting needs.</p></div>
+        <div><span className="eyebrow">Image</span><h1 id="image-lab-title">Build a Munsell Block-In</h1><p>Begin with ten large color masses, then add only the chips the painting needs.</p></div>
         <div><input accept="image/*" hidden onChange={chooseFile} ref={fileRef} type="file" /><button className="outline-button" onClick={() => fileRef.current?.click()} type="button">Choose image</button></div>
       </header>
       <div className="image-lab-toolbar">
@@ -659,7 +744,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       </div>
       <div className="image-lab-stage">
         <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && <span className="image-lab-sample" style={{ background: chipCss(sample.color), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` }} />}</div></div>
-        {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap to add · drag to inspect · pinch or wheel to zoom</span>
+        {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
       <div className="mass-dock" aria-label="Munsell block-in palette ordered from light to dark">
