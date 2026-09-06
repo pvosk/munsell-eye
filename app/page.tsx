@@ -40,8 +40,10 @@ const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
 type AppView = 'practice' | 'image' | 'mix' | 'explore' | 'reference';
-type SwatchPresentation = 'isolated' | 'context';
+type SwatchPresentation = 'isolated' | 'context' | 'hunt';
 type HuePresentation = 'swatch' | 'slice';
+type RGB = [number, number, number];
+type HuntPick = { rgb: RGB; color: MunsellColor };
 type CompareDimension = 'value' | 'chroma' | 'hue';
 type CompareQuestion = {
   prompt: string;
@@ -125,6 +127,52 @@ const familyOf = (hue: string) => hue.replace(/[\d.]/g, '');
 const rgbCss = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 
+function rgbArrayToOklab(rgb: readonly number[]) {
+  const linear = rgb.map((channel) => {
+    const value = channel / 255;
+    return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+  });
+  const l = .4122214708 * linear[0] + .5363325363 * linear[1] + .0514459929 * linear[2];
+  const m = .2119034982 * linear[0] + .6806995451 * linear[1] + .1073969566 * linear[2];
+  const s = .0883024619 * linear[0] + .2817188376 * linear[1] + .6299787005 * linear[2];
+  const lRoot = Math.cbrt(l); const mRoot = Math.cbrt(m); const sRoot = Math.cbrt(s);
+  return [
+    .2104542553 * lRoot + .793617785 * mRoot - .0040720468 * sRoot,
+    1.9779984951 * lRoot - 2.428592205 * mRoot + .4505937099 * sRoot,
+    .0259040371 * lRoot + .7827717662 * mRoot - .808675766 * sRoot,
+  ] as const;
+}
+
+function rgbPerceptualDistance(first: readonly number[], second: readonly number[]) {
+  const a = rgbArrayToOklab(first); const b = rgbArrayToOklab(second);
+  return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+const ALL_MUNSELL_CHIPS = [...MUNSELL_COLORS, ...NEUTRALS];
+const MUNSELL_LABS = ALL_MUNSELL_CHIPS.map((color) => ({ color, lab: rgbArrayToOklab(color.rgb) }));
+const HUNT_CHIPS_BY_HUE_VALUE = new Map<string, MunsellColor[]>();
+for (const color of MUNSELL_COLORS) {
+  const key = `${color.h}:${color.v}`;
+  HUNT_CHIPS_BY_HUE_VALUE.set(key, [...(HUNT_CHIPS_BY_HUE_VALUE.get(key) ?? []), color].sort((a, b) => a.c - b.c));
+}
+
+function nearestMunsellColor(rgb: RGB) {
+  const lab = rgbArrayToOklab(rgb);
+  return MUNSELL_LABS.reduce((best, entry) => {
+    const distance = Math.hypot(lab[0] - entry.lab[0], lab[1] - entry.lab[1], lab[2] - entry.lab[2]);
+    return distance < best.distance ? { color: entry.color, distance } : best;
+  }, { color: MUNSELL_LABS[0].color, distance: Number.POSITIVE_INFINITY }).color;
+}
+
+function localPerceptualStep(target: MunsellColor) {
+  return MUNSELL_LABS.reduce((best, entry) => {
+    if (notation(entry.color) === notation(target)) return best;
+    if (Math.abs(entry.color.v - target.v) > 1) return best;
+    const distance = rgbPerceptualDistance(entry.color.rgb, target.rgb);
+    return Math.min(best, distance);
+  }, Number.POSITIVE_INFINITY);
+}
+
 function chromaOptionsFor(hue: string, value?: number) {
   const exact = MUNSELL_COLORS.filter((color) => color.h === hue && (value === undefined || color.v === value));
   const candidates = exact.length ? exact : MUNSELL_COLORS.filter((color) => color.h === hue);
@@ -180,7 +228,7 @@ function weaknessWeight(color: MunsellColor, exercise: Exercise, attempts: Attem
     if (exercise === 'family') return sum + attempt.valueError + attempt.chromaError;
     return sum + attempt.valueError + attempt.hueError + attempt.chromaError;
   }, 0) / recent.length;
-  const misses = recent.filter((attempt) => !attempt.exact).length / recent.length;
+  const misses = recent.reduce((sum, attempt) => sum + (attempt.grade === 'close' ? .35 : attempt.exact ? 0 : 1), 0) / recent.length;
   return Math.min(2.15, 1 + error * 0.12 + misses * 0.4);
 }
 
@@ -805,6 +853,118 @@ function PracticeImage({ prompt, exercise, questionKey, monochrome, allowValueOn
 const wrapIndex = (index: number, length: number) => ((index % length) + length) % length;
 const normalizeAngle = (angle: number) => ((angle + 180) % 360 + 360) % 360 - 180;
 
+function HuntSurface({ target, questionKey, onPick }: {
+  target: MunsellColor;
+  questionKey: number;
+  onPick: (pick: HuntPick) => void;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [value, setValue] = useState(5);
+  const [point, setPoint] = useState({ x: .5, y: .5 });
+  const dragging = useRef(false);
+
+  const maxChromaAt = useCallback((hue: string, nextValue: number) => (
+    HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${nextValue}`)?.at(-1)?.c ?? 0
+  ), []);
+
+  const fieldSample = useCallback((normalX: number, normalY: number, nextValue: number) => {
+    const dx = normalX - .5; const dy = normalY - .5;
+    const angle = (Math.atan2(dx, -dy) / (Math.PI * 2) + 1) % 1;
+    const huePosition = angle * HUE_ORDER.length;
+    const hueIndex = Math.floor(huePosition) % HUE_ORDER.length;
+    const nextHueIndex = (hueIndex + 1) % HUE_ORDER.length;
+    const mix = huePosition - Math.floor(huePosition);
+    const firstHue = HUE_ORDER[hueIndex]; const secondHue = HUE_ORDER[nextHueIndex];
+    const firstMax = maxChromaAt(firstHue, nextValue); const secondMax = maxChromaAt(secondHue, nextValue);
+    const maxChroma = firstMax * (1 - mix) + secondMax * mix;
+    const boundary = .15 + .31 * (maxChroma / MAX_MUNSELL_CHROMA);
+    const distance = Math.hypot(dx, dy);
+    if (distance > boundary) return null;
+    const chroma = boundary ? Math.max(0, distance / boundary * maxChroma) : 0;
+    const neutral = NEUTRALS[nextValue - 1];
+    const colorFor = (hue: string) => {
+      const available = HUNT_CHIPS_BY_HUE_VALUE.get(`${hue}:${nextValue}`) ?? [];
+      if (!available.length || chroma < 1) return neutral.rgb;
+      const chip = available.reduce((best, color) => Math.abs(color.c - chroma) < Math.abs(best.c - chroma) ? color : best, available[0]);
+      const amount = Math.min(1, chroma / Math.max(1, chip.c));
+      return chip.rgb.map((channel, index) => neutral.rgb[index] + (channel - neutral.rgb[index]) * amount);
+    };
+    const first = colorFor(firstHue); const second = colorFor(secondHue);
+    return first.map((channel, index) => Math.round(channel * (1 - mix) + second[index] * mix)) as RGB;
+  }, [maxChromaAt]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const size = 280;
+    canvas.width = size; canvas.height = size;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    const image = context.createImageData(size, size);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const rgb = fieldSample((x + .5) / size, (y + .5) / size, value);
+      const offset = (y * size + x) * 4;
+      if (rgb) {
+        image.data[offset] = rgb[0]; image.data[offset + 1] = rgb[1]; image.data[offset + 2] = rgb[2]; image.data[offset + 3] = 255;
+      } else {
+        image.data[offset] = 238; image.data[offset + 1] = 237; image.data[offset + 2] = 232; image.data[offset + 3] = 0;
+      }
+    }
+    context.putImageData(image, 0, 0);
+  }, [fieldSample, value]);
+
+  const choosePoint = useCallback((clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    let x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    let y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height));
+    let rgb = fieldSample(x, y, value);
+    if (!rgb) {
+      const dx = x - .5; const dy = y - .5;
+      const angle = Math.atan2(dy, dx);
+      let radius = Math.hypot(dx, dy);
+      while (!rgb && radius > 0) {
+        radius -= .004;
+        x = .5 + Math.cos(angle) * radius; y = .5 + Math.sin(angle) * radius;
+        rgb = fieldSample(x, y, value);
+      }
+    }
+    if (!rgb) rgb = [...NEUTRALS[value - 1].rgb] as RGB;
+    setPoint({ x, y });
+    onPick({ rgb, color: nearestMunsellColor(rgb) });
+  }, [fieldSample, onPick, value]);
+
+  useEffect(() => {
+    const initial = nearestNotationColor('5BG', 5, 6) ?? NEUTRALS[4];
+    onPick({ rgb: [...initial.rgb] as RGB, color: initial });
+  }, [onPick, questionKey]);
+
+  return (
+    <section className="hunt-stage" aria-label={`Find ${notation(target)} in the color field`}>
+      <header><span>Find This Munsell Chip</span><strong>{notation(target)}</strong></header>
+      <div className="hunt-field-wrap">
+        <div className="hunt-field">
+          <canvas
+            aria-label={`Hue and chroma field at value ${value}`}
+            onPointerDown={(event) => { dragging.current = true; event.currentTarget.setPointerCapture(event.pointerId); choosePoint(event.clientX, event.clientY); }}
+            onPointerMove={(event) => { if (dragging.current) choosePoint(event.clientX, event.clientY); }}
+            onPointerUp={(event) => { dragging.current = false; if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId); }}
+            ref={canvasRef}
+          />
+          <i className="hunt-cursor" style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }} />
+        </div>
+        <label className="hunt-value">
+          <span>N{value}</span>
+          <input aria-label="Munsell value" max="9" min="1" onChange={(event) => { const next = Number(event.target.value); setValue(next); const sampled = fieldSample(point.x, point.y, next); const rgb = sampled ?? [...NEUTRALS[next - 1].rgb] as RGB; if (!sampled) setPoint({ x: .5, y: .5 }); onPick({ rgb, color: nearestMunsellColor(rgb) }); }} step="1" type="range" value={value} />
+          <small>Value</small>
+        </label>
+      </div>
+      <p>Drag through hue and chroma; move the value rail from black to white.</p>
+    </section>
+  );
+}
+
 function HueMissMap({ target, guess }: { target: string; guess: string }) {
   const targetIndex = Math.max(0, HUE_ORDER.indexOf(target as (typeof HUE_ORDER)[number]));
   const guessIndex = Math.max(0, HUE_ORDER.indexOf(guess as (typeof HUE_ORDER)[number]));
@@ -1302,6 +1462,7 @@ export default function Home() {
   const [answerH, setAnswerH] = useState('5BG');
   const [answerV, setAnswerV] = useState('5');
   const [answerC, setAnswerC] = useState('6');
+  const [huntPick, setHuntPick] = useState<HuntPick | null>(null);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [submitted, setSubmitted] = useState<Attempt | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
@@ -1340,7 +1501,7 @@ export default function Home() {
         const stored = JSON.parse(window.localStorage.getItem(APP_STATE_STORAGE_KEY) ?? '{}') as Record<string, unknown>;
         if (['practice', 'image', 'mix', 'explore', 'reference'].includes(String(stored.view))) setView(stored.view as AppView);
         if (['swatch', 'image'].includes(String(stored.source))) setSource(stored.source as SourceMode);
-        if (['isolated', 'context'].includes(String(stored.swatchPresentation))) setSwatchPresentation(stored.swatchPresentation as SwatchPresentation);
+        if (['isolated', 'context', 'hunt'].includes(String(stored.swatchPresentation))) setSwatchPresentation(stored.swatchPresentation as SwatchPresentation);
         if (['swatch', 'slice'].includes(String(stored.huePresentation))) setHuePresentation(stored.huePresentation as HuePresentation);
         if (['value', 'hue', 'chroma', 'family', 'full', 'compare'].includes(String(stored.exercise))) setExercise(stored.exercise as Exercise);
         if (typeof stored.valueMonochrome === 'boolean') setValueMonochrome(stored.valueMonochrome);
@@ -1398,6 +1559,7 @@ export default function Home() {
     setAnswerH('5BG');
     setAnswerV('5');
     setChromaAnswer('6');
+    setHuntPick(null);
     setSubmitted(null);
     startedAt.current = Date.now();
   }, [setChromaAnswer]);
@@ -1447,6 +1609,7 @@ export default function Home() {
   }, [attempts, compareDimension, exercise, familyHue, imagePrompt.id, resetAnswer, setChromaAnswer, source]);
 
   const presentation: SwatchPresentation | 'image' | 'contrast' = exercise === 'compare' ? 'contrast' : source === 'image' ? 'image' : swatchPresentation;
+  const isHunt = presentation === 'hunt';
 
   const changePresentation = (next: SwatchPresentation | 'image' | 'contrast') => {
     if (next === presentation) return;
@@ -1460,6 +1623,14 @@ export default function Home() {
       setSource('swatch');
       setSwatchPresentation('isolated');
       nextQuestion('swatch', 'compare', familyHue, compareDimension);
+      return;
+    }
+    if (next === 'hunt') {
+      lastStandardExercise.current = 'full';
+      setExercise('full');
+      setSource('swatch');
+      setSwatchPresentation('hunt');
+      nextQuestion('swatch', 'full', familyHue);
       return;
     }
     const nextSource: SourceMode = next === 'image' ? 'image' : 'swatch';
@@ -1478,6 +1649,7 @@ export default function Home() {
     if (next === 'compare') return;
     lastStandardExercise.current = next;
     const nextSource = next === 'family' ? 'swatch' : source;
+    if (swatchPresentation === 'hunt') setSwatchPresentation('isolated');
     setExercise(next);
     if (next === 'family') setSource('swatch');
     nextQuestion(nextSource, next, familyHue);
@@ -1562,6 +1734,8 @@ export default function Home() {
       valueError: Math.abs(answer.v - correct.v),
       chromaError: Math.abs(answer.c - correct.c) / 2,
       exact,
+      grade: exact ? 'exact' : 'miss',
+      mode: 'identify',
       responseMs: Date.now() - startedAt.current,
     };
     setCompareChoice(index);
@@ -1579,14 +1753,26 @@ export default function Home() {
   };
 
   const submit = async () => {
-    if (!imageReady || submitted) return;
+    if (!imageReady || submitted || (isHunt && !huntPick)) return;
     const submittedH = answerHLive.current;
     const submittedV = answerVLive.current;
     const submittedC = answerCLive.current;
-    const hueError = target.h === 'N' || exercise === 'family' ? 0 : hueDistance(submittedH, target.h);
-    const valueError = Math.abs(Number(submittedV) - target.v);
-    const chromaError = target.c === 0 ? 0 : Math.abs(Number(submittedC) - target.c) / 2;
-    const exact = exercise === 'value'
+    const conventionalAnswer = exercise === 'value'
+      ? nearestNotationColor(target.h, Number(submittedV), target.c) ?? NEUTRALS[Number(submittedV) - 1]
+      : exercise === 'hue'
+        ? nearestNotationColor(submittedH, target.v, target.c) ?? target
+        : exercise === 'chroma'
+          ? nearestNotationColor(target.h, target.v, Number(submittedC)) ?? target
+          : exercise === 'family'
+            ? nearestNotationColor(familyHue, Number(submittedV), Number(submittedC)) ?? target
+            : nearestNotationColor(submittedH, Number(submittedV), Number(submittedC)) ?? target;
+    const answerColor = isHunt ? huntPick!.color : conventionalAnswer;
+    const hueError = target.h === 'N' || exercise === 'family' ? 0 : hueDistance(answerColor.h, target.h);
+    const valueError = Math.abs(answerColor.v - target.v);
+    const chromaError = target.c === 0 ? 0 : Math.abs(answerColor.c - target.c) / 2;
+    const exact = isHunt
+      ? notation(answerColor) === notation(target)
+      : exercise === 'value'
       ? valueError === 0
       : exercise === 'hue'
         ? hueError === 0
@@ -1595,20 +1781,26 @@ export default function Home() {
           : exercise === 'family'
             ? valueError === 0 && chromaError === 0
             : hueError === 0 && valueError === 0 && chromaError === 0;
+    const perceptualError = rgbPerceptualDistance(isHunt ? huntPick!.rgb : answerColor.rgb, target.rgb);
+    const closeThreshold = Math.max(.035, Math.min(.085, localPerceptualStep(target) * 1.18));
+    const grade: NonNullable<Attempt['grade']> = exact ? 'exact' : exercise !== 'value' && perceptualError <= closeThreshold ? 'close' : 'miss';
     const attempt: Attempt = {
       createdAt: Date.now(),
-      source,
+      source: isHunt ? 'swatch' : source,
       exercise,
       targetH: target.h,
       targetV: target.v,
       targetC: target.c,
-      answerH: exercise === 'family' ? familyHue : submittedH,
-      answerV: Number(submittedV),
-      answerC: Number(submittedC),
+      answerH: answerColor.h,
+      answerV: answerColor.v,
+      answerC: answerColor.c,
       hueError,
       valueError,
       chromaError,
       exact,
+      grade,
+      perceptualError,
+      mode: isHunt ? 'hunt' : 'identify',
       responseMs: Date.now() - startedAt.current,
     };
     setSubmitted(attempt);
@@ -1673,7 +1865,9 @@ export default function Home() {
     return () => window.removeEventListener('keydown', handleKeyboard);
   });
 
-  const promptText = exercise === 'value'
+  const promptText = isHunt
+    ? `Find ${notation(target)}`
+    : exercise === 'value'
     ? 'Identify this value'
     : exercise === 'hue'
       ? 'Identify this hue'
@@ -1694,7 +1888,9 @@ export default function Home() {
   const resolvedAnswerH = submitted?.answerH ?? answerH;
   const resolvedAnswerV = String(submitted?.answerV ?? answerV);
   const resolvedAnswerC = String(submitted?.answerC ?? answerC);
-  const visibleAnswer = exercise === 'value'
+  const visibleAnswer = isHunt
+    ? notation(huntPick?.color ?? target)
+    : exercise === 'value'
     ? `N${resolvedAnswerV}`
     : exercise === 'hue'
       ? resolvedAnswerH
@@ -1711,12 +1907,13 @@ export default function Home() {
         ? `/${target.c}`
         : notation(target);
   const guessedColor = useMemo(() => {
+    if (isHunt) return nearestNotationColor(resolvedAnswerH, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? huntPick?.color ?? target;
     if (exercise === 'value') return nearestNotationColor(target.h, Number(resolvedAnswerV), target.c) ?? NEUTRALS[Number(resolvedAnswerV) - 1];
     if (exercise === 'hue') return nearestNotationColor(resolvedAnswerH, target.v, target.c) ?? target;
     if (exercise === 'chroma') return nearestNotationColor(target.h, target.v, Number(resolvedAnswerC)) ?? target;
     if (exercise === 'family') return nearestNotationColor(familyHue, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? target;
     return nearestNotationColor(resolvedAnswerH, Number(resolvedAnswerV), Number(resolvedAnswerC)) ?? target;
-  }, [exercise, familyHue, resolvedAnswerC, resolvedAnswerH, resolvedAnswerV, target]);
+  }, [exercise, familyHue, huntPick?.color, isHunt, resolvedAnswerC, resolvedAnswerH, resolvedAnswerV, target]);
   const missPrompt = submitted ? MISS_PROMPTS[Math.floor(submitted.createdAt / 1000) % MISS_PROMPTS.length] : MISS_PROMPTS[0];
   const exerciseOptions: [Exercise, string][] = [
     ['value', 'Value'],
@@ -1763,7 +1960,10 @@ export default function Home() {
     return { total, exactRate: total ? exact / total : 0, hueAverage: average(hueAttempts, 'hueError'), valueAverage: average(valueAttempts, 'valueError'), chromaAverage: average(chromaAttempts, 'chromaError'), insights };
   }, [attempts]);
 
-  const hueMiss = Boolean(submitted && (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0);
+  const hueMiss = Boolean(!isHunt && submitted && (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0);
+  const huntMatch = isHunt && submitted?.perceptualError !== undefined
+    ? Math.max(0, Math.round(100 * Math.exp(-submitted.perceptualError / Math.max(.02, localPerceptualStep(target) * 2.4))))
+    : null;
   const feedbackErrors = submitted ? [
     (exercise === 'hue' || exercise === 'full') && submitted.hueError > 0
       ? `Your guess is ${submitted.hueError} hue step${submitted.hueError === 1 ? '' : 's'} toward ${HUE_FAMILY_NAMES[familyOf(submitted.answerH)] ?? familyOf(submitted.answerH)}`
@@ -1817,6 +2017,7 @@ export default function Home() {
               { id: 'context', label: 'Context' },
               { id: 'contrast', label: 'Contrast' },
               { id: 'image', label: 'Image' },
+              { id: 'hunt', label: 'Hunt' },
             ] as const).map((mode) => (
               <button
                 className={presentation === mode.id ? 'active' : ''}
@@ -1838,20 +2039,20 @@ export default function Home() {
             onChange={(next) => { changePresentation(next as SwatchPresentation | 'image' | 'contrast'); setMobileRail(null); }}
             onToggle={() => setMobileRail((current) => current === 'view' ? null : 'view')}
             open={mobileRail === 'view'}
-            options={[{ id: 'isolated', label: 'Swatch' }, { id: 'context', label: 'Context' }, { id: 'contrast', label: 'Contrast' }, { id: 'image', label: 'Image' }]}
+            options={[{ id: 'isolated', label: 'Swatch' }, { id: 'context', label: 'Context' }, { id: 'contrast', label: 'Contrast' }, { id: 'image', label: 'Image' }, { id: 'hunt', label: 'Hunt' }]}
             value={presentation}
           />
-          <MobileChoiceRail<string>
-            compressed={mobileRail === 'view'}
-            label="Skill"
-            onChange={(next) => { if (exercise === 'compare') changeCompareDimension(next as CompareDimension); else changeExercise(next as Exercise); setMobileRail(null); }}
-            onToggle={() => setMobileRail((current) => current === 'skill' ? null : 'skill')}
-            open={mobileRail === 'skill'}
-            options={exercise === 'compare'
-              ? [{ id: 'value', label: 'Value' }, { id: 'hue', label: 'Hue' }, { id: 'chroma', label: 'Chroma' }]
-              : exerciseOptions.map(([id, label]) => ({ id, label }))}
-            value={exercise === 'compare' ? compareDimension : exercise}
-          />
+          {!isHunt && <MobileChoiceRail<string>
+              compressed={mobileRail === 'view'}
+              label="Skill"
+              onChange={(next) => { if (exercise === 'compare') changeCompareDimension(next as CompareDimension); else changeExercise(next as Exercise); setMobileRail(null); }}
+              onToggle={() => setMobileRail((current) => current === 'skill' ? null : 'skill')}
+              open={mobileRail === 'skill'}
+              options={exercise === 'compare'
+                ? [{ id: 'value', label: 'Value' }, { id: 'hue', label: 'Hue' }, { id: 'chroma', label: 'Chroma' }]
+                : exerciseOptions.map(([id, label]) => ({ id, label }))}
+              value={exercise === 'compare' ? compareDimension : exercise}
+            />}
           {exercise === 'value' ? (
             <div className={`segmented value-display-toggle ${mobileRail ? 'mobile-toggle-hidden' : ''}`} aria-label="Value question appearance">
               <button className={!valueMonochrome ? 'active' : ''} onClick={() => setValueMonochrome(false)} type="button">Color</button>
@@ -1865,7 +2066,7 @@ export default function Home() {
           ) : null}
         </div>
 
-        <div className="exercise-control-row desktop-practice-controls">
+        {!isHunt && <div className="exercise-control-row desktop-practice-controls">
           {exercise === 'compare' ? (
             <nav className="exercise-tabs contrast-tabs" aria-label="Contrast dimension">
               {(['value', 'hue', 'chroma'] as CompareDimension[]).map((dimension) => (
@@ -1893,9 +2094,9 @@ export default function Home() {
               <button className={huePresentation === 'slice' ? 'active' : ''} onClick={() => changeHuePresentation('slice')} type="button">Slice</button>
             </div>
           )}
-        </div>
+        </div>}
 
-        {exercise === 'family' && (
+        {!isHunt && exercise === 'family' && (
           <div className="family-control">
             <div className="family-hue-grid">
               <HuePicker value={familyHue} onChange={changeFamilyHue} />
@@ -1904,14 +2105,14 @@ export default function Home() {
           </div>
         )}
 
-        <div className={`prompt-copy ${exercise === 'compare' ? 'contrast-prompt' : 'standard-prompt'}`}>
+        {!isHunt && <div className={`prompt-copy ${exercise === 'compare' ? 'contrast-prompt' : 'standard-prompt'}`}>
           <div>
             <span>{promptText}</span>
           </div>
           <div className="prompt-settings">
             <span className="difficulty">{exercise === 'value' ? 'N1–N9' : exercise === 'hue' ? source === 'swatch' ? huePresentation === 'slice' ? '40 HUE SLICES' : '40 HUES · EDGE CHROMA' : '40 HUES' : exercise === 'family' ? `${familyHue} · ${chromaRange}` : exercise === 'full' ? `${answerH} V${answerV} · ${chromaRange}` : exercise === 'compare' ? '4 CLOSE CHIPS' : chromaRange}</span>
           </div>
-        </div>
+        </div>}
 
         {exercise === 'compare' ? (
           <div className="compare-stage" aria-label={compareQuestion.prompt}>
@@ -1933,6 +2134,8 @@ export default function Home() {
               );
             })}
           </div>
+        ) : isHunt ? (
+          <HuntSurface key={sessionCount} onPick={setHuntPick} questionKey={sessionCount} target={target} />
         ) : source === 'swatch' ? (
           <div className={`swatch-stage ${submitted?.exact ? 'is-correct' : ''}`} aria-label="Color swatch">
             {exercise === 'hue' && huePresentation === 'slice' ? (
@@ -1987,14 +2190,14 @@ export default function Home() {
         <section className="answer-panel" aria-label="Your answer" ref={answerPanelRef}>
           <button
             className="check-button practice-action"
-            disabled={!submitted && !imageReady}
+            disabled={!submitted && (!imageReady || (isHunt && !huntPick))}
             onClick={submitted ? advanceQuestion : submit}
             type="button"
           >
             {submitted ? 'Next' : imageReady ? 'Check answer' : 'Preparing image…'}
           </button>
-          <div className={`answer-state ${exercise}`}>
-            {!submitted ? (
+          <div className={`answer-state ${isHunt ? 'hunt' : exercise}`}>
+            {!submitted ? isHunt ? null : (
               <>
                 <p>Your answer</p>
                 <div className={`picker-grid ${exercise === 'full' ? 'full' : exercise === 'family' ? 'family' : exercise === 'hue' ? 'hue' : ''}`}>
@@ -2009,9 +2212,19 @@ export default function Home() {
                   <span className="reward-mark" aria-hidden="true">✓</span>
                   <div>
                     <strong>Correct</strong>
-                    <small>{streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
+                    <small>{huntMatch !== null ? `${huntMatch}% perceptual match` : streak > 1 ? `${streak} in a row` : 'Your eye matched the chip.'}</small>
                   </div>
                 </div>
+                <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
+              </div>
+            ) : submitted.grade === 'close' ? (
+              <div className="feedback close" role="status" aria-live="polite">
+                <div className="feedback-head">
+                  <div><span className="feedback-kicker">Within One Perceptual Step</span><strong>Close</strong></div>
+                  <AlbersComparison correct={displayColor(target)} guess={displayColor(guessedColor)} />
+                </div>
+                <div className="feedback-guess"><span>Nearest Chip</span><strong>{visibleAnswer}</strong></div>
+                <div className="feedback-detail"><strong>{feedbackErrors.join(' · ') || `Target ${visibleTarget}`}</strong><small>{huntMatch !== null ? `${huntMatch}% perceptual match · ` : ''}This will return, but less aggressively than a full miss.</small></div>
                 <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
               </div>
             ) : (
@@ -2027,6 +2240,7 @@ export default function Home() {
                 {hueMiss && <HueMissMap target={target.h} guess={resolvedAnswerH} />}
                 <div className="feedback-detail">
                   <strong>{feedbackErrors.join(' · ')}</strong>
+                  {huntMatch !== null && <small>{huntMatch}% perceptual match</small>}
                   {hueMiss && exercise === 'full' && <small>Your full guess: {visibleAnswer}</small>}
                 </div>
                 <PaintRecipeCard target={target} recipe={paintRecipe} paletteSize={selectedPaintIds.length} />
