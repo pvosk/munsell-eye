@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ChangeEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
@@ -441,6 +442,8 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const zoomFrameRef = useRef<number | undefined>(undefined);
   const chipPressRef = useRef<number | undefined>(undefined);
   const chipRemovedRef = useRef(false);
+  const addedTimerRef = useRef<number | undefined>(undefined);
+  const massDockRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<ImageMode>('block');
   const [palette, setPalette] = useState<MunsellColor[]>([]);
   const [quantized, setQuantized] = useState<QuantizedImage | null>(null);
@@ -450,6 +453,8 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const [selectedKey, setSelectedKey] = useState('');
   const [sample, setSample] = useState<Sample | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [highlightedKey, setHighlightedKey] = useState('');
+  const [addedKey, setAddedKey] = useState('');
 
   const loadSource = useCallback((src: string, name: string, restoredPalette: MunsellColor[] = []) => {
     setLoading(true);
@@ -473,7 +478,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       softContext.filter = `blur(${Math.max(.8, Math.min(1.6, Math.min(width, height) / 300))}px)`;
       softContext.drawImage(rawCanvas, 0, 0);
       const labs = buildLabField(softContext.getImageData(0, 0, width, height));
-      const nextPalette = restoredPalette.length ? restoredPalette : initialPalette(labs, width, height);
+      const nextPalette = restoredPalette.length ? restoredPalette : initialPalette(labs, width, height).sort((a, b) => b.v - a.v || a.h.localeCompare(b.h) || a.c - b.c);
       rawDataRef.current = raw;
       labFieldRef.current = labs;
       originalCanvasRef.current = rawCanvas;
@@ -481,6 +486,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       setPalette(nextPalette);
       setSelectedKey(notation(nextPalette[0] ?? NEUTRALS[4]));
       setSample(null);
+      setHighlightedKey('');
       zoomRef.current = 1;
       setZoom(1);
       if (canvasWrapRef.current) canvasWrapRef.current.style.width = '100%';
@@ -519,6 +525,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       active = false;
       window.clearTimeout(timer);
       window.clearTimeout(addPressTimerRef.current);
+      window.clearTimeout(addedTimerRef.current);
       if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
       if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
@@ -551,18 +558,46 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     canvas.width = raw.width; canvas.height = raw.height;
     const context = canvas.getContext('2d');
     if (!context) return;
-    if (mode === 'original' && originalCanvasRef.current) { context.drawImage(originalCanvasRef.current, 0, 0); return; }
-    const output = context.createImageData(quantized.width, quantized.height);
-    for (let index = 0; index < quantized.labels.length; index++) {
-      const chip = palette[quantized.labels[index]] ?? palette[0] ?? NEUTRALS[4];
-      const color = mode === 'value' ? NEUTRALS[Math.max(0, Math.min(8, chip.v - 1))] : chip;
-      const offset = index * 4;
-      output.data[offset] = color.rgb[0]; output.data[offset + 1] = color.rgb[1]; output.data[offset + 2] = color.rgb[2]; output.data[offset + 3] = 255;
+    if (mode === 'original' && originalCanvasRef.current) {
+      context.drawImage(originalCanvasRef.current, 0, 0);
+    } else {
+      const output = context.createImageData(quantized.width, quantized.height);
+      for (let index = 0; index < quantized.labels.length; index++) {
+        const chip = palette[quantized.labels[index]] ?? palette[0] ?? NEUTRALS[4];
+        const color = mode === 'value' ? NEUTRALS[Math.max(0, Math.min(8, chip.v - 1))] : chip;
+        const offset = index * 4;
+        output.data[offset] = color.rgb[0]; output.data[offset + 1] = color.rgb[1]; output.data[offset + 2] = color.rgb[2]; output.data[offset + 3] = 255;
+      }
+      context.putImageData(output, 0, 0);
     }
-    context.putImageData(output, 0, 0);
-  }, [mode, palette, quantized]);
+    if (highlightedKey) {
+      const highlightedIndex = palette.findIndex((color) => notation(color) === highlightedKey);
+      if (highlightedIndex >= 0) {
+        const display = context.getImageData(0, 0, quantized.width, quantized.height);
+        for (let index = 0; index < quantized.labels.length; index++) {
+          const offset = index * 4;
+          if (quantized.labels[index] !== highlightedIndex) {
+            display.data[offset] = Math.round(display.data[offset] * .38 + 238 * .2);
+            display.data[offset + 1] = Math.round(display.data[offset + 1] * .38 + 237 * .2);
+            display.data[offset + 2] = Math.round(display.data[offset + 2] * .38 + 232 * .2);
+          } else {
+            const x = index % quantized.width; const y = Math.floor(index / quantized.width);
+            const boundary = x === 0 || y === 0 || x === quantized.width - 1 || y === quantized.height - 1
+              || quantized.labels[index - 1] !== highlightedIndex || quantized.labels[index + 1] !== highlightedIndex
+              || quantized.labels[index - quantized.width] !== highlightedIndex || quantized.labels[index + quantized.width] !== highlightedIndex;
+            if (boundary) {
+              display.data[offset] = Math.round(display.data[offset] * .5 + 255 * .5);
+              display.data[offset + 1] = Math.round(display.data[offset + 1] * .5 + 255 * .5);
+              display.data[offset + 2] = Math.round(display.data[offset + 2] * .5 + 255 * .5);
+            }
+          }
+        }
+        context.putImageData(display, 0, 0);
+      }
+    }
+  }, [highlightedKey, mode, palette, quantized]);
 
-  const paletteRows = useMemo(() => palette.map((color, index) => ({ color, count: quantized?.counts[index] ?? 0 })).sort((a, b) => b.color.v - a.color.v || a.color.h.localeCompare(b.color.h) || a.color.c - b.color.c), [palette, quantized]);
+  const paletteRows = useMemo(() => palette.map((color, index) => ({ color, count: quantized?.counts[index] ?? 0 })), [palette, quantized]);
   const selectedColor = sample?.color ?? palette.find((color) => notation(color) === selectedKey) ?? paletteRows[0]?.color ?? NEUTRALS[4];
   const recipe = useMemo(() => suggestPaintRecipe(selectedColor, selectedPaintIds), [selectedColor, selectedPaintIds]);
   const representedValues = useMemo(() => [...new Set(paletteRows.filter((entry) => entry.count).map((entry) => entry.color.v))].sort((a, b) => b - a), [paletteRows]);
@@ -625,14 +660,21 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     }
     const rgb = [Math.round(r / count), Math.round(g / count), Math.round(b / count)] as RGB;
     const next = { x: x / raw.width, y: y / raw.height, rgb, color: nearestChip(rgb) };
-    setSample(next); setSelectedKey(notation(next.color)); return next;
+    setHighlightedKey(''); setSample(next); setSelectedKey(notation(next.color)); return next;
   }, []);
 
   const addChip = useCallback((color = sample?.color) => {
     if (!color) return;
-    setPalette((current) => current.some((entry) => notation(entry) === notation(color)) || current.length >= MAX_CHIP_COUNT ? current : [...current, color]);
-    setSelectedKey(notation(color));
-  }, [sample]);
+    const key = notation(color);
+    if (palette.some((entry) => notation(entry) === key) || palette.length >= MAX_CHIP_COUNT) return;
+    setQuantized(null);
+    setPalette((current) => [color, ...current]);
+    setSelectedKey(key);
+    setAddedKey(key);
+    window.clearTimeout(addedTimerRef.current);
+    addedTimerRef.current = window.setTimeout(() => setAddedKey(''), 520);
+    window.requestAnimationFrame(() => massDockRef.current?.scrollTo({ left: 0, behavior: 'smooth' }));
+  }, [palette, sample]);
 
   const cancelAddHold = () => {
     window.clearTimeout(addPressTimerRef.current);
@@ -719,8 +761,10 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     chipPressRef.current = window.setTimeout(() => {
       if (palette.length <= 2) return;
       chipRemovedRef.current = true;
+      setQuantized(null);
       setPalette((current) => current.filter((entry) => notation(entry) !== notation(color)));
       setSample(null);
+      setHighlightedKey('');
     }, 520);
   };
   const endChipHold = () => { if (chipPressRef.current) window.clearTimeout(chipPressRef.current); chipPressRef.current = undefined; };
@@ -743,16 +787,16 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         <span className="sr-only" aria-live="polite">Image zoom {Math.round(zoom * 100)} percent</span>
       </div>
       <div className="image-lab-stage">
-        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && <span className="image-lab-sample" style={{ background: chipCss(sample.color), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` }} />}</div></div>
+        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -54 : 54; const offsetY = sample.y < .2 ? 38 : -38; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.rgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
         {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
-      <div className="mass-dock" aria-label="Munsell block-in palette ordered from light to dark">
-        {paletteRows.map(({ color }) => <button aria-label={`${notation(color)}. Hold to remove.`} className={notation(color) === selectedKey ? 'active' : ''} key={notation(color)} onClick={() => { if (chipRemovedRef.current) { chipRemovedRef.current = false; return; } setSelectedKey(notation(color)); setSample(null); }} onContextMenu={(event) => event.preventDefault()} onPointerCancel={endChipHold} onPointerDown={() => beginChipHold(color)} onPointerLeave={endChipHold} onPointerUp={endChipHold} style={{ background: chipCss(color) }} type="button" />)}
+      <div className="mass-dock" aria-label="Munsell block-in palette" ref={massDockRef}>
+        {paletteRows.map(({ color }) => { const key = notation(color); return <button aria-label={`${key}. Tap to show its image region; hold to remove.`} className={`${key === selectedKey ? 'active' : ''} ${key === highlightedKey ? 'highlighted' : ''} ${key === addedKey ? 'just-added' : ''}`} key={key} onClick={() => { if (chipRemovedRef.current) { chipRemovedRef.current = false; return; } setSelectedKey(key); setHighlightedKey((current) => current === key ? '' : key); setSample(null); }} onContextMenu={(event) => event.preventDefault()} onPointerCancel={endChipHold} onPointerDown={() => beginChipHold(color)} onPointerLeave={endChipHold} onPointerUp={endChipHold} style={{ background: chipCss(color) }} type="button" />; })}
       </div>
-      <p className="mass-dock-note">{palette.length} Munsell chips · hold a chip to remove it</p>
+      <p className="mass-dock-note">{palette.length} Munsell chips · tap to show its mass · hold to remove</p>
       <div className="sample-sheet">
-        <div className="sample-identity"><span className="sample-large" style={{ background: chipCss(selectedColor) }} /><div><span className="eyebrow">Closest Munsell chip</span><strong>{notation(selectedColor)}</strong></div></div>
+        <div className="sample-identity"><div className="sample-swatches">{sample && <span className="sample-large raw" style={{ background: rgbCss(sample.rgb) }} title="Sampled screen color" />}<span className="sample-large" style={{ background: chipCss(selectedColor) }} title="Nearest Munsell chip" /></div><div className="sample-copy"><span className="eyebrow">{sample ? 'Sampled RGB → Munsell' : 'Closest Munsell Chip'}</span><strong>{notation(selectedColor)}</strong>{sample && <small>{sample.rgb.join(', ')}</small>}</div></div>
         <div className="sample-actions"><button className="outline-button" disabled={!sample || palette.some((color) => notation(color) === notation(sample.color))} onClick={() => addChip()} type="button">Add chip</button><button className="dark-button" onClick={() => onSendToMixer(selectedColor)} type="button">Send to Mix</button></div>
         {recipe && <div className="sample-paint-match"><span style={{ background: rgbCss(recipe.rgb) }} /><small>Closest from active palette</small><strong>{recipe.ingredients.map(({ paint, parts }) => `${parts} ${paint.name}`).join(' · ')}</strong></div>}
       </div>

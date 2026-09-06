@@ -1,4 +1,4 @@
-const CACHE = 'munsell-eye-v23';
+const CACHE = 'munsell-eye-v24';
 const CORE = [
   '/',
   '/manifest.webmanifest',

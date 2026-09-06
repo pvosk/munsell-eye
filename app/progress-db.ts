@@ -16,6 +16,9 @@ export type Attempt = {
   valueError: number;
   chromaError: number;
   exact: boolean;
+  grade?: 'exact' | 'close' | 'miss';
+  perceptualError?: number;
+  mode?: 'identify' | 'hunt';
   responseMs: number;
 };
 
