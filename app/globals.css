@@ -399,7 +399,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .reset-button { background: transparent; border: 0; color: #8a4a3f; cursor: pointer; display: block; font-size: 10px; margin: 14px auto 0; padding: 6px; }
 
 .reference-view { margin: 0 auto; max-width: 1180px; padding: 40px 24px 72px; }
-.reference-intro { margin: 0 auto 24px; max-width: 650px; text-align: center; }
+.reference-intro { margin: 0 auto 14px; max-width: 650px; text-align: center; }
 .reference-intro h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 620; letter-spacing: -.055em; margin: 7px 0 10px; }
 .reference-intro p { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0; }
 .reference-workbench { align-items: start; display: grid; gap: clamp(18px, 4vw, 48px); grid-template-columns: minmax(300px, .78fr) minmax(460px, 1.22fr); }
@@ -448,16 +448,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .hue-wheel-center > div { align-items: center; display: flex; gap: 14px; pointer-events: auto; }
 .hue-wheel-center strong { font-size: clamp(26px, 6vw, 40px); font-weight: 620; letter-spacing: -.045em; min-width: 92px; }
 .hue-wheel-center button { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 30px; font-weight: 250; line-height: 1; padding: 5px; }
-.reference-readout { align-items: center; border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); display: grid; gap: 12px; grid-template-columns: 1fr auto; margin: 0 auto; max-width: 430px; padding: 13px 0; }
-.reference-readout > div { display: flex; flex-direction: column; gap: 3px; }
-.reference-readout > div:last-child { display: none; }
-.reference-readout span { color: var(--muted); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
-.reference-readout strong { font-size: 15px; font-weight: 650; }
 .reference-readout-swatch { border: 1px solid rgba(29,29,27,.22); height: 38px; width: 38px; }
 .hue-page { background: rgba(248,247,243,.64); border: 1px solid var(--line); border-radius: 20px; min-width: 0; padding: 22px; }
 .hue-page-head { align-items: flex-end; display: flex; justify-content: space-between; margin-bottom: 22px; }
 .hue-page-head h2 { font-size: 32px; font-weight: 620; letter-spacing: -.045em; margin: 3px 0 0; }
-.hue-page-head > span { color: var(--muted); font-size: 10px; }
+.reference-chip-readout { align-items: center; display: flex; gap: 11px; }
+.reference-chip-readout > div { align-items: flex-end; display: flex; flex-direction: column; gap: 3px; }
+.reference-chip-readout span { color: var(--muted); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.reference-chip-readout strong { font-size: 14px; font-weight: 650; }
 .hue-chart-scroll { overflow-x: auto; padding: 3px 3px 10px; }
 .hue-chart { display: grid; gap: 5px; grid-template-columns: 36px repeat(var(--chart-columns), 48px); min-width: max-content; }
 .chart-row { display: contents; }
@@ -788,12 +786,12 @@ button.chart-chip { cursor: pointer; }
   .stat-grid > div:nth-child(3) { border-radius: 0 0 0 10px; }
   .stat-grid > div:last-child { border-radius: 0 0 10px 0; }
   .reference-view { padding: 24px 14px 48px; }
-  .reference-intro { margin-bottom: 14px; text-align: left; }
+  .reference-intro { margin-bottom: 8px; text-align: left; }
   .reference-intro h1 { font-size: 30px; margin-bottom: 0; }
   .reference-intro p { display: none; }
   .reference-workbench { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
   .reference-wheel-column { position: static; top: auto; }
-  .hue-wheel { --wheel-diameter: min(43vw, 158px); margin: 4px auto 15px; }
+  .hue-wheel { --wheel-diameter: min(52vw, 190px); margin: 0 auto 8px; }
   .reference-workbench .hue-wheel-chip { height: 14px; width: 14px; }
   .reference-workbench .hue-wheel-indicator { border-width: 2px; height: 19px; width: 19px; }
   .reference-workbench .hue-wheel-center { gap: 3px; inset: 25%; }
@@ -801,14 +799,13 @@ button.chart-chip { cursor: pointer; }
   .reference-workbench .hue-wheel-center > div { gap: 2px; }
   .reference-workbench .hue-wheel-center strong { font-size: 17px; min-width: 49px; }
   .reference-workbench .hue-wheel-center button { font-size: 20px; padding: 2px; }
-  .reference-readout { gap: 6px; max-width: 310px; padding: 9px 0; }
-  .reference-readout span { font-size: 6px; }
-  .reference-readout strong { font-size: 10px; }
   .reference-readout-swatch { height: 26px; width: 26px; }
   .hue-page { border-radius: 14px; padding: 12px 9px; width: 100%; }
   .hue-page-head { align-items: center; margin-bottom: 8px; padding: 0 2px; }
   .hue-page-head h2 { font-size: 21px; }
-  .hue-page-head > span { display: none; }
+  .reference-chip-readout { gap: 7px; }
+  .reference-chip-readout span { font-size: 6px; }
+  .reference-chip-readout strong { font-size: 10px; }
   .hue-chart-scroll { overflow-x: hidden; padding-inline: 1px; }
   .reference-workbench .hue-chart { gap: 2px; grid-template-columns: 18px repeat(var(--chart-columns), minmax(0, 1fr)); min-width: 0; width: 100%; }
   .reference-workbench .chart-chip { aspect-ratio: 1; border-radius: 2px; height: auto; min-width: 0; width: 100%; }

@@ -7,13 +7,13 @@ type Family = 'R' | 'YR' | 'Y' | 'GY' | 'G' | 'BG' | 'B' | 'PB' | 'P' | 'RP';
 type Study = 'harmony' | 'flow' | 'albers' | 'klee' | 'ostwald' | 'vanderpoel' | 'gartside';
 
 const STUDIES: { id: Study; name: string; eyebrow: string; description: string }[] = [
-  { id: 'harmony', name: 'Munsell harmonies', eyebrow: 'Create and export', description: 'Build familiar harmony structures while keeping value and chroma visible. Every screen color resolves to a discrete Munsell chip that can be sent directly to Mix.' },
-  { id: 'flow', name: 'Color pond', eyebrow: 'Touch and watch', description: 'Drop bright Munsell colors into a field of white chips. Rings spread, overlap and slowly share color with their neighbors.' },
+  { id: 'harmony', name: 'Munsell Harmonies', eyebrow: 'Create and export', description: 'Build familiar harmony structures while keeping value and chroma visible. Every screen color resolves to a discrete Munsell chip that can be sent directly to Mix.' },
+  { id: 'flow', name: 'Color Pond', eyebrow: 'Touch and watch', description: 'Drop bright Munsell colors into a field of white chips. Rings spread, overlap and slowly share color with their neighbors.' },
   { id: 'albers', name: 'Relativity', eyebrow: 'After Josef Albers', description: 'One identical square is nested inside two different grounds. The three-color study isolates how context changes appearance.' },
-  { id: 'klee', name: 'Color movement', eyebrow: 'After Paul Klee', description: 'A field of stepped hue, value and chroma rhythms. Every transition is built from discrete Munsell chips.' },
-  { id: 'ostwald', name: 'Complement field', eyebrow: 'After Wilhelm Ostwald', description: 'Diametrically opposed hues share a diamond field. White content rises, black content falls and chromatic strength moves toward either edge.' },
-  { id: 'vanderpoel', name: 'Color problems', eyebrow: 'After Emily Noyes Vanderpoel', description: 'Cellular ten-by-ten arrangements explore proportion, borders, axes and connected masses using a limited palette.' },
-  { id: 'gartside', name: 'Color field', eyebrow: 'After Mary Gartside', description: 'Opaque asymmetric masses evoke Gartside’s painted blots without pretending that screen transparency behaves like watercolor.' },
+  { id: 'klee', name: 'Color Movement', eyebrow: 'After Paul Klee', description: 'A field of stepped hue, value and chroma rhythms. Every transition is built from discrete Munsell chips.' },
+  { id: 'ostwald', name: 'Complement Field', eyebrow: 'After Wilhelm Ostwald', description: 'Diametrically opposed hues share a diamond field. White content rises, black content falls and chromatic strength moves toward either edge.' },
+  { id: 'vanderpoel', name: 'Color Problems', eyebrow: 'After Emily Noyes Vanderpoel', description: 'Cellular ten-by-ten arrangements explore proportion, borders, axes and connected masses using a limited palette.' },
+  { id: 'gartside', name: 'Color Field', eyebrow: 'After Mary Gartside', description: 'Opaque asymmetric masses evoke Gartside’s painted blots without pretending that screen transparency behaves like watercolor.' },
 ];
 
 const rgb = (color: MunsellColor) => `rgb(${color.rgb.join(',')})`;
@@ -437,7 +437,7 @@ export default function StudioView({ onSendToMixer }: { onSendToMixer?: (color: 
     <section className="studio-view" aria-labelledby="studio-title">
       <div className="reference-intro studio-intro">
         <span className="eyebrow">Explore</span>
-        <h1 id="studio-title">Color relationships</h1>
+        <h1 id="studio-title">Color Relationships</h1>
         <p>Generate harmonies, translate screen palettes into discrete Munsell chips, or move through historically informed systems of color.</p>
       </div>
 

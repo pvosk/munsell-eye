@@ -1035,7 +1035,7 @@ function PaletteSheet({ selectedIds, onChange, onClose }: {
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section className="progress-sheet palette-sheet" role="dialog" aria-modal="true" aria-labelledby="palette-title">
         <div className="sheet-head">
-          <div><span className="eyebrow">Saved on this device</span><h2 id="palette-title">Your paint box</h2></div>
+          <div><span className="eyebrow">Saved on this device</span><h2 id="palette-title">Your Paint Box</h2></div>
           <button className="close-button" onClick={onClose} type="button" aria-label="Close palette">×</button>
         </div>
         <p className="palette-intro">Choose the tubes you actually own. Recipes will use no more than four and favor the simplest close match.</p>
@@ -1235,24 +1235,21 @@ function ReferenceView() {
   return (
     <section className="reference-view" aria-labelledby="reference-title">
       <div className="reference-intro">
-        <span className="eyebrow">Reference</span>
-        <h1 id="reference-title">Munsell Hues</h1>
+        <span className="eyebrow" id="reference-title">Reference</span>
         <p>Rotate the wheel and the hue page follows the chip crossing the top marker. Value rises vertically; chroma moves outward from neutral.</p>
       </div>
 
       <div className="reference-workbench">
         <div className="reference-wheel-column">
           <HueWheel value={hue} onChange={changeHue} />
-          <div className="reference-readout" aria-live="polite">
-            <div><span>Selected chip</span><strong>{notation(selectedChip)}</strong></div>
-            <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
-            <div><span>Hue practice</span><strong>Highest in-gamut chroma</strong></div>
-          </div>
         </div>
         <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
         <div className="hue-page-head">
           <div><span className="eyebrow">Constant hue</span><h2>{hue}</h2></div>
-          <span>Full in-gamut range · up to C{MAX_MUNSELL_CHROMA}</span>
+          <div className="reference-chip-readout" aria-live="polite">
+            <div><span>Selected chip</span><strong>{notation(selectedChip)}</strong></div>
+            <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
+          </div>
         </div>
         <div className="hue-chart-scroll">
           <div className="hue-chart reference-hue-chart" style={{ '--chart-columns': REFERENCE_CHROMAS.length } as CSSProperties}>
@@ -2029,7 +2026,7 @@ export default function Home() {
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setProgressOpen(false); }}>
           <section className="progress-sheet" role="dialog" aria-modal="true" aria-labelledby="progress-title">
             <div className="sheet-head">
-              <div><span className="eyebrow">On this device</span><h2 id="progress-title">Your eye, over time</h2></div>
+              <div><span className="eyebrow">On this device</span><h2 id="progress-title">Your Eye over Time</h2></div>
               <button className="close-button" onClick={() => setProgressOpen(false)} type="button" aria-label="Close progress">×</button>
             </div>
             <div className="stat-grid">

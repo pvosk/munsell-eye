@@ -179,7 +179,7 @@ function PathVisual({ points, interactive = false, compact = false }: { points: 
 function Recipe({ recipe }: { recipe: PaintRecipe }) {
   return (
     <section className="mixer-recipe" aria-label="Suggested starting mix">
-      <header><span className="eyebrow">Simplest close route</span><h3>Starting mix</h3></header>
+      <header><span className="eyebrow">Simplest close route</span><h3>Starting Mix</h3></header>
       <ol>
         {recipe.ingredients.map(({ paint, parts }) => (
           <li key={paint.id}>
@@ -233,7 +233,7 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
     <section className="mixer-view" aria-labelledby="mixer-title">
       <div className="reference-intro mixer-intro">
         <span className="eyebrow">Mix</span>
-        <h1 id="mixer-title">Find a practical route to color</h1>
+        <h1 id="mixer-title">Find a Practical Route to Color</h1>
         <p>Choose one target, then follow the simplest close path available from the paint box you actually use.</p>
       </div>
 
@@ -249,7 +249,7 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
       {mode === 'path' ? (
         <section className="path-workspace">
           <header>
-            <div><span className="eyebrow">Two-paint path</span><h2>See what happens between the tubes</h2></div>
+            <div><span className="eyebrow">Two-paint path</span><h2>See What Happens Between the Tubes</h2></div>
             <div className="paint-pair-controls">
               <select aria-label="First paint" onChange={(event) => setFirstPaint(event.target.value)} value={firstPaint}>
                 {selectedPaints.map((paint) => paint && <option key={paint.id} value={paint.id}>{paint.name}</option>)}
