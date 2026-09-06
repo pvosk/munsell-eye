@@ -5,7 +5,7 @@ import { HUE_ORDER, MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsel
 import {
   PAINTS,
   paintPairPath,
-  recipeMixPath,
+  recipeMixTrajectory,
   suggestPaintRecipe,
   type PaintPathPoint,
   type PaintRecipe,
@@ -16,6 +16,8 @@ type RGB = [number, number, number];
 const rgbCss = (rgb: RGB) => `rgb(${rgb.join(',')})`;
 const notation = (color: MunsellColor) => color.h === 'N' ? `N${color.v}` : `${color.h} ${color.v}/${color.c}`;
 const rgbHex = (rgb: RGB) => `#${rgb.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
+const MIXER_HUE_OPTIONS = ['N', ...HUE_ORDER];
+const MIXER_VALUE_OPTIONS = ['1','2','3','4','5','6','7','8','9'];
 
 function rgbToOklab(rgb: RGB) {
   const linear = rgb.map((channel) => {
@@ -85,7 +87,122 @@ function MiniHueFamily({ target }: { target: MunsellColor }) {
   );
 }
 
-function PathVisual({ points, interactive = false, compact = false }: { points: PaintPathPoint[]; interactive?: boolean; compact?: boolean }) {
+function MixerScrollPicker({ label, options, value, onChange, disabled = false }: {
+  label: string;
+  options: readonly string[];
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const frame = useRef<number | undefined>(undefined);
+  const settling = useRef<number | undefined>(undefined);
+  const programmatic = useRef(false);
+  const localSelection = useRef<string | null>(null);
+  const suppressClick = useRef(false);
+  const drag = useRef({ id: -1, x: 0, scroll: 0, moved: false });
+
+  const center = useCallback((option: string, behavior: ScrollBehavior = 'smooth') => {
+    const container = ref.current;
+    const item = container?.querySelector<HTMLButtonElement>(`[data-mixer-value="${CSS.escape(option)}"]`);
+    if (!container || !item) return;
+    programmatic.current = true;
+    container.scrollTo({ left: item.offsetLeft + item.offsetWidth / 2 - container.clientWidth / 2, behavior });
+    window.clearTimeout(settling.current);
+    settling.current = window.setTimeout(() => { programmatic.current = false; }, behavior === 'smooth' ? 260 : 0);
+  }, []);
+
+  const closest = useCallback(() => {
+    const container = ref.current;
+    if (!container) return null;
+    const middle = container.scrollLeft + container.clientWidth / 2;
+    return Array.from(container.querySelectorAll<HTMLButtonElement>('button')).reduce((best, item) => {
+      const distance = Math.abs(item.offsetLeft + item.offsetWidth / 2 - middle);
+      return distance < best.distance ? { item, distance } : best;
+    }, { item: null as HTMLButtonElement | null, distance: Number.POSITIVE_INFINITY }).item?.dataset.mixerValue ?? null;
+  }, []);
+
+  useEffect(() => {
+    if (localSelection.current === value) {
+      localSelection.current = null;
+      return;
+    }
+    window.cancelAnimationFrame(frame.current ?? 0);
+    frame.current = window.requestAnimationFrame(() => center(value, 'auto'));
+    return () => window.cancelAnimationFrame(frame.current ?? 0);
+  }, [center, options, value]);
+
+  useEffect(() => () => window.clearTimeout(settling.current), []);
+
+  const move = (direction: number) => {
+    const index = Math.max(0, options.indexOf(value));
+    const next = options[Math.max(0, Math.min(options.length - 1, index + direction))];
+    if (next !== undefined) { localSelection.current = next; onChange(next); center(next); }
+  };
+
+  return (
+    <div className={`answer-picker mixer-scroll-picker ${disabled ? 'disabled' : ''}`}>
+      <span className="picker-label">{label}</span>
+      <div className="picker-window">
+        <span className="picker-focus" aria-hidden="true" />
+        <div
+          aria-disabled={disabled}
+          aria-label={label}
+          className="picker"
+          onClickCapture={(event) => {
+            if (!suppressClick.current) return;
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          onKeyDown={(event) => {
+            if (disabled) return;
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); move(-1); }
+            if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); move(1); }
+          }}
+          onPointerDown={(event) => {
+            if (disabled || event.pointerType !== 'mouse' || event.button !== 0 || !ref.current) return;
+            ref.current.setPointerCapture(event.pointerId);
+            drag.current = { id: event.pointerId, x: event.clientX, scroll: ref.current.scrollLeft, moved: false };
+            ref.current.classList.add('dragging');
+          }}
+          onPointerMove={(event) => {
+            if (!ref.current || drag.current.id !== event.pointerId) return;
+            const distance = event.clientX - drag.current.x;
+            if (Math.abs(distance) > 3) drag.current.moved = true;
+            if (drag.current.moved) { event.preventDefault(); ref.current.scrollLeft = drag.current.scroll - distance; }
+          }}
+          onPointerUp={(event) => {
+            if (!ref.current || drag.current.id !== event.pointerId) return;
+            if (ref.current.hasPointerCapture(event.pointerId)) ref.current.releasePointerCapture(event.pointerId);
+            ref.current.classList.remove('dragging');
+            if (drag.current.moved) {
+              suppressClick.current = true;
+              window.setTimeout(() => { suppressClick.current = false; }, 160);
+            }
+            drag.current.id = -1;
+            const next = closest();
+            if (next) { localSelection.current = next; onChange(next); center(next); }
+          }}
+          onScroll={() => {
+            if (disabled || programmatic.current) return;
+            window.cancelAnimationFrame(frame.current ?? 0);
+            frame.current = window.requestAnimationFrame(() => {
+              const next = closest();
+              if (next && next !== value) { localSelection.current = next; onChange(next); }
+            });
+          }}
+          ref={ref}
+          role="listbox"
+          tabIndex={disabled ? -1 : 0}
+        >
+          {options.map((option) => <button aria-selected={option === value} className={option === value ? 'selected' : ''} data-mixer-value={option} key={option} onClick={() => { if (!disabled) { localSelection.current = option; onChange(option); center(option); } }} role="option" tabIndex={-1} type="button">{option}</button>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PathVisual({ points, interactive = false, compact = false, sequence = false }: { points: PaintPathPoint[]; interactive?: boolean; compact?: boolean; sequence?: boolean }) {
   const [zoom, setZoom] = useState(1);
   const zoomRef = useRef(1);
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -148,14 +265,14 @@ function PathVisual({ points, interactive = false, compact = false }: { points: 
   };
   const segments = (plot: typeof chromaticPlot, prefix: string) => plot.slice(0, -1).map((point, index) => {
     const next = plot[index + 1]; const dx = next.x - point.x; const dy = next.y - point.y;
-    return <span className="mix-map-segment" key={`${prefix}-${index}`} style={{ left: `${point.x}%`, top: `${point.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }} />;
+    return <span className={`mix-map-segment ${next.role === 'target' ? 'to-target' : ''}`} key={`${prefix}-${index}`} style={{ left: `${point.x}%`, top: `${point.y}%`, width: `${Math.hypot(dx, dy)}%`, transform: `rotate(${Math.atan2(dy, dx) * 180 / Math.PI}deg)` }} />;
   });
   const dots = (plot: typeof chromaticPlot, prefix: string) => plot.map((point, index) => (
-    <span aria-label={point.label} className={`mix-path-point ${index === 0 || index === plot.length - 1 ? 'endpoint' : ''}`} key={`${prefix}-${index}`} role="img" style={{ background: rgbCss(point.rgb), left: `${point.x}%`, top: `${point.y}%` }} title={point.label} />
+    <span aria-label={point.label} className={`mix-path-point ${index === 0 || index === plot.length - 1 ? 'endpoint' : ''} ${point.role === 'target' ? 'target' : ''}`} key={`${prefix}-${index}`} role="img" style={{ background: rgbCss(point.rgb), left: `${point.x}%`, top: `${point.y}%` }} title={point.label} />
   ));
   return (
     <div className={`mix-path-visual ${compact ? 'compact' : ''}`}>
-      <div className="mix-path-strip" aria-label="Mixing path swatches">
+      <div className="mix-path-strip" aria-label="Mixing path swatches" style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}>
         {points.map((point, index) => <span key={index} style={{ background: rgbCss(point.rgb) }} title={point.label} />)}
       </div>
       <div className={`mix-path-projections ${interactive ? 'interactive' : ''}`} onPointerCancel={pointerEnd} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd} ref={surfaceRef}>
@@ -168,11 +285,32 @@ function PathVisual({ points, interactive = false, compact = false }: { points: 
         <section className="mix-projection"><header><strong>Value</strong><small>Across the mix</small></header><div className="mix-coordinate-map value-map" aria-label="Auto-framed value change across the mixing path">
           <span className="mix-map-axis horizontal" /><span className="mix-map-grid y-one" /><span className="mix-map-grid y-two" />
           {segments(valuePlot, 'value-line')}{dots(valuePlot, 'value-point')}
-          <small className="map-label top">lighter</small><small className="map-label bottom">darker</small><small className="map-label left">first</small><small className="map-label right">second</small>
+          <small className="map-label top">lighter</small><small className="map-label bottom">darker</small><small className="map-label left">{sequence ? 'base' : 'first'}</small><small className="map-label right">{sequence ? 'target' : 'second'}</small>
         </div></section>
       </div>
       {interactive && <small className="mix-gesture-hint">Auto-framed · pinch or wheel to inspect the curve{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
     </div>
+  );
+}
+
+function RecipeTrajectory({ recipe, target }: { recipe: PaintRecipe; target: MunsellColor }) {
+  const ingredients = useMemo(() => [...recipe.ingredients].sort((a, b) => b.parts - a.parts), [recipe]);
+  const points = useMemo(() => [
+    ...recipeMixTrajectory(recipe),
+    { rgb: target.rgb, progress: 1, label: `Target ${notation(target)}`, role: 'target' as const },
+  ], [recipe, target]);
+  const total = ingredients.reduce((sum, ingredient) => sum + ingredient.parts, 0);
+  return (
+    <section className="recipe-path-card">
+      <header><span className="eyebrow">Mixing Trajectory</span><strong>{ingredients.length} Stage{ingredients.length === 1 ? '' : 's'}</strong></header>
+      <div className="ingredient-ratio-strip" aria-label="Recipe proportions">
+        {ingredients.map(({ paint, parts }) => <span key={paint.id} style={{ background: rgbCss(paint.rgb), flexGrow: parts }} title={`${paint.name}: ${parts} of ${total} parts`} />)}
+      </div>
+      <ol className="trajectory-steps">
+        {ingredients.map(({ paint }, index) => <li key={paint.id}><i>{index + 1}</i><span>{index ? 'Add' : 'Begin with'} {paint.name}</span></li>)}
+      </ol>
+      <PathVisual compact points={points} sequence />
+    </section>
   );
 }
 
@@ -219,10 +357,12 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
   }, [firstPaint, secondPaint, selectedPaintIds]);
 
   const recipe = useMemo(() => suggestPaintRecipe(deferredTarget, selectedPaintIds), [deferredTarget, selectedPaintIds]);
-  const recipePath = useMemo(() => recipe ? recipeMixPath(recipe) : [], [recipe]);
   const pairPath = useMemo(() => paintPairPath(firstPaint, secondPaint), [firstPaint, secondPaint]);
   const updateTarget = (hue: string, value: number, chroma: number) => setTarget(nearestNotation(hue, value, chroma));
   const paletteLabel = selectedPaintIds.length === PAINTS.length ? 'Full catalogue' : `${selectedPaintIds.length}-paint palette`;
+  const chromaOptions = useMemo(() => target.h === 'N' ? ['0'] : [...new Set(
+    MUNSELL_COLORS.filter((color) => color.h === target.h && color.v === target.v).map((color) => color.c),
+  )].sort((a, b) => a - b).map(String), [target.h, target.v]);
 
   const pickScreenColor = (hex: string) => {
     const rgb = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16)) as RGB;
@@ -279,19 +419,16 @@ export default function MixerView({ selectedPaintIds, onOpenPalette, initialTarg
               </div>
               <div className="target-controls">
                 <label className="screen-color-control"><span>Screen color</span><input aria-label="Choose a screen color" onChange={(event) => pickScreenColor(event.target.value)} type="color" value={rgbHex(target.rgb)} /></label>
-                <label><span>Hue</span><select onChange={(event) => updateTarget(event.target.value, target.v, target.c)} value={target.h}><option value="N">N</option>{HUE_ORDER.map((hue) => <option key={hue}>{hue}</option>)}</select></label>
-                <label><span>Value</span><select onChange={(event) => updateTarget(target.h, Number(event.target.value), target.c)} value={target.v}>{[1,2,3,4,5,6,7,8,9].map((value) => <option key={value}>{value}</option>)}</select></label>
-                <label><span>Chroma</span><select disabled={target.h === 'N'} onChange={(event) => updateTarget(target.h, target.v, Number(event.target.value))} value={target.c}>{(target.h === 'N' ? [0] : Array.from({ length: 12 }, (_, index) => (index + 1) * 2)).map((chroma) => <option key={chroma}>{chroma}</option>)}</select></label>
+                <MixerScrollPicker label="Hue" onChange={(hue) => updateTarget(hue, target.v, target.c)} options={MIXER_HUE_OPTIONS} value={target.h} />
+                <MixerScrollPicker label="Value" onChange={(value) => updateTarget(target.h, Number(value), target.c)} options={MIXER_VALUE_OPTIONS} value={String(target.v)} />
+                <MixerScrollPicker disabled={target.h === 'N'} label="Chroma" onChange={(chroma) => updateTarget(target.h, target.v, Number(chroma))} options={chromaOptions} value={String(target.c)} />
               </div>
             </div>
             <Recipe recipe={recipe} />
           </section>
           <aside className="target-mixer-side">
             <MiniHueFamily target={target} />
-            <section className="recipe-path-card">
-              <header><span className="eyebrow">Recommended path</span><strong>{recipe.ingredients.length} paint{recipe.ingredients.length === 1 ? '' : 's'}</strong></header>
-              <PathVisual compact points={recipePath} />
-            </section>
+            <RecipeTrajectory recipe={recipe} target={target} />
           </aside>
         </div>
       )}
