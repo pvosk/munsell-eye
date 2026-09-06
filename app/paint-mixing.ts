@@ -362,6 +362,7 @@ export type PaintPathPoint = {
   rgb: [number, number, number];
   progress: number;
   label: string;
+  role?: 'mix' | 'target';
 };
 
 function pathColor(paints: PaintColor[], weights: number[]) {
@@ -386,6 +387,17 @@ export function recipeMixPath(recipe: PaintRecipe, steps = 13): PaintPathPoint[]
       label: index === 0 ? paints[0].name : index === steps - 1 ? 'Recommended mix' : `${Math.round(progress * 100)}% additions`,
     };
   });
+}
+
+export function recipeMixTrajectory(recipe: PaintRecipe): PaintPathPoint[] {
+  const ingredients = [...recipe.ingredients].sort((a, b) => b.parts - a.parts);
+  const paints = ingredients.map((entry) => entry.paint);
+  return ingredients.map((entry, index) => ({
+    rgb: pathColor(paints.slice(0, index + 1), ingredients.slice(0, index + 1).map((ingredient) => ingredient.parts)),
+    progress: ingredients.length <= 1 ? 1 : index / (ingredients.length - 1),
+    label: index === 0 ? `Begin with ${entry.paint.name}` : `Add ${entry.paint.name}`,
+    role: 'mix',
+  }));
 }
 
 export function paintPairPath(firstId: string, secondId: string, steps = 13): PaintPathPoint[] {
