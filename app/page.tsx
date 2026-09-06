@@ -99,6 +99,7 @@ const ACTIVE_IMAGE_BANK = [...CURATED_IMAGE_BANK, ...MASTER_PAINTING_BANK];
 
 const MISS_PROMPTS = ['Squint harder', 'Look deeper', 'Let the color settle', 'Look once more'];
 const PALETTE_STORAGE_KEY = 'munsell-eye-palette-v1';
+const APP_STATE_STORAGE_KEY = 'munsell-eye-ui-v1';
 
 function shuffled<T>(items: readonly T[]) {
   const copy = [...items];
@@ -1245,9 +1246,8 @@ function ReferenceView() {
         </div>
         <section className="hue-page" aria-label={`${hue} value and chroma chart`}>
         <div className="hue-page-head">
-          <div><span className="eyebrow">Constant hue</span><h2>{hue}</h2></div>
           <div className="reference-chip-readout" aria-live="polite">
-            <div><span>Selected chip</span><strong>{notation(selectedChip)}</strong></div>
+            <div><span className="eyebrow">Selected Chip</span><strong>{notation(selectedChip)}</strong></div>
             <span className="reference-readout-swatch" style={{ background: rgbCss(selectedChip) }} />
           </div>
         </div>
@@ -1332,6 +1332,32 @@ export default function Home() {
   const answerHLive = useRef('5BG');
   const answerVLive = useRef('5');
   const answerCLive = useRef('6');
+  const [uiStateReady, setUiStateReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = JSON.parse(window.localStorage.getItem(APP_STATE_STORAGE_KEY) ?? '{}') as Record<string, unknown>;
+        if (['practice', 'image', 'mix', 'explore', 'reference'].includes(String(stored.view))) setView(stored.view as AppView);
+        if (['swatch', 'image'].includes(String(stored.source))) setSource(stored.source as SourceMode);
+        if (['isolated', 'context'].includes(String(stored.swatchPresentation))) setSwatchPresentation(stored.swatchPresentation as SwatchPresentation);
+        if (['swatch', 'slice'].includes(String(stored.huePresentation))) setHuePresentation(stored.huePresentation as HuePresentation);
+        if (['value', 'hue', 'chroma', 'family', 'full', 'compare'].includes(String(stored.exercise))) setExercise(stored.exercise as Exercise);
+        if (typeof stored.valueMonochrome === 'boolean') setValueMonochrome(stored.valueMonochrome);
+        if (HUE_ORDER.includes(stored.familyHue as (typeof HUE_ORDER)[number])) setFamilyHue(stored.familyHue as string);
+        if (['value', 'hue', 'chroma'].includes(String(stored.compareDimension))) setCompareDimension(stored.compareDimension as CompareDimension);
+      } catch { /* Invalid local preferences fall back to the clean defaults. */ }
+      setUiStateReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!uiStateReady) return;
+    window.localStorage.setItem(APP_STATE_STORAGE_KEY, JSON.stringify({
+      view, source, swatchPresentation, huePresentation, exercise, valueMonochrome, familyHue, compareDimension,
+    }));
+  }, [compareDimension, exercise, familyHue, huePresentation, source, swatchPresentation, uiStateReady, valueMonochrome, view]);
 
   useEffect(() => {
     startedAt.current = Date.now();
@@ -2010,15 +2036,12 @@ export default function Home() {
         </section>
         )}
         </section>
-      ) : view === 'image' ? (
-        <div className="image-view-shell"><ImageLab onSendToMixer={openMixerWith} selectedPaintIds={selectedPaintIds} /></div>
-      ) : view === 'mix' ? (
-        <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />
-      ) : view === 'explore' ? (
-        <StudioView onSendToMixer={openMixerWith} />
-      ) : (
-        <ReferenceView />
-      )}
+      ) : null}
+
+      <div className="image-view-shell" hidden={view !== 'image'}><ImageLab onSendToMixer={openMixerWith} selectedPaintIds={selectedPaintIds} /></div>
+      {view === 'mix' && <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />}
+      {view === 'explore' && <StudioView onSendToMixer={openMixerWith} />}
+      {view === 'reference' && <ReferenceView />}
 
       {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
