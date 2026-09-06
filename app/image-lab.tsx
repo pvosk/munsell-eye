@@ -240,10 +240,10 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       const hueDifference = circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])) / Math.PI;
       const valueDifference = Math.min(1, Math.abs(candidate.lab[0] - entry.lab[0]) / .28);
       const chromaDifference = Math.min(1, Math.abs(chroma - entryChroma) / .12);
-      return Math.sqrt(.42 * hueDifference ** 2 + .28 * valueDifference ** 2 + .3 * chromaDifference ** 2);
+      return Math.sqrt(.48 * hueDifference ** 2 + .42 * valueDifference ** 2 + .1 * chromaDifference ** 2);
     })));
   };
-  const chromaticApexOf = (candidate: PaletteCandidate) => {
+  const valueConditionedChromaOf = (candidate: PaletteCandidate) => {
     const chroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
     if (chroma <= .025) return 0;
     const angle = Math.atan2(candidate.lab[2], candidate.lab[1]);
@@ -251,6 +251,7 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       .filter((entry) => {
         const entryChroma = Math.hypot(entry.lab[1], entry.lab[2]);
         return entryChroma > .025
+          && Math.abs(entry.color.v - candidate.color.v) <= 1
           && circularAngleDistance(angle, Math.atan2(entry.lab[2], entry.lab[1])) <= Math.PI / 8;
       })
       .reduce((maximum, entry) => Math.max(maximum, Math.hypot(entry.lab[1], entry.lab[2])), chroma);
@@ -286,7 +287,7 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
     const available = pool.filter(canSelect);
     if (!available.length) break;
     const totalError = currentErrors.reduce((sum, error, sampleIndex) => sum + error * sampleWeights[sampleIndex], 0);
-    let best: PaletteCandidate | null = null; let bestScore = -1;
+    const scored: { candidate: PaletteCandidate; baseScore: number; chromaTieBreak: number }[] = [];
     for (const candidate of available) {
       let gain = 0;
       samples.forEach((index, sampleIndex) => {
@@ -298,18 +299,16 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
       const identityNovelty = colorIdentityNovelty(candidate);
       const chromaConfidence = Math.max(0, Math.min(1, (chroma - .025) / .12));
       const mass = massOf(candidate);
-      const chromaticApex = chromaticApexOf(candidate);
-      let score = reliabilityOf(candidate) * (
+      let baseScore = reliabilityOf(candidate) * (
         .74 * (totalError > 0 ? gain / totalError : 0)
         + .15 * valueNovelty * (.35 + .65 * mass)
         + .11 * identityNovelty * chromaConfidence * (.35 + .65 * mass)
-        + .06 * chromaticApex * (.3 + .7 * mass)
       );
 
       const selectedShadows = selected.filter(isShadowCandidate);
       if (isShadowCandidate(candidate)) {
         if (!selectedShadows.length && shadowCoverage >= .018) {
-          score *= 1 + .1 * Math.min(1, shadowCoverage / .2);
+          baseScore *= 1 + .1 * Math.min(1, shadowCoverage / .2);
         } else if (selectedShadows.length) {
           const shadowNovelty = Math.min(1, Math.min(...selectedShadows.map((entry) => {
             const candidateChroma = Math.hypot(candidate.lab[1], candidate.lab[2]);
@@ -322,11 +321,22 @@ function initialPalette(labs: Float32Array, width: number, height: number) {
             return Math.sqrt(.58 * valueDifference ** 2 + .24 * hueDifference ** 2 + .18 * chromaDifference ** 2);
           })));
           const repeatFloor = Math.max(.4, .62 - .1 * (selectedShadows.length - 1));
-          score *= repeatFloor + (1 - repeatFloor) * shadowNovelty;
+          baseScore *= repeatFloor + (1 - repeatFloor) * shadowNovelty;
         }
       }
-      if (score > bestScore) { best = candidate; bestScore = score; }
+      const sameValueReferences = selected.filter((entry) => Math.abs(entry.color.v - candidate.color.v) <= 1);
+      const neutralReplacement = sameValueReferences.length
+        ? Math.max(0, Math.min(1, (chroma - Math.min(...sameValueReferences.map((entry) => Math.hypot(entry.lab[1], entry.lab[2])))) / .12))
+        : 0;
+      const chromaTieBreak = (.72 * valueConditionedChromaOf(candidate) + .28 * neutralReplacement)
+        * (.35 + .65 * mass);
+      scored.push({ candidate, baseScore, chromaTieBreak });
     }
+    const strongestBaseScore = Math.max(...scored.map((entry) => entry.baseScore));
+    const structuralShortlist = scored.filter((entry) => entry.baseScore >= strongestBaseScore * .95);
+    const best = structuralShortlist.sort((first, second) => (
+      second.chromaTieBreak - first.chromaTieBreak || second.baseScore - first.baseScore
+    ))[0]?.candidate ?? null;
     if (!best || !addCandidate(best)) break;
     refreshErrors();
   }
@@ -640,7 +650,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   return (
     <section className="image-lab" aria-labelledby="image-lab-title">
       <header className="image-lab-head">
-        <div><span className="eyebrow">Image</span><h1 id="image-lab-title">Build a Munsell block-in</h1><p>Begin with seven large color masses, then add only the chips the painting needs.</p></div>
+        <div><span className="eyebrow">Image</span><h1 id="image-lab-title">Build a Munsell Block-In</h1><p>Begin with seven large color masses, then add only the chips the painting needs.</p></div>
         <div><input accept="image/*" hidden onChange={chooseFile} ref={fileRef} type="file" /><button className="outline-button" onClick={() => fileRef.current?.click()} type="button">Choose image</button></div>
       </header>
       <div className="image-lab-toolbar">
