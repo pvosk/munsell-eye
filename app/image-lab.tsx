@@ -454,6 +454,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   const [selectedKey, setSelectedKey] = useState('');
   const [sample, setSample] = useState<Sample | null>(null);
   const [zoom, setZoom] = useState(1);
+  const [imageAspect, setImageAspect] = useState(4 / 3);
   const [highlightedKey, setHighlightedKey] = useState('');
   const [addedKey, setAddedKey] = useState('');
 
@@ -466,6 +467,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       const scale = Math.min(560 / image.naturalWidth, 480 / image.naturalHeight, 1);
       const width = Math.max(1, Math.round(image.naturalWidth * scale));
       const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      setImageAspect(width / height);
       const rawCanvas = document.createElement('canvas');
       rawCanvas.width = width; rawCanvas.height = height;
       const rawContext = rawCanvas.getContext('2d', { willReadFrequently: true });
@@ -490,7 +492,6 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
       setHighlightedKey('');
       zoomRef.current = 1;
       setZoom(1);
-      if (canvasWrapRef.current) canvasWrapRef.current.style.width = '100%';
       if (zoomFrameRef.current !== undefined) window.cancelAnimationFrame(zoomFrameRef.current);
       zoomFrameRef.current = window.requestAnimationFrame(() => {
         if (viewportRef.current) {
@@ -609,7 +610,6 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     const next = Math.max(1, Math.min(3, requested));
     const previous = zoomRef.current;
     const viewport = viewportRef.current;
-    const canvasWrap = canvasWrapRef.current;
     let scrollTarget: { left: number; top: number } | null = null;
     if (viewport && clientX !== undefined && clientY !== undefined) {
       const rect = viewport.getBoundingClientRect();
@@ -621,7 +621,6 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     }
     if (Math.abs(next - previous) < .002 && !fixedAnchor) return;
     zoomRef.current = next;
-    if (canvasWrap) canvasWrap.style.width = `${next * 100}%`;
     setZoom(next);
     if (viewport && scrollTarget) {
       viewport.scrollLeft = scrollTarget.left;
@@ -694,7 +693,6 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
   };
 
   const pointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
     cancelAddHold();
     activePointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -750,7 +748,6 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     if (next) press.color = next.color;
   };
   const pointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    event.preventDefault();
     cancelAddHold();
     activePointersRef.current.delete(event.pointerId);
     if (!activePointersRef.current.size) pinchingRef.current = false;
@@ -787,6 +784,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     sourceBlobRef.current = file;
     objectUrlRef.current = URL.createObjectURL(file); loadSource(objectUrlRef.current, file.name.replace(/\.[^.]+$/, '')); event.target.value = '';
   };
+  const fittedCanvasWidth = `min(${(zoom * 100).toFixed(2)}%, ${(imageAspect * 48 * zoom).toFixed(2)}dvh, ${(imageAspect * 620 * zoom).toFixed(1)}px)`;
 
   return (
     <section className="image-lab" aria-labelledby="image-lab-title">
@@ -799,7 +797,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         <span className="sr-only" aria-live="polite">Image zoom {Math.round(zoom * 100)} percent</span>
       </div>
       <div className="image-lab-stage">
-        <div className={`image-lab-viewport ${zoom > 1.01 ? 'zoomed' : ''}`} ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -36 : 36; const offsetY = sample.y < .2 ? 26 : -26; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.displayRgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
+        <div className={`image-lab-viewport ${zoom > 1.01 ? 'zoomed' : ''}`} ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: fittedCanvasWidth }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -36 : 36; const offsetY = sample.y < .2 ? 26 : -26; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.displayRgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
         {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or ⌘-wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
