@@ -1,7 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
-import { HUE_ORDER, MUNSELL_COLORS, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
+import { HUE_ORDER, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
+import {
+  PRACTICAL_CHROMAS,
+  PRACTICAL_CHROMA_LIMIT,
+  PRACTICAL_MUNSELL_COLORS as MUNSELL_COLORS,
+  practicalEdgeColor,
+} from './munsell-gamut';
 import {
   DEFAULT_PALETTE_IDS,
   PAINTS,
@@ -22,28 +28,19 @@ const HUE_FAMILY_NAMES: Record<string, string> = {
   BG: 'blue-green', B: 'blue', PB: 'purple-blue', P: 'purple', RP: 'red-purple',
 };
 const VALUE_OPTIONS = Array.from({ length: 9 }, (_, index) => String(index + 1));
-const MAX_MUNSELL_CHROMA = Math.max(...MUNSELL_COLORS.map((color) => color.c));
+const MAX_MUNSELL_CHROMA = PRACTICAL_CHROMA_LIMIT;
 const VALUE_ONE_CHANCE = 1 / 30;
 const VALUE_ONE_COOLDOWN = 29;
 const VALUE_TWO_CHANCE = 0.16;
-// Keep the complete renotation tree in Reference, but train against a more
-// useful painter's gamut. The renotation contains valid displayable P/PB
-// coordinates through C24 that are unusually difficult to approach in paint.
-const TRAINING_CHROMA_CAP: Partial<Record<string, number>> = { B: 10, PB: 12, P: 12, RP: 16 };
-const practicalTrainingColor = (color: MunsellColor) => color.c <= (TRAINING_CHROMA_CAP[color.h.replace(/[\d.]/g, '')] ?? MAX_MUNSELL_CHROMA);
-const PRACTICE_COLORS = MUNSELL_COLORS.filter(practicalTrainingColor);
+const PRACTICE_COLORS = MUNSELL_COLORS;
 const PRACTICE_MAX_CHROMA = Math.max(...PRACTICE_COLORS.map((color) => color.c));
 const ALL_CHROMA_OPTIONS = Array.from({ length: PRACTICE_MAX_CHROMA / 2 }, (_, index) => String((index + 1) * 2));
 const DEFAULT_CHROMA = '6';
-const REFERENCE_CHROMAS = Array.from({ length: MAX_MUNSELL_CHROMA / 2 + 1 }, (_, index) => index * 2);
+const REFERENCE_CHROMAS = PRACTICAL_CHROMAS;
 const HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
-  const colors = PRACTICE_COLORS.filter((color) => color.h === hue);
-  return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
+  return practicalEdgeColor(hue);
 }).filter((color): color is MunsellColor => Boolean(color));
-const REFERENCE_HUE_EDGE_COLORS = HUE_ORDER.map((hue) => {
-  const colors = MUNSELL_COLORS.filter((color) => color.h === hue);
-  return [...colors].sort((a, b) => b.c - a.c || b.v - a.v)[0];
-}).filter((color): color is MunsellColor => Boolean(color));
+const REFERENCE_HUE_EDGE_COLORS = HUE_EDGE_COLORS;
 const HUE_TRAINING_POOL = HUE_EDGE_COLORS;
 const SWATCH_POOL = PRACTICE_COLORS.filter((color) => color.v >= 2 && color.v <= 8);
 const IMAGE_COLOR_POOL = PRACTICE_COLORS;

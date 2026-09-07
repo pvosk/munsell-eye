@@ -1,5 +1,6 @@
 import { Color, mix } from 'spectral.js';
-import { HUE_ORDER, MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsell-data';
+import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
+import { PRACTICAL_MUNSELL_COLORS as MUNSELL_COLORS } from './munsell-gamut';
 
 export type PaintCategory = 'White' | 'Yellow' | 'Orange' | 'Earth' | 'Red' | 'Violet' | 'Blue' | 'Green' | 'Black';
 

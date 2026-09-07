@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
-import { HUE_ORDER, MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsell-data';
+import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
+import { PRACTICAL_MUNSELL_COLORS as MUNSELL_COLORS } from './munsell-gamut';
 
 type Family = 'R' | 'YR' | 'Y' | 'GY' | 'G' | 'BG' | 'B' | 'PB' | 'P' | 'RP';
 type Study = 'harmony' | 'flow' | 'albers' | 'klee' | 'ostwald' | 'vanderpoel' | 'gartside';

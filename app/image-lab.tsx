@@ -10,7 +10,8 @@ import {
   type ChangeEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import { MUNSELL_COLORS, NEUTRALS, type MunsellColor } from './munsell-data';
+import { NEUTRALS, type MunsellColor } from './munsell-data';
+import { PRACTICAL_MUNSELL_COLORS as MUNSELL_COLORS } from './munsell-gamut';
 import { suggestPaintRecipe } from './paint-mixing';
 
 type RGB = [number, number, number];
