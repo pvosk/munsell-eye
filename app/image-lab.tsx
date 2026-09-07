@@ -639,6 +639,7 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
     const viewport = viewportRef.current;
     if (!viewport) return;
     const wheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
       const next = zoomRef.current * Math.exp(-event.deltaY * .0024);
       if ((zoomRef.current <= 1 && next <= 1) || (zoomRef.current >= 3 && next >= 3)) return;
       event.preventDefault();
@@ -798,8 +799,8 @@ export default function ImageLab({ selectedPaintIds, onSendToMixer }: {
         <span className="sr-only" aria-live="polite">Image zoom {Math.round(zoom * 100)} percent</span>
       </div>
       <div className="image-lab-stage">
-        <div className="image-lab-viewport" ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -36 : 36; const offsetY = sample.y < .2 ? 26 : -26; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.displayRgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
-        {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or wheel to zoom</span>
+        <div className={`image-lab-viewport ${zoom > 1.01 ? 'zoomed' : ''}`} ref={viewportRef}><div className="image-lab-canvas-wrap" ref={canvasWrapRef} style={{ width: `${zoom * 100}%` }}><canvas aria-label={`${sourceName}, ${mode} view`} onPointerCancel={pointerCancel} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} ref={canvasRef} />{sample && (() => { const offsetX = sample.x > .72 ? -36 : 36; const offsetY = sample.y < .2 ? 26 : -26; return <span className="image-lab-sample" style={{ '--loupe-x': `${offsetX}px`, '--loupe-y': `${offsetY}px`, '--loupe-angle': `${Math.atan2(offsetY, offsetX)}rad`, '--loupe-length': `${Math.hypot(offsetX, offsetY)}px`, '--sample-color': rgbCss(sample.displayRgb), left: `${sample.x * 100}%`, top: `${sample.y * 100}%` } as CSSProperties}><i /><b /></span>; })()}</div></div>
+        {loading && <span className="image-lab-loading">Resolving the color masses…</span>}<span className="image-lab-instruction">Tap or drag to inspect · hold to add · pinch or ⌘-wheel to zoom</span>
       </div>
       {mode === 'value' && <div className="image-value-key" aria-label={`Represented Munsell values ${representedValues.join(', ')}`}><span>Values in this block-in</span>{representedValues.map((value) => <i key={value} style={{ background: chipCss(NEUTRALS[value - 1]) }}>N{value}</i>)}</div>}
       <div className="mass-dock" aria-label="Munsell block-in palette" ref={massDockRef}>

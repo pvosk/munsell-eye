@@ -289,6 +289,7 @@ function PathVisual({ points, interactive = false, compact = false, sequence = f
     const surface = surfaceRef.current;
     if (!surface || !interactive) return;
     const wheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
       const next = zoomRef.current * Math.exp(-event.deltaY * .0024);
       if ((zoomRef.current <= 1 && next <= 1) || (zoomRef.current >= 3 && next >= 3)) return;
       event.preventDefault();
@@ -357,7 +358,7 @@ function PathVisual({ points, interactive = false, compact = false, sequence = f
           <small className="map-label top">lighter</small><small className="map-label bottom">darker</small><small className="map-label left">{sequence ? 'base' : 'first'}</small><small className="map-label right">{sequence ? 'target' : 'second'}</small>
         </div></section>
       </div>
-      {interactive && <small className="mix-gesture-hint">Auto-framed · drag to pan · pinch or wheel to zoom{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
+      {interactive && <small className="mix-gesture-hint">Auto-framed · drag to pan · pinch or ⌘-wheel to zoom{zoom > 1.02 ? ` · ${zoom.toFixed(1)}×` : ''}</small>}
     </div>
   );
 }

@@ -1078,7 +1078,10 @@ function HuntSurface({ target, questionKey, onPick, submitted }: {
 
   return (
     <section className="hunt-stage" aria-label={`Find ${notation(target)} in the color field`}>
-      <header><span>Find</span><strong>{notation(target)}</strong></header>
+      <header>
+        <div className="hunt-prompt"><span>Find</span><strong>{notation(target)}</strong></div>
+        <span className="hunt-current"><small>Your Guess</small><i style={{ background: `rgb(${guessRgb.join(',')})` }} /></span>
+      </header>
       <div className="hunt-field-wrap">
         <div className="hunt-field">
           <canvas
@@ -1089,12 +1092,10 @@ function HuntSurface({ target, questionKey, onPick, submitted }: {
             ref={canvasRef}
           />
           <i className={`hunt-cursor ${replaying ? 'replaying' : ''}`} style={{ left: `${point.x * 100}%`, top: `${point.y * 100}%` }} />
-          <span className="hunt-current"><small>Your Guess</small><i style={{ background: `rgb(${guessRgb.join(',')})` }} /></span>
         </div>
         <label className="hunt-value">
           <small>Value</small>
           <input aria-label="Munsell value" disabled={Boolean(submitted)} max="9.49" min=".5" onChange={(event) => changeValue(Number(event.target.value))} step=".01" type="range" value={value} />
-          <span>N{Math.max(1, Math.min(9, Math.round(value)))}</span>
         </label>
       </div>
     </section>
