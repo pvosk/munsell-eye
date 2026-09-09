@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PLAY_LEVELS, CHARGE_SECONDS, WORLD_SCALE, addPaint, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
+import { PLAY_LEVELS, CHARGE_SECONDS, WORLD_SCALE, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
-test('the three requested palettes have the correct pigments, including actual PW1', () => {
+test('the four requested palettes have the correct pigments, including actual PW1', () => {
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
-    ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'],
+    ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
   ]);
 });
 
@@ -19,13 +19,20 @@ test('mixtures retain absolute mass, independent of pour order or splitting', ()
   assert.ok(colorDistance(mixtureColor(paints, direct), mixtureColor(paints, direct.map((q) => q * 1e6))) < 1e-9);
 });
 
-test('charging is monotonic, starts with a tiny dab, and reaches eight times current mass', () => {
-  assert.equal(chargeRatio(0), .005);
+test('golf meter eases out, returns after peak, and mass reduces equal-charge influence', () => {
+  assert.equal(chargePower(0), 0);
+  assert.equal(chargePower(CHARGE_SECONDS), 1);
+  assert.equal(chargePower(CHARGE_SECONDS * 2), 0);
   assert.equal(chargeRatio(CHARGE_SECONDS), 8);
-  assert.equal(chargeRatio(CHARGE_SECONDS * 2), 8);
-  let last = 0;
-  for (let i = 0; i <= 360; i++) { const value = chargeRatio(i / 100); assert.ok(value >= last); last = value; }
-  assert.ok(chargeRatio(.3) < .02);
+  assert.ok(chargePower(CHARGE_SECONDS / 4) > .5);
+  assert.ok(chargeAmount(100, 1) / 100 < chargeAmount(1, 1));
+  assert.equal(chargeAmount(0, 1), 1);
+  assert.ok(chargeRatio(.06) < .01);
+  let previous = 0;
+  for (let i = 0; i <= 100; i++) {
+    const value = chargePower(CHARGE_SECONDS * i / 100);
+    assert.ok(value >= previous); previous = value;
+  }
 });
 
 test('pour endpoints are exactly the cumulative mixture, even after a large correction', () => {
@@ -40,8 +47,8 @@ test('pour endpoints are exactly the cumulative mixture, even after a large corr
 });
 
 test('every generated target has a constructive route at guide par within the hold limits', () => {
-  const began = performance.now(); const pars: number[][] = [[], [], []];
-  for (let index = 0; index < 3; index++) for (let seed = 1; seed <= 16; seed++) {
+  const began = performance.now(); const pars: number[][] = PLAY_LEVELS.map(() => []);
+  for (let index = 0; index < PLAY_LEVELS.length; index++) for (let seed = 1; seed <= 16; seed++) {
     const level = PLAY_LEVELS[index]; const hole = generateHole(index, seed * 7919);
     const recipe = hole.recipe;
     const order = recipe.map((amount, i) => ({ i, amount })).filter((p) => p.amount > 0).sort((a, b) => b.amount - a.amount);
@@ -51,7 +58,7 @@ test('every generated target has a constructive route at guide par within the ho
     const base = order[0].amount;
     for (const { i, amount } of order) {
       const dose = amount / base;
-      if (totalMass(state)) { assert.ok(dose / totalMass(state) <= 8); assert.ok(dose / totalMass(state) >= .005); }
+      if (totalMass(state)) { assert.ok(dose <= chargeAmount(totalMass(state), CHARGE_SECONDS)); assert.ok(dose >= chargeAmount(totalMass(state), 0)); }
       state = addPaint(state, i, dose);
     }
     const result = mixtureColor(level.paints, state);
@@ -59,7 +66,7 @@ test('every generated target has a constructive route at guide par within the ho
     assert.ok(level.paints.every((_, i) => colorDistance(mixtureColor(level.paints, level.paints.map((_, j) => i === j ? 1 : 0)), hole.target) > hole.tolerance));
     pars[index].push(hole.par);
   }
-  console.log(`48 target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
+  console.log(`64 target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
 });
 
 test('spherical landing boundaries match the exact scored color distance', () => {
@@ -74,4 +81,23 @@ test('targets are reproducible for restart and invalid paint amounts are rejecte
   assert.throws(() => addPaint([1, 0, 0], -1, 1));
   assert.throws(() => addPaint([1, 0, 0], 2, -1));
   assert.throws(() => mixtureColor(PLAY_LEVELS[0].paints, [Infinity, 0, 0]));
+});
+
+test('ribbons twist continuously around the accurate path without moving its center', async () => {
+  const { ribbonEdges, flightProgress } = await import('../app/play-motion');
+  const path = pourPath(PLAY_LEVELS[2].paints, [1, 2, .4, 0], 3, 4);
+  const edges = ribbonEdges(path, 7.4);
+  edges.forEach(([left, right], i) => {
+    const center = left.clone().add(right).multiplyScalar(.5);
+    path[i].position.forEach((v, axis) => assert.ok(Math.abs(v - center.getComponent(axis)) < 1e-10));
+    assert.ok(left.distanceTo(right) >= .18);
+    if (i) {
+      const direction = right.clone().sub(left).normalize();
+      const previous = edges[i - 1][1].clone().sub(edges[i - 1][0]).normalize();
+      assert.ok(direction.dot(previous) > 0, 'ribbon unexpectedly flipped');
+    }
+  });
+  assert.equal(flightProgress(0), 0);
+  assert.equal(flightProgress(1), 1);
+  assert.ok(flightProgress(.05) > .09, 'release should launch immediately');
 });

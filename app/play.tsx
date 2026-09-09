@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
-import { PLAY_LEVELS, CHARGE_SECONDS, addPaint, chargeRatio, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, totalMass, type Hole, type Mixture } from './play-engine';
+import { PLAY_LEVELS, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
 import './play.css';
 
@@ -19,7 +19,7 @@ export default function PlayView() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
   const [help, setHelp] = useState(false);
-  const [results, setResults] = useState<(number | null)[]>([null, null, null]);
+  const [results, setResults] = useState<(number | null)[]>(PLAY_LEVELS.map(() => null));
   const [announcement, setAnnouncement] = useState('Choose your first paint.');
   const host = useRef<HTMLDivElement>(null);
   const targetLabel = useRef<HTMLDivElement>(null);
@@ -70,7 +70,7 @@ export default function PlayView() {
     const palette = PLAY_LEVELS[s.levelIndex].paints;
     const before = s.quantities;
     const beforeMass = totalMass(before);
-    const amount = beforeMass ? beforeMass * chargeRatio((performance.now() - held.started) / 1000) : 1;
+    const amount = chargeAmount(beforeMass, (performance.now() - held.started) / 1000);
     const after = addPaint(before, held.index, amount);
     const path = pourPath(palette, before, held.index, amount);
     const nextPours = s.pours + 1;
@@ -97,8 +97,11 @@ export default function PlayView() {
       if (held && scene.current) {
         const seconds = (now - held.started) / 1000;
         const s = live.current;
-        scene.current.charge(PLAY_LEVELS[s.levelIndex].paints[held.index].rgb, totalMass(s.quantities) ? chargeRatio(seconds) : 1);
-        if (now - lastUI > 40) { setCharged(Math.min(1, seconds / CHARGE_SECONDS)); lastUI = now; }
+        const palette = PLAY_LEVELS[s.levelIndex].paints;
+        const mass = totalMass(s.quantities);
+        const tangent = mass ? mixtureColor(palette, addPaint(s.quantities, held.index, mass * .03)) : undefined;
+        scene.current.charge(palette[held.index].rgb, chargeAmount(mass, seconds) / Math.max(1, mass), chargePower(seconds), tangent);
+        if (now - lastUI > 25) { setCharged(seconds); lastUI = now; }
       }
       frame = requestAnimationFrame(tick);
     };
@@ -143,15 +146,16 @@ export default function PlayView() {
       if (event.detail === 0 && !charge.current) { begin(index, 'accessible'); release('accessible'); }
     },
   });
-  const ratio = charged === null ? 0 : chargeRatio(charged * CHARGE_SECONDS);
+  const power = charged === null ? 0 : chargePower(charged);
+  const amount = charged === null ? 0 : chargeAmount(mass, charged);
   const disabled = !ready || error || phase === 'flight' || phase === 'landed' || help;
   const status = phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 2 ? 'Within Reach' : 'Choose Your Next Pour';
 
   return <section className="paint-play" aria-label="Paint mixing game">
     <div className="play-topline">
-      <div className="play-name"><span className="play-eyebrow">Munsell Eye / Play</span><h1>Color Drift</h1></div>
+      <div className="play-name"><span className="play-eyebrow">Munsell Eye / Play</span><h1>Chroma Glider</h1></div>
       <div className="play-levels" aria-label="Palette levels">{PLAY_LEVELS.map((entry, i) => <button key={entry.name} type="button" aria-pressed={levelIndex === i} onClick={() => startHole(i)} disabled={phase === 'flight' || charged !== null}><span>{results[i] !== null ? '✓' : `0${i + 1}`}</span>{entry.name}</button>)}</div>
-      <button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button>
+      <div className="play-upper-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button><button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button></div>
     </div>
     <div className="play-world">
       <div className="play-canvas" ref={host} /><div className="play-world-vignette" />
@@ -161,12 +165,12 @@ export default function PlayView() {
       <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
-      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first pour chooses a pure base. Every later pour blends into everything you’ve already added.</p><p>A short touch adds a trace. Hold longer for a larger pour; the final part of the charge can add up to eight times your mixture’s mass.</p><p>Settle inside the destination’s rings. Passing through them doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge.</p><p className="play-fineprint">Guide par includes the base pour and comes from a sampled recipe search. Positions and landing distance use continuous perceptual color space; the notation is the nearest Munsell chip. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to the Drift</button></div>}
-      {phase === 'landed' && !help && <div className="play-arrival"><span className="play-eyebrow">Destination Reached</span><h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2><p>{pours} pours · Guide par {hole.par} · {massLabel(mass)} parts</p><div><button type="button" onClick={() => startHole(levelIndex < 2 ? levelIndex + 1 : 0)}>{levelIndex < 2 ? 'Next Palette' : 'Play Again'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex)}>New Target</button></div></div>}
+      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first pour chooses a pure base. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want: a light touch adds a trace, a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Settle inside the destination’s rings. Passing through them doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge.</p><p className="play-fineprint">Guide par includes the base pour and comes from a sampled recipe search. Positions and landing distance use continuous perceptual color space; the notation is the nearest Munsell chip. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
+      {phase === 'landed' && !help && <div className="play-arrival"><span className="play-eyebrow">Destination Reached</span><h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2><p>{pours} pours · Guide par {hole.par} · {massLabel(mass)} parts</p><div><button type="button" onClick={() => startHole(levelIndex < PLAY_LEVELS.length - 1 ? levelIndex + 1 : 0)}>{levelIndex < PLAY_LEVELS.length - 1 ? 'Next Palette' : 'Play Again'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex)}>New Target</button></div></div>}
     </div>
     <div className="play-dock">
-      <div className="play-dock-status"><div><span className="play-eyebrow">{charged === null ? 'Your Mixture' : mass ? ratio > 1 ? 'Power Pour' : 'Loading Paint' : 'Pure Base'}</span><strong>{charged !== null ? mass ? `+ ${massLabel(mass * ratio)} parts` : '1 part · release to begin' : mass ? nearestNotation(point) : 'No paint yet'}</strong></div><div className="play-mixture-chip" style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div className="play-dock-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div></div>
-      <div className="play-paints" style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb), '--charge': charged !== null && selected === i ? charged : 0 } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '')}</span><span className="play-paint-key">{i + 1}</span><span className="play-paint-charge" /></button>)}</div>
+      <div className="play-dock-status"><div className="play-current-mixture"><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? nearestNotation(point) : 'No paint yet'}</strong></div><div className="play-mixture-chip" style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /></div><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb) } as CSSProperties}><i /><b /></div></div></div>
+      <div className="play-paints" style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '')}</span></button>)}</div>
       <div className="play-control-hint"><span>{phase === 'flight' ? 'Follow the color as it settles.' : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
     </div>
     <p className="sr-only" role="status" aria-live="polite">{announcement}</p>

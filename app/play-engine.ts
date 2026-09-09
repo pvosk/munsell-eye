@@ -10,7 +10,7 @@ export type ColorPoint = { rgb: RGB; lab: XYZ; position: XYZ };
 export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number };
 export type Hole = { seed: number; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number };
 export const WORLD_SCALE = 22;
-export const CHARGE_SECONDS = 3.6;
+export const CHARGE_SECONDS = 2.2;
 
 const paint = (id: string) => {
   const found = PAINTS.find((entry) => entry.id === id);
@@ -25,6 +25,7 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'Earth & Air', subtitle: 'The Classic Triad', paints: [oxide, paint('ultramarine-blue'), paint('titanium-white')], tolerance: .038 },
   { name: 'Zorn', subtitle: 'Four Quiet Colors', paints: [paint('yellow-ochre'), paint('cadmium-red-light'), paint('ivory-black'), paint('titanium-white')], tolerance: .032 },
   { name: 'Full Bloom', subtitle: 'The Chromatic Palette', paints: [flake, paint('cadmium-lemon'), paint('cadmium-red-medium'), paint('phthalo-blue-green')], tolerance: .028 },
+  { name: 'Wild Color', subtitle: 'Without White', paints: [paint('cadmium-lemon'), paint('quinacridone-magenta'), paint('phthalo-blue-green'), oxide], tolerance: .032 },
 ];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
@@ -60,19 +61,32 @@ export function mixtureColor(paints: PaintColor[], quantities: Mixture): ColorPo
   // composition and introduce order-dependent drift after successive pours.
   const active = paints.map((p, i) => [pigmentColor(p), (quantities[i] ?? 0) / mass] as [Color, number]).filter(([, q]) => q > 0);
   const result = active.length === 1 ? active[0][0] : mix(...active);
-  return colorPoint(result.sRGB.map((v) => Math.max(0, Math.min(255, v))) as RGB);
+  // spectral.sRGB rounds to integers. Preserve linear RGB precision for smooth
+  // physical paths, only rounding the CSS label at the presentation boundary.
+  return colorPoint(result.lRGB.map((v) => {
+    const linear = Math.max(0, Math.min(1, v));
+    return 255 * (linear <= .0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - .055);
+  }) as RGB);
 }
 
+export function chargePower(seconds: number) {
+  const cycle = (Math.max(0, seconds) / CHARGE_SECONDS) % 2;
+  const leg = cycle <= 1 ? cycle : 2 - cycle;
+  return 1 - (1 - leg) ** 3;
+}
 export function chargeRatio(seconds: number) {
-  const t = Math.max(0, Math.min(1, seconds / CHARGE_SECONDS));
-  // A generous fine-control interval, then an explicitly visible power pour.
-  return Math.min(8, .005 + .995 * Math.min(1, t / .7) ** 2.4 + 7 * Math.max(0, (t - .7) / .3) ** 2);
+  return .005 + 7.995 * chargePower(seconds) ** 4;
+}
+export function chargeAmount(mass: number, seconds: number) {
+  // Capacity grows with mass, but less quickly than the mixture itself: an
+  // equally timed shot has less influence on a large accumulated pile.
+  return mass ? Math.max(1, mass) ** .8 * chargeRatio(seconds) : 1;
 }
 export function addPaint(mixture: Mixture, index: number, amount: number): Mixture {
   if (!Number.isInteger(index) || index < 0 || index >= mixture.length || !Number.isFinite(amount) || amount < 0) throw new Error('Invalid pour');
   return mixture.map((q, i) => q + (i === index ? amount : 0));
 }
-export function pourPath(paints: PaintColor[], before: Mixture, index: number, amount: number, samples = 96): ColorPoint[] {
+export function pourPath(paints: PaintColor[], before: Mixture, index: number, amount: number, samples = 192): ColorPoint[] {
   if (!totalMass(before)) return [mixtureColor(paints, addPaint(before, index, 1))];
   // Sample more densely near the beginning of large corrective pours.
   return Array.from({ length: samples + 1 }, (_, n) => mixtureColor(paints, addPaint(before, index, amount * (n / samples) ** 2)));

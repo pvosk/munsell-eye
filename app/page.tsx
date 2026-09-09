@@ -2453,7 +2453,7 @@ export default function Home() {
       {view === 'mix' && <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />}
       {view === 'explore' && <StudioView onSendToMixer={openMixerWith} />}
       {view === 'reference' && <ReferenceView />}
-      {view === 'play' && <Suspense fallback={<div className="play-loading-shell">Opening Color Drift…</div>}><PlayView /></Suspense>}
+      {view === 'play' && <Suspense fallback={<div className="play-loading-shell">Opening Chroma Glider…</div>}><PlayView /></Suspense>}
 
       {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
