@@ -9,6 +9,9 @@
   --panel: #f8f7f3;
   --surround: #aaa9a3;
   --correct: #426b4e;
+  --play-space: #242b2c;
+  --play-ivory: #eee8d7;
+  --play-muted: #a5b1ab;
 }
 
 * { box-sizing: border-box; }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
 import {
   PRACTICAL_CHROMAS,
@@ -21,6 +21,7 @@ import curatedImageData from './data/practice-images.json';
 import StudioView from './studio';
 import MixerView from './mixer';
 import ImageLab from './image-lab';
+const PlayView = lazy(() => import('./play'));
 
 const BASIC_HUES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];
 const HUE_FAMILY_NAMES: Record<string, string> = {
@@ -47,7 +48,7 @@ const IMAGE_COLOR_POOL = PRACTICE_COLORS;
 const VALUE_TRAINING_POOL = IMAGE_COLOR_POOL.filter((color) => color.c >= 2);
 const INITIAL_VALUE_COLOR = VALUE_TRAINING_POOL.find((color) => color.h === '5YR' && color.v === 5 && color.c === 6) ?? VALUE_TRAINING_POOL[0];
 
-type AppView = 'practice' | 'image' | 'mix' | 'explore' | 'reference';
+type AppView = 'practice' | 'image' | 'mix' | 'explore' | 'reference' | 'play';
 type SwatchPresentation = 'isolated' | 'context' | 'hunt';
 type HuePresentation = 'swatch' | 'slice';
 type RGB = [number, number, number];
@@ -570,6 +571,7 @@ const APP_SECTIONS: readonly { id: AppView; label: string }[] = [
   { id: 'practice', label: 'Practice' },
   { id: 'image', label: 'Image' },
   { id: 'mix', label: 'Mix' },
+  { id: 'play', label: 'Play' },
   { id: 'explore', label: 'Explore' },
   { id: 'reference', label: 'Reference' },
 ];
@@ -1683,7 +1685,7 @@ export default function Home() {
     const timer = window.setTimeout(() => {
       try {
         const stored = JSON.parse(window.localStorage.getItem(APP_STATE_STORAGE_KEY) ?? '{}') as Record<string, unknown>;
-        if (['practice', 'image', 'mix', 'explore', 'reference'].includes(String(stored.view))) setView(stored.view as AppView);
+        if (['practice', 'image', 'mix', 'explore', 'reference', 'play'].includes(String(stored.view))) setView(stored.view as AppView);
         if (['swatch', 'image'].includes(String(stored.source))) setSource(stored.source as SourceMode);
         if (['isolated', 'context', 'hunt'].includes(String(stored.swatchPresentation))) setSwatchPresentation(stored.swatchPresentation as SwatchPresentation);
         if (['swatch', 'slice'].includes(String(stored.huePresentation))) setHuePresentation(stored.huePresentation as HuePresentation);
@@ -1692,6 +1694,7 @@ export default function Home() {
         if (HUE_ORDER.includes(stored.familyHue as (typeof HUE_ORDER)[number])) setFamilyHue(stored.familyHue as string);
         if (['value', 'hue', 'chroma'].includes(String(stored.compareDimension))) setCompareDimension(stored.compareDimension as CompareDimension);
       } catch { /* Invalid local preferences fall back to the clean defaults. */ }
+      if (new URLSearchParams(window.location.search).get('mode') === 'play') setView('play');
       setUiStateReady(true);
     }, 0);
     return () => window.clearTimeout(timer);
@@ -2180,6 +2183,7 @@ export default function Home() {
           <button className={view === 'practice' ? 'active' : ''} onClick={() => setView('practice')} type="button">Practice</button>
           <button className={view === 'image' ? 'active' : ''} onClick={() => setView('image')} type="button">Image</button>
           <button className={view === 'mix' ? 'active' : ''} onClick={() => setView('mix')} type="button">Mix</button>
+          <button className={view === 'play' ? 'active' : ''} onClick={() => setView('play')} type="button">Play</button>
           <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
@@ -2449,6 +2453,7 @@ export default function Home() {
       {view === 'mix' && <MixerView initialTarget={mixerTarget} onOpenPalette={() => setPaletteOpen(true)} selectedPaintIds={selectedPaintIds} />}
       {view === 'explore' && <StudioView onSendToMixer={openMixerWith} />}
       {view === 'reference' && <ReferenceView />}
+      {view === 'play' && <Suspense fallback={<div className="play-loading-shell">Opening Color Drift…</div>}><PlayView /></Suspense>}
 
       {paletteOpen && <PaletteSheet selectedIds={selectedPaintIds} onChange={changeSelectedPaints} onClose={() => setPaletteOpen(false)} />}
 
