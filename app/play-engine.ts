@@ -3,6 +3,7 @@ import { PAINTS, type PaintColor } from './paint-mixing';
 import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
 import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
 import courseBank from './generated/play-courses.json';
+import legacyCourseBank from './generated/play-courses-v2.json';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
@@ -292,10 +293,12 @@ export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance:
 }
 
 const courseSignature = JSON.stringify(PLAY_LEVELS.map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
-export function generateHole(levelIndex: number, seed: number, stage = 0): Hole {
+export function generateHole(levelIndex: number, seed: number, stage = 0, legacy = false): Hole {
   if (!PLAY_LEVELS[levelIndex] || !Number.isInteger(stage) || stage < 0 || stage >= HOLES_PER_PALETTE) throw new Error('Invalid hole');
   if (courseBank.signature!==courseSignature) throw new Error('Paint model changed: regenerate the evaluated course bank');
-  const level=PLAY_LEVELS[levelIndex],rounds=courseBank.palettes[levelIndex].rounds;
+  const bank=legacy?legacyCourseBank:courseBank;
+  if(bank.signature!==courseSignature)throw new Error('Archived paint model does not match');
+  const level=PLAY_LEVELS[levelIndex],rounds=bank.palettes[levelIndex].rounds;
   // Stable course selection. No candidate search runs on the player's device.
   let hash=seed>>>0;hash=Math.imul(hash^(hash>>>16),0x7feb352d);hash=Math.imul(hash^(hash>>>15),0x846ca68b);hash=(hash^(hash>>>16))>>>0;
   const record=rounds[hash%rounds.length][stage];

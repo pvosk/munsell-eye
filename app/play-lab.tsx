@@ -1,13 +1,13 @@
 'use client';
 import {memo,useMemo,useState} from 'react';
 import {PLAY_LEVELS,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
-import {LAB_ENGINE,LAB_STARTERS,labEntries,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
+import {supportedLabEngine,LAB_STARTERS,labEntries,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
 import type {usePlayLabSync} from './play-lab-sync';
 
 const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
   const {attempt}=entry,[showSolution,setShowSolution]=useState(false),[step,setStep]=useState(0),[inspectExample,setInspectExample]=useState(false);
   const paths=useMemo(()=>{
-    if(attempt.engine!==LAB_ENGINE)return [];
+    if(!supportedLabEngine(attempt.engine))return [];
     const paints=PLAY_LEVELS[attempt.specimen.levelIndex].paints;
     return attempt.shots.filter(s=>!s.cancelled).map(s=>pourPath(paints,s.before,s.paint,s.amount));
   },[attempt]);

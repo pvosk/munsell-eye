@@ -1,5 +1,7 @@
 # Chroma Glider: evaluated course bank, correction pass
 
+**Historical courses-2 design below.** The current courses-3 pass adds competing-route comparisons and a denser multi-start search. See [the current palette × type report](play-competition-report.md) for actual results, selection rules and limitations. The previous bank is retained solely for exact lab replay; it is not the new-course generator.
+
 This is the second bank revision (`courses-2`), not the Lab and not a proof of globally optimal routes. `play-course-report.json` is generated with the bank and contains the actual selected pars, lightness ranges and route-interaction counts.
 
 ## What now runs

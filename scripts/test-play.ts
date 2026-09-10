@@ -2,8 +2,27 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 import courseBank from '../app/generated/play-courses.json';
-import { paletteSignature, PROFILES, replayRoute, playerPar } from '../app/play-course-analysis';
+import { paletteSignature, PROFILES, replayRoute, playerPar, compareRoutes, competingTags, type Route } from '../app/play-course-analysis';
 import {LAB_STARTERS,newLabAttempt,validLabEvent,labEntries,type LabEvent} from '../app/play-lab-model';
+
+test('competing routes expose shortcuts instead of rewarding only the demonstration',()=>{
+  const route=(base:number,shots:number,length:number,window=.05):Route=>({order:[base,...Array(shots).fill(1)],times:Array(shots).fill(.5),recipe:[1,1,0],error:0,window,length,lastLength:length/shots,valueChange:0,minChroma:.1});
+  const result=compareRoutes(0,[route(0,1,10),route(0,2,60),route(1,1,45)],45);
+  assert.equal(result.coverage,2/3);assert.equal(result.bases[2].shots,null);
+  assert.equal(result.minTravel,10);assert.equal(result.travelBalance,10/45);
+  assert.deepEqual(competingTags(['chromatic-ride','precision'],result),['precision']);
+  const balanced=compareRoutes(0,[route(0,1,24),route(1,1,30),route(2,2,35)],30);
+  assert.deepEqual(competingTags(['chromatic-ride'],balanced),['chromatic-ride']);
+});
+
+test('previous lab holes remain valid and exactly replayable after bank revision',()=>{
+  const specimen={levelIndex:5,hole:generateHole(5,190926,4,true)};
+  const attempt=newLabAttempt(specimen,'legacy-replay');
+  assert.equal(attempt.engine,'glider-courses-2-controls-1');
+  assert.ok(validLabEvent({id:'legacy-event',attemptId:attempt.id,type:'attempt',attempt}));
+  const altered=structuredClone(attempt);altered.specimen.hole.target.lab[0]+=.1;
+  assert.equal(validLabEvent({id:'altered',attemptId:altered.id,type:'attempt',attempt:altered}),false);
+});
 
 test('lab starter snapshots survive serialization and replay the exact hole',()=>{
   assert.equal(LAB_STARTERS.length,12);
@@ -106,6 +125,12 @@ test('every bank entry replays through the real charge controls and checks every
     assert.ok(hole.nearestWorld>=6.5);
     assert.ok(hole.tapError>level.tolerance);
     assert.ok(hole.timingWindow>0);
+    assert.equal(hole.competition.bases.length,level.paints.length);
+    assert.ok(hole.competition.minTravel<=hole.routeLength+1e-7);
+    if(hole.tags.includes('chromatic-ride')){
+      assert.ok(hole.competition.minTravel>=14);
+      assert.ok(hole.competition.travelBalance>=.4);
+    }
     for(const direction of [-1,1])for(let i=0;i<hole.times.length;i++) {
       const times=[...hole.times];times[i]+=direction*hole.timingWindow*.5;
       if(times[i]<0||times[i]>CHARGE_SECONDS)continue;

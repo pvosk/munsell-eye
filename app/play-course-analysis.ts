@@ -2,7 +2,7 @@
 // building the versioned course bank, never inside a render or animation loop.
 import { PLAY_LEVELS, CHARGE_SECONDS, addPaint, chargeAmount, colorDistance, generateCandidate, mixtureColor, pourPath, totalMass, type Mixture, type ColorPoint } from './play-engine';
 
-export const COURSE_VERSION='courses-2';
+export const COURSE_VERSION='courses-3';
 export type HoleKind='chromatic-ride'|'value-finish'|'quiet-cool'|'interior'|'choice'|'precision'|'muted';
 export const PROFILES: {name:string;challenge:number;preferences:Partial<Record<HoleKind,number>>;required?:Partial<Record<HoleKind,number>>}[]=[
   {name:'Warm / cool / lift',challenge:.1,preferences:{'value-finish':3,'chromatic-ride':2,interior:2},required:{'value-finish':1,interior:2}},
@@ -17,7 +17,8 @@ export const PROFILES: {name:string;challenge:number;preferences:Partial<Record<
   {name:'Opposing pulls',challenge:.9,preferences:{choice:4,interior:3,precision:2},required:{interior:2}},
 ];
 export type Route={order:number[];times:number[];recipe:Mixture;error:number;window:number;length:number;lastLength:number;valueChange:number;minChroma:number};
-export type CourseRecord={id:string;target:Mixture;recipe:Mixture;order:number[];times:number[];solutionShots:number;par:number;timingWindow:number;kind:HoleKind;tags:HoleKind[];nearestBase:number;nearestWorld:number;tapError:number;routeLength:number;alternativeBases:number;alternativeRecipes:number;checks:{base:number;one:number;two:number}[]};
+export type Competition={bases:{base:number;shots:number|null;minTravel:number|null;minFinish:number|null;bestWindow:number|null}[];coverage:number;efficientCoverage:number;minTravel:number;minFinish:number;travelBalance:number;exampleTravelRatio:number;multiShotBases:number};
+export type CourseRecord={id:string;target:Mixture;recipe:Mixture;order:number[];times:number[];solutionShots:number;par:number;timingWindow:number;kind:HoleKind;tags:HoleKind[];proposedTags:HoleKind[];competition:Competition;nearestBase:number;nearestWorld:number;tapError:number;routeLength:number;alternativeBases:number;alternativeRecipes:number;checks:{base:number;one:number;two:number}[]};
 type Atlas={order:number[];samples:{times:number[];lab:number[]}[]};
 const clamp=(n:number)=>Math.max(0,Math.min(CHARGE_SECONDS,n));
 const distance=(a:readonly number[],b:readonly number[])=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
@@ -77,7 +78,7 @@ export function makeAtlas(palette:number):Atlas[] {
     atlas.push(one);
     for(let second=0;second<count;second++) {
       const two:Atlas={order:[base,first,second],samples:[]};
-      for(let i=0;i<=8;i++) for(let j=0;j<=8;j++) {const times=[i*CHARGE_SECONDS/8,j*CHARGE_SECONDS/8];two.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,two.order,times)).lab});}
+      for(let i=0;i<=16;i++) for(let j=0;j<=16;j++) {const times=[i*CHARGE_SECONDS/16,j*CHARGE_SECONDS/16];two.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,two.order,times)).lab});}
       atlas.push(two);
     }
   }
@@ -100,6 +101,41 @@ export function playerPar(shots:number,window:number,challenge:number) {
   const timingAllowance=+(window<.055)+ +(window<.022);
   const courseAllowance=+(challenge>=.8 && shots>=2);
   return Math.max(2,Math.min(6,shots+1+timingAllowance+courseAllowance));
+}
+
+// Compare shortest FOUND routes within each base, not only the globally
+// shortest route. Unsolved bases remain explicit; no "unreachable" claim.
+export function compareRoutes(palette:number,routes:Route[],exampleLength:number):Competition {
+  const bases=PLAY_LEVELS[palette].paints.map((_,base)=>{
+    const viable=routes.filter(r=>r.order[0]===base),shots=Math.min(...viable.map(r=>r.times.length));
+    const shortest=viable.filter(r=>r.times.length===shots);
+    return {base,shots:shortest.length?shots:null,minTravel:shortest.length?Math.min(...shortest.map(r=>r.length)):null,
+      minFinish:shortest.length?Math.min(...shortest.map(r=>r.lastLength)):null,bestWindow:shortest.length?Math.max(...shortest.map(r=>r.window)):null};
+  });
+  const found=bases.filter(b=>b.minTravel!==null),lengths=found.map(b=>b.minTravel!);
+  const minTravel=lengths.length?Math.min(...lengths):0;
+  const minShots=Math.min(...found.map(b=>b.shots!)),efficient=found.filter(b=>b.shots===minShots);
+  const efficientLengths=efficient.map(b=>b.minTravel!),maxTravel=efficientLengths.length?Math.max(...efficientLengths):0;
+  // Compare travel among equally shot-efficient starting choices. A difficult
+  // three-pour rescue from another base should not invalidate a two-base ride.
+  return {bases,coverage:found.length/bases.length,efficientCoverage:efficient.length/bases.length,minTravel,minFinish:found.length?Math.min(...found.map(b=>b.minFinish!)):0,
+    travelBalance:maxTravel>0?Math.min(...efficientLengths)/maxTravel:0,exampleTravelRatio:exampleLength>0?Math.min(1,minTravel/exampleLength):0,
+    multiShotBases:found.filter(b=>b.shots!>=2).length};
+}
+
+export function competingTags(tags:HoleKind[],c:Competition):HoleKind[] {
+  // Design parameters in display-world units, not laws of color perception.
+  // A ride must survive the easiest found starting choice. Interior/precision
+  // retain their independent no-one-pour and timing tests below.
+  return tags.filter(tag=>tag!=='chromatic-ride'||(c.minTravel>=14&&c.travelBalance>=.4));
+}
+
+export function competitionMerit(c:CourseRecord,kind:HoleKind):number {
+  const x=c.competition;
+  if(kind==='chromatic-ride')return Math.min(x.minTravel,40)*.035+x.travelBalance*.5;
+  if(kind==='value-finish')return Math.min(x.minFinish,25)*.035+x.exampleTravelRatio*.4;
+  if(kind==='interior'||kind==='choice'||kind==='muted')return x.efficientCoverage*.7+Math.min(x.multiShotBases,3)*.2+Math.min(x.minTravel,35)*.015;
+  return x.efficientCoverage*.3; // Do not punish a deliberately short precision hole.
 }
 
 // Diagnostic only: does not change the live bank or previously saved holes.
@@ -158,17 +194,23 @@ export function analyzeCandidate(palette:number,seed:number,atlas:Atlas[],forced
       tapError=Math.min(tapError,refine(palette,entry.order,[tapTime],target,.01,.18).error);
       if(tapError<=level.tolerance)return null;
     }
-    let best=entry.samples[0],error=Infinity;
-    for(const sample of entry.samples){const d=distance(target.lab,sample.lab);if(d<error){error=d;best=sample;}}
-    const result=refine(palette,entry.order,best.times,target,CHARGE_SECONDS/(entry.order.length===2?64:8));
-    const key=entry.order.length===2?'one':'two';checks[entry.order[0]][key]=Math.min(checks[entry.order[0]][key],result.error);
-    if(result.error<level.tolerance-1e-8) routes.push(routeDetails(palette,entry.order,result.times,target));
+    const ranked=entry.samples.map(sample=>({sample,error:distance(target.lab,sample.lab)})).sort((a,b)=>a.error-b.error);
+    const starts:number[][]=[];
+    for(const {sample} of ranked) {
+      if(starts.some(t=>Math.hypot(...t.map((v,i)=>v-sample.times[i]))<.12))continue;
+      starts.push(sample.times);
+      const result=refine(palette,entry.order,sample.times,target,CHARGE_SECONDS/(entry.order.length===2?64:16));
+      const key=entry.order.length===2?'one':'two';checks[entry.order[0]][key]=Math.min(checks[entry.order[0]][key],result.error);
+      if(result.error<level.tolerance-1e-8) routes.push(routeDetails(palette,entry.order,result.times,target));
+      if(starts.length===3)break;
+    }
   }
-  const viable=routes.filter(r=>r.error<level.tolerance-1e-8);
+  const viable=routes.filter(r=>r.error<level.tolerance-1e-8).map(r=>geometry(palette,r));
   if(!viable.length)return null;
   const shots=Math.min(...viable.map(r=>r.times.length));
   const shortest=viable.filter(r=>r.times.length===shots);
-  const best=geometry(palette,shortest.reduce((a,b)=>a.window>b.window?a:b));
+  const best=shortest.reduce((a,b)=>a.window>b.window?a:b);
+  const competition=compareRoutes(palette,viable,best.length);
   const bases=new Set(shortest.map(r=>r.order[0])).size;
   const masks=new Set(shortest.map(r=>r.recipe.map(q=>q/totalMass(r.recipe)>.015?1:0).join(''))).size;
   const tags:HoleKind[]=[];
@@ -182,7 +224,7 @@ export function analyzeCandidate(palette:number,seed:number,atlas:Atlas[],forced
   if(masks>=2)tags.push('choice');
   if(shots>=2 && best.window<.07 && allOne>level.tolerance*1.05)tags.push('precision');
   if(!tags.length)return null;
-  return {id:`${COURSE_VERSION}-${palette}-${seed}`,target:candidate.recipe,recipe:best.recipe,order:best.order,times:best.times,solutionShots:shots,par:playerPar(shots,best.window,PROFILES[palette].challenge),timingWindow:best.window,kind:tags[0],tags,nearestBase,nearestWorld,tapError,routeLength:best.length,alternativeBases:bases,alternativeRecipes:masks,checks};
+  return {id:`${COURSE_VERSION}-${palette}-${seed}`,target:candidate.recipe,recipe:best.recipe,order:best.order,times:best.times,solutionShots:shots,par:playerPar(shots,best.window,PROFILES[palette].challenge),timingWindow:best.window,kind:tags[0],proposedTags:tags,tags:competingTags(tags,competition),competition,nearestBase,nearestWorld,tapError,routeLength:best.length,alternativeBases:bases,alternativeRecipes:masks,checks};
 }
 
 export function selectRounds(palette:number,candidates:CourseRecord[],count=4) {
@@ -192,13 +234,13 @@ export function selectRounds(palette:number,candidates:CourseRecord[],count=4) {
   for(let round=0;round<count;round++) {
     const chosen:CourseRecord[]=[];
     const choose=(required?:HoleKind)=>{
-      const pool=candidates.filter(c=>!chosen.some(h=>h.id===c.id) && (!required||c.tags.includes(required)) && !(palette===4 && c.tags.includes('chromatic-ride') && chosen.filter(h=>h.tags.includes('chromatic-ride')).length>=2) && chosen.every(h=>colorDistance(points.get(h.id)!,points.get(c.id)!)>level.tolerance*1.8));
+      const pool=candidates.filter(c=>c.tags.length>0&&!chosen.some(h=>h.id===c.id) && (!required||c.tags.includes(required)) && !(palette===4 && c.tags.includes('chromatic-ride') && chosen.filter(h=>h.tags.includes('chromatic-ride')).length>=2) && chosen.every(h=>colorDistance(points.get(h.id)!,points.get(c.id)!)>level.tolerance*1.8));
       if(!pool.length)throw new Error(`${level.name}: no valid ${required??'diverse'} candidate; expand search instead of relaxing constraints`);
       const merit=(c:CourseRecord)=>{
         const novelty=chosen.length?Math.min(...chosen.map(h=>colorDistance(points.get(h.id)!,points.get(c.id)!))):.1;
         const unusedType=c.tags.some(tag=>!chosen.some(h=>h.kind===tag));
         const preference=Math.max(...c.tags.map(t=>profile.preferences[t]??0));
-        const travel=c.tags.some(t=>t==='chromatic-ride'||t==='value-finish')?Math.min(c.routeLength,40)*.035:0;
+        const travel=required?competitionMerit(c,required):Math.max(...c.tags.map(t=>competitionMerit(c,t)));
         const challenge=c.solutionShots>=2?Math.min(1,.055/Math.max(.015,c.timingWindow))*.55:0;
         return preference*.32+novelty*5+travel+challenge+(unusedType?.45:0)-(usage.get(c.id)??0)*1.6;
       };

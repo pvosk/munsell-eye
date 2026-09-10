@@ -1,6 +1,7 @@
 import { PLAY_LEVELS, generateHole, type Hole, type Mixture } from './play-engine';
 
-export const LAB_ENGINE = 'glider-courses-2-controls-1';
+export const LAB_ENGINE = 'glider-courses-3-controls-1';
+export const supportedLabEngine=(engine:string)=>engine===LAB_ENGINE||engine==='glider-courses-2-controls-1';
 export type LabSpecimen = { levelIndex: number; hole: Hole };
 export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
 export type LabAttempt = {
@@ -16,7 +17,7 @@ export const LAB_STARTERS: LabSpecimen[] = [4,5,1,8].flatMap(levelIndex =>
   [0,2,4].map(stage=>({levelIndex,hole:generateHole(levelIndex,190926,stage)})));
 
 export function newLabAttempt(specimen:LabSpecimen,id:string):LabAttempt {
-  return {id,engine:LAB_ENGINE,specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
+  return {id,engine:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE,specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
     paints:PLAY_LEVELS[specimen.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}))};
 }
 export function labEntries(events:LabEvent[]):LabEntry[] {
@@ -48,10 +49,10 @@ export function validLabEvent(value:unknown):value is LabEvent {
   }
   if(e.type!=='attempt'||!e.attempt)return false;
   const a=e.attempt,s=a.specimen;
-  if(a.id!==e.attemptId||a.engine!==LAB_ENGINE||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
+  if(a.id!==e.attemptId||!supportedLabEngine(a.engine)||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
   if(!s||!Number.isInteger(s.levelIndex)||!PLAY_LEVELS[s.levelIndex]||!s.hole)return false;
   if(!Number.isInteger(s.hole.seed)||s.hole.seed<0||s.hole.seed>0xffffffff||!Number.isInteger(s.hole.stage)||s.hole.stage<0||s.hole.stage>4)return false;
-  const original=generateHole(s.levelIndex,s.hole.seed,s.hole.stage);
+  const original=generateHole(s.levelIndex,s.hole.seed,s.hole.stage,a.engine==='glider-courses-2-controls-1');
   // Snapshot equality catches accidental edits to the target, cup or controls.
   if(!sameSnapshot(s.hole,original))return false;
   const paints=PLAY_LEVELS[s.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}));

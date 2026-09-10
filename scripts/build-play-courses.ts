@@ -1,11 +1,14 @@
 // Generated artifacts only: edit the evaluator/profiles, then regenerate.
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { PLAY_LEVELS, mixtureColor } from '../app/play-engine';
 import { COURSE_VERSION, PROFILES, analyzeCandidate, makeAtlas, paletteSignature, selectRounds, type CourseRecord } from '../app/play-course-analysis';
 
 const began=performance.now();
+const previous=JSON.parse(readFileSync('app/generated/play-courses.json','utf8'));
+if(previous.version==='courses-2'&&!existsSync('app/generated/play-courses-v2.json'))writeFileSync('app/generated/play-courses-v2.json',JSON.stringify(previous));
 const palettes=[];
 const reports=[];
+const allCandidates=[];
 for(let palette=0;palette<PLAY_LEVELS.length;palette++) {
   const level=PLAY_LEVELS[palette],atlas=makeAtlas(palette),candidates:CourseRecord[]=[];
   console.log(`Evaluating ${level.name}: ${atlas.length} ordered one/two-addition searches, every base.`);
@@ -25,6 +28,7 @@ for(let palette=0;palette<PLAY_LEVELS.length;palette++) {
     }
   }
   const selected=rounds!,flat=selected.flat();
+  allCandidates.push({palette,name:level.name,candidates});
   const tags=Object.fromEntries([...new Set(candidates.flatMap(c=>c.tags))].map(tag=>[tag,candidates.filter(c=>c.tags.includes(tag)).length]));
   const interactions:Record<string,number>={};
   for(const h of flat)for(let i=1;i<h.order.length;i++) {
@@ -38,5 +42,21 @@ for(let palette=0;palette<PLAY_LEVELS.length;palette++) {
 }
 mkdirSync('app/generated',{recursive:true});mkdirSync('docs',{recursive:true});
 writeFileSync('app/generated/play-courses.json',JSON.stringify({version:COURSE_VERSION,signature:paletteSignature(),palettes}));
-writeFileSync('docs/play-course-report.json',JSON.stringify({version:COURSE_VERSION,search:{one:'65 charge samples per base/order, then local refinement',two:'9 × 9 charge samples per base/order, then local refinement',witness:'All permutations of the candidate recipe, up to three additions',limits:'Best found, not a proof of global minimum; three-addition alternatives are not exhaustively searched.',par:'Provisional player allowance: best-found additions + 1; +1 below 55ms timing margin; another +1 below 22ms; +1 on harder palettes for multi-addition routes. Clamped 2–6.',timing:'Most forgiving sampled minimum-shot route. Tightest single-time perturbation margin with later hold times replayed, capped at 300ms. Not the complete joint setup/finish region.',coolZorn:'Low-chroma black-containing relative cools. Current black is slightly warm; no measured blue undertone claim.',interactions:'Counts of consecutive additions along retained routes, not a score of historical or perceptual merit.'},palettes:reports},null,2)+'\n');
+writeFileSync('docs/play-candidate-audit.json',JSON.stringify({version:COURSE_VERSION,palettes:allCandidates}));
+const median=(values:number[])=>{const s=[...values].sort((a,b)=>a-b);return s.length?(s[Math.floor((s.length-1)/2)]+s[Math.ceil((s.length-1)/2)])/2:null;};
+const kinds=['chromatic-ride','value-finish','quiet-cool','interior','choice','precision','muted'] as const;
+const matrix=allCandidates.flatMap(p=>kinds.map(kind=>{
+  const proposed=p.candidates.filter(c=>c.proposedTags.includes(kind)),eligible=proposed.filter(c=>c.tags.includes(kind));
+  return {palette:p.name,kind,proposed:proposed.length,eligible:eligible.length,
+    medianBaseCoverage:median(proposed.map(c=>c.competition.coverage)),
+    medianEfficientBaseCoverage:median(proposed.map(c=>c.competition.efficientCoverage)),
+    medianTravelBalance:median(proposed.map(c=>c.competition.travelBalance)),
+    medianMinimumTravel:median(proposed.map(c=>c.competition.minTravel)),
+    medianMinimumFinish:median(proposed.map(c=>c.competition.minFinish)),
+    medianTimingMarginMs:median(proposed.map(c=>c.timingWindow*1000)),
+    oneAdditionShortcuts:proposed.filter(c=>c.solutionShots===1).length,
+    threeOrMoreMultiShotBases:proposed.filter(c=>c.competition.multiShotBases>=3).length};
+}));
+writeFileSync('docs/play-competition-matrix.json',JSON.stringify({version:COURSE_VERSION,limits:'Deterministic candidate sample. Overlapping computed types, not independently forced generators. One/two-addition search from all bases; recipe witnesses may add longer routes. No proof of continuous optimality or of fun.',rows:matrix},null,2)+'\n');
+writeFileSync('docs/play-course-report.json',JSON.stringify({version:COURSE_VERSION,search:{one:'65 charge samples per base/order, three separated local refinements',two:'17 × 17 charge samples per base/order, three separated local refinements',witness:'All permutations of the candidate recipe, up to three additions',limits:'Best found, not a proof of global minimum; three-addition alternatives are not exhaustively searched.',par:'Provisional player allowance: best-found additions + 1; +1 below 55ms timing margin; another +1 below 22ms; +1 on harder palettes for multi-addition routes. Clamped 2–6.',timing:'Most forgiving sampled minimum-shot route. Tightest single-time perturbation margin with later hold times replayed, capped at 300ms. Not the complete joint setup/finish region.',coolZorn:'Low-chroma black-containing relative cools. Current black is slightly warm; no measured blue undertone claim.',interactions:'Counts of consecutive additions along retained routes, not a score of historical or perceptual merit.'},palettes:reports},null,2)+'\n');
 console.log(`Saved ${palettes.length*20} evaluated holes in ${Math.round((performance.now()-began)/1000)}s.`);

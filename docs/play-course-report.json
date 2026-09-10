@@ -1,8 +1,8 @@
 {
-  "version": "courses-2",
+  "version": "courses-3",
   "search": {
-    "one": "65 charge samples per base/order, then local refinement",
-    "two": "9 × 9 charge samples per base/order, then local refinement",
+    "one": "65 charge samples per base/order, three separated local refinements",
+    "two": "17 × 17 charge samples per base/order, three separated local refinements",
     "witness": "All permutations of the candidate recipe, up to three additions",
     "limits": "Best found, not a proof of global minimum; three-addition alternatives are not exhaustively searched.",
     "par": "Provisional player allowance: best-found additions + 1; +1 below 55ms timing margin; another +1 below 22ms; +1 on harder palettes for multi-addition routes. Clamped 2–6.",
@@ -23,30 +23,30 @@
       "distinctSelected": 20,
       "pars": [
         [
-          2,
           3,
           3,
-          3,
-          4
-        ],
-        [
-          2,
-          3,
-          3,
-          3,
-          4
-        ],
-        [
-          2,
-          3,
-          3,
+          4,
           4,
           4
         ],
         [
-          2,
           3,
           3,
+          4,
+          4,
+          4
+        ],
+        [
+          3,
+          3,
+          4,
+          4,
+          4
+        ],
+        [
+          3,
+          3,
+          4,
           4,
           4
         ]
@@ -55,28 +55,28 @@
         [
           1,
           2,
-          1,
-          1,
-          2
-        ],
-        [
-          1,
           2,
-          1,
-          1,
-          2
-        ],
-        [
-          1,
-          2,
-          1,
           2,
           2
         ],
         [
           1,
           2,
+          2,
+          2,
+          2
+        ],
+        [
           1,
+          2,
+          2,
+          2,
+          2
+        ],
+        [
+          1,
+          2,
+          2,
           2,
           2
         ]
@@ -85,51 +85,51 @@
         [
           "value-finish",
           "interior",
-          "value-finish",
-          "value-finish",
-          "interior"
-        ],
-        [
-          "value-finish",
           "interior",
-          "value-finish",
-          "value-finish",
-          "interior"
-        ],
-        [
-          "value-finish",
-          "interior",
-          "value-finish",
           "interior",
           "interior"
         ],
         [
           "value-finish",
           "interior",
+          "interior",
+          "interior",
+          "interior"
+        ],
+        [
           "value-finish",
+          "interior",
+          "interior",
+          "interior",
+          "interior"
+        ],
+        [
+          "value-finish",
+          "interior",
+          "interior",
           "interior",
           "interior"
         ]
       ],
       "lightnessRange": [
         0.3298567455407775,
-        0.9057022601199716
+        0.8400341226262447
       ],
       "interactions": {
-        "Ultramarine Blue → Titanium White": 10,
-        "Titanium White → Transparent Oxide Red": 5,
+        "Ultramarine Blue → Titanium White": 5,
+        "Titanium White → Transparent Oxide Red": 6,
         "Transparent Oxide Red → Ultramarine Blue": 5,
-        "Titanium White → Ultramarine Blue": 5,
-        "Ultramarine Blue → Transparent Oxide Red": 5
+        "Titanium White → Ultramarine Blue": 10,
+        "Ultramarine Blue → Transparent Oxide Red": 10
       }
     },
     {
       "name": "Zorny",
       "eligible": 98,
       "tags": {
-        "value-finish": 61,
+        "value-finish": 60,
         "choice": 9,
-        "chromatic-ride": 13,
+        "chromatic-ride": 10,
         "quiet-cool": 34,
         "interior": 30,
         "precision": 26,
@@ -138,10 +138,10 @@
       "distinctSelected": 20,
       "pars": [
         [
-          2,
           4,
           4,
-          2,
+          4,
+          4,
           4
         ],
         [
@@ -149,6 +149,13 @@
           2,
           4,
           3,
+          5
+        ],
+        [
+          3,
+          2,
+          4,
+          4,
           4
         ],
         [
@@ -156,113 +163,104 @@
           3,
           3,
           3,
-          3
-        ],
-        [
-          3,
-          2,
-          2,
-          3,
-          3
+          4
         ]
       ],
       "bestFoundShots": [
         [
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        [
+          1,
           1,
           2,
           2,
-          1,
-          1
+          3
         ],
         [
           1,
           1,
-          1,
-          1,
-          1
+          2,
+          2,
+          2
         ],
         [
           1,
           1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
+          2,
+          2,
+          2
         ]
       ],
       "selectedKinds": [
         [
           "quiet-cool",
-          "value-finish",
-          "quiet-cool",
-          "value-finish",
+          "interior",
+          "interior",
+          "interior",
           "quiet-cool"
         ],
         [
           "quiet-cool",
           "quiet-cool",
-          "quiet-cool",
-          "quiet-cool",
-          "quiet-cool"
+          "interior",
+          "interior",
+          "interior"
         ],
         [
           "quiet-cool",
           "quiet-cool",
-          "quiet-cool",
-          "quiet-cool",
-          "quiet-cool"
+          "interior",
+          "interior",
+          "interior"
         ],
         [
           "quiet-cool",
-          "value-finish",
-          "value-finish",
-          "value-finish",
-          "quiet-cool"
+          "quiet-cool",
+          "interior",
+          "interior",
+          "interior"
         ]
       ],
       "lightnessRange": [
-        0.31639953341370197,
-        0.918944443710476
+        0.4100409055671802,
+        0.8823230212859183
       ],
       "interactions": {
         "Titanium White → Ivory Black": 11,
-        "Cadmium Red Light → Ivory Black": 1,
-        "Ivory Black → Titanium White": 7,
-        "Ivory Black → Cadmium Red Light": 1,
-        "Cadmium Red Light → Titanium White": 2
+        "Ivory Black → Cadmium Red Light": 6,
+        "Cadmium Red Light → Titanium White": 5,
+        "Titanium White → Yellow Ochre": 5,
+        "Ivory Black → Titanium White": 2,
+        "Cadmium Red Light → Yellow Ochre": 2,
+        "Ivory Black → Yellow Ochre": 1,
+        "Titanium White → Cadmium Red Light": 2,
+        "Cadmium Red Light → Ivory Black": 1
       }
     },
     {
       "name": "RYB",
       "eligible": 91,
       "tags": {
-        "chromatic-ride": 33,
+        "chromatic-ride": 20,
         "value-finish": 32,
         "interior": 50,
         "muted": 23,
-        "precision": 43
+        "precision": 43,
+        "choice": 1
       },
       "distinctSelected": 20,
       "pars": [
         [
           4,
+          3,
+          5,
           4,
-          3,
-          3,
-          4
-        ],
-        [
-          4,
-          3,
-          3,
-          3,
-          4
+          5
         ],
         [
           3,
@@ -272,28 +270,21 @@
           5
         ],
         [
-          3,
-          3,
-          3,
+          5,
+          4,
           2,
+          4,
+          5
+        ],
+        [
+          4,
+          4,
+          3,
+          3,
           4
         ]
       ],
       "bestFoundShots": [
-        [
-          2,
-          2,
-          1,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          1,
-          2,
-          2
-        ],
         [
           2,
           1,
@@ -303,33 +294,47 @@
         ],
         [
           2,
+          1,
+          2,
+          2,
+          3
+        ],
+        [
+          3,
           2,
           1,
+          3,
+          3
+        ],
+        [
+          2,
+          2,
           1,
+          2,
           2
         ]
       ],
       "selectedKinds": [
         [
           "interior",
-          "interior",
           "chromatic-ride",
           "precision",
-          "precision"
-        ],
-        [
-          "interior",
-          "interior",
-          "chromatic-ride",
           "precision",
-          "precision"
-        ],
-        [
-          "interior",
-          "chromatic-ride",
-          "precision",
-          "value-finish",
           "interior"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "precision",
+          "precision",
+          "interior"
+        ],
+        [
+          "interior",
+          "interior",
+          "chromatic-ride",
+          "precision",
+          "precision"
         ],
         [
           "interior",
@@ -341,18 +346,20 @@
       ],
       "lightnessRange": [
         0.3463059964853651,
-        0.8957366954661425
+        0.8736375394748211
       ],
       "interactions": {
-        "Cadmium Lemon → Phthalo Blue (Green Shade)": 8,
-        "Phthalo Blue (Green Shade) → Flake White": 4,
-        "Phthalo Blue (Green Shade) → Cadmium Red Medium": 5,
-        "Cadmium Red Medium → Flake White": 4,
-        "Cadmium Red Medium → Cadmium Lemon": 3,
-        "Cadmium Lemon → Flake White": 6,
-        "Cadmium Red Medium → Phthalo Blue (Green Shade)": 3,
-        "Cadmium Lemon → Cadmium Red Medium": 1,
-        "Phthalo Blue (Green Shade) → Cadmium Lemon": 3
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 6,
+        "Phthalo Blue (Green Shade) → Cadmium Red Medium": 9,
+        "Cadmium Red Medium → Phthalo Blue (Green Shade)": 1,
+        "Phthalo Blue (Green Shade) → Cadmium Lemon": 2,
+        "Cadmium Lemon → Flake White": 4,
+        "Phthalo Blue (Green Shade) → Flake White": 3,
+        "Flake White → Cadmium Red Medium": 3,
+        "Cadmium Red Medium → Flake White": 5,
+        "Flake White → Cadmium Lemon": 3,
+        "Cadmium Red Medium → Cadmium Lemon": 5,
+        "Cadmium Lemon → Cadmium Red Medium": 1
       }
     },
     {
@@ -361,38 +368,38 @@
       "tags": {
         "interior": 34,
         "muted": 14,
-        "choice": 31,
+        "choice": 32,
         "precision": 28,
-        "chromatic-ride": 67
+        "chromatic-ride": 34
       },
       "distinctSelected": 20,
       "pars": [
         [
+          3,
           4,
-          3,
-          3,
-          2,
+          4,
+          4,
           4
         ],
         [
           4,
           4,
+          4,
           3,
-          2,
-          4
-        ],
-        [
-          4,
-          2,
-          2,
-          4,
           4
         ],
         [
           4,
           3,
-          2,
-          2,
+          4,
+          4,
+          4
+        ],
+        [
+          4,
+          3,
+          4,
+          3,
           4
         ]
       ],
@@ -400,29 +407,29 @@
         [
           2,
           2,
-          1,
-          1,
+          2,
+          2,
           2
         ],
         [
           2,
           2,
-          1,
-          1,
-          2
-        ],
-        [
           2,
-          1,
-          1,
           2,
           2
         ],
         [
           2,
-          1,
-          1,
-          1,
+          2,
+          2,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
+          2,
+          2,
           2
         ]
       ],
@@ -430,45 +437,47 @@
         [
           "interior",
           "interior",
-          "chromatic-ride",
-          "choice",
+          "interior",
+          "interior",
           "interior"
         ],
         [
           "interior",
           "interior",
-          "chromatic-ride",
-          "choice",
-          "interior"
-        ],
-        [
           "interior",
-          "chromatic-ride",
-          "chromatic-ride",
           "interior",
           "interior"
         ],
         [
           "interior",
-          "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride",
+          "interior",
+          "interior",
+          "interior",
+          "interior"
+        ],
+        [
+          "interior",
+          "interior",
+          "interior",
+          "interior",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3844237431700606,
-        0.8514953939642674
+        0.3341438852033388,
+        0.7549708721636704
       ],
       "interactions": {
+        "Phthalo Blue (Green Shade) → Cadmium Lemon": 11,
+        "Cadmium Lemon → Quinacridone Magenta": 3,
+        "Cadmium Lemon → Transparent Oxide Red": 9,
+        "Transparent Oxide Red → Quinacridone Magenta": 2,
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 4,
+        "Quinacridone Magenta → Cadmium Lemon": 2,
         "Quinacridone Magenta → Phthalo Blue (Green Shade)": 2,
-        "Phthalo Blue (Green Shade) → Cadmium Lemon": 6,
-        "Cadmium Lemon → Quinacridone Magenta": 7,
-        "Quinacridone Magenta → Cadmium Lemon": 6,
-        "Cadmium Lemon → Phthalo Blue (Green Shade)": 5,
-        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 3,
-        "Cadmium Lemon → Transparent Oxide Red": 1,
-        "Quinacridone Magenta → Transparent Oxide Red": 1
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 3,
+        "Quinacridone Magenta → Transparent Oxide Red": 2,
+        "Phthalo Blue (Green Shade) → Transparent Oxide Red": 2
       }
     },
     {
@@ -478,36 +487,36 @@
         "interior": 60,
         "muted": 37,
         "precision": 54,
-        "chromatic-ride": 44
+        "chromatic-ride": 24
       },
       "distinctSelected": 20,
       "pars": [
         [
           2,
+          4,
+          4,
+          4,
+          4
+        ],
+        [
           3,
-          2,
+          4,
+          4,
           4,
           4
         ],
         [
           3,
           3,
-          2,
           3,
-          4
-        ],
-        [
-          2,
-          4,
-          2,
           4,
           4
         ],
         [
-          2,
+          3,
           4,
           3,
-          3,
+          4,
           4
         ]
       ],
@@ -515,16 +524,16 @@
         [
           1,
           2,
-          1,
           2,
-          2
+          2,
+          1
         ],
         [
           1,
           2,
-          1,
           2,
-          2
+          2,
+          1
         ],
         [
           1,
@@ -545,16 +554,16 @@
         [
           "chromatic-ride",
           "interior",
-          "chromatic-ride",
+          "interior",
           "muted",
-          "interior"
+          "chromatic-ride"
         ],
         [
           "chromatic-ride",
           "interior",
-          "chromatic-ride",
+          "interior",
           "muted",
-          "interior"
+          "chromatic-ride"
         ],
         [
           "chromatic-ride",
@@ -572,16 +581,16 @@
         ]
       ],
       "lightnessRange": [
-        0.329823977427805,
-        0.8280131642059148
+        0.34364610484775976,
+        0.7115225149766776
       ],
       "interactions": {
-        "Hansa Yellow Light → Quinacridone Magenta": 11,
-        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 6,
-        "Quinacridone Magenta → Hansa Yellow Light": 7,
-        "Hansa Yellow Light → Phthalo Blue (Green Shade)": 5,
-        "Phthalo Blue (Green Shade) → Hansa Yellow Light": 2,
-        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 1
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 4,
+        "Quinacridone Magenta → Hansa Yellow Light": 6,
+        "Hansa Yellow Light → Phthalo Blue (Green Shade)": 8,
+        "Phthalo Blue (Green Shade) → Hansa Yellow Light": 5,
+        "Hansa Yellow Light → Quinacridone Magenta": 7,
+        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 2
       }
     },
     {
@@ -589,41 +598,41 @@
       "eligible": 89,
       "tags": {
         "interior": 48,
-        "chromatic-ride": 29,
         "precision": 45,
         "muted": 33,
-        "value-finish": 20,
+        "chromatic-ride": 18,
+        "value-finish": 19,
         "choice": 4
       },
       "distinctSelected": 20,
       "pars": [
         [
           3,
-          4,
-          2,
-          2,
-          4
-        ],
-        [
-          3,
-          4,
-          3,
-          2,
-          4
-        ],
-        [
-          4,
           3,
           3,
-          4,
-          4
-        ],
-        [
-          3,
-          4,
-          2,
-          3,
+          5,
           5
+        ],
+        [
+          3,
+          3,
+          3,
+          4,
+          5
+        ],
+        [
+          3,
+          3,
+          2,
+          4,
+          4
+        ],
+        [
+          3,
+          4,
+          3,
+          4,
+          4
         ]
       ],
       "bestFoundShots": [
@@ -631,29 +640,29 @@
           2,
           2,
           1,
-          1,
-          2
-        ],
-        [
-          2,
-          2,
-          1,
-          1,
-          2
-        ],
-        [
-          2,
-          2,
-          1,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          1,
-          1,
+          3,
           3
+        ],
+        [
+          2,
+          2,
+          1,
+          2,
+          3
+        ],
+        [
+          2,
+          2,
+          1,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
+          1,
+          2,
+          2
         ]
       ],
       "selectedKinds": [
@@ -661,46 +670,48 @@
           "interior",
           "precision",
           "chromatic-ride",
-          "value-finish",
+          "precision",
           "interior"
         ],
         [
           "interior",
           "precision",
           "chromatic-ride",
-          "value-finish",
+          "precision",
           "interior"
         ],
         [
           "interior",
-          "interior",
+          "precision",
           "chromatic-ride",
           "precision",
-          "precision"
+          "interior"
         ],
         [
           "interior",
           "precision",
           "chromatic-ride",
-          "value-finish",
+          "precision",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3651178545852198,
-        0.890368345755693
+        0.36884878871449067,
+        0.8778675347468465
       ],
       "interactions": {
-        "Cadmium Orange → Dioxazine Purple": 2,
-        "Dioxazine Purple → Phthalo Green (Yellow Shade)": 6,
-        "Phthalo Green (Yellow Shade) → Dioxazine Purple": 2,
-        "Dioxazine Purple → Cadmium Orange": 3,
-        "Dioxazine Purple → Titanium White": 6,
-        "Phthalo Green (Yellow Shade) → Titanium White": 4,
+        "Phthalo Green (Yellow Shade) → Titanium White": 3,
         "Titanium White → Cadmium Orange": 4,
-        "Phthalo Green (Yellow Shade) → Cadmium Orange": 2,
-        "Titanium White → Dioxazine Purple": 4,
-        "Titanium White → Phthalo Green (Yellow Shade)": 1
+        "Cadmium Orange → Dioxazine Purple": 4,
+        "Dioxazine Purple → Phthalo Green (Yellow Shade)": 6,
+        "Dioxazine Purple → Titanium White": 4,
+        "Titanium White → Dioxazine Purple": 6,
+        "Dioxazine Purple → Cadmium Orange": 4,
+        "Cadmium Orange → Phthalo Green (Yellow Shade)": 1,
+        "Titanium White → Phthalo Green (Yellow Shade)": 1,
+        "Phthalo Green (Yellow Shade) → Dioxazine Purple": 2,
+        "Phthalo Green (Yellow Shade) → Cadmium Orange": 3,
+        "Cadmium Orange → Titanium White": 1
       }
     },
     {
@@ -710,68 +721,68 @@
         "choice": 102,
         "interior": 16,
         "muted": 7,
-        "precision": 12,
+        "precision": 11,
         "value-finish": 15,
-        "chromatic-ride": 44
+        "chromatic-ride": 14
       },
       "distinctSelected": 20,
       "pars": [
         [
           3,
-          2,
-          2,
-          2,
-          3
+          4,
+          3,
+          3,
+          4
         ],
         [
           3,
-          2,
-          2,
+          4,
+          4,
           3,
-          3
+          4
         ],
         [
-          2,
-          2,
-          2,
+          4,
+          3,
+          4,
           3,
           4
         ],
         [
           2,
+          3,
           2,
-          2,
-          4,
+          3,
           4
         ]
       ],
       "bestFoundShots": [
         [
           2,
-          1,
-          1,
-          1,
-          1
+          2,
+          2,
+          2,
+          2
         ],
         [
           2,
-          1,
-          1,
-          1,
-          1
+          2,
+          2,
+          2,
+          2
         ],
         [
-          1,
-          1,
-          1,
-          1,
+          2,
+          2,
+          2,
+          2,
           2
         ],
         [
           1,
           1,
           1,
-          2,
+          1,
           2
         ]
       ],
@@ -806,27 +817,35 @@
         ]
       ],
       "lightnessRange": [
-        0.28443990260425606,
-        0.9299090580534626
+        0.28151796082207176,
+        0.913980705421602
       ],
       "interactions": {
-        "Ultramarine Blue → Yellow Ochre": 1,
-        "Yellow Ochre → Flake White": 1,
-        "Cobalt Blue → Alizarin Crimson": 2,
-        "Cobalt Blue → Yellow Ochre": 4,
-        "Alizarin Crimson → Cadmium Yellow Light": 2,
-        "Cadmium Yellow Light → Alizarin Crimson": 2,
         "Cadmium Yellow Light → Cobalt Blue": 1,
         "Cobalt Blue → Flake White": 1,
-        "Ultramarine Blue → Flake White": 1,
-        "Alizarin Crimson → Ultramarine Blue": 3,
-        "Cadmium Red Light → Alizarin Crimson": 1,
-        "Alizarin Crimson → Flake White": 1,
+        "Alizarin Crimson → Flake White": 2,
         "Flake White → Yellow Ochre": 1,
+        "Flake White → Alizarin Crimson": 3,
+        "Alizarin Crimson → Cobalt Blue": 2,
+        "Cobalt Blue → Cadmium Red Light": 2,
+        "Cadmium Red Light → Yellow Ochre": 2,
+        "Ultramarine Blue → Flake White": 2,
+        "Flake White → Viridian": 2,
+        "Ultramarine Blue → Yellow Ochre": 1,
+        "Yellow Ochre → Flake White": 1,
+        "Flake White → Cadmium Yellow Light": 1,
+        "Ultramarine Blue → Cadmium Yellow Light": 1,
+        "Cadmium Yellow Light → Yellow Ochre": 1,
+        "Flake White → Ultramarine Blue": 2,
+        "Ultramarine Blue → Viridian": 1,
+        "Ultramarine Blue → Cadmium Red Light": 1,
         "Cadmium Yellow Light → Flake White": 1,
-        "Flake White → Alizarin Crimson": 1,
-        "Cadmium Red Light → Flake White": 1,
-        "Flake White → Cobalt Blue": 1
+        "Flake White → Cobalt Blue": 2,
+        "Alizarin Crimson → Ultramarine Blue": 1,
+        "Cadmium Red Light → Flake White": 2,
+        "Alizarin Crimson → Cadmium Yellow Light": 1,
+        "Cobalt Blue → Alizarin Crimson": 1,
+        "Cadmium Yellow Light → Alizarin Crimson": 1
       }
     },
     {
@@ -834,40 +853,40 @@
       "eligible": 108,
       "tags": {
         "choice": 62,
-        "value-finish": 37,
+        "value-finish": 38,
         "interior": 39,
         "precision": 37,
         "muted": 19,
-        "chromatic-ride": 17
+        "chromatic-ride": 7
       },
-      "distinctSelected": 19,
+      "distinctSelected": 20,
       "pars": [
         [
-          4,
-          5,
-          5,
-          5,
-          6
-        ],
-        [
-          5,
           5,
           4,
           5,
-          6
+          5,
+          5
         ],
         [
           4,
           5,
-          2,
           4,
+          5,
           5
         ],
         [
           2,
-          2,
           5,
+          5,
+          5,
+          6
+        ],
+        [
           3,
+          5,
+          5,
+          4,
           6
         ]
       ],
@@ -887,23 +906,30 @@
           2
         ],
         [
-          2,
-          2,
           1,
+          2,
+          2,
           2,
           2
         ],
         [
           1,
-          1,
           2,
-          1,
+          2,
+          2,
           2
         ]
       ],
       "selectedKinds": [
         [
           "value-finish",
+          "precision",
+          "precision",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "precision",
           "value-finish",
           "value-finish",
           "value-finish",
@@ -911,45 +937,41 @@
         ],
         [
           "value-finish",
-          "value-finish",
-          "value-finish",
-          "value-finish",
-          "value-finish"
-        ],
-        [
-          "value-finish",
-          "value-finish",
+          "precision",
           "value-finish",
           "precision",
           "value-finish"
         ],
         [
           "value-finish",
-          "chromatic-ride",
+          "precision",
           "value-finish",
           "value-finish",
-          "value-finish"
+          "precision"
         ]
       ],
       "lightnessRange": [
-        0.3220432382617083,
-        0.878454830812971
+        0.34671337523720913,
+        0.8226910448108115
       ],
       "interactions": {
-        "Quinacridone Red → Phthalo Emerald": 8,
-        "Phthalo Emerald → Flake White": 7,
-        "Phthalo Emerald → Quinacridone Red": 6,
+        "Phthalo Emerald → Quinacridone Red": 7,
         "Quinacridone Red → Flake White": 8,
-        "Phthalo Emerald → Ultramarine Blue": 3,
-        "Ultramarine Blue → Flake White": 3,
-        "Quinacridone Red → Ultramarine Blue": 1
+        "Quinacridone Red → Phthalo Emerald": 6,
+        "Phthalo Emerald → Ultramarine Blue": 2,
+        "Phthalo Emerald → Flake White": 6,
+        "Flake White → Quinacridone Red": 3,
+        "Flake White → Ultramarine Blue": 1,
+        "Ultramarine Blue → Quinacridone Red": 1,
+        "Flake White → Phthalo Emerald": 2,
+        "Ultramarine Blue → Flake White": 2
       }
     },
     {
       "name": "Violet Shift",
       "eligible": 103,
       "tags": {
-        "chromatic-ride": 61,
+        "chromatic-ride": 40,
         "choice": 49,
         "interior": 21,
         "precision": 19,
@@ -959,44 +981,37 @@
       "pars": [
         [
           5,
-          2,
-          5,
-          3,
-          5
-        ],
-        [
-          4,
-          2,
           5,
           4,
-          5
-        ],
-        [
-          5,
-          4,
-          3,
           5,
           5
         ],
         [
           5,
           5,
-          2,
           5,
+          5,
+          5
+        ],
+        [
+          5,
+          5,
+          5,
+          4,
+          5
+        ],
+        [
+          4,
+          5,
+          4,
+          4,
           5
         ]
       ],
       "bestFoundShots": [
         [
           2,
-          1,
           2,
-          1,
-          2
-        ],
-        [
-          2,
-          1,
           2,
           2,
           2
@@ -1004,14 +1019,21 @@
         [
           2,
           2,
-          1,
+          2,
           2,
           2
         ],
         [
           2,
           2,
-          1,
+          2,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
+          2,
           2,
           2
         ]
@@ -1019,14 +1041,7 @@
       "selectedKinds": [
         [
           "interior",
-          "choice",
           "precision",
-          "choice",
-          "interior"
-        ],
-        [
-          "interior",
-          "choice",
           "precision",
           "precision",
           "interior"
@@ -1034,41 +1049,47 @@
         [
           "interior",
           "interior",
-          "choice",
+          "precision",
           "precision",
           "precision"
         ],
         [
           "interior",
           "interior",
-          "choice",
+          "precision",
           "precision",
           "precision"
+        ],
+        [
+          "interior",
+          "precision",
+          "precision",
+          "interior",
+          "interior"
         ]
       ],
       "lightnessRange": [
         0.33664804434695966,
-        0.8112110599179356
+        0.781557380236262
       ],
       "interactions": {
+        "Dioxazine Purple → Chartreuse": 7,
+        "Chartreuse → Cobalt Blue": 9,
+        "Chartreuse → Cadmium Red Light": 9,
         "Cadmium Red Light → Cobalt Blue": 7,
-        "Cobalt Blue → Chartreuse": 1,
-        "Chartreuse → Dioxazine Purple": 5,
-        "Dioxazine Purple → Chartreuse": 5,
-        "Chartreuse → Cadmium Red Light": 7,
         "Cobalt Blue → Dioxazine Purple": 1,
-        "Cadmium Red Light → Chartreuse": 3,
-        "Chartreuse → Cobalt Blue": 4,
+        "Cadmium Red Light → Chartreuse": 4,
+        "Chartreuse → Dioxazine Purple": 1,
         "Dioxazine Purple → Cobalt Blue": 1,
-        "Dioxazine Purple → Cadmium Red Light": 1
+        "Cobalt Blue → Cadmium Red Light": 1
       }
     },
     {
       "name": "Double Cross",
       "eligible": 84,
       "tags": {
-        "chromatic-ride": 39,
         "choice": 59,
+        "chromatic-ride": 15,
         "interior": 19,
         "muted": 12,
         "precision": 16
@@ -1077,60 +1098,60 @@
       "pars": [
         [
           5,
-          2,
-          2,
+          5,
+          5,
           5,
           5
         ],
         [
           5,
+          5,
+          4,
           2,
-          2,
+          5
+        ],
+        [
+          4,
+          5,
+          5,
           4,
           5
         ],
         [
           4,
-          2,
-          2,
-          5,
-          5
-        ],
-        [
-          5,
-          2,
           4,
           2,
+          4,
           5
         ]
       ],
       "bestFoundShots": [
         [
           2,
-          1,
-          1,
+          2,
+          2,
           2,
           2
         ],
         [
           2,
+          2,
+          2,
           1,
-          1,
+          2
+        ],
+        [
+          2,
+          2,
+          2,
           2,
           2
         ],
         [
           2,
-          1,
-          1,
-          2,
-          2
-        ],
-        [
           2,
           1,
           2,
-          1,
           2
         ]
       ],
@@ -1153,7 +1174,7 @@
           "interior",
           "choice",
           "choice",
-          "choice",
+          "interior",
           "interior"
         ],
         [
@@ -1166,18 +1187,19 @@
       ],
       "lightnessRange": [
         0.37629429872987247,
-        0.7258384874117922
+        0.6841917596522503
       ],
       "interactions": {
-        "Permanent Green Light → Cadmium Red Medium": 3,
-        "Cadmium Red Medium → Cadmium Orange": 4,
-        "Cobalt Blue → Cadmium Orange": 1,
-        "Permanent Green Light → Cadmium Orange": 10,
-        "Cadmium Orange → Cadmium Red Medium": 5,
+        "Cadmium Red Medium → Permanent Green Light": 1,
+        "Permanent Green Light → Cadmium Orange": 9,
+        "Cadmium Orange → Cadmium Red Medium": 9,
         "Cadmium Red Medium → Cobalt Blue": 4,
+        "Permanent Green Light → Cobalt Blue": 1,
+        "Cobalt Blue → Cadmium Orange": 1,
+        "Permanent Green Light → Cadmium Red Medium": 4,
+        "Cadmium Red Medium → Cadmium Orange": 6,
         "Cadmium Orange → Permanent Green Light": 2,
-        "Cadmium Red Medium → Permanent Green Light": 2,
-        "Permanent Green Light → Cobalt Blue": 1
+        "Cadmium Orange → Cobalt Blue": 1
       }
     }
   ]
