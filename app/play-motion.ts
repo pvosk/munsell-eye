@@ -99,6 +99,10 @@ export function chargeEnergy(strength:number,power:number,ratio:number) {
   return Math.max(0,Math.min(2.2,Math.sqrt(Math.max(.05,strength))*(.25+.75*power)*(.7+.3*Math.min(1,Math.log1p(Math.max(0,ratio))/Math.log(9)))));
 }
 
+export function ribbonChargeSpeed(energy:number,charging:boolean) {
+  return charging ? 2.2 + 4.8 * Math.max(0,Math.min(1,energy/2.2)) : 2;
+}
+
 // Parallel transport prevents the abrupt flips caused by crossing every
 // tangent with world-up. Ribbon centers remain on the sampled mixing curve.
 export function ribbonEdges(path: ColorPoint[], weight: number) {

@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
 import { HOLES_PER_PALETTE, PLAY_LEVELS, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
+import {newLabAttempt,type LabAttempt,type LabSpecimen} from './play-lab-model';
+import {usePlayLabSync} from './play-lab-sync';
+import {LabPicker,PlayLabPanel} from './play-lab';
 import './play.css';
 
 type Phase = 'intro' | 'seed' | 'rest' | 'flight' | 'landed';
@@ -29,6 +32,18 @@ function PaletteRail({value,disabled,onChange}:{value:number;disabled:boolean;on
 }
 
 export default function PlayView() {
+  const [lab,setLab]=useState(false);
+  const sync=usePlayLabSync(lab);
+  const [attempt,setAttempt]=useState<LabAttempt|null>(null);
+  const attemptRef=useRef<LabAttempt|null>(null);
+  const labLive=useRef({enabled:lab,signedIn:sync.signedIn});
+  useEffect(()=>{labLive.current={enabled:lab,signedIn:sync.signedIn};},[lab,sync.signedIn]);
+  const saveLabEvent=sync.save;
+  const record=useCallback((next:LabAttempt)=>{
+    attemptRef.current=next;setAttempt(next);
+    saveLabEvent({id:crypto.randomUUID(),attemptId:next.id,type:'attempt',attempt:next});
+  },[saveLabEvent]);
+  useEffect(()=>{const frame=requestAnimationFrame(()=>setLab(new URLSearchParams(location.search).get('lab')==='1'));return()=>cancelAnimationFrame(frame);},[]);
   const [levelIndex, setLevelIndex] = useState(0);
   const [hole, setHole] = useState<Hole>(() => generateHole(0, 190926));
   const [quantities, setQuantities] = useState<Mixture>([0, 0, 0]);
@@ -47,8 +62,11 @@ export default function PlayView() {
   const scene = useRef<PlayScene | null>(null);
   const charge = useRef<Charge | null>(null);
   const rollback=useRef<{quantities:Mixture;pours:number;phase:Phase}|null>(null);
-  const paintPress = useRef<{ id: number; x: number; y: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
+  const paintPress = useRef<{ id: number; x: number; y: number; started: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
   const level = PLAY_LEVELS[levelIndex];
+  useEffect(()=>{
+    if(lab&&sync.signedIn&&!attemptRef.current)record(newLabAttempt({levelIndex,hole},crypto.randomUUID()));
+  },[lab,sync.signedIn,levelIndex,hole,record]);
   const point = useMemo(() => mixtureColor(level.paints, quantities), [level.paints, quantities]);
   const notation = useMemo(() => nearestNotation(point), [point]);
   const mass = totalMass(quantities);
@@ -88,12 +106,15 @@ export default function PlayView() {
     rollback.current=null;
     live.current={...live.current,...before};
     setQuantities(before.quantities);setPours(before.pours);setPhase(before.phase);
+    const active=attemptRef.current;
+    if(labLive.current.enabled&&active&&active.shots.length)record({...active,shots:active.shots.map((s,i)=>i===active.shots.length-1?{...s,cancelled:true}:s)});
     setAnnouncement('Shot cancelled. Previous mixture and shot count restored.');
-  },[]);
-  const begin = useCallback((index: number, source: string) => {
+  },[record]);
+  const begin = useCallback((index: number, source: string, started = performance.now()) => {
     const s = live.current;
+    if(labLive.current.enabled&&(!labLive.current.signedIn||(attemptRef.current?.shots.length??0)>=200))return;
     if (!s.ready || s.error || s.help || s.phase === 'intro' || s.phase === 'flight' || s.phase === 'landed' || charge.current) return;
-    charge.current = { index, started: performance.now(), source };
+    charge.current = { index, started, source };
     setSelected(index); setCharged(0);
   }, []);
   const release = useCallback((source: string) => {
@@ -104,7 +125,8 @@ export default function PlayView() {
     const palette = PLAY_LEVELS[s.levelIndex].paints;
     const before = s.quantities;
     const beforeMass = totalMass(before);
-    const amount = chargeAmount(beforeMass, (performance.now() - held.started) / 1000);
+    const seconds=(performance.now()-held.started)/1000;
+    const amount = chargeAmount(beforeMass, seconds);
     const after = addPaint(before, held.index, amount);
     const path = pourPath(palette, before, held.index, amount);
     const nextPours = s.pours + (beforeMass ? 1 : 0);
@@ -113,18 +135,20 @@ export default function PlayView() {
     live.current = { ...s, phase: 'flight', pours: nextPours, quantities: after };
     setPhase('flight'); setPours(nextPours);
     setAnnouncement(`Pour ${nextPours}: ${palette[held.index].name}.`);
+    if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,shots:[...attemptRef.current.shots,{paint:held.index,seconds,amount,before:[...before],after:[...after],cancelled:false}]});
     scene.current.launch(path, beforeMass, totalMass(after), () => {
       rollback.current=null;
       const result = mixtureColor(palette, after);
       const landed = colorDistance(result, s.hole.target) <= s.hole.tolerance;
       setQuantities(after); setPhase(landed ? 'landed' : 'rest');
       if (landed) {
+        if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,outcome:'landed'});
         scene.current?.celebrate();
         setResults((current) => current.map((round, i) => i === s.levelIndex ? round.map((score, j) => j === s.hole.stage ? Math.min(score ?? Infinity, nextPours) : score) : round));
         setAnnouncement(`Landed in ${nextPours} pours. Player par ${s.hole.par}.`);
       } else setAnnouncement(`${beforeMass ? 'Settled' : 'Base chosen'}. ${nearestNotation(result)}. Choose a paint and hold to pour.`);
     });
-  }, []);
+  }, [record]);
 
   useEffect(() => {
     let frame = 0; let lastUI = 0;
@@ -167,18 +191,36 @@ export default function PlayView() {
     return () => { window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', cancelCharge); document.removeEventListener('visibilitychange', visibility); cancelCharge(); };
   }, [begin, release, cancelCharge, cancelShot]);
 
-  const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0) => {
+  const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole) => {
+    cancelShot();
+    scene.current?.cancelFlight();
     rollback.current=null;
     setFinishPaused(false);
     cancelCharge(); setReady(false); setError(false); setSelected(0); setPours(0); setPhase('intro'); setHelp(false);
     setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
     // Keep a round's seed through all five holes. A requested new target should
     // not immediately repeat the same bank entry when the random variant repeats.
-    let next=generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage);
-    if(!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    let next=exact??generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    if(!exact&&!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    if(lab&&sync.signedIn){
+      const previous=attemptRef.current;
+      if(previous&&previous.outcome==='playing')record({...previous,outcome:previous.specimen.hole.courseId===next.courseId?'replayed':'left'});
+      record(newLabAttempt({levelIndex:index,hole:next},crypto.randomUUID()));
+    }
     setHole(next);
     setAnnouncement(`Hole ${stage + 1} of ${HOLES_PER_PALETTE}. Arriving in color space.`);
   };
+  const replaySpecimen=(specimen:LabSpecimen)=>startHole(specimen.levelIndex,true,specimen.hole.stage,{...specimen.hole});
+  const toggleLab=()=>{
+    cancelCharge();cancelShot();
+    if(lab&&attemptRef.current&&attemptRef.current.outcome==='playing')record({...attemptRef.current,outcome:'left'});
+    attemptRef.current=null;setAttempt(null);
+    const next=!lab;setLab(next);labLive.current.enabled=next;
+    const url=new URL(location.href);if(next)url.searchParams.set('lab','1');else url.searchParams.delete('lab');history.replaceState(null,'',url);
+    // Enter with a clean start so every recorded route includes its free base.
+    if(next)startHole(levelIndex,true);
+  };
+  const reveal=()=>{if(attemptRef.current&&!attemptRef.current.revealed)record({...attemptRef.current,revealed:true});};
   const nextHole = () => hole.stage < HOLES_PER_PALETTE - 1
     ? startHole(levelIndex, true, hole.stage + 1)
     : startHole((levelIndex + 1) % PLAY_LEVELS.length, false, 0);
@@ -186,10 +228,10 @@ export default function PlayView() {
     onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0 || !event.isPrimary || charge.current) return;
       if (event.pointerType !== 'touch') event.preventDefault();
-      event.currentTarget.focus({ preventScroll: true });
+      if (event.pointerType !== 'touch') event.currentTarget.focus({ preventScroll: true });
       clearTimeout(paintPress.current?.timer);
       const rail = event.currentTarget.closest<HTMLElement>('.play-paints[data-wide=true]');
-      const press = { id: event.pointerId, x: event.clientX, y: event.clientY, scroll: rail?.scrollLeft ?? 0, rail, cancelled: false, timer: undefined as ReturnType<typeof setTimeout> | undefined };
+      const press = { id: event.pointerId, x: event.clientX, y: event.clientY, started: performance.now(), scroll: rail?.scrollLeft ?? 0, rail, cancelled: false, timer: undefined as ReturnType<typeof setTimeout> | undefined };
       paintPress.current = press;
       event.currentTarget.setPointerCapture(event.pointerId);
       setSelected(index);
@@ -197,7 +239,7 @@ export default function PlayView() {
         // Let native scrolling win before committing to a hold. Moving later
         // still cancels the pour, even after the charge animation has begun.
         press.timer = setTimeout(() => {
-          if (paintPress.current === press && !press.cancelled) begin(index, `pointer:${press.id}`);
+          if (paintPress.current === press && !press.cancelled) begin(index, `pointer:${press.id}`, press.started);
         }, 150);
       } else begin(index, `pointer:${event.pointerId}`);
     },
@@ -214,7 +256,12 @@ export default function PlayView() {
       const press = paintPress.current;
       if (!press || press.id !== event.pointerId) return;
       clearTimeout(press.timer);
-      if (!press.cancelled) release(`pointer:${event.pointerId}`);
+      if (!press.cancelled) {
+        // A clean short tap is a small pour, not a discarded hold. Charge time
+        // always starts at contact, including the scroll-intent delay.
+        if (!charge.current) begin(index, `pointer:${event.pointerId}`, press.started);
+        release(`pointer:${event.pointerId}`);
+      }
       paintPress.current = null;
     },
     onPointerCancel: cancelCharge,
@@ -228,14 +275,14 @@ export default function PlayView() {
   const advance = useRef(nextHole);
   useEffect(() => { advance.current = nextHole; });
   useEffect(() => {
-    if (phase !== 'landed' || help || finishPaused) return;
+    if (lab || phase !== 'landed' || help || finishPaused) return;
     const timer = window.setTimeout(() => advance.current(), 5200);
     return () => window.clearTimeout(timer);
-  }, [phase, help, hole, finishPaused]);
+  }, [phase, help, hole, finishPaused,lab]);
   const amount = charged === null ? 0 : chargeAmount(mass, charged);
   const paintLab=rgbToLab(level.paints[selected].rgb);
   const mutedPaint=`oklab(${paintLab[0]} ${paintLab[1]*.08} ${paintLab[2]*.08})`;
-  const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help;
+  const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help || (lab&&!sync.signedIn);
   const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 1.6 ? 'Just Outside the Landing Zone' : 'Choose Your Next Pour';
 
   return <section className="paint-play" aria-label="Paint mixing game">
@@ -244,21 +291,22 @@ export default function PlayView() {
       <PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />
       <div className="play-upper-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button><button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button></div>
     </div>
+    <div className="play-lab-bar"><button type="button" aria-pressed={lab} onClick={toggleLab} disabled={phase==='flight'}>{lab?'Return to course':'Hole Lab'}</button>{lab&&<><LabPicker current={{levelIndex,hole}} disabled={phase==='flight'||!sync.signedIn} onChoose={replaySpecimen}/><button type="button" disabled={phase==='flight'||!sync.signedIn} onClick={()=>startHole(levelIndex,true)}>Replay hole</button></>}</div>
     <div className="play-world">
       <div className="play-canvas" ref={host} /><div className="play-world-vignette" />
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>
       <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span><span>Destination</span></div>
-      <div className="play-score"><span><b>{hole.stage + 1}/{HOLES_PER_PALETTE}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span><span><b>{hole.par}</b> Par</span><span><b>{massLabel(mass)}</b> Parts</span></div>
+      <div className="play-score"><span><b>{hole.stage + 1}/{HOLES_PER_PALETTE}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span>{(!lab||attempt?.revealed)&&<span><b>{hole.par}</b> Par</span>}<span><b>{massLabel(mass)}</b> Parts</span></div>
       <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
       {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette draws from four evaluated five-hole rounds, with its own balance of colorful rides, value changes and quieter mixtures. The final hole carries the round’s toughest par or timing margin. A qualifying endpoint is drawn into the cup, then advances automatically. All palettes are available to explore.</p><p className="play-fineprint">Player par includes room for adjustment; it is not the fewest possible shots. It is provisionally calibrated from sampled routes and timing margins. Every starting paint is checked for one- and two-pour alternatives, but the search is not a mathematical proof. Landing tolerance stays fixed within each palette. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
       {phase === 'landed' && !help && <div className="play-arrival" data-result={pours<=hole.par?'within':'over'} onFocus={()=>setFinishPaused(true)} onPointerDown={()=>setFinishPaused(true)}>
         <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Shots</span></div><div><strong>{massLabel(mass)}</strong><span>Total parts</span></div></div>
-        <p className="play-par-difference">{pours===hole.par?'On par':`${pours>hole.par?'+':''}${pours-hole.par} vs par`} <span>· Player par {hole.par}</span></p>
+        {(!lab||attempt?.revealed)&&<p className="play-par-difference">{pours===hole.par?'On par':`${pours>hole.par?'+':''}${pours-hole.par} vs par`} <span>· Player par {hole.par}</span></p>}
         <span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span>
-        <h2>{pours < hole.par ? 'Beautifully Judged.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
-        <div><button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button></div>
+        <h2>{lab?'Route complete.':pours < hole.par ? 'Beautifully Judged.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
+        <div>{!lab&&<button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button>}<button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button>{lab&&<button type="button" onClick={()=>document.querySelector('.play-lab-panel')?.scrollIntoView({behavior:'smooth'})}>Review below ↓</button>}</div>
       </div>}
     </div>
     <div className="play-dock">
@@ -267,6 +315,7 @@ export default function PlayView() {
       <div className="play-control-hint"><span>{phase === 'flight' ? <button type="button" onClick={cancelShot}>Cancel shot · Esc</button> : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>
     </div>
+    {lab&&<PlayLabPanel sync={sync} current={attempt} onReplay={replaySpecimen} onReveal={reveal}/>}
     <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
   </section>;
 }

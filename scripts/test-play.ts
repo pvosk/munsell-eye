@@ -3,6 +3,25 @@ import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 import courseBank from '../app/generated/play-courses.json';
 import { paletteSignature, PROFILES, replayRoute, playerPar } from '../app/play-course-analysis';
+import {LAB_STARTERS,newLabAttempt,validLabEvent,labEntries,type LabEvent} from '../app/play-lab-model';
+
+test('lab starter snapshots survive serialization and replay the exact hole',()=>{
+  assert.equal(LAB_STARTERS.length,12);
+  for(const specimen of LAB_STARTERS){
+    const attempt=newLabAttempt(specimen,'test-attempt');
+    const event=JSON.parse(JSON.stringify({id:'test-event',attemptId:attempt.id,type:'attempt',attempt}));
+    assert.ok(validLabEvent(event));
+    assert.equal(event.type,'attempt');if(event.type!=='attempt')throw new Error('Expected attempt');
+    assert.deepEqual(generateHole(specimen.levelIndex,specimen.hole.seed,specimen.hole.stage),specimen.hole);
+    event.attempt.specimen.hole.tolerance+=.01;assert.equal(validLabEvent(event),false);
+  }
+});
+test('lab replays retain earlier attempts and notes',()=>{
+  const first=newLabAttempt(LAB_STARTERS[0],'first'),second=newLabAttempt(LAB_STARTERS[0],'second');
+  const events:LabEvent[]=[{id:'one',attemptId:'first',type:'attempt',attempt:first},{id:'two',attemptId:'first',type:'review',review:{verdict:'keep',challenge:'setup',issue:'',note:'Great second pour',shot:null}},{id:'three',attemptId:'second',type:'attempt',attempt:second}];
+  const entries=labEntries(events);assert.equal(entries.length,2);assert.equal(entries[1].review?.note,'Great second pour');
+  assert.ok(validLabEvent(events[1]));assert.equal(validLabEvent({...events[1],review:{note:'bad'}}),false);
+});
 
 test('every palette shares one perceptual landing tolerance', () => {
   PLAY_LEVELS.forEach(level=>assert.equal(level.tolerance,.028));
@@ -294,6 +313,15 @@ test('vertical camera travel keeps its azimuth and tint strength drives charge e
   }
   assert.ok(chargeEnergy(1.4,.8,.5)>chargeEnergy(.5,.8,.5));
   assert.ok(chargeEnergy(1,.8,2)>chargeEnergy(1,.2,.01));
+});
+
+test('charging fins stay just above idle with a bounded gentler maximum',async()=>{
+  const {ribbonChargeSpeed}=await import('../app/play-motion');
+  assert.equal(ribbonChargeSpeed(0,false),2);
+  assert.equal(ribbonChargeSpeed(0,true),2.2);
+  assert.equal(ribbonChargeSpeed(2.2,true),7);
+  assert.equal(ribbonChargeSpeed(20,true),7);
+  assert.ok(ribbonChargeSpeed(.5,true)<ribbonChargeSpeed(1,true));
 });
 
 test('wake decays to rest after ten seconds and fin attachments taper', async () => {

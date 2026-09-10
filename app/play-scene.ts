@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
+import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, ribbonChargeSpeed, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -177,6 +177,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   let charge: { rgb: RGB; ratio: number; power: number; strength: number; tangent?: THREE.Vector3 } | null = null;
   let flightWeight=0, shotLength=0;
   let time = 0; let last = performance.now(); let landing = -10; let releaseTime = -10;
+  let ribbonPhase = 0;
   let previousHue: number | null = null;
   let lastGate = -10;
   let introElapsed = 0; let introducing = true;
@@ -197,7 +198,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   let orbitYaw = 0; let orbitPitch = 0;
   let drag: { id: number; x: number; y: number } | null = null;
   const pointerDown = (event: PointerEvent) => {
-    if (introducing || flight || charge || event.button !== 0) return;
+    // Touch belongs to page scrolling, not camera orientation.
+    if (event.pointerType !== 'mouse' || introducing || flight || charge || event.button !== 0) return;
     drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
     renderer.domElement.setPointerCapture(event.pointerId);
   };
@@ -214,7 +216,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   renderer.domElement.addEventListener('pointercancel', pointerEnd);
 
   function resize() {
-    width = Math.max(1, host.clientWidth); height = Math.max(1, host.clientHeight);
+    const nextWidth = Math.max(1, host.clientWidth), nextHeight = Math.max(1, host.clientHeight);
+    if (nextWidth === width && nextHeight === height) return;
+    width = nextWidth; height = nextHeight;
     renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix();
   }
   const observer = new ResizeObserver(resize); observer.observe(host); resize();
@@ -379,6 +383,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const settle = reduced ? 0 : Math.exp(-(time - landing) * 5) * Math.sin((time - landing) * 7) * .075;
     const tension = reduced ? 0 : charge?.power ?? 0;
     const energy=reduced?0:charge?chargeEnergy(charge.strength,charge.power,charge.ratio):0;
+    // Integrate frequency: multiplying absolute time by changing charge speed
+    // made the fins jump through phase as a pour charged up.
+    if (!reduced) ribbonPhase = (ribbonPhase + dt*ribbonChargeSpeed(energy,!!charge)) % (Math.PI*2);
     const stretch = reduced ? 0 : Math.min(.38, speed * .025) + kick;
     body.scale.set(1 - tension * .14 - stretch * .2 + settle, 1 - tension * .14 - stretch * .15 + settle, 1 + tension * .38 + stretch - settle);
     blob.scale.setScalar(scale);
@@ -409,7 +416,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const length = .7 + Math.min(.8, speed * .035);
       for (let j = 0; j < 26; j++) {
         const t = j / 25;
-        const ripple = reduced ? 0 : Math.sin(t * (6+tension*3) - time * (2+tension*3+energy*5) + phase) * (.1+energy*.065) * t;
+        const ripple = reduced ? 0 : Math.sin(t * (6+tension*3) - ribbonPhase + phase) * (.1+energy*.065) * t;
         const spread = .17 + t * .12 + ripple;
         const x = Math.cos(phase) * spread, y = Math.sin(phase) * spread;
         const w = finWidth(t);
