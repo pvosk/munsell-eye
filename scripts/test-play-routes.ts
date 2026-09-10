@@ -1,10 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PLAY_LEVELS,pairedLabBank,generatePairedHole,mixtureColor,colorDistance,addPaint,chargeAmount,totalMass} from '../app/play-engine';
+import {PLAY_LEVELS,pairedLabBank,generatePairedHole,mixtureColor,colorDistance,addPaint,chargeAmount,totalMass,withLiveLanding,LIVE_LANDING_TOLERANCE,targetDisplayRadius} from '../app/play-engine';
 import {LAB_PAIRED,newLabAttempt,validLabEvent,suggestedComparison} from '../app/play-lab-model';
 import {replayRoute,paletteSignature} from '../app/play-course-analysis';
 import {analyzeRoutes,finishingIntervals} from '../app/play-route-analysis';
 import round2 from '../app/generated/play-lab-round2.json';
+
+test('slightly easier live landing is versioned without changing archived replays',()=>{
+  for(const specimen of LAB_PAIRED){
+    const original=structuredClone(specimen),current={...specimen,hole:withLiveLanding(specimen.hole)},a=newLabAttempt(current,'live');
+    assert.equal(current.hole.tolerance,LIVE_LANDING_TOLERANCE);assert.ok(Math.abs(current.hole.tolerance/specimen.hole.tolerance-1.05)<1e-12);
+    assert.ok(a.engine.endsWith('-landing-2'));assert.ok(validLabEvent({id:'live-event',attemptId:a.id,type:'attempt',attempt:a}));
+    assert.deepEqual(specimen,original);
+    const wrong=structuredClone(a);wrong.specimen.hole.tolerance=.04;
+    assert.equal(validLabEvent({id:'wrong',attemptId:wrong.id,type:'attempt',attempt:wrong}),false);
+    const radius=targetDisplayRadius(current.hole.target,current.hole.tolerance);
+    assert.ok(Number.isFinite(radius)&&radius>0);
+    for(let axis=0;axis<3;axis++)for(let i=0;i<80;i++){
+      const angle=i/80*Math.PI*2,d=[0,0,0];d[(axis+1)%3]=Math.cos(angle)*radius;d[(axis+2)%3]=Math.sin(angle)*radius;
+      assert.ok(Math.abs(Math.hypot(...d)-radius)<1e-10);
+    }
+  }
+});
 
 test('six immutable paired targets preserve free starts and real scoring',()=>{
   assert.equal(LAB_PAIRED.length,6);assert.equal(pairedLabBank.signature,paletteSignature());

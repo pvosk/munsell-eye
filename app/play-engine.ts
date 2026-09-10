@@ -17,6 +17,10 @@ export type Hole = { seed: number; stage: number; start: ColorPoint; target: Col
 export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
 export const LANDING_TOLERANCE = .028;
+// Bank signatures and historical attempts retain their original tolerance.
+// New live attempts use this separately versioned, five-percent adjustment.
+export const LIVE_LANDING_TOLERANCE = .0294;
+export const withLiveLanding = (hole:Hole):Hole=>({...hole,tolerance:LIVE_LANDING_TOLERANCE});
 
 const paint = (id: string) => {
   const found = PAINTS.find((entry) => entry.id === id);
@@ -114,6 +118,15 @@ export function labPosition(lab: XYZ): XYZ {
 export function landingBoundary(target: ColorPoint, tolerance: number, direction: XYZ): XYZ {
   const length = Math.hypot(...direction) || 1;
   return labPosition(target.lab.map((n, i) => n + direction[i] / length * tolerance) as XYZ);
+}
+export function targetDisplayRadius(target:ColorPoint,tolerance:number):number {
+  let radius=0;
+  for(let axis=0;axis<3;axis++)for(const sign of [-1,1]){
+    const direction:XYZ=[0,0,0];direction[axis]=sign;
+    const p=landingBoundary(target,tolerance,direction);
+    radius+=Math.hypot(...p.map((v,i)=>v-target.position[i]))/6;
+  }
+  return radius;
 }
 export const SEED_POINT = colorPoint([145, 145, 139]);
 export const colorDistance = (a: ColorPoint, b: ColorPoint) => Math.hypot(...a.lab.map((v, i) => v - b.lab[i]));

@@ -1,9 +1,10 @@
-import { PLAY_LEVELS, generateHole, generateLabHole, generatePairedHole, pairedLabBank, type Hole, type Mixture } from './play-engine';
+import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, pairedLabBank, type Hole, type Mixture } from './play-engine';
 
 export const LAB_ENGINE = 'glider-courses-3-controls-1';
 export const LAB_ROUND_ENGINE='glider-lab-2-controls-1';
 export const LAB_PAIRED_ENGINE='glider-lab-3-controls-1';
-export const supportedLabEngine=(engine:string)=>engine===LAB_ENGINE||engine==='glider-courses-2-controls-1'||engine===LAB_ROUND_ENGINE||engine===LAB_PAIRED_ENGINE;
+const originalEngine=(engine:string)=>engine.endsWith('-landing-2')?engine.slice(0,-10):engine;
+export const supportedLabEngine=(engine:string)=>[LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE].includes(originalEngine(engine));
 export type LabSpecimen = { levelIndex: number; hole: Hole; comparison?:{base:number;sourceAttemptId:string} };
 export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
 export type LabAttempt = {
@@ -28,7 +29,8 @@ export function suggestedComparison(attempt:LabAttempt):LabSpecimen|null {
 }
 
 export function newLabAttempt(specimen:LabSpecimen,id:string):LabAttempt {
-  return {id,engine:specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE,specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
+  const base=specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE;
+  return {id,engine:base+(specimen.hole.tolerance===LIVE_LANDING_TOLERANCE?'-landing-2':''),specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
     paints:PLAY_LEVELS[specimen.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}))};
 }
 export function labEntries(events:LabEvent[]):LabEntry[] {
@@ -64,12 +66,14 @@ export function validLabEvent(value:unknown):value is LabEvent {
   const a=e.attempt,s=a.specimen;
   if(a.id!==e.attemptId||!supportedLabEngine(a.engine)||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
   if(!s||!Number.isInteger(s.levelIndex)||!PLAY_LEVELS[s.levelIndex]||!s.hole)return false;
-  if(s.comparison&&(a.engine!==LAB_PAIRED_ENGINE||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
+  const engine=originalEngine(a.engine);
+  if(s.comparison&&(engine!==LAB_PAIRED_ENGINE||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
   if(!Number.isInteger(s.hole.seed)||s.hole.seed<0||s.hole.seed>0xffffffff||!Number.isInteger(s.hole.stage)||s.hole.stage<0||s.hole.stage>4)return false;
   let original:Hole;
   try {
-    if(a.engine!==LAB_ROUND_ENGINE&&a.engine!==LAB_PAIRED_ENGINE&&s.levelIndex>=10)return false;
-    original=a.engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):a.engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,a.engine==='glider-courses-2-controls-1');
+    if(engine!==LAB_ROUND_ENGINE&&engine!==LAB_PAIRED_ENGINE&&s.levelIndex>=10)return false;
+    original=engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,engine==='glider-courses-2-controls-1');
+    if(a.engine.endsWith('-landing-2'))original=withLiveLanding(original);
   }catch{return false;}
   // Snapshot equality catches accidental edits to the target, cup or controls.
   if(!sameSnapshot(s.hole,original))return false;

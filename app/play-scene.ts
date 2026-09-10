@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, ribbonChargeSpeed, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
-import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
+import { FIELD_POINTS, baseLaunchPath, colorDistance, targetDisplayRadius, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
 type SceneCallbacks = { targetPosition: (x: number, y: number, offscreen: boolean, angle: number) => void; onIntroEnd: () => void; onError: () => void };
@@ -241,18 +241,14 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     target.position.copy(v3(next.target));
     targetAnchor.copy(target.position); targetRecoil.set(0,0,0);
     targetMaterial.color.copy(color(next.target.rgb));
-    // Three sections of the actual OKLab tolerance surface mapped into the
-    // world. Do not substitute an average-radius sphere for the scoring zone.
-    let radius = 0;
-    for (let axis = 0; axis < 3; axis++) for (const sign of [-1, 1]) {
-      const direction: [number, number, number] = [0, 0, 0]; direction[axis] = sign;
-      radius += new THREE.Vector3(...landingBoundary(next.target, next.tolerance, direction)).distanceTo(target.position) / 6;
-    }
+    // Symmetric destination marker, intentionally not the warped projection
+    // of the scoring boundary. Capture remains based on perceptual distance.
+    const radius=targetDisplayRadius(next.target,next.tolerance);
     const boundaryLines: THREE.Vector3[] = [];
     for (let axis = 0; axis < 3; axis++) for (let segment = 0; segment < 80; segment++) for (const t of [segment, segment + 1]) {
       const angle = t / 80 * Math.PI * 2;
       const direction: [number, number, number] = [0, 0, 0]; direction[(axis + 1) % 3] = Math.cos(angle); direction[(axis + 2) % 3] = Math.sin(angle);
-      boundaryLines.push(new THREE.Vector3(...landingBoundary(next.target,next.tolerance,direction)).sub(targetAnchor));
+      boundaryLines.push(new THREE.Vector3(...direction).multiplyScalar(radius));
     }
     targetBoundary.geometry.dispose(); targetBoundary.geometry = new THREE.BufferGeometry().setFromPoints(boundaryLines);
     targetGlow.material.uniforms.tint.value.copy(targetMaterial.color);

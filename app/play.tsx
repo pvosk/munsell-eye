@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
-import { HOLES_PER_PALETTE, PLAY_LEVELS, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
+import { HOLES_PER_PALETTE, PLAY_LEVELS, withLiveLanding, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
 import {newLabAttempt,type LabAttempt,type LabSpecimen} from './play-lab-model';
 import {usePlayLabSync} from './play-lab-sync';
@@ -48,7 +48,7 @@ export default function PlayView() {
   },[saveLabEvent]);
   useEffect(()=>{const frame=requestAnimationFrame(()=>setLab(new URLSearchParams(location.search).get('lab')==='1'));return()=>cancelAnimationFrame(frame);},[]);
   const [levelIndex, setLevelIndex] = useState(0);
-  const [hole, setHole] = useState<Hole>(() => generateHole(0, 190926));
+  const [hole, setHole] = useState<Hole>(() => withLiveLanding(generateHole(0, 190926)));
   const [quantities, setQuantities] = useState<Mixture>([0, 0, 0]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [pours, setPours] = useState(0);
@@ -205,6 +205,7 @@ export default function PlayView() {
     // not immediately repeat the same bank entry when the random variant repeats.
     let next=exact??(same&&index===levelIndex&&stage===hole.stage?{...hole}:generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage));
     if(!exact&&!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    if(!exact&&!(same&&index===levelIndex&&stage===hole.stage))next=withLiveLanding(next);
     if(lab&&sync.signedIn){
       const previous=attemptRef.current;
       if(previous&&previous.outcome==='playing')record({...previous,outcome:previous.specimen.hole.courseId===next.courseId?'replayed':'left'});

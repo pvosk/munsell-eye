@@ -1,6 +1,6 @@
 'use client';
 import {memo,useMemo,useState} from 'react';
-import {PLAY_LEVELS,pairedLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
+import {PLAY_LEVELS,LANDING_TOLERANCE,withLiveLanding,pairedLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
 import {supportedLabEngine,LAB_STARTERS,LAB_PAIRED,suggestedComparison,labEntries,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
 import type {usePlayLabSync} from './play-lab-sync';
 
@@ -70,11 +70,12 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
 
 export function LabPicker({current,onChoose,disabled}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;disabled:boolean}) {
   const tests=LAB_PAIRED.length?LAB_PAIRED:LAB_STARTERS;
+  const choose=(s:LabSpecimen)=>onChoose({...s,hole:withLiveLanding(s.hole)});
   const index=tests.findIndex(s=>s.hole.courseId===current.hole.courseId&&s.levelIndex===current.levelIndex);
-  return <><label className="lab-picker">Paired starts · Round 3<select disabled={disabled} value={index} onChange={e=>onChoose(tests[Number(e.target.value)])}>
+  return <><label className="lab-picker">Paired starts · Round 3<select disabled={disabled} value={index} onChange={e=>choose(tests[Number(e.target.value)])}>
     {index<0&&<option value={-1}>Current course hole · {PLAY_LEVELS[current.levelIndex].name}</option>}
     {tests.map((s,i)=><option key={i} value={i}>{String(i+1).padStart(2,'0')} · {PLAY_LEVELS[s.levelIndex].name} · {s.hole.notation}</option>)}
-  </select></label>{index<tests.length-1&&<button type="button" disabled={disabled} onClick={()=>onChoose(tests[index+1])}>{index<0?'Start round 3':'Next test →'}</button>}</>;
+  </select></label>{index<tests.length-1&&<button type="button" disabled={disabled} onClick={()=>choose(tests[index+1])}>{index<0?'Start round 3':'Next test →'}</button>}</>;
 }
 
 export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<typeof usePlayLabSync>;current:LabAttempt|null;onReplay:(specimen:LabSpecimen)=>void;onReveal:()=>void}) {
@@ -96,6 +97,7 @@ export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<t
         <div className="lab-review-heading"><h3>{PLAY_LEVELS[entry.attempt.specimen.levelIndex].name} · {entry.attempt.specimen.hole.notation}</h3><button type="button" onClick={()=>{onReplay(entry.attempt.specimen);setChosen(null);setReviewing(false);}}>Replay this exact hole ↗</button></div>
         <p>{entry.attempt.specimen.hole.courseId} · {entry.attempt.engine} · {entry.attempt.specimen.comparison?'Suggested-base comparison':entry.attempt.revealed?'Analysis revealed':'Unassisted attempt'}</p>
         <p>Design intent: {entry.attempt.specimen.hole.kind.replaceAll('-',' ')}. This describes the test—not a required starting paint or route.</p>
+        <p className="lab-muted">Landing tolerance: {entry.attempt.specimen.hole.tolerance.toFixed(4)}. Exact replays retain this setting. The spherical outline is a visual marker, not the exact scoring boundary.{entry.attempt.specimen.hole.tolerance!==LANDING_TOLERANCE?' Route measurements and par below were calculated at the original 0.028 tolerance.':''}</p>
         {comparison&&<div className="lab-paired"><p>Compare the same target from <strong>{PLAY_LEVELS[comparison.levelIndex].paints[comparison.comparison!.base].name}</strong>. Choose that base yourself; other paints remain available.</p><button type="button" onClick={()=>{onReplay(comparison);setChosen(null);setReviewing(false);}}>Replay with suggested start ↗</button></div>}
         {analysis&&<details className="lab-base-analysis"><summary>Starting-choice measurements</summary><p>{analysis.qualifyingBases.length}/{analysis.bases.length} starts meet provisional route-quality checks. {analysis.robustThree?'Three additions found from every base; no one- or two-addition solution found.':''} This predicts candidates, not enjoyment.</p><div className="lab-base-scroll"><table><thead><tr><th>Base</th><th>Additions found</th><th>Shortest travel</th><th>Measured support</th></tr></thead><tbody>{analysis.bases.map(b=><tr key={b.base}><td>{entry.attempt.paints[b.base].name}</td><td>{b.fewestFound??'Not found'}</td><td>{b.minimumTravel?.toFixed(1)??'—'}</td><td>{b.qualifies?'Supported':'Uncertain'}</td></tr>)}</tbody></table></div><p>Travel is in display-world units. Search is sampled, not exhaustive. Setup tests vary earlier release times within ±0.18 seconds and search for a successful finish; they do not prove global difficulty.</p></details>}
         <div className="lab-comparison">{same.map((e,i)=>{const shots=e.attempt.shots.filter(s=>!s.cancelled),last=shots.at(-1),error=last?colorDistance(mixtureColor(PLAY_LEVELS[e.attempt.specimen.levelIndex].paints,last.after),e.attempt.specimen.hole.target)/e.attempt.specimen.hole.tolerance:null;return <button type="button" key={e.attempt.id} aria-pressed={entry.attempt.id===e.attempt.id} onClick={()=>setChosen(e.attempt.id)}><strong>Attempt {same.length-i}</strong><span>{Math.max(0,shots.length-1)} pours · {last?totalMass(last.after).toFixed(2):0} parts</span><span>{error===null?'No base yet':`${error.toFixed(2)} × tolerance`} · {e.attempt.outcome}</span></button>;})}</div>
