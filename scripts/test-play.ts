@@ -4,9 +4,8 @@ import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunch
 import courseBank from '../app/generated/play-courses.json';
 import { paletteSignature, PROFILES, replayRoute, playerPar } from '../app/play-course-analysis';
 
-test('landing tolerances are ten percent tighter across every palette', () => {
-  const previous = [.038,.032,.028,.032,.03,.032,.032,.032,.032,.032];
-  PLAY_LEVELS.forEach((level,i) => assert.ok(Math.abs(level.tolerance-previous[i]*.9)<1e-12));
+test('every palette shares one perceptual landing tolerance', () => {
+  PLAY_LEVELS.forEach(level=>assert.equal(level.tolerance,.028));
 });
 
 test('the ten palettes have the requested pigments and names', () => {
@@ -85,6 +84,8 @@ test('every bank entry replays through the real charge controls and checks every
     if(hole.solutionShots>1)assert.ok(hole.checks.every(c=>c.one>=level.tolerance-1e-8));
     if(hole.solutionShots>2)assert.ok(hole.checks.every(c=>c.two>=level.tolerance-1e-8));
     assert.ok(hole.nearestBase>=level.tolerance*1.8);
+    assert.ok(hole.nearestWorld>=6.5);
+    assert.ok(hole.tapError>level.tolerance);
     assert.ok(hole.timingWindow>0);
     for(const direction of [-1,1])for(let i=0;i<hole.times.length;i++) {
       const times=[...hole.times];times[i]+=direction*hole.timingWindow*.5;
@@ -172,8 +173,13 @@ test('every palette round has its own verified requirements, separation and toug
     assert.equal(round.length,HOLES_PER_PALETTE);
     for(const [tag,n] of Object.entries(PROFILES[index].required??{}))assert.ok(round.filter(h=>h.tags.includes(tag)).length>=n,`${level.name}: ${tag}`);
     assert.ok(round.every(h=>h.par<=round.at(-1)!.par));
+    if(index===4) {
+      assert.equal(round.filter(h=>h.tags.includes('chromatic-ride')).length,2);
+      assert.ok(round.slice(0,4).some(h=>h.tags.includes('muted')),'CMY must reach a quiet target before the last hole');
+    }
+    if(index===5)assert.ok(round.filter(h=>h.solutionShots>=2).length>=3);
     round.forEach((h,i)=>round.slice(i+1).forEach(other=>{
-      assert.ok(colorDistance(mixtureColor(level.paints,h.target),mixtureColor(level.paints,other.target))>level.tolerance*1.4);
+      assert.ok(colorDistance(mixtureColor(level.paints,h.target),mixtureColor(level.paints,other.target))>level.tolerance*1.8);
     }));
   }));
 });
@@ -276,6 +282,18 @@ test('near misses move the destination more than the glider, without changing co
   assert.ok(response.recoil[200].length()>.8);
   const win=splitTargetResponse(original,targetFlightPath(original,goal,true),true);
   assert.ok(win.recoil.every(p=>p.length()===0));assert.deepEqual(win.path.at(-1)!.position,goal.position);
+  const close=splitTargetResponse(original,diverted,false,1.4);
+  assert.ok(close.recoil.every(p=>p.length()===0),'close misses must not shove the target');
+});
+
+test('vertical camera travel keeps its azimuth and tint strength drives charge energy',async()=>{
+  const {stableCameraYaw,chargeEnergy}=await import('../app/play-motion');const {Vector3}=await import('three');
+  for(const sign of [-1,1])for(let i=0;i<100;i++) {
+    const direction=new Vector3(Math.cos(i)*.02,sign,Math.sin(i)*.02).normalize();
+    assert.equal(stableCameraYaw(1.3,direction),1.3);
+  }
+  assert.ok(chargeEnergy(1.4,.8,.5)>chargeEnergy(.5,.8,.5));
+  assert.ok(chargeEnergy(1,.8,2)>chargeEnergy(1,.2,.01));
 });
 
 test('wake decays to rest after ten seconds and fin attachments taper', async () => {

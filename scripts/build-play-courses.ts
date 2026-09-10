@@ -10,7 +10,7 @@ for(let palette=0;palette<PLAY_LEVELS.length;palette++) {
   const level=PLAY_LEVELS[palette],atlas=makeAtlas(palette),candidates:CourseRecord[]=[];
   console.log(`Evaluating ${level.name}: ${atlas.length} ordered one/two-addition searches, every base.`);
   const add=(seed:number,recipe?:number[])=>{const c=analyzeCandidate(palette,seed,atlas,recipe);if(c)candidates.push(c);};
-  for(let i=0;i<64;i++)add((43117+Math.imul(palette+1,73856093)+Math.imul(i+1,19349663))>>>0);
+  for(let i=0;i<160;i++)add((43117+Math.imul(palette+1,73856093)+Math.imul(i+1,19349663))>>>0);
   // Quiet Zorn neutrals need targeted sampling, not just a promise in the label.
   // The catalogue black is slightly warm: these are low-chroma relative cools,
   // not a claim of measured blue undertone in real ivory-black paint.

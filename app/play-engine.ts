@@ -12,6 +12,7 @@ export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; 
 export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number; courseId: string; kind: string; solutionShots: number; routeOrder: number[]; routeTimes: number[] };
 export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
+export const LANDING_TOLERANCE = .028;
 
 const paint = (id: string) => {
   const found = PAINTS.find((entry) => entry.id === id);
@@ -40,6 +41,8 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'Violet Shift', subtitle: 'Purple Holds the Depth', paints: [paint('cobalt-blue'),paint('cadmium-red-light'),chartreuse,paint('dioxazine-purple')], tolerance: .0288 },
   { name: 'Double Cross', subtitle: 'Two Opposing Pairs', paints: [paint('cadmium-orange'),paint('cobalt-blue'),paint('cadmium-red-medium'),paint('permanent-green-light')], tolerance: .0288 },
 ];
+// Palette identity belongs in routes, not a different-sized perceptual cup.
+PLAY_LEVELS.forEach(level=>{level.tolerance=LANDING_TOLERANCE;});
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
   const [r, g, b] = rgb.map((n) => { const v = n / 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });

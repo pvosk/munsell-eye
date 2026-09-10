@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
-import { HOLES_PER_PALETTE, PLAY_LEVELS, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, totalMass, type Hole, type Mixture } from './play-engine';
+import { HOLES_PER_PALETTE, PLAY_LEVELS, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
 import './play.css';
 
@@ -46,6 +46,7 @@ export default function PlayView() {
   const targetLabel = useRef<HTMLDivElement>(null);
   const scene = useRef<PlayScene | null>(null);
   const charge = useRef<Charge | null>(null);
+  const rollback=useRef<{quantities:Mixture;pours:number;phase:Phase}|null>(null);
   const paintPress = useRef<{ id: number; x: number; y: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
   const level = PLAY_LEVELS[levelIndex];
   const point = useMemo(() => mixtureColor(level.paints, quantities), [level.paints, quantities]);
@@ -81,6 +82,14 @@ export default function PlayView() {
     if (paintPress.current) { paintPress.current.cancelled = true; clearTimeout(paintPress.current.timer); }
     charge.current = null; setCharged(null); scene.current?.cancelCharge();
   }, []);
+  const cancelShot=useCallback(()=>{
+    const before=rollback.current;
+    if(!before || !scene.current?.cancelFlight())return;
+    rollback.current=null;
+    live.current={...live.current,...before};
+    setQuantities(before.quantities);setPours(before.pours);setPhase(before.phase);
+    setAnnouncement('Shot cancelled. Previous mixture and shot count restored.');
+  },[]);
   const begin = useCallback((index: number, source: string) => {
     const s = live.current;
     if (!s.ready || s.error || s.help || s.phase === 'intro' || s.phase === 'flight' || s.phase === 'landed' || charge.current) return;
@@ -99,11 +108,13 @@ export default function PlayView() {
     const after = addPaint(before, held.index, amount);
     const path = pourPath(palette, before, held.index, amount);
     const nextPours = s.pours + (beforeMass ? 1 : 0);
+    rollback.current={quantities:[...before],pours:s.pours,phase:beforeMass?'rest':'seed'};
     // Lock before React renders so overlapping key/pointer events cannot pour twice.
     live.current = { ...s, phase: 'flight', pours: nextPours, quantities: after };
     setPhase('flight'); setPours(nextPours);
     setAnnouncement(`Pour ${nextPours}: ${palette[held.index].name}.`);
     scene.current.launch(path, beforeMass, totalMass(after), () => {
+      rollback.current=null;
       const result = mixtureColor(palette, after);
       const landed = colorDistance(result, s.hole.target) <= s.hole.tolerance;
       setQuantities(after); setPhase(landed ? 'landed' : 'rest');
@@ -130,7 +141,7 @@ export default function PlayView() {
           cachedCharge = held;
           tangent = mass ? mixtureColor(palette, addPaint(s.quantities, held.index, mass * .03)) : undefined;
         }
-        scene.current.charge(palette[held.index].rgb, chargeAmount(mass, seconds) / Math.max(1, mass), chargePower(seconds), tangent);
+        scene.current.charge(palette[held.index].rgb, chargeAmount(mass, seconds) / Math.max(1, mass), chargePower(seconds), palette[held.index].strength, tangent);
         if (now - lastUI > 25) { setCharged(seconds); lastUI = now; }
       }
       frame = requestAnimationFrame(tick);
@@ -140,7 +151,7 @@ export default function PlayView() {
   }, []);
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { cancelCharge(); setHelp(false); return; }
+      if (event.key === 'Escape') { cancelCharge(); cancelShot(); setHelp(false); return; }
       const target = event.target as HTMLElement | null;
       if (target?.matches('input, textarea, select') || target?.isContentEditable || event.ctrlKey || event.metaKey || event.altKey) return;
       const index = Number(event.key) - 1;
@@ -154,9 +165,10 @@ export default function PlayView() {
     window.addEventListener('keydown', keyDown); window.addEventListener('keyup', keyUp); window.addEventListener('blur', cancelCharge);
     document.addEventListener('visibilitychange', visibility);
     return () => { window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', cancelCharge); document.removeEventListener('visibilitychange', visibility); cancelCharge(); };
-  }, [begin, release, cancelCharge]);
+  }, [begin, release, cancelCharge, cancelShot]);
 
   const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0) => {
+    rollback.current=null;
     setFinishPaused(false);
     cancelCharge(); setReady(false); setError(false); setSelected(0); setPours(0); setPhase('intro'); setHelp(false);
     setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
@@ -221,8 +233,10 @@ export default function PlayView() {
     return () => window.clearTimeout(timer);
   }, [phase, help, hole, finishPaused]);
   const amount = charged === null ? 0 : chargeAmount(mass, charged);
+  const paintLab=rgbToLab(level.paints[selected].rgb);
+  const mutedPaint=`oklab(${paintLab[0]} ${paintLab[1]*.08} ${paintLab[2]*.08})`;
   const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help;
-  const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 2 ? 'Within Reach' : 'Choose Your Next Pour';
+  const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 1.6 ? 'Just Outside the Landing Zone' : 'Choose Your Next Pour';
 
   return <section className="paint-play" aria-label="Paint mixing game">
     <div className="play-topline">
@@ -248,9 +262,9 @@ export default function PlayView() {
       </div>}
     </div>
     <div className="play-dock">
-      <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb) } as CSSProperties}><i /><b /></div></div></div>
+      <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb), '--paint-muted':mutedPaint } as CSSProperties}><i /><b /></div></div></div>
       <div className="play-paints" data-wide={level.paints.length > 4} role="group" aria-label="Paint palette" onScroll={() => { if (paintPress.current) cancelCharge(); }} style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '').replace(' (Yellow Shade)', '')}</span></button>)}</div>
-      <div className="play-control-hint"><span>{phase === 'flight' ? 'Follow the color as it settles.' : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
+      <div className="play-control-hint"><span>{phase === 'flight' ? <button type="button" onClick={cancelShot}>Cancel shot · Esc</button> : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>
     </div>
     <p className="sr-only" role="status" aria-live="polite">{announcement}</p>

@@ -1,5 +1,5 @@
 {
-  "version": "courses-1",
+  "version": "courses-2",
   "search": {
     "one": "65 charge samples per base/order, then local refinement",
     "two": "9 × 9 charge samples per base/order, then local refinement",
@@ -13,14 +13,14 @@
   "palettes": [
     {
       "name": "UltraOx Dual",
-      "eligible": 23,
+      "eligible": 52,
       "tags": {
-        "interior": 7,
-        "value-finish": 16,
-        "precision": 3,
-        "choice": 3
+        "value-finish": 29,
+        "interior": 23,
+        "muted": 22,
+        "precision": 19
       },
-      "distinctSelected": 18,
+      "distinctSelected": 20,
       "pars": [
         [
           2,
@@ -33,21 +33,21 @@
           2,
           3,
           3,
-          2,
+          3,
           4
         ],
         [
           2,
           3,
           3,
-          3,
-          3
+          4,
+          4
         ],
         [
           2,
           3,
-          2,
           3,
+          4,
           4
         ]
       ],
@@ -69,15 +69,15 @@
         [
           1,
           2,
-          2,
           1,
-          1
+          2,
+          2
         ],
         [
           1,
           2,
           1,
-          1,
+          2,
           2
         ]
       ],
@@ -99,56 +99,56 @@
         [
           "value-finish",
           "interior",
-          "interior",
           "value-finish",
-          "value-finish"
+          "interior",
+          "interior"
         ],
         [
           "value-finish",
           "interior",
           "value-finish",
-          "value-finish",
+          "interior",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3768187873623083,
-        0.9200915682399295
+        0.3298567455407775,
+        0.9057022601199716
       ],
       "interactions": {
-        "Ultramarine Blue → Titanium White": 7,
-        "Titanium White → Ultramarine Blue": 6,
-        "Ultramarine Blue → Transparent Oxide Red": 6,
-        "Transparent Oxide Red → Titanium White": 5,
-        "Titanium White → Transparent Oxide Red": 2,
-        "Transparent Oxide Red → Ultramarine Blue": 2
+        "Ultramarine Blue → Titanium White": 10,
+        "Titanium White → Transparent Oxide Red": 5,
+        "Transparent Oxide Red → Ultramarine Blue": 5,
+        "Titanium White → Ultramarine Blue": 5,
+        "Ultramarine Blue → Transparent Oxide Red": 5
       }
     },
     {
       "name": "Zorny",
-      "eligible": 56,
+      "eligible": 98,
       "tags": {
-        "value-finish": 39,
+        "value-finish": 61,
         "choice": 9,
-        "chromatic-ride": 6,
-        "quiet-cool": 19,
-        "interior": 16,
-        "precision": 13
+        "chromatic-ride": 13,
+        "quiet-cool": 34,
+        "interior": 30,
+        "precision": 26,
+        "muted": 11
       },
       "distinctSelected": 20,
       "pars": [
         [
           2,
-          3,
-          3,
-          3,
+          4,
+          4,
+          2,
           4
         ],
         [
           3,
+          2,
+          4,
           3,
-          2,
-          2,
           4
         ],
         [
@@ -161,16 +161,16 @@
         [
           3,
           2,
-          3,
           2,
+          3,
           3
         ]
       ],
       "bestFoundShots": [
         [
           1,
-          1,
-          1,
+          2,
+          2,
           1,
           1
         ],
@@ -179,7 +179,7 @@
           1,
           1,
           1,
-          2
+          1
         ],
         [
           1,
@@ -199,6 +199,13 @@
       "selectedKinds": [
         [
           "quiet-cool",
+          "value-finish",
+          "quiet-cool",
+          "value-finish",
+          "quiet-cool"
+        ],
+        [
+          "quiet-cool",
           "quiet-cool",
           "quiet-cool",
           "quiet-cool",
@@ -207,15 +214,8 @@
         [
           "quiet-cool",
           "quiet-cool",
-          "value-finish",
-          "value-finish",
-          "value-finish"
-        ],
-        [
           "quiet-cool",
           "quiet-cool",
-          "value-finish",
-          "value-finish",
           "quiet-cool"
         ],
         [
@@ -227,32 +227,40 @@
         ]
       ],
       "lightnessRange": [
-        0.2945353651320781,
-        0.9269988120017365
+        0.31639953341370197,
+        0.918944443710476
       ],
       "interactions": {
-        "Titanium White → Ivory Black": 9,
+        "Titanium White → Ivory Black": 11,
+        "Cadmium Red Light → Ivory Black": 1,
         "Ivory Black → Titanium White": 7,
-        "Cadmium Red Light → Titanium White": 3,
-        "Cadmium Red Light → Ivory Black": 2
+        "Ivory Black → Cadmium Red Light": 1,
+        "Cadmium Red Light → Titanium White": 2
       }
     },
     {
       "name": "RYB",
-      "eligible": 43,
+      "eligible": 91,
       "tags": {
-        "chromatic-ride": 15,
-        "value-finish": 11,
-        "interior": 27,
-        "precision": 22,
-        "choice": 1
+        "chromatic-ride": 33,
+        "value-finish": 32,
+        "interior": 50,
+        "muted": 23,
+        "precision": 43
       },
-      "distinctSelected": 18,
+      "distinctSelected": 20,
       "pars": [
         [
           4,
+          4,
           3,
-          2,
+          3,
+          4
+        ],
+        [
+          4,
+          3,
+          3,
           3,
           4
         ],
@@ -266,22 +274,22 @@
         [
           3,
           3,
-          2,
-          2,
-          3
-        ],
-        [
-          3,
           3,
           2,
-          3,
           4
         ]
       ],
       "bestFoundShots": [
         [
           2,
+          2,
           1,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
           1,
           2,
           2
@@ -289,20 +297,13 @@
         [
           2,
           1,
-          2,
+          3,
           2,
           3
         ],
         [
           2,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
+          2,
           1,
           1,
           2
@@ -311,93 +312,101 @@
       "selectedKinds": [
         [
           "interior",
+          "interior",
           "chromatic-ride",
+          "precision",
+          "precision"
+        ],
+        [
+          "interior",
+          "interior",
           "chromatic-ride",
-          "value-finish",
-          "value-finish"
+          "precision",
+          "precision"
         ],
         [
           "interior",
           "chromatic-ride",
+          "precision",
           "value-finish",
-          "value-finish",
-          "value-finish"
-        ],
-        [
-          "interior",
-          "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride"
-        ],
-        [
-          "chromatic-ride",
-          "chromatic-ride",
-          "value-finish",
-          "chromatic-ride",
           "interior"
+        ],
+        [
+          "interior",
+          "interior",
+          "chromatic-ride",
+          "value-finish",
+          "precision"
         ]
       ],
       "lightnessRange": [
-        0.4174817733133413,
-        0.9099070987198272
+        0.3463059964853651,
+        0.8957366954661425
       ],
       "interactions": {
-        "Cadmium Red Medium → Phthalo Blue (Green Shade)": 4,
-        "Phthalo Blue (Green Shade) → Flake White": 5,
-        "Cadmium Lemon → Phthalo Blue (Green Shade)": 5,
-        "Cadmium Lemon → Cadmium Red Medium": 2,
-        "Phthalo Blue (Green Shade) → Cadmium Lemon": 3,
-        "Cadmium Lemon → Flake White": 4,
-        "Phthalo Blue (Green Shade) → Cadmium Red Medium": 2,
-        "Cadmium Red Medium → Flake White": 2,
-        "Cadmium Red Medium → Cadmium Lemon": 3
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 8,
+        "Phthalo Blue (Green Shade) → Flake White": 4,
+        "Phthalo Blue (Green Shade) → Cadmium Red Medium": 5,
+        "Cadmium Red Medium → Flake White": 4,
+        "Cadmium Red Medium → Cadmium Lemon": 3,
+        "Cadmium Lemon → Flake White": 6,
+        "Cadmium Red Medium → Phthalo Blue (Green Shade)": 3,
+        "Cadmium Lemon → Cadmium Red Medium": 1,
+        "Phthalo Blue (Green Shade) → Cadmium Lemon": 3
       }
     },
     {
       "name": "EarthPop",
-      "eligible": 41,
+      "eligible": 101,
       "tags": {
-        "interior": 14,
-        "choice": 14,
-        "precision": 13,
-        "chromatic-ride": 27
+        "interior": 34,
+        "muted": 14,
+        "choice": 31,
+        "precision": 28,
+        "chromatic-ride": 67
       },
       "distinctSelected": 20,
       "pars": [
         [
+          4,
           3,
           3,
           2,
+          4
+        ],
+        [
+          4,
+          4,
           3,
+          2,
           4
         ],
         [
           4,
           2,
-          3,
           2,
+          4,
           4
         ],
         [
+          4,
           3,
           2,
-          3,
           2,
-          4
-        ],
-        [
-          3,
-          3,
-          2,
-          3,
           4
         ]
       ],
       "bestFoundShots": [
         [
           2,
+          2,
           1,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
           1,
           1,
           2
@@ -406,14 +415,7 @@
           2,
           1,
           1,
-          1,
-          2
-        ],
-        [
           2,
-          1,
-          1,
-          1,
           2
         ],
         [
@@ -427,211 +429,207 @@
       "selectedKinds": [
         [
           "interior",
+          "interior",
           "chromatic-ride",
           "choice",
-          "chromatic-ride",
           "interior"
         ],
         [
           "interior",
-          "choice",
-          "chromatic-ride",
-          "chromatic-ride",
-          "interior"
-        ],
-        [
           "interior",
           "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride",
+          "choice",
           "interior"
         ],
         [
           "interior",
           "chromatic-ride",
           "chromatic-ride",
-          "choice",
+          "interior",
+          "interior"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3755587422747378,
-        0.8686074441754497
+        0.3844237431700606,
+        0.8514953939642674
       ],
       "interactions": {
+        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 2,
         "Phthalo Blue (Green Shade) → Cadmium Lemon": 6,
-        "Cadmium Lemon → Quinacridone Magenta": 8,
-        "Quinacridone Magenta → Cadmium Lemon": 5,
-        "Cadmium Lemon → Phthalo Blue (Green Shade)": 2,
-        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 1,
-        "Cadmium Lemon → Transparent Oxide Red": 3,
-        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 1,
-        "Transparent Oxide Red → Quinacridone Magenta": 1,
-        "Transparent Oxide Red → Cadmium Lemon": 1
+        "Cadmium Lemon → Quinacridone Magenta": 7,
+        "Quinacridone Magenta → Cadmium Lemon": 6,
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 5,
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 3,
+        "Cadmium Lemon → Transparent Oxide Red": 1,
+        "Quinacridone Magenta → Transparent Oxide Red": 1
       }
     },
     {
       "name": "CMY",
-      "eligible": 54,
+      "eligible": 105,
       "tags": {
-        "interior": 33,
-        "precision": 26,
-        "chromatic-ride": 21
+        "interior": 60,
+        "muted": 37,
+        "precision": 54,
+        "chromatic-ride": 44
       },
       "distinctSelected": 20,
       "pars": [
         [
           2,
-          2,
-          3,
-          3,
-          4
-        ],
-        [
-          2,
-          2,
-          2,
-          3,
-          4
-        ],
-        [
           3,
           2,
           4,
-          3,
           4
         ],
         [
           3,
           3,
+          2,
+          3,
+          4
+        ],
+        [
+          2,
+          4,
+          2,
+          4,
+          4
+        ],
+        [
+          2,
+          4,
           3,
           3,
-          3
+          4
         ]
       ],
       "bestFoundShots": [
         [
           1,
+          2,
           1,
-          1,
-          1,
+          2,
           2
         ],
         [
           1,
+          2,
           1,
-          1,
-          1,
+          2,
           2
         ],
         [
           1,
-          1,
           2,
           1,
-          1
+          2,
+          2
         ],
         [
           1,
-          1,
           2,
           1,
-          1
+          2,
+          2
         ]
       ],
       "selectedKinds": [
         [
           "chromatic-ride",
+          "interior",
           "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride",
+          "muted",
           "interior"
         ],
         [
           "chromatic-ride",
+          "interior",
           "chromatic-ride",
-          "chromatic-ride",
-          "chromatic-ride",
+          "muted",
           "interior"
         ],
         [
           "chromatic-ride",
-          "chromatic-ride",
           "interior",
           "chromatic-ride",
-          "chromatic-ride"
+          "muted",
+          "interior"
         ],
         [
           "chromatic-ride",
-          "chromatic-ride",
           "interior",
           "chromatic-ride",
-          "chromatic-ride"
+          "muted",
+          "interior"
         ]
       ],
       "lightnessRange": [
         0.329823977427805,
-        0.8277652988021256
+        0.8280131642059148
       ],
       "interactions": {
-        "Hansa Yellow Light → Quinacridone Magenta": 4,
-        "Quinacridone Magenta → Hansa Yellow Light": 9,
-        "Hansa Yellow Light → Phthalo Blue (Green Shade)": 8,
-        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 3
+        "Hansa Yellow Light → Quinacridone Magenta": 11,
+        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 6,
+        "Quinacridone Magenta → Hansa Yellow Light": 7,
+        "Hansa Yellow Light → Phthalo Blue (Green Shade)": 5,
+        "Phthalo Blue (Green Shade) → Hansa Yellow Light": 2,
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 1
       }
     },
     {
       "name": "Secondaries",
-      "eligible": 44,
+      "eligible": 89,
       "tags": {
-        "interior": 22,
-        "chromatic-ride": 15,
-        "precision": 20,
-        "value-finish": 9,
-        "choice": 3
+        "interior": 48,
+        "chromatic-ride": 29,
+        "precision": 45,
+        "muted": 33,
+        "value-finish": 20,
+        "choice": 4
       },
-      "distinctSelected": 19,
+      "distinctSelected": 20,
       "pars": [
         [
           3,
-          2,
-          2,
-          3,
-          4
-        ],
-        [
-          3,
-          3,
-          3,
-          2,
-          4
-        ],
-        [
-          3,
-          3,
-          2,
-          2,
-          3
-        ],
-        [
-          3,
-          2,
-          2,
           4,
+          2,
+          2,
+          4
+        ],
+        [
+          3,
+          4,
+          3,
+          2,
+          4
+        ],
+        [
+          4,
+          3,
+          3,
+          4,
+          4
+        ],
+        [
+          3,
+          4,
+          2,
+          3,
           5
         ]
       ],
       "bestFoundShots": [
         [
           2,
-          1,
-          1,
-          1,
-          2
-        ],
-        [
           2,
-          1,
           1,
           1,
           2
@@ -641,73 +639,80 @@
           2,
           1,
           1,
-          1
+          2
         ],
         [
           2,
-          1,
+          2,
           1,
           2,
           2
+        ],
+        [
+          2,
+          2,
+          1,
+          1,
+          3
         ]
       ],
       "selectedKinds": [
         [
           "interior",
-          "choice",
-          "value-finish",
+          "precision",
+          "chromatic-ride",
           "value-finish",
           "interior"
         ],
         [
           "interior",
-          "value-finish",
+          "precision",
           "chromatic-ride",
-          "choice",
+          "value-finish",
           "interior"
         ],
         [
           "interior",
           "interior",
-          "value-finish",
-          "choice",
-          "chromatic-ride"
+          "chromatic-ride",
+          "precision",
+          "precision"
         ],
         [
           "interior",
-          "value-finish",
+          "precision",
           "chromatic-ride",
-          "interior",
+          "value-finish",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3463782153911223,
-        0.9309948413725386
+        0.3651178545852198,
+        0.890368345755693
       ],
       "interactions": {
-        "Titanium White → Phthalo Green (Yellow Shade)": 3,
+        "Cadmium Orange → Dioxazine Purple": 2,
+        "Dioxazine Purple → Phthalo Green (Yellow Shade)": 6,
         "Phthalo Green (Yellow Shade) → Dioxazine Purple": 2,
-        "Cadmium Orange → Phthalo Green (Yellow Shade)": 2,
-        "Dioxazine Purple → Titanium White": 4,
-        "Dioxazine Purple → Phthalo Green (Yellow Shade)": 3,
-        "Phthalo Green (Yellow Shade) → Titanium White": 4,
-        "Titanium White → Cadmium Orange": 3,
         "Dioxazine Purple → Cadmium Orange": 3,
-        "Titanium White → Dioxazine Purple": 2,
-        "Cadmium Orange → Dioxazine Purple": 1,
-        "Cadmium Orange → Titanium White": 2
+        "Dioxazine Purple → Titanium White": 6,
+        "Phthalo Green (Yellow Shade) → Titanium White": 4,
+        "Titanium White → Cadmium Orange": 4,
+        "Phthalo Green (Yellow Shade) → Cadmium Orange": 2,
+        "Titanium White → Dioxazine Purple": 4,
+        "Titanium White → Phthalo Green (Yellow Shade)": 1
       }
     },
     {
       "name": "French Light",
-      "eligible": 56,
+      "eligible": 129,
       "tags": {
-        "choice": 38,
-        "interior": 7,
-        "precision": 5,
-        "value-finish": 9,
-        "chromatic-ride": 27
+        "choice": 102,
+        "interior": 16,
+        "muted": 7,
+        "precision": 12,
+        "value-finish": 15,
+        "chromatic-ride": 44
       },
       "distinctSelected": 20,
       "pars": [
@@ -719,7 +724,7 @@
           3
         ],
         [
-          2,
+          3,
           2,
           2,
           3,
@@ -727,14 +732,14 @@
         ],
         [
           2,
-          3,
+          2,
           2,
           3,
-          3
+          4
         ],
         [
           2,
-          4,
+          2,
           2,
           4,
           4
@@ -749,22 +754,22 @@
           1
         ],
         [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
-        ],
-        [
-          1,
           2,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
           1,
           2,
           2
@@ -788,110 +793,112 @@
         [
           "choice",
           "choice",
-          "value-finish",
+          "choice",
           "choice",
           "choice"
         ],
         [
           "choice",
           "choice",
-          "value-finish",
+          "choice",
           "choice",
           "choice"
         ]
       ],
       "lightnessRange": [
-        0.28151796082207176,
-        0.913980705421602
+        0.28443990260425606,
+        0.9299090580534626
       ],
       "interactions": {
+        "Ultramarine Blue → Yellow Ochre": 1,
+        "Yellow Ochre → Flake White": 1,
+        "Cobalt Blue → Alizarin Crimson": 2,
+        "Cobalt Blue → Yellow Ochre": 4,
+        "Alizarin Crimson → Cadmium Yellow Light": 2,
+        "Cadmium Yellow Light → Alizarin Crimson": 2,
         "Cadmium Yellow Light → Cobalt Blue": 1,
-        "Cobalt Blue → Flake White": 2,
-        "Alizarin Crimson → Cadmium Yellow Light": 4,
-        "Cobalt Blue → Yellow Ochre": 1,
-        "Cadmium Yellow Light → Alizarin Crimson": 1,
-        "Cobalt Blue → Alizarin Crimson": 1,
-        "Ultramarine Blue → Flake White": 2,
-        "Cadmium Yellow Light → Viridian": 2,
-        "Alizarin Crimson → Ultramarine Blue": 2,
+        "Cobalt Blue → Flake White": 1,
+        "Ultramarine Blue → Flake White": 1,
+        "Alizarin Crimson → Ultramarine Blue": 3,
         "Cadmium Red Light → Alizarin Crimson": 1,
-        "Cadmium Yellow Light → Yellow Ochre": 2,
-        "Flake White → Alizarin Crimson": 1,
-        "Flake White → Viridian": 1,
-        "Viridian → Cobalt Blue": 1,
         "Alizarin Crimson → Flake White": 1,
-        "Flake White → Cadmium Yellow Light": 1
+        "Flake White → Yellow Ochre": 1,
+        "Cadmium Yellow Light → Flake White": 1,
+        "Flake White → Alizarin Crimson": 1,
+        "Cadmium Red Light → Flake White": 1,
+        "Flake White → Cobalt Blue": 1
       }
     },
     {
       "name": "Chromatic Dark",
-      "eligible": 47,
+      "eligible": 108,
       "tags": {
-        "choice": 26,
-        "value-finish": 19,
-        "interior": 15,
-        "precision": 14,
-        "chromatic-ride": 11
+        "choice": 62,
+        "value-finish": 37,
+        "interior": 39,
+        "precision": 37,
+        "muted": 19,
+        "chromatic-ride": 17
       },
-      "distinctSelected": 20,
+      "distinctSelected": 19,
       "pars": [
         [
           4,
           5,
+          5,
+          5,
+          6
+        ],
+        [
+          5,
+          5,
+          4,
+          5,
+          6
+        ],
+        [
+          4,
+          5,
+          2,
+          4,
+          5
+        ],
+        [
+          2,
           2,
           5,
-          5
-        ],
-        [
-          5,
-          2,
-          2,
           3,
-          5
-        ],
-        [
-          3,
-          2,
-          3,
-          2,
-          5
-        ],
-        [
-          3,
-          3,
-          3,
-          3,
-          4
+          6
         ]
       ],
       "bestFoundShots": [
         [
           2,
           2,
-          1,
+          2,
           2,
           2
         ],
         [
           2,
+          2,
+          2,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
           1,
-          1,
-          1,
+          2,
           2
         ],
         [
           1,
           1,
-          1,
+          2,
           1,
           2
-        ],
-        [
-          1,
-          1,
-          1,
-          1,
-          1
         ]
       ],
       "selectedKinds": [
@@ -904,17 +911,17 @@
         ],
         [
           "value-finish",
-          "chromatic-ride",
+          "value-finish",
           "value-finish",
           "value-finish",
           "value-finish"
         ],
         [
           "value-finish",
-          "chromatic-ride",
           "value-finish",
           "value-finish",
-          "precision"
+          "precision",
+          "value-finish"
         ],
         [
           "value-finish",
@@ -925,56 +932,57 @@
         ]
       ],
       "lightnessRange": [
-        0.3378090986133222,
-        0.877597748195936
+        0.3220432382617083,
+        0.878454830812971
       ],
       "interactions": {
-        "Phthalo Emerald → Quinacridone Red": 5,
+        "Quinacridone Red → Phthalo Emerald": 8,
+        "Phthalo Emerald → Flake White": 7,
+        "Phthalo Emerald → Quinacridone Red": 6,
         "Quinacridone Red → Flake White": 8,
-        "Phthalo Emerald → Ultramarine Blue": 1,
-        "Ultramarine Blue → Flake White": 4,
-        "Quinacridone Red → Ultramarine Blue": 3,
-        "Phthalo Emerald → Flake White": 5,
-        "Flake White → Quinacridone Red": 1
+        "Phthalo Emerald → Ultramarine Blue": 3,
+        "Ultramarine Blue → Flake White": 3,
+        "Quinacridone Red → Ultramarine Blue": 1
       }
     },
     {
       "name": "Violet Shift",
-      "eligible": 50,
+      "eligible": 103,
       "tags": {
-        "chromatic-ride": 31,
-        "choice": 25,
-        "interior": 10,
-        "precision": 9
+        "chromatic-ride": 61,
+        "choice": 49,
+        "interior": 21,
+        "precision": 19,
+        "muted": 9
       },
       "distinctSelected": 20,
       "pars": [
         [
-          4,
-          3,
+          5,
           2,
+          5,
           3,
           5
         ],
         [
           4,
           2,
-          2,
           5,
-          5
-        ],
-        [
-          5,
-          2,
-          2,
-          5,
-          5
-        ],
-        [
           4,
-          2,
+          5
+        ],
+        [
+          5,
+          4,
           3,
+          5,
+          5
+        ],
+        [
+          5,
+          5,
           2,
+          5,
           5
         ]
       ],
@@ -982,29 +990,29 @@
         [
           2,
           1,
-          1,
+          2,
           1,
           2
         ],
         [
           2,
           1,
+          2,
+          2,
+          2
+        ],
+        [
+          2,
+          2,
           1,
           2,
           2
         ],
         [
           2,
-          1,
-          1,
-          2,
-          2
-        ],
-        [
           2,
           1,
-          1,
-          1,
+          2,
           2
         ]
       ],
@@ -1012,84 +1020,86 @@
         [
           "interior",
           "choice",
-          "choice",
+          "precision",
           "choice",
           "interior"
         ],
         [
           "interior",
           "choice",
-          "choice",
+          "precision",
           "precision",
           "interior"
         ],
         [
           "interior",
+          "interior",
           "choice",
-          "chromatic-ride",
           "precision",
-          "interior"
+          "precision"
         ],
         [
           "interior",
-          "chromatic-ride",
-          "chromatic-ride",
+          "interior",
           "choice",
-          "interior"
+          "precision",
+          "precision"
         ]
       ],
       "lightnessRange": [
-        0.35025222194029465,
-        0.8387098309386153
+        0.33664804434695966,
+        0.8112110599179356
       ],
       "interactions": {
-        "Cadmium Red Light → Cobalt Blue": 5,
+        "Cadmium Red Light → Cobalt Blue": 7,
+        "Cobalt Blue → Chartreuse": 1,
+        "Chartreuse → Dioxazine Purple": 5,
+        "Dioxazine Purple → Chartreuse": 5,
+        "Chartreuse → Cadmium Red Light": 7,
         "Cobalt Blue → Dioxazine Purple": 1,
-        "Chartreuse → Dioxazine Purple": 3,
-        "Dioxazine Purple → Chartreuse": 6,
         "Cadmium Red Light → Chartreuse": 3,
-        "Chartreuse → Cobalt Blue": 5,
-        "Chartreuse → Cadmium Red Light": 4,
-        "Cobalt Blue → Cadmium Red Light": 2,
-        "Cobalt Blue → Chartreuse": 1
+        "Chartreuse → Cobalt Blue": 4,
+        "Dioxazine Purple → Cobalt Blue": 1,
+        "Dioxazine Purple → Cadmium Red Light": 1
       }
     },
     {
       "name": "Double Cross",
-      "eligible": 40,
+      "eligible": 84,
       "tags": {
-        "chromatic-ride": 22,
-        "choice": 26,
-        "interior": 4,
-        "precision": 3
+        "chromatic-ride": 39,
+        "choice": 59,
+        "interior": 19,
+        "muted": 12,
+        "precision": 16
       },
-      "distinctSelected": 16,
+      "distinctSelected": 20,
       "pars": [
         [
-          4,
+          5,
           2,
           2,
-          3,
+          5,
           5
         ],
         [
           5,
           2,
           2,
-          3,
+          4,
           5
         ],
         [
           4,
           2,
           2,
-          2,
+          5,
           5
         ],
         [
           5,
           2,
-          2,
+          4,
           2,
           5
         ]
@@ -1099,27 +1109,27 @@
           2,
           1,
           1,
-          1,
+          2,
           2
         ],
         [
           2,
           1,
           1,
-          1,
+          2,
           2
         ],
         [
           2,
           1,
           1,
-          1,
+          2,
           2
         ],
         [
           2,
           1,
-          1,
+          2,
           1,
           2
         ]
@@ -1129,14 +1139,7 @@
           "interior",
           "choice",
           "choice",
-          "chromatic-ride",
-          "interior"
-        ],
-        [
-          "interior",
           "choice",
-          "choice",
-          "chromatic-ride",
           "interior"
         ],
         [
@@ -1149,24 +1152,32 @@
         [
           "interior",
           "choice",
-          "chromatic-ride",
+          "choice",
+          "choice",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "choice",
           "choice",
           "interior"
         ]
       ],
       "lightnessRange": [
-        0.3814777510768669,
+        0.37629429872987247,
         0.7258384874117922
       ],
       "interactions": {
-        "Cadmium Orange → Cadmium Red Medium": 4,
-        "Cadmium Red Medium → Cobalt Blue": 2,
-        "Permanent Green Light → Cadmium Orange": 10,
-        "Cadmium Orange → Cobalt Blue": 2,
         "Permanent Green Light → Cadmium Red Medium": 3,
         "Cadmium Red Medium → Cadmium Orange": 4,
         "Cobalt Blue → Cadmium Orange": 1,
-        "Cadmium Orange → Permanent Green Light": 2
+        "Permanent Green Light → Cadmium Orange": 10,
+        "Cadmium Orange → Cadmium Red Medium": 5,
+        "Cadmium Red Medium → Cobalt Blue": 4,
+        "Cadmium Orange → Permanent Green Light": 2,
+        "Cadmium Red Medium → Permanent Green Light": 2,
+        "Permanent Green Light → Cobalt Blue": 1
       }
     }
   ]

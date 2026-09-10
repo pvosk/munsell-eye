@@ -24,7 +24,7 @@ export function planArrival(target: Vector3, rest: Vector3, restLook: Vector3, s
   const variant=((hash^(hash>>>16))>>>0)/4294967296;
   const angle=variant*Math.PI*2;
   const reveal=side.clone().multiplyScalar(Math.cos(angle)).addScaledVector(lift,Math.sin(angle));
-  const bow = Math.min(25,Math.max(7,near.distanceTo(rest)*.7));
+  const bow = Math.min(20,3+near.distanceTo(rest)*.4);
   // Control points stay between the endpoints on the sight-line axis.
   // All landscape reveal comes from the perpendicular bow, not overshoot.
   const far = near.clone().lerp(rest,.25).addScaledVector(reveal,bow);
@@ -37,14 +37,8 @@ export function planArrival(target: Vector3, rest: Vector3, restLook: Vector3, s
     const t = easeQuint(progress);
     const position=orbit.getPointAt(t);
     const quaternion=initial.clone().slerp(final,t);
-    // A restrained look into the landscape at the widest part of the bow.
-    // Zero weight/velocity at both ends preserves the exact playing pose.
-    const forward=new Vector3(0,0,-1).applyQuaternion(quaternion);
-    const landscape=target.clone().lerp(restLook,t).sub(position).normalize();
-    // Transport the existing frame instead of rebuilding it from world-up:
-    // looking across a pole must not suddenly reverse the camera's roll.
-    const turn=new Quaternion().setFromUnitVectors(forward,landscape);
-    quaternion.premultiply(new Quaternion().slerp(turn,.45*Math.sin(Math.PI*t)**2));
+    // One lateral bow, no mid-arc look-around or counter-swivel. The seed
+    // varies its side between holes, never within one arrival.
     return {position,quaternion};
   };
 }
@@ -86,10 +80,23 @@ export function targetFlightPath(path: ColorPoint[], target: ColorPoint, qualifi
 
 // Transfer most of a near-miss response to the destination. Relative separation
 // stays identical to the original solid-core avoidance; recipe data is untouched.
-export function splitTargetResponse(original: ColorPoint[], diverted: ColorPoint[], qualifies: boolean) {
-  const recoil=original.map((point,i)=>qualifies ? new Vector3() : new Vector3(...point.position).sub(new Vector3(...diverted[i].position)).multiplyScalar(.85));
-  const path=original.map((point,i)=>({...point,position:new Vector3(...point.position).lerp(new Vector3(...diverted[i].position),qualifies?1:.15).toArray() as [number,number,number]}));
+export function splitTargetResponse(original: ColorPoint[], diverted: ColorPoint[], qualifies: boolean, missRatio=3) {
+  const share=qualifies?0:.85*easeQuint((missRatio-1.8)/1.2);
+  const recoil=original.map((point,i)=>new Vector3(...point.position).sub(new Vector3(...diverted[i].position)).multiplyScalar(share));
+  const path=original.map((point,i)=>({...point,position:new Vector3(...point.position).lerp(new Vector3(...diverted[i].position),1-share).toArray() as [number,number,number]}));
   return {path,recoil};
+}
+
+export function stableCameraYaw(previous:number,direction:Vector3) {
+  // Longitude has no useful meaning at the poles. Retain the established
+  // side when flying nearly vertically instead of chasing numerical azimuth.
+  const horizontal=Math.hypot(direction.x,direction.z);
+  const weight=easeQuint((horizontal-.35)/.25);
+  return previous+wrapAngle(Math.atan2(direction.x,direction.z)-previous)*weight;
+}
+
+export function chargeEnergy(strength:number,power:number,ratio:number) {
+  return Math.max(0,Math.min(2.2,Math.sqrt(Math.max(.05,strength))*(.25+.75*power)*(.7+.3*Math.min(1,Math.log1p(Math.max(0,ratio))/Math.log(9)))));
 }
 
 // Parallel transport prevents the abrupt flips caused by crossing every

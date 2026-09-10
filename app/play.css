@@ -53,7 +53,8 @@
 .play-charge-caption strong { color: var(--play-ivory); font-size: 13px; margin: 0; font-variant-numeric: tabular-nums; }
 .play-charge-meter { height: 10px; position: relative; border-radius: 999px; background: #ffffff0c; border: 1px solid #eee8d72b; }
 .play-charge-meter::after { position: absolute; right: 12%; top: -4px; bottom: -4px; width: 1px; content: ''; background: #eee8d74d; }
-.play-charge-meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; width: calc(var(--power) * 100%); background: linear-gradient(90deg,var(--paint),#e8d5a5); }
+.play-charge-meter i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; width: calc(var(--power) * 100%); background: linear-gradient(90deg,var(--paint-muted),var(--paint)); }
+.play-control-hint button { background: none; color: inherit; border: 1px solid var(--play-line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
 .play-charge-meter b { position: absolute; left: calc(var(--power) * 100%); top: 50%; transform: translate(-50%,-50%); width: 4px; height: 20px; border-radius: 4px; background: #eee8d7; box-shadow: 0 0 12px #eee8d733; }
 .play-paint { grid-template-columns: 34px 1fr; }.play-paint.charging { transform: none; }
 @media (max-width: 1100px) {

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
+import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -174,7 +174,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   let flight: Flight | null = null;
   let captureAmount = 0;
   let cameraYaw = 0; let yawGoal = 0; let cameraPitch = 0;
-  let charge: { rgb: RGB; ratio: number; power: number; tangent?: THREE.Vector3 } | null = null;
+  let charge: { rgb: RGB; ratio: number; power: number; strength: number; tangent?: THREE.Vector3 } | null = null;
+  let flightWeight=0, shotLength=0;
   let time = 0; let last = performance.now(); let landing = -10; let releaseTime = -10;
   let previousHue: number | null = null;
   let lastGate = -10;
@@ -221,6 +222,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   renderer.domElement.addEventListener('webglcontextlost', onContextLost);
 
   function setHole(next: Hole) {
+    flightWeight=0;shotLength=0;
     activeHole = next; current = next.start; mass = 0; flight = null; charge = null; won = false; previousHue = null;
     orbitYaw = 0; orbitPitch = 0; drag = null;
     blob.position.copy(v3(current));
@@ -228,26 +230,25 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     if (cameraDirection.lengthSq() < .001) cameraDirection.set(0, 0, -1);
     travelDirection.copy(cameraDirection);
     cameraYaw = yawGoal = Math.atan2(cameraDirection.x, cameraDirection.z);
-    cameraPitch = Math.asin(THREE.MathUtils.clamp(cameraDirection.y,-.94,.94)); captureAmount = 0;
+    cameraPitch = Math.asin(THREE.MathUtils.clamp(cameraDirection.y,-.87,.87)); captureAmount = 0;
     cameraDirection.set(Math.sin(cameraYaw)*Math.cos(cameraPitch),Math.sin(cameraPitch),Math.cos(cameraYaw)*Math.cos(cameraPitch));
     wakeSamples.forEach(sample=>sample.w=-100); wakeCursor=0; lastWake=-10;
     lookAt.copy(blob.position).addScaledVector(cameraDirection, 2.5);
     target.position.copy(v3(next.target));
     targetAnchor.copy(target.position); targetRecoil.set(0,0,0);
     targetMaterial.color.copy(color(next.target.rgb));
-    // A readable spherical marker, sized from the local perceptual tolerance.
-    // It is an approximate cue; settlement is still scored in OKLab.
+    // Three sections of the actual OKLab tolerance surface mapped into the
+    // world. Do not substitute an average-radius sphere for the scoring zone.
     let radius = 0;
     for (let axis = 0; axis < 3; axis++) for (const sign of [-1, 1]) {
       const direction: [number, number, number] = [0, 0, 0]; direction[axis] = sign;
       radius += new THREE.Vector3(...landingBoundary(next.target, next.tolerance, direction)).distanceTo(target.position) / 6;
     }
-    radius = Math.max(.9, radius);
     const boundaryLines: THREE.Vector3[] = [];
     for (let axis = 0; axis < 3; axis++) for (let segment = 0; segment < 80; segment++) for (const t of [segment, segment + 1]) {
       const angle = t / 80 * Math.PI * 2;
       const direction: [number, number, number] = [0, 0, 0]; direction[(axis + 1) % 3] = Math.cos(angle); direction[(axis + 2) % 3] = Math.sin(angle);
-      boundaryLines.push(new THREE.Vector3(...direction).multiplyScalar(radius));
+      boundaryLines.push(new THREE.Vector3(...landingBoundary(next.target,next.tolerance,direction)).sub(targetAnchor));
     }
     targetBoundary.geometry.dispose(); targetBoundary.geometry = new THREE.BufferGeometry().setFromPoints(boundaryLines);
     targetGlow.material.uniforms.tint.value.copy(targetMaterial.color);
@@ -324,7 +325,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
 
   function render(now: number) {
     if (disposed) return;
-    const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;
+    const stamp=Number.isFinite(now)?now:performance.now();
+    const dt = Math.min(.05, Math.max(0, (stamp - last) / 1000)); last = stamp;
     if (document.hidden) return;
     time += dt;
     if (introducing) introElapsed += dt;
@@ -376,6 +378,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const kick = reduced ? 0 : Math.exp(-launchAge * 7) * .65;
     const settle = reduced ? 0 : Math.exp(-(time - landing) * 5) * Math.sin((time - landing) * 7) * .075;
     const tension = reduced ? 0 : charge?.power ?? 0;
+    const energy=reduced?0:charge?chargeEnergy(charge.strength,charge.power,charge.ratio):0;
     const stretch = reduced ? 0 : Math.min(.38, speed * .025) + kick;
     body.scale.set(1 - tension * .14 - stretch * .2 + settle, 1 - tension * .14 - stretch * .15 + settle, 1 + tension * .38 + stretch - settle);
     blob.scale.setScalar(scale);
@@ -406,7 +409,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const length = .7 + Math.min(.8, speed * .035);
       for (let j = 0; j < 26; j++) {
         const t = j / 25;
-        const ripple = reduced ? 0 : Math.sin(t * (6+tension*3) - time * (2+tension*7) + phase) * (.1+tension*.07) * t;
+        const ripple = reduced ? 0 : Math.sin(t * (6+tension*3) - time * (2+tension*3+energy*5) + phase) * (.1+energy*.065) * t;
         const spread = .17 + t * .12 + ripple;
         const x = Math.cos(phase) * spread, y = Math.sin(phase) * spread;
         const w = finWidth(t);
@@ -422,7 +425,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     satellite.visible = !!charge;
     if (charge) {
       chargeRing.position.copy(blob.position); chargeRing.quaternion.copy(camera.quaternion);
-      chargeRing.material.color.copy(color(charge.rgb)); chargeRing.material.opacity = .65;
+      chargeRing.material.color.copy(color(charge.rgb)); chargeRing.material.opacity = Math.min(.95,.4+energy*.25);
       chargeRing.scale.setScalar(scale * (1.6 - charge.power * .65));
       const orbit = reduced ? .8 : time * .9;
       satellite.position.copy(blob.position).add(new THREE.Vector3(Math.cos(orbit), Math.sin(orbit) * .4, Math.sin(orbit)).multiplyScalar((.65 - charge.power * .3) * scale));
@@ -468,30 +471,30 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     // fit the whole system. At rest, turn toward the destination from here.
     const toTarget = targetAnchor.clone().sub(blob.position);
     const separation = toTarget.length();
-    const heading = flight ? travelDirection.clone() : separation > .25 ? toTarget.clone().normalize() : travelDirection.clone();
+    flightWeight+=(Number(!!flight)-flightWeight)*(1-Math.exp(-dt*2));
+    shotLength+=((flight?.length??0)-shotLength)*(1-Math.exp(-dt*1.5));
+    const goalDirection=separation>.25?toTarget.clone().normalize():cameraDirection.clone();
+    // Destination remains the framing anchor through the whole shot. A modest
+    // travel bias fades continuously after landing instead of switching rigs.
+    const heading=goalDirection.lerp(travelDirection,flightWeight*.3).normalize();
     if (flight) { orbitYaw *= Math.exp(-dt * 1.2); orbitPitch *= Math.exp(-dt * 1.2); }
     heading.applyAxisAngle(new THREE.Vector3(0, 1, 0), orbitYaw);
     const orbitSide = heading.clone().cross(new THREE.Vector3(0, 1, 0)).normalize();
     if (orbitSide.lengthSq() > .01) heading.applyAxisAngle(orbitSide, orbitPitch);
     // Quaternion interpolation handles opposite headings without a sudden flip.
-    if (Math.hypot(heading.x, heading.z) > .12) {
-      const raw = Math.atan2(heading.x, heading.z);
-      // Unwrap against the previous goal, not the camera: a chosen turn cannot
-      // reverse merely because its shortest route crosses the +/- pi seam.
-      yawGoal += Math.atan2(Math.sin(raw-yawGoal), Math.cos(raw-yawGoal));
-    }
+    yawGoal=stableCameraYaw(yawGoal,heading);
     const turnRate = 1 - Math.exp(-dt * (reduced ? 8 : .75));
     cameraYaw += (yawGoal-cameraYaw)*turnRate;
-    cameraPitch += (Math.asin(THREE.MathUtils.clamp(heading.y,-.94,.94))-cameraPitch)*turnRate;
+    cameraPitch += (Math.asin(THREE.MathUtils.clamp(heading.y,-.87,.87))-cameraPitch)*turnRate;
     cameraDirection.set(Math.sin(cameraYaw)*Math.cos(cameraPitch),Math.sin(cameraPitch),Math.cos(cameraYaw)*Math.cos(cameraPitch));
     const side = cameraDirection.clone().cross(new THREE.Vector3(0, 1, 0));
     if (side.lengthSq() < .01) side.set(1, 0, 0); else side.normalize();
-    const longShot = flight ? smooth(Math.min(1, Math.max(0, (flight.length - 10) / 24))) : 0;
+    const longShot = smooth(Math.min(1, Math.max(0, (shotLength - 10) / 24)));
     const nearGoal = 1 - smooth(Math.min(1, separation / 12));
     const distanceBehind = (camera.aspect < .85 ? 6.3 : 5.4) + longShot * 3 + nearGoal * 2.5;
     const desiredPosition = blob.position.clone().addScaledVector(cameraDirection, -distanceBehind).addScaledVector(side, 2.8 + longShot * 3 + nearGoal * 2).add(new THREE.Vector3(0, 1.8 + longShot, 0));
-    const desiredLook = flight ? blob.position.clone().addScaledVector(cameraDirection, 2.5) : blob.position.clone().addScaledVector(toTarget, Math.min(.5, 4 / Math.max(1, separation)));
-    const damping = reduced ? 12 : (flight ? 2.5 : 2) / (1 + Math.log1p(mass) * .035);
+    const desiredLook = blob.position.clone().addScaledVector(toTarget, Math.min(.5, 4 / Math.max(1, separation)));
+    const damping = reduced ? 12 : 1.8 / (1 + Math.log1p(mass) * .035);
     camera.position.lerp(desiredPosition, 1 - Math.exp(-dt * damping));
     lookAt.lerp(desiredLook, 1 - Math.exp(-dt * (reduced ? 12 : 2.8)));
     if (introducing) {
@@ -506,10 +509,12 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     // value near arrival. After base selection, only the mixture drives light.
     const mixtureValue=mass ? movingPoint.position[1] : activeHole.start.position[1];
     const introBlend=introducing ? 1-easeQuint((introElapsed/introSeconds-.65)/.35) : 0;
-    const valueHeight=THREE.MathUtils.lerp(mixtureValue,camera.position.y,introBlend);
+    const safeHeight=Number.isFinite(mixtureValue)?mixtureValue:activeHole.start.position[1];
+    const viewHeight=Number.isFinite(camera.position.y)?camera.position.y:safeHeight;
+    const valueHeight=THREE.MathUtils.lerp(safeHeight,viewHeight,introBlend);
     const brightness=smooth(THREE.MathUtils.clamp((valueHeight+2)/20,0,1));
     const desiredBackground=darkBackground.clone().lerp(lightBackground,brightness);
-    if(introducing && introElapsed<=dt*1.01) background.copy(desiredBackground);
+    if(![background.r,background.g,background.b].every(Number.isFinite) || (introducing && introElapsed<=dt*1.01)) background.copy(desiredBackground);
     else background.lerp(desiredBackground,1-Math.exp(-dt*1.6));
     renderer.setClearColor(background); (scene.fog as THREE.FogExp2).color.copy(background);
     rimBrightness.value+=(brightness-rimBrightness.value)*(1-Math.exp(-dt*2));
@@ -532,15 +537,25 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
 
   return {
     reset: setHole,
-    charge(rgb: RGB, ratio: number, power: number, tangent?: ColorPoint) { charge = { rgb, ratio, power, tangent: tangent ? v3(tangent).sub(blob.position).normalize() : undefined }; },
+    charge(rgb: RGB, ratio: number, power: number, strength: number, tangent?: ColorPoint) { charge = { rgb, ratio, power, strength, tangent: tangent ? v3(tangent).sub(blob.position).normalize() : undefined }; },
     cancelCharge() { charge = null; },
+    cancelFlight() {
+      if(!flight)return false;
+      const aborted=flight;flight=null;mass=aborted.fromMass;charge=null;won=false;captureAmount=0;
+      blob.position.copy(v3(current));targetRecoil.set(0,0,0);target.position.copy(targetAnchor);
+      const index=trails.indexOf(aborted.ribbon);if(index>=0)trails.splice(index,1);
+      scene.remove(aborted.ribbon);aborted.ribbon.geometry.dispose();aborted.ribbon.material.dispose();
+      pulses.splice(0).forEach(({mesh})=>{scene.remove(mesh);mesh.geometry.dispose();mesh.material.dispose();});
+      wakeSamples.forEach(sample=>sample.w=-100);landing=time;releaseTime=-10;
+      return true;
+    },
     launch(path: ColorPoint[], fromMass: number, toMass: number, done: () => void) {
       charge = null; releaseTime = time;
       if (path.length === 1) path = baseLaunchPath(activeHole.start, path[0]);
       const endpoint=path[path.length-1];
       const qualifies=fromMass>0 && colorDistance(endpoint,activeHole.target)<=activeHole.tolerance;
       const diverted=targetFlightPath(path,activeHole.target,qualifies);
-      const response=splitTargetResponse(path,diverted,qualifies);
+      const response=splitTargetResponse(path,diverted,qualifies,colorDistance(endpoint,activeHole.target)/activeHole.tolerance);
       path=response.path;const recoil=response.recoil;
       const distances = [0];
       for (let i = 1; i < path.length; i++) distances.push(distances[i - 1] + v3(path[i]).distanceTo(v3(path[i - 1])));
@@ -550,7 +565,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       // Discard turn history, not the visible camera pose. Resume toward the
       // shot using the nearest equivalent heading, even after many full orbits.
       cameraYaw = wrapAngle(cameraYaw);
-      yawGoal = closestHeading(cameraYaw,Math.atan2(travelDirection.x,travelDirection.z));
+      yawGoal = closestHeading(cameraYaw,stableCameraYaw(cameraYaw,travelDirection));
       orbitYaw = 0; orbitPitch = 0;
       pulse(path[0].rgb, blob.position, travelDirection);
       flight = { path, recoil, endpoint, qualifies, distances, length, elapsed: 0, duration: reduced ? .4 : Math.max(.7, Math.min(3.2, .5 + Math.sqrt(length) * .35 + Math.log1p(toMass) * .018)), fromMass, toMass, done, ribbon: makeRibbon(path, toMass) };
