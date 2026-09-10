@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PLAY_LEVELS, CHARGE_SECONDS, WORLD_SCALE, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
+import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
 test('the four requested palettes have the correct pigments, including actual PW1', () => {
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
@@ -69,11 +69,21 @@ test('every generated target has a constructive route at guide par within the ho
   console.log(`64 target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
 });
 
-test('spherical landing boundaries match the exact scored color distance', () => {
+test('Munsell nodes preserve absolute chroma and value; scoring survives the display warp', () => {
   const a = mixtureColor(PLAY_LEVELS[0].paints, [3, 1, 4]);
-  const b = mixtureColor(PLAY_LEVELS[0].paints, [3, 2, 4]);
-  const worldDistance = Math.hypot(...a.position.map((value, i) => value - b.position[i]));
-  assert.ok(Math.abs(worldDistance / WORLD_SCALE - colorDistance(a, b)) < 1e-12);
+  for (const { chip, point } of SPACE_NODES) {
+    assert.deepEqual(point.position, munsellPosition(chip));
+    assert.ok(Math.abs(Math.hypot(point.position[0], point.position[2]) - chip.c * 2.6) < 1e-9);
+  }
+  for (const direction of [[1,0,0], [0,1,0], [0,0,1], [-1,2,-3]]) {
+    const tolerance = .038;
+    const length = Math.hypot(...direction);
+    const lab = a.lab.map((n,i) => n + direction[i] / length * tolerance) as [number,number,number];
+    assert.ok(Math.abs(colorDistance(a, {...a, lab}) - tolerance) < 1e-12);
+    assert.deepEqual(landingBoundary(a, tolerance, direction as [number,number,number]), labPosition(lab));
+    const shifted = labPosition(lab.map((n,i) => n + (i === 1 ? 1e-7 : 0)) as [number,number,number]);
+    assert.ok(Math.hypot(...shifted.map((n,i) => n - labPosition(lab)[i])) < .001);
+  }
 });
 
 test('targets are reproducible for restart and invalid paint amounts are rejected', () => {
@@ -81,6 +91,51 @@ test('targets are reproducible for restart and invalid paint amounts are rejecte
   assert.throws(() => addPaint([1, 0, 0], -1, 1));
   assert.throws(() => addPaint([1, 0, 0], 2, -1));
   assert.throws(() => mixtureColor(PLAY_LEVELS[0].paints, [Infinity, 0, 0]));
+});
+
+test('the empty neutral start launches straight to pure paint without adding gray', () => {
+  for (const level of PLAY_LEVELS) {
+    const start = neutralStart(level);
+    assert.equal(start.position[0], 0); assert.equal(start.position[2], 0);
+    assert.equal(start.rgb[0], start.rgb[1]); assert.equal(start.rgb[1], start.rgb[2]);
+    for (let i = 0; i < level.paints.length; i++) {
+      const quantities = addPaint(level.paints.map(() => 0), i, 1);
+      const pure = mixtureColor(level.paints, quantities);
+      const path = baseLaunchPath(start, pure);
+      assert.deepEqual(path[0].position, start.position);
+      for (let axis = 0; axis < 3; axis++) assert.ok(Math.abs(path.at(-1)!.position[axis] - pure.position[axis]) < 1e-10);
+      assert.equal(totalMass(quantities), 1);
+      for (const [j, point] of path.entries()) {
+        assert.equal(colorDistance(point, pure), 0);
+        for (let axis = 0; axis < 3; axis++) assert.ok(Math.abs(point.position[axis] - (start.position[axis] + (pure.position[axis] - start.position[axis]) * j / (path.length - 1))) < 1e-10);
+      }
+    }
+  }
+});
+
+test('all five holes in each palette remain reachable while precision tightens', () => {
+  for (let palette = 0; palette < PLAY_LEVELS.length; palette++) for (const seed of [190926, 17, 391]) {
+    const level = PLAY_LEVELS[palette];
+    let previousTolerance = Infinity;
+    const round = Array.from({ length: HOLES_PER_PALETTE }, (_, stage) => generateHole(palette, seed, stage));
+    for (const hole of round) {
+      assert.ok(hole.tolerance < previousTolerance); previousTolerance = hole.tolerance;
+      assert.ok(hole.timingWindow > 0 && Number.isFinite(hole.timingWindow));
+      assert.equal(hole.par, hole.recipe.filter(q => q > 0).length);
+      const base = Math.max(...hole.recipe);
+      const recipe = hole.recipe.map(q => q / base);
+      assert.ok(colorDistance(mixtureColor(level.paints, recipe), hole.target) <= hole.tolerance);
+      let mass = 0;
+      for (const amount of recipe.filter(q => q > 0).sort((a,b) => b-a)) {
+        if (mass) assert.ok(amount >= chargeAmount(mass, 0) && amount <= chargeAmount(mass, CHARGE_SECONDS));
+        mass += amount;
+      }
+    }
+    assert.ok(round.at(-1)!.par >= round[0].par);
+    console.log(`${level.name} seed ${seed}: pars ${round.map(h => h.par).join('/')}; estimated timing windows ${round.map(h => Math.round(h.timingWindow * 1000)).join('/')}ms`);
+    const recipe = round.at(-1)!.recipe;
+    assert.ok(recipeTimingWindow(level, recipe, .02) < recipeTimingWindow(level, recipe, .04));
+  }
 });
 
 test('ribbons twist continuously around the accurate path without moving its center', async () => {

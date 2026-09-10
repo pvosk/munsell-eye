@@ -1,6 +1,6 @@
 import { Color, mix } from 'spectral.js';
 import { PAINTS, type PaintColor } from './paint-mixing';
-import { NEUTRALS, type MunsellColor } from './munsell-data';
+import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
 import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
 
 export type RGB = [number, number, number];
@@ -8,8 +8,8 @@ export type XYZ = [number, number, number];
 export type Mixture = number[];
 export type ColorPoint = { rgb: RGB; lab: XYZ; position: XYZ };
 export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number };
-export type Hole = { seed: number; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number };
-export const WORLD_SCALE = 22;
+export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number };
+export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
 
 const paint = (id: string) => {
@@ -38,13 +38,56 @@ export function rgbToLab(rgb: readonly number[]): XYZ {
 
 export function colorPoint(rgb: RGB): ColorPoint {
   const lab = rgbToLab(rgb);
-  // Uniform scale makes the visible spherical landing zone match scoring exactly.
-  return { rgb, lab, position: [lab[1] * WORLD_SCALE, (lab[0] - .6) * WORLD_SCALE, lab[2] * WORLD_SCALE] };
+  // Most recipe candidates only need a score. Defer the visual interpolation.
+  let position: XYZ | undefined;
+  return { rgb, lab, get position() { return position ??= labPosition(lab); } };
+}
+export function munsellPosition(chip: MunsellColor): XYZ {
+  const angle = Math.max(0, HUE_ORDER.indexOf(chip.h as typeof HUE_ORDER[number])) * Math.PI / 20;
+  return [Math.cos(angle) * chip.c * 2.6, (chip.v - 5) * 4, Math.sin(angle) * chip.c * 2.6];
+}
+const spatialReferences = [...PRACTICAL_MUNSELL_COLORS, ...NEUTRALS,
+  { h: 'N', v: 0, c: 0, rgb: [0, 0, 0] as RGB }, { h: 'N', v: 10, c: 0, rgb: [255, 255, 255] as RGB },
+].map(chip => ({ lab: rgbToLab(chip.rgb), position: munsellPosition(chip) }));
+// Continuous inverse-distance interpolation of the renotation samples, in
+// Cartesian coordinates so the red/purple seam never jumps. Exact at samples;
+// intermediate positions are display estimates, not new pigment measurements.
+export function labPosition(lab: XYZ): XYZ {
+  const out: XYZ = [0, 0, 0]; let sum = 0;
+  for (const sample of spatialReferences) {
+    const d2 = (lab[0] - sample.lab[0]) ** 2 + (lab[1] - sample.lab[1]) ** 2 + (lab[2] - sample.lab[2]) ** 2;
+    if (d2 < 1e-18) return [...sample.position];
+    const weight = 1 / (d2 * d2 * d2);
+    sum += weight;
+    for (let i = 0; i < 3; i++) out[i] += sample.position[i] * weight;
+  }
+  return out.map(n => n / sum) as XYZ;
+}
+export function landingBoundary(target: ColorPoint, tolerance: number, direction: XYZ): XYZ {
+  const length = Math.hypot(...direction) || 1;
+  return labPosition(target.lab.map((n, i) => n + direction[i] / length * tolerance) as XYZ);
 }
 export const SEED_POINT = colorPoint([145, 145, 139]);
 export const colorDistance = (a: ColorPoint, b: ColorPoint) => Math.hypot(...a.lab.map((v, i) => v - b.lab[i]));
 export const totalMass = (mixture: Mixture) => mixture.reduce((sum, value) => sum + value, 0);
 export const rgbStyle = (rgb: RGB) => `rgb(${rgb.map(Math.round).join(' ')})`;
+
+export function neutralStart(level: PlayLevel): ColorPoint {
+  const lightness = level.paints.reduce((sum, p) => sum + rgbToLab(p.rgb)[0], 0) / level.paints.length;
+  const linear = lightness ** 3;
+  const gray = 255 * (linear <= .0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - .055);
+  const point = colorPoint([gray, gray, gray]);
+  // Empty launch point: neutral at the palette's mean lightness, zero paint.
+  return { ...point, position: [0, point.position[1], 0] };
+}
+
+export function baseLaunchPath(start: ColorPoint, pure: ColorPoint, samples = 96): ColorPoint[] {
+  // Travel before mixing starts. Every displayed paint color is already pure;
+  // this straight relocation does not inject neutral paint into the recipe.
+  return Array.from({ length: samples + 1 }, (_, i) => ({ ...pure,
+    position: start.position.map((n, axis) => n + (pure.position[axis] - n) * i / samples) as XYZ,
+  }));
+}
 
 const spectralCache = new Map<string, Color>();
 function pigmentColor(p: PaintColor) {
@@ -93,7 +136,7 @@ export function pourPath(paints: PaintColor[], before: Mixture, index: number, a
 }
 
 const chips = [...PRACTICAL_MUNSELL_COLORS, ...NEUTRALS].map((chip) => ({ chip, point: colorPoint(chip.rgb) }));
-export const SPACE_NODES = chips.filter(({ chip }) => chip.h === 'N' || (chip.h.startsWith('5') && chip.c % 4 === 0));
+export const SPACE_NODES = chips.filter(({ chip }) => chip.h === 'N' || ((chip.h.startsWith('5') || chip.h.startsWith('10')) && chip.c % 4 === 0));
 export function nearestNotation(point: ColorPoint) {
   const nearest = chips.reduce((best, item) => colorDistance(item.point, point) < colorDistance(best.point, point) ? item : best);
   return chipNotation(nearest.chip);
@@ -134,7 +177,7 @@ export function simplestRecipe(level: PlayLevel, target: ColorPoint, witness: Mi
   return best;
 }
 
-export function generateHole(levelIndex: number, seed: number): Hole {
+function generateCandidate(levelIndex: number, seed: number) {
   const level = PLAY_LEVELS[levelIndex];
   const rng = seededRandom(seed);
   let recipe: Mixture = [];
@@ -151,5 +194,68 @@ export function generateHole(levelIndex: number, seed: number): Hole {
     if (level.paints.every((p) => colorDistance(colorPoint(p.rgb), target) > level.tolerance * 1.7)) break;
   }
   const simple = simplestRecipe(level, target, recipe);
-  return { seed, target, notation: nearestNotation(target), par: simple.filter((q) => q > 0).length, recipe: simple, tolerance: level.tolerance };
+  return { target, recipe, simple };
+}
+
+// Estimate the tightest timing window along the most forgiving valid ordering.
+// Perturb one charge by 20ms, finish the remaining recipe, and measure the final
+// color error. This is a local sensitivity estimate, not a solved global par.
+export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance: number): number {
+  const ids = recipe.map((q, i) => q > 0 ? i : -1).filter(i => i >= 0);
+  const target = mixtureColor(level.paints, recipe);
+  let best = 0;
+  function visit(order: number[]) {
+    if (order.length < ids.length) {
+      for (const id of ids) if (!order.includes(id)) visit([...order, id]);
+      return;
+    }
+    const amounts = recipe.map(q => q / recipe[order[0]]);
+    let mass = 1; let bottleneck = Infinity;
+    for (const index of order.slice(1)) {
+      const capacity = Math.max(1, mass) ** .8;
+      const ratio = amounts[index] / capacity;
+      if (ratio < .005 || ratio > 8) return;
+      const power = ((ratio - .005) / 7.995) ** .25;
+      const seconds = CHARGE_SECONDS * (1 - (1 - power) ** (1 / 3));
+      let slope = 0;
+      for (const sign of [-1, 1]) {
+        const changedSeconds = Math.max(0, Math.min(CHARGE_SECONDS, seconds + sign * .02));
+        if (Math.abs(changedSeconds - seconds) < 1e-8) continue;
+        const changed = amounts.map((q, i) => i === index ? chargeAmount(mass, changedSeconds) : q);
+        slope = Math.max(slope, colorDistance(mixtureColor(level.paints, changed), target) / Math.abs(changedSeconds - seconds));
+      }
+      bottleneck = Math.min(bottleneck, tolerance / Math.max(.00001, slope));
+      mass += amounts[index];
+    }
+    best = Math.max(best, bottleneck);
+  }
+  visit([]);
+  return best;
+}
+
+const roundCache = new Map<string, Hole[]>();
+export function generateHole(levelIndex: number, seed: number, stage = 0): Hole {
+  if (!PLAY_LEVELS[levelIndex] || !Number.isInteger(stage) || stage < 0 || stage >= HOLES_PER_PALETTE) throw new Error('Invalid hole');
+  const key = `${levelIndex}:${seed}`;
+  let round = roundCache.get(key);
+  if (!round) {
+    const level = PLAY_LEVELS[levelIndex];
+    const candidates = Array.from({ length: 36 }, (_, i) => {
+      const candidate = generateCandidate(levelIndex, (seed + Math.imul(i + 1, 7919)) >>> 0);
+      const timing = recipeTimingWindow(level, candidate.recipe, level.tolerance);
+      const support = candidate.simple.filter(q => q > 0).length;
+      return { ...candidate, score: (support - 2) * .7 + Math.log1p(1 / Math.max(.01, timing)) };
+    }).sort((a, b) => a.score - b.score);
+    round = Array.from({ length: HOLES_PER_PALETTE }, (_, holeIndex) => {
+      const candidate = candidates[Math.round((candidates.length - 1) * (.08 + holeIndex * .21))];
+      const tolerance = level.tolerance * [1.35, 1.15, 1, .83, .68][holeIndex];
+      const recipe = simplestRecipe({ ...level, tolerance }, candidate.target, candidate.recipe);
+      const slack = Math.max(.001, tolerance - colorDistance(mixtureColor(level.paints, recipe), candidate.target));
+      return { seed, stage: holeIndex, start: neutralStart(level), target: candidate.target, notation: nearestNotation(candidate.target), par: recipe.filter(q => q > 0).length, recipe, tolerance, timingWindow: recipeTimingWindow(level, recipe, slack) };
+    });
+    // Bounded cache keeps repeated restarts cheap without accumulating rounds.
+    if (roundCache.size >= 12) roundCache.delete(roundCache.keys().next().value!);
+    roundCache.set(key, round);
+  }
+  return round[stage];
 }
