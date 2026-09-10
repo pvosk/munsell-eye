@@ -293,10 +293,10 @@ export function generateHole(levelIndex: number, seed: number, stage = 0): Hole 
     }).sort((a, b) => a.score - b.score);
     round = Array.from({ length: HOLES_PER_PALETTE }, (_, holeIndex) => {
       const candidate = candidates[Math.round((candidates.length - 1) * (.08 + holeIndex * .21))];
-      const tolerance = level.tolerance * [1.35, 1.15, 1, .83, .68][holeIndex];
+      const tolerance = level.tolerance;
       const recipe = simplestRecipe({ ...level, tolerance }, candidate.target, candidate.recipe);
       const slack = Math.max(.001, tolerance - colorDistance(mixtureColor(level.paints, recipe), candidate.target));
-      return { seed, stage: holeIndex, start: neutralStart(level), target: candidate.target, notation: nearestNotation(candidate.target), par: recipe.filter(q => q > 0).length, recipe, tolerance, timingWindow: recipeTimingWindow(level, recipe, slack) };
+      return { seed, stage: holeIndex, start: neutralStart(level), target: candidate.target, notation: nearestNotation(candidate.target), par: recipe.filter(q => q > 0).length - 1, recipe, tolerance, timingWindow: recipeTimingWindow(level, recipe, slack) };
     });
     // Bounded cache keeps repeated restarts cheap without accumulating rounds.
     if (roundCache.size >= 12) roundCache.delete(roundCache.keys().next().value!);

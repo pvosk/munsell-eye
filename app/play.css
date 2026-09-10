@@ -111,3 +111,4 @@
   .play-mobile-actions { display: flex; justify-content: flex-end; gap: 22px; margin-top: 18px; padding: 8px; }
   .play-mobile-actions button { background: none; border: 0; font: inherit; font-size: 12px; color: var(--play-muted); padding: 8px 0; }
 }
+.paint-play .play-paint { touch-action: pan-y; }

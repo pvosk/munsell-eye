@@ -75,7 +75,7 @@ export default function PlayView() {
     const amount = chargeAmount(beforeMass, (performance.now() - held.started) / 1000);
     const after = addPaint(before, held.index, amount);
     const path = pourPath(palette, before, held.index, amount);
-    const nextPours = s.pours + 1;
+    const nextPours = s.pours + (beforeMass ? 1 : 0);
     // Lock before React renders so overlapping key/pointer events cannot pour twice.
     live.current = { ...s, phase: 'flight', pours: nextPours, quantities: after };
     setPhase('flight'); setPours(nextPours);
@@ -146,7 +146,8 @@ export default function PlayView() {
   const controls = (index: number) => ({
     onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0) return;
-      event.preventDefault(); event.currentTarget.focus({ preventScroll: true });
+      if (event.pointerType !== 'touch') event.preventDefault();
+      event.currentTarget.focus({ preventScroll: true });
       event.currentTarget.setPointerCapture(event.pointerId); begin(index, `pointer:${event.pointerId}`);
     },
     onPointerUp: (event: PointerEvent<HTMLButtonElement>) => { event.preventDefault(); release(`pointer:${event.pointerId}`); },
@@ -158,6 +159,13 @@ export default function PlayView() {
     },
   });
   const power = charged === null ? 0 : chargePower(charged);
+  const advance = useRef(nextHole);
+  useEffect(() => { advance.current = nextHole; });
+  useEffect(() => {
+    if (phase !== 'landed' || help) return;
+    const timer = window.setTimeout(() => advance.current(), 2300);
+    return () => window.clearTimeout(timer);
+  }, [phase, help, hole]);
   const amount = charged === null ? 0 : chargeAmount(mass, charged);
   const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help;
   const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 2 ? 'Within Reach' : 'Choose Your Next Pour';
@@ -178,7 +186,7 @@ export default function PlayView() {
       <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
-      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette has five holes, with more demanding mixtures and smaller landing zones. Landing advances you; par is a personal challenge. All palettes are available to explore.</p><p className="play-fineprint">Guide par comes from sampled recipes. Landing uses OKLab color difference; the map interpolates Munsell samples. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
+      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette has five holes with a consistent color tolerance. Early holes keep simple two-paint routes; later mixtures become more demanding. A qualifying endpoint is drawn into the cup, then advances automatically; par is a personal challenge. All palettes are available to explore.</p><p className="play-fineprint">Guide par comes from sampled recipes. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
       {phase === 'landed' && !help && <div className="play-arrival"><span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span><h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2><p>{pours} pours · Guide par {hole.par} · {massLabel(mass)} parts</p><div><button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : levelIndex < PLAY_LEVELS.length - 1 ? 'Next Palette' : 'Play Again'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button></div></div>}
     </div>
     <div className="play-dock">

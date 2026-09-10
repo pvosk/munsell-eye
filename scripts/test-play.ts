@@ -21,6 +21,15 @@ test('mixtures retain absolute mass, independent of pour order or splitting', ()
   assert.ok(colorDistance(mixtureColor(paints, direct), mixtureColor(paints, direct.map((q) => q * 1e6))) < 1e-9);
 });
 
+test('tinting strength survives parts normalization and changes equal-dose mixtures', () => {
+  const paints = PLAY_LEVELS[2].paints;
+  const normal = mixtureColor(paints, [1,0,0,.1]);
+  const weaker = paints.map(p => ({ ...p, strength: p.id === paints[3].id ? p.strength / 4 : p.strength }));
+  const altered = mixtureColor(weaker, [1,0,0,.1]);
+  assert.ok(colorDistance(normal, altered) > .02);
+  assert.ok(colorDistance(normal, mixtureColor(paints, [100,0,0,10])) < 1e-9);
+});
+
 test('golf meter eases out, returns after peak, and mass reduces equal-charge influence', () => {
   assert.equal(chargePower(0), 0);
   assert.equal(chargePower(CHARGE_SECONDS), 1);
@@ -54,8 +63,8 @@ test('every generated target has a constructive route at guide par within the ho
     const level = PLAY_LEVELS[index]; const hole = generateHole(index, seed * 7919);
     const recipe = hole.recipe;
     const order = recipe.map((amount, i) => ({ i, amount })).filter((p) => p.amount > 0).sort((a, b) => b.amount - a.amount);
-    assert.equal(order.length, hole.par);
-    assert.ok(hole.par >= 2 && hole.par <= level.paints.length);
+    assert.equal(order.length - 1, hole.par);
+    assert.ok(hole.par >= 1 && hole.par < level.paints.length);
     let state = level.paints.map(() => 0);
     const base = order[0].amount;
     for (const { i, amount } of order) {
@@ -139,15 +148,14 @@ test('the empty neutral start launches straight to pure paint without adding gra
   }
 });
 
-test('all five holes in each palette remain reachable while precision tightens', () => {
+test('all five holes retain a constant landing tolerance and reachable recipes', () => {
   for (let palette = 0; palette < PLAY_LEVELS.length; palette++) for (const seed of [190926, 17, 391]) {
     const level = PLAY_LEVELS[palette];
-    let previousTolerance = Infinity;
     const round = Array.from({ length: HOLES_PER_PALETTE }, (_, stage) => generateHole(palette, seed, stage));
     for (const hole of round) {
-      assert.ok(hole.tolerance < previousTolerance); previousTolerance = hole.tolerance;
+      assert.equal(hole.tolerance, level.tolerance);
       assert.ok(hole.timingWindow > 0 && Number.isFinite(hole.timingWindow));
-      assert.equal(hole.par, hole.recipe.filter(q => q > 0).length);
+      assert.equal(hole.par, hole.recipe.filter(q => q > 0).length - 1);
       const base = Math.max(...hole.recipe);
       const recipe = hole.recipe.map(q => q / base);
       assert.ok(colorDistance(mixtureColor(level.paints, recipe), hole.target) <= hole.tolerance);
