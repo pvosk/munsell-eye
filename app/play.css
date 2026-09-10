@@ -83,7 +83,6 @@
 .play-target-swatch { display: grid; grid-template-columns: auto auto; align-items: start; gap: 8px; }
 .play-target-swatch strong { font-size: 11px; font-weight: 400; opacity: .65; margin-top: 5px; }
 .play-target-swatch .play-eyebrow { font-size: 10px; letter-spacing: .09em; }
-.play-skip-intro { position: absolute; right: 14px; bottom: 45px; background: #2b323399; border: 1px solid var(--play-line); border-radius: 999px; color: var(--play-muted); padding: 8px 12px; font-size: 11px; }
 .play-dock-status { display: flex; justify-content: center; }
 .play-charge-control { max-width: 420px; }
 .play-world { height: max(400px,calc(100dvh - 300px)); }
@@ -161,7 +160,7 @@
 .app-shell[data-view=play] .mobile-section-options button.active { background: #ffffff16; color: white; }
 .paint-play .play-topline { display: flex; flex-wrap: nowrap; min-height: 58px; padding: 8px 0; gap: 18px; }
 .paint-play .play-name { min-width: 0; flex: 0 0 auto; }
-.paint-play .play-name h1 { font-variant-caps: small-caps; font-size: 25px; letter-spacing: .025em; white-space: nowrap; }
+.paint-play .play-name h1 { font-family: inherit; font-variant-caps: small-caps; font-weight: 500; font-size: 25px; letter-spacing: .025em; white-space: nowrap; }
 .play-palette-rail { flex: 0 1 220px; min-width: 140px; height: 36px; margin-left: auto; }
 .play-palette-rail.open { flex: 1 1 100%; }
 .play-palette-rail .mobile-choice-trigger, .play-palette-rail .mobile-choice-options { height: 36px; border-color: #eee8d733; box-shadow: none; background: #ffffff08; color: var(--play-ivory); }

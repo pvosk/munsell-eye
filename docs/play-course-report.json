@@ -1,0 +1,1173 @@
+{
+  "version": "courses-1",
+  "search": {
+    "one": "65 charge samples per base/order, then local refinement",
+    "two": "9 × 9 charge samples per base/order, then local refinement",
+    "witness": "All permutations of the candidate recipe, up to three additions",
+    "limits": "Best found, not a proof of global minimum; three-addition alternatives are not exhaustively searched.",
+    "par": "Provisional player allowance: best-found additions + 1; +1 below 55ms timing margin; another +1 below 22ms; +1 on harder palettes for multi-addition routes. Clamped 2–6.",
+    "timing": "Most forgiving sampled minimum-shot route. Tightest single-time perturbation margin with later hold times replayed, capped at 300ms. Not the complete joint setup/finish region.",
+    "coolZorn": "Low-chroma black-containing relative cools. Current black is slightly warm; no measured blue undertone claim.",
+    "interactions": "Counts of consecutive additions along retained routes, not a score of historical or perceptual merit."
+  },
+  "palettes": [
+    {
+      "name": "UltraOx Dual",
+      "eligible": 23,
+      "tags": {
+        "interior": 7,
+        "value-finish": 16,
+        "precision": 3,
+        "choice": 3
+      },
+      "distinctSelected": 18,
+      "pars": [
+        [
+          2,
+          3,
+          3,
+          3,
+          4
+        ],
+        [
+          2,
+          3,
+          3,
+          2,
+          4
+        ],
+        [
+          2,
+          3,
+          3,
+          3,
+          3
+        ],
+        [
+          2,
+          3,
+          2,
+          3,
+          4
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          1,
+          2,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          2,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          2,
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          2,
+          1,
+          1,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "value-finish",
+          "interior",
+          "value-finish",
+          "value-finish",
+          "interior"
+        ],
+        [
+          "value-finish",
+          "interior",
+          "value-finish",
+          "value-finish",
+          "interior"
+        ],
+        [
+          "value-finish",
+          "interior",
+          "interior",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "value-finish",
+          "interior",
+          "value-finish",
+          "value-finish",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.3768187873623083,
+        0.9200915682399295
+      ],
+      "interactions": {
+        "Ultramarine Blue → Titanium White": 7,
+        "Titanium White → Ultramarine Blue": 6,
+        "Ultramarine Blue → Transparent Oxide Red": 6,
+        "Transparent Oxide Red → Titanium White": 5,
+        "Titanium White → Transparent Oxide Red": 2,
+        "Transparent Oxide Red → Ultramarine Blue": 2
+      }
+    },
+    {
+      "name": "Zorny",
+      "eligible": 56,
+      "tags": {
+        "value-finish": 39,
+        "choice": 9,
+        "chromatic-ride": 6,
+        "quiet-cool": 19,
+        "interior": 16,
+        "precision": 13
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          2,
+          3,
+          3,
+          3,
+          4
+        ],
+        [
+          3,
+          3,
+          2,
+          2,
+          4
+        ],
+        [
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        [
+          3,
+          2,
+          3,
+          2,
+          3
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "quiet-cool",
+          "quiet-cool",
+          "quiet-cool",
+          "quiet-cool",
+          "quiet-cool"
+        ],
+        [
+          "quiet-cool",
+          "quiet-cool",
+          "value-finish",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "quiet-cool",
+          "quiet-cool",
+          "value-finish",
+          "value-finish",
+          "quiet-cool"
+        ],
+        [
+          "quiet-cool",
+          "value-finish",
+          "value-finish",
+          "value-finish",
+          "quiet-cool"
+        ]
+      ],
+      "lightnessRange": [
+        0.2945353651320781,
+        0.9269988120017365
+      ],
+      "interactions": {
+        "Titanium White → Ivory Black": 9,
+        "Ivory Black → Titanium White": 7,
+        "Cadmium Red Light → Titanium White": 3,
+        "Cadmium Red Light → Ivory Black": 2
+      }
+    },
+    {
+      "name": "RYB",
+      "eligible": 43,
+      "tags": {
+        "chromatic-ride": 15,
+        "value-finish": 11,
+        "interior": 27,
+        "precision": 22,
+        "choice": 1
+      },
+      "distinctSelected": 18,
+      "pars": [
+        [
+          4,
+          3,
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          3,
+          4,
+          3,
+          5
+        ],
+        [
+          3,
+          3,
+          2,
+          2,
+          3
+        ],
+        [
+          3,
+          3,
+          2,
+          3,
+          4
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          2,
+          2
+        ],
+        [
+          2,
+          1,
+          2,
+          2,
+          3
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "value-finish",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride"
+        ],
+        [
+          "chromatic-ride",
+          "chromatic-ride",
+          "value-finish",
+          "chromatic-ride",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.4174817733133413,
+        0.9099070987198272
+      ],
+      "interactions": {
+        "Cadmium Red Medium → Phthalo Blue (Green Shade)": 4,
+        "Phthalo Blue (Green Shade) → Flake White": 5,
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 5,
+        "Cadmium Lemon → Cadmium Red Medium": 2,
+        "Phthalo Blue (Green Shade) → Cadmium Lemon": 3,
+        "Cadmium Lemon → Flake White": 4,
+        "Phthalo Blue (Green Shade) → Cadmium Red Medium": 2,
+        "Cadmium Red Medium → Flake White": 2,
+        "Cadmium Red Medium → Cadmium Lemon": 3
+      }
+    },
+    {
+      "name": "EarthPop",
+      "eligible": 41,
+      "tags": {
+        "interior": 14,
+        "choice": 14,
+        "precision": 13,
+        "chromatic-ride": 27
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          3,
+          3,
+          2,
+          3,
+          4
+        ],
+        [
+          4,
+          2,
+          3,
+          2,
+          4
+        ],
+        [
+          3,
+          2,
+          3,
+          2,
+          4
+        ],
+        [
+          3,
+          3,
+          2,
+          3,
+          4
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "interior",
+          "chromatic-ride",
+          "choice",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "choice",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.3755587422747378,
+        0.8686074441754497
+      ],
+      "interactions": {
+        "Phthalo Blue (Green Shade) → Cadmium Lemon": 6,
+        "Cadmium Lemon → Quinacridone Magenta": 8,
+        "Quinacridone Magenta → Cadmium Lemon": 5,
+        "Cadmium Lemon → Phthalo Blue (Green Shade)": 2,
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 1,
+        "Cadmium Lemon → Transparent Oxide Red": 3,
+        "Quinacridone Magenta → Phthalo Blue (Green Shade)": 1,
+        "Transparent Oxide Red → Quinacridone Magenta": 1,
+        "Transparent Oxide Red → Cadmium Lemon": 1
+      }
+    },
+    {
+      "name": "CMY",
+      "eligible": 54,
+      "tags": {
+        "interior": 33,
+        "precision": 26,
+        "chromatic-ride": 21
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          2,
+          2,
+          3,
+          3,
+          4
+        ],
+        [
+          2,
+          2,
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          2,
+          4,
+          3,
+          4
+        ],
+        [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          2,
+          1,
+          1
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride"
+        ],
+        [
+          "chromatic-ride",
+          "chromatic-ride",
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride"
+        ]
+      ],
+      "lightnessRange": [
+        0.329823977427805,
+        0.8277652988021256
+      ],
+      "interactions": {
+        "Hansa Yellow Light → Quinacridone Magenta": 4,
+        "Quinacridone Magenta → Hansa Yellow Light": 9,
+        "Hansa Yellow Light → Phthalo Blue (Green Shade)": 8,
+        "Phthalo Blue (Green Shade) → Quinacridone Magenta": 3
+      }
+    },
+    {
+      "name": "Secondaries",
+      "eligible": 44,
+      "tags": {
+        "interior": 22,
+        "chromatic-ride": 15,
+        "precision": 20,
+        "value-finish": 9,
+        "choice": 3
+      },
+      "distinctSelected": 19,
+      "pars": [
+        [
+          3,
+          2,
+          2,
+          3,
+          4
+        ],
+        [
+          3,
+          3,
+          3,
+          2,
+          4
+        ],
+        [
+          3,
+          3,
+          2,
+          2,
+          3
+        ],
+        [
+          3,
+          2,
+          2,
+          4,
+          5
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          2,
+          1,
+          1,
+          1
+        ],
+        [
+          2,
+          1,
+          1,
+          2,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "interior",
+          "choice",
+          "value-finish",
+          "value-finish",
+          "interior"
+        ],
+        [
+          "interior",
+          "value-finish",
+          "chromatic-ride",
+          "choice",
+          "interior"
+        ],
+        [
+          "interior",
+          "interior",
+          "value-finish",
+          "choice",
+          "chromatic-ride"
+        ],
+        [
+          "interior",
+          "value-finish",
+          "chromatic-ride",
+          "interior",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.3463782153911223,
+        0.9309948413725386
+      ],
+      "interactions": {
+        "Titanium White → Phthalo Green (Yellow Shade)": 3,
+        "Phthalo Green (Yellow Shade) → Dioxazine Purple": 2,
+        "Cadmium Orange → Phthalo Green (Yellow Shade)": 2,
+        "Dioxazine Purple → Titanium White": 4,
+        "Dioxazine Purple → Phthalo Green (Yellow Shade)": 3,
+        "Phthalo Green (Yellow Shade) → Titanium White": 4,
+        "Titanium White → Cadmium Orange": 3,
+        "Dioxazine Purple → Cadmium Orange": 3,
+        "Titanium White → Dioxazine Purple": 2,
+        "Cadmium Orange → Dioxazine Purple": 1,
+        "Cadmium Orange → Titanium White": 2
+      }
+    },
+    {
+      "name": "French Light",
+      "eligible": 56,
+      "tags": {
+        "choice": 38,
+        "interior": 7,
+        "precision": 5,
+        "value-finish": 9,
+        "chromatic-ride": 27
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          3,
+          2,
+          2,
+          2,
+          3
+        ],
+        [
+          2,
+          2,
+          2,
+          3,
+          3
+        ],
+        [
+          2,
+          3,
+          2,
+          3,
+          3
+        ],
+        [
+          2,
+          4,
+          2,
+          4,
+          4
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        [
+          1,
+          2,
+          1,
+          2,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "choice",
+          "choice",
+          "choice",
+          "choice",
+          "choice"
+        ],
+        [
+          "choice",
+          "choice",
+          "choice",
+          "choice",
+          "choice"
+        ],
+        [
+          "choice",
+          "choice",
+          "value-finish",
+          "choice",
+          "choice"
+        ],
+        [
+          "choice",
+          "choice",
+          "value-finish",
+          "choice",
+          "choice"
+        ]
+      ],
+      "lightnessRange": [
+        0.28151796082207176,
+        0.913980705421602
+      ],
+      "interactions": {
+        "Cadmium Yellow Light → Cobalt Blue": 1,
+        "Cobalt Blue → Flake White": 2,
+        "Alizarin Crimson → Cadmium Yellow Light": 4,
+        "Cobalt Blue → Yellow Ochre": 1,
+        "Cadmium Yellow Light → Alizarin Crimson": 1,
+        "Cobalt Blue → Alizarin Crimson": 1,
+        "Ultramarine Blue → Flake White": 2,
+        "Cadmium Yellow Light → Viridian": 2,
+        "Alizarin Crimson → Ultramarine Blue": 2,
+        "Cadmium Red Light → Alizarin Crimson": 1,
+        "Cadmium Yellow Light → Yellow Ochre": 2,
+        "Flake White → Alizarin Crimson": 1,
+        "Flake White → Viridian": 1,
+        "Viridian → Cobalt Blue": 1,
+        "Alizarin Crimson → Flake White": 1,
+        "Flake White → Cadmium Yellow Light": 1
+      }
+    },
+    {
+      "name": "Chromatic Dark",
+      "eligible": 47,
+      "tags": {
+        "choice": 26,
+        "value-finish": 19,
+        "interior": 15,
+        "precision": 14,
+        "chromatic-ride": 11
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          4,
+          5,
+          2,
+          5,
+          5
+        ],
+        [
+          5,
+          2,
+          2,
+          3,
+          5
+        ],
+        [
+          3,
+          2,
+          3,
+          2,
+          5
+        ],
+        [
+          3,
+          3,
+          3,
+          3,
+          4
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          2,
+          1,
+          2,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "value-finish",
+          "value-finish",
+          "value-finish",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "value-finish",
+          "chromatic-ride",
+          "value-finish",
+          "value-finish",
+          "value-finish"
+        ],
+        [
+          "value-finish",
+          "chromatic-ride",
+          "value-finish",
+          "value-finish",
+          "precision"
+        ],
+        [
+          "value-finish",
+          "chromatic-ride",
+          "value-finish",
+          "value-finish",
+          "value-finish"
+        ]
+      ],
+      "lightnessRange": [
+        0.3378090986133222,
+        0.877597748195936
+      ],
+      "interactions": {
+        "Phthalo Emerald → Quinacridone Red": 5,
+        "Quinacridone Red → Flake White": 8,
+        "Phthalo Emerald → Ultramarine Blue": 1,
+        "Ultramarine Blue → Flake White": 4,
+        "Quinacridone Red → Ultramarine Blue": 3,
+        "Phthalo Emerald → Flake White": 5,
+        "Flake White → Quinacridone Red": 1
+      }
+    },
+    {
+      "name": "Violet Shift",
+      "eligible": 50,
+      "tags": {
+        "chromatic-ride": 31,
+        "choice": 25,
+        "interior": 10,
+        "precision": 9
+      },
+      "distinctSelected": 20,
+      "pars": [
+        [
+          4,
+          3,
+          2,
+          3,
+          5
+        ],
+        [
+          4,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          5,
+          2,
+          2,
+          5,
+          5
+        ],
+        [
+          4,
+          2,
+          3,
+          2,
+          5
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          2,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          2,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "interior",
+          "choice",
+          "choice",
+          "choice",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "choice",
+          "precision",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "chromatic-ride",
+          "precision",
+          "interior"
+        ],
+        [
+          "interior",
+          "chromatic-ride",
+          "chromatic-ride",
+          "choice",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.35025222194029465,
+        0.8387098309386153
+      ],
+      "interactions": {
+        "Cadmium Red Light → Cobalt Blue": 5,
+        "Cobalt Blue → Dioxazine Purple": 1,
+        "Chartreuse → Dioxazine Purple": 3,
+        "Dioxazine Purple → Chartreuse": 6,
+        "Cadmium Red Light → Chartreuse": 3,
+        "Chartreuse → Cobalt Blue": 5,
+        "Chartreuse → Cadmium Red Light": 4,
+        "Cobalt Blue → Cadmium Red Light": 2,
+        "Cobalt Blue → Chartreuse": 1
+      }
+    },
+    {
+      "name": "Double Cross",
+      "eligible": 40,
+      "tags": {
+        "chromatic-ride": 22,
+        "choice": 26,
+        "interior": 4,
+        "precision": 3
+      },
+      "distinctSelected": 16,
+      "pars": [
+        [
+          4,
+          2,
+          2,
+          3,
+          5
+        ],
+        [
+          5,
+          2,
+          2,
+          3,
+          5
+        ],
+        [
+          4,
+          2,
+          2,
+          2,
+          5
+        ],
+        [
+          5,
+          2,
+          2,
+          2,
+          5
+        ]
+      ],
+      "bestFoundShots": [
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ],
+        [
+          2,
+          1,
+          1,
+          1,
+          2
+        ]
+      ],
+      "selectedKinds": [
+        [
+          "interior",
+          "choice",
+          "choice",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "choice",
+          "chromatic-ride",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "choice",
+          "choice",
+          "interior"
+        ],
+        [
+          "interior",
+          "choice",
+          "chromatic-ride",
+          "choice",
+          "interior"
+        ]
+      ],
+      "lightnessRange": [
+        0.3814777510768669,
+        0.7258384874117922
+      ],
+      "interactions": {
+        "Cadmium Orange → Cadmium Red Medium": 4,
+        "Cadmium Red Medium → Cobalt Blue": 2,
+        "Permanent Green Light → Cadmium Orange": 10,
+        "Cadmium Orange → Cobalt Blue": 2,
+        "Permanent Green Light → Cadmium Red Medium": 3,
+        "Cadmium Red Medium → Cadmium Orange": 4,
+        "Cobalt Blue → Cadmium Orange": 1,
+        "Cadmium Orange → Permanent Green Light": 2
+      }
+    }
+  ]
+}

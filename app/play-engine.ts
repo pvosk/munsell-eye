@@ -2,13 +2,14 @@ import { Color, mix } from 'spectral.js';
 import { PAINTS, type PaintColor } from './paint-mixing';
 import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
 import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
+import courseBank from './generated/play-courses.json';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
 export type Mixture = number[];
 export type ColorPoint = { rgb: RGB; lab: XYZ; position: XYZ };
 export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number };
-export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number };
+export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number; courseId: string; kind: string; solutionShots: number; routeOrder: number[]; routeTimes: number[] };
 export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
 
@@ -231,7 +232,7 @@ export function simplestRecipe(level: PlayLevel, target: ColorPoint, witness: Mi
   return best;
 }
 
-function generateCandidate(levelIndex: number, seed: number) {
+export function generateCandidate(levelIndex: number, seed: number, simplify = true) {
   const level = PLAY_LEVELS[levelIndex];
   const rng = seededRandom(seed);
   let recipe: Mixture = [];
@@ -247,7 +248,7 @@ function generateCandidate(levelIndex: number, seed: number) {
     target = mixtureColor(level.paints, recipe);
     if (level.paints.every((p) => colorDistance(colorPoint(p.rgb), target) > level.tolerance * 1.7)) break;
   }
-  const simple = simplestRecipe(level, target, recipe);
+  const simple = simplify ? simplestRecipe(level, target, recipe) : recipe;
   return { target, recipe, simple };
 }
 
@@ -287,45 +288,14 @@ export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance:
   return best;
 }
 
-const roundCache = new Map<string, Hole[]>();
+const courseSignature = JSON.stringify(PLAY_LEVELS.map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
 export function generateHole(levelIndex: number, seed: number, stage = 0): Hole {
   if (!PLAY_LEVELS[levelIndex] || !Number.isInteger(stage) || stage < 0 || stage >= HOLES_PER_PALETTE) throw new Error('Invalid hole');
-  const key = `${levelIndex}:${seed}`;
-  let round = roundCache.get(key);
-  if (!round) {
-    const level = PLAY_LEVELS[levelIndex];
-    const candidates = Array.from({ length: 80 }, (_, i) => {
-      const candidate = generateCandidate(levelIndex, (seed + Math.imul(i + 1, 7919)) >>> 0);
-      const timing = recipeTimingWindow(level, candidate.recipe, level.tolerance);
-      const support = candidate.simple.filter(q => q > 0).length;
-      return { ...candidate, support, route: candidate.simple.map(q => q > 0 ? 1 : 0).join(''), score: (support - 2) * .7 + Math.log1p(1 / Math.max(.01, timing)) };
-    }).sort((a, b) => a.score - b.score);
-    const chosen: typeof candidates = [];
-    round = Array.from({ length: HOLES_PER_PALETTE }, (_, holeIndex) => {
-      const unused = candidates.filter(c => !chosen.includes(c) && level.paints.every(p => colorDistance(colorPoint(p.rgb),c.target) > level.tolerance * 1.4));
-      const stagePool = unused.filter(c => holeIndex < 2 ? c.support === 2 : c.support >= 3);
-      const pool = stagePool.length ? stagePool : unused.length ? unused : candidates.filter(c => !chosen.includes(c));
-      const rankGoal = .1 + holeIndex * .2;
-      const merit = (c: typeof candidates[number]) => {
-        const novelty = chosen.length ? Math.min(...chosen.map(other => colorDistance(c.target,other.target))) : .1;
-        const repeatedRoute = chosen.some(other => other.route === c.route);
-        return Math.min(.3,novelty)*12 - (novelty < level.tolerance*1.8 ? 3 : 0)
-          - (repeatedRoute ? .55 : 0) - Math.abs(candidates.indexOf(c)/(candidates.length-1)-rankGoal)*.65;
-      };
-      const candidate = pool.reduce((best,c) => merit(c)>merit(best) ? c : best);
-      chosen.push(candidate);
-      const tolerance = level.tolerance;
-      const recipe = simplestRecipe({ ...level, tolerance }, candidate.target, candidate.recipe);
-      const slack = Math.max(.001, tolerance - colorDistance(mixtureColor(level.paints, recipe), candidate.target));
-      return { seed, stage: holeIndex, start: neutralStart(level), target: candidate.target, notation: nearestNotation(candidate.target), par: recipe.filter(q => q > 0).length - 1, recipe, tolerance, timingWindow: recipeTimingWindow(level, recipe, slack) };
-    });
-    // Bounded cache keeps repeated restarts cheap without accumulating rounds.
-    // Finish with the most demanding selected recipe: more required paints,
-    // then the narrower estimated timing window when par is equal.
-    round.sort((a,b) => a.par-b.par || b.timingWindow-a.timingWindow);
-    round = round.map((hole,stage) => ({...hole,stage}));
-    if (roundCache.size >= 12) roundCache.delete(roundCache.keys().next().value!);
-    roundCache.set(key, round);
-  }
-  return round[stage];
+  if (courseBank.signature!==courseSignature) throw new Error('Paint model changed: regenerate the evaluated course bank');
+  const level=PLAY_LEVELS[levelIndex],rounds=courseBank.palettes[levelIndex].rounds;
+  // Stable course selection. No candidate search runs on the player's device.
+  let hash=seed>>>0;hash=Math.imul(hash^(hash>>>16),0x7feb352d);hash=Math.imul(hash^(hash>>>15),0x846ca68b);hash=(hash^(hash>>>16))>>>0;
+  const record=rounds[hash%rounds.length][stage];
+  const target=mixtureColor(level.paints,record.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:record.par,recipe:[...record.recipe],tolerance:level.tolerance,timingWindow:record.timingWindow,courseId:record.id,kind:record.kind,solutionShots:record.solutionShots,routeOrder:[...record.order],routeTimes:[...record.times]};
 }

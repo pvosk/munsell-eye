@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, targetFlightPath, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
+import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
-type Flight = { path: ColorPoint[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
+type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
 type SceneCallbacks = { targetPosition: (x: number, y: number, offscreen: boolean, angle: number) => void; onIntroEnd: () => void; onError: () => void };
 const v3 = (point: ColorPoint) => new THREE.Vector3(...point.position);
 const color = (rgb: RGB) => new THREE.Color().setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, THREE.SRGBColorSpace);
@@ -147,6 +147,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   scene.add(field);
 
   const target = new THREE.Group(); scene.add(target);
+  const targetAnchor=new THREE.Vector3(...hole.target.position);
+  const targetRecoil=new THREE.Vector3();
   const targetMaterial = new THREE.MeshBasicMaterial({ color: color(hole.target.rgb) });
   const targetCore = new THREE.Mesh(new THREE.SphereGeometry(.62, 28, 20), targetMaterial); target.add(targetCore);
   const targetRim = new THREE.Mesh(targetCore.geometry,new THREE.MeshBasicMaterial({color:'#fff5dc',side:THREE.BackSide}));
@@ -179,7 +181,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   let introElapsed = 0; let introducing = true;
   const introSeconds=4.8;
   const background=new THREE.Color('#353e44');
-  const darkBackground=new THREE.Color('#303a3e'), lightBackground=new THREE.Color('#9a9f9a');
+  const darkBackground=new THREE.Color('#202b2e'), lightBackground=new THREE.Color('#b5b9b3');
   let introPose: ReturnType<typeof planArrival>;
   const introFinishLook = new THREE.Vector3();
   let won = false; let disposed = false;
@@ -231,6 +233,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     wakeSamples.forEach(sample=>sample.w=-100); wakeCursor=0; lastWake=-10;
     lookAt.copy(blob.position).addScaledVector(cameraDirection, 2.5);
     target.position.copy(v3(next.target));
+    targetAnchor.copy(target.position); targetRecoil.set(0,0,0);
     targetMaterial.color.copy(color(next.target.rgb));
     // A readable spherical marker, sized from the local perceptual tolerance.
     // It is an approximate cue; settlement is still scored in OKLab.
@@ -257,7 +260,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const nearGoal = 1 - smooth(Math.min(1, separation / 12));
     const restPosition = blob.position.clone().addScaledVector(cameraDirection, -((camera.aspect < .85 ? 6.3 : 5.4) + nearGoal * 2.5)).addScaledVector(side, 2.8 + nearGoal * 2).add(new THREE.Vector3(0, 1.8, 0));
     introFinishLook.copy(blob.position).lerp(target.position, Math.min(.5, 4 / Math.max(1, separation)));
-    introPose = planArrival(target.position,restPosition,introFinishLook);
+    introPose = planArrival(target.position,restPosition,introFinishLook,next.seed+Math.imul(next.stage+1,7919));
     introElapsed = 0; introducing = true;
     camera.position.copy(reduced ? restPosition : introPose(0).position);
     lookAt.copy(reduced ? introFinishLook : target.position);
@@ -336,6 +339,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const fraction = (distance - f.distances[index - 1]) / Math.max(.000001, f.distances[index] - f.distances[index - 1]);
       const a = f.path[index - 1]; const b = f.path[index];
       const p = v3(a).lerp(v3(b), fraction);
+      targetRecoil.copy(f.recoil[index-1]).lerp(f.recoil[index],fraction);
+      target.position.copy(targetAnchor).add(targetRecoil);
       const old = blob.position.clone(); blob.position.copy(p);
       captureAmount=f.qualifies ? easeQuint((progress-.78)/.22) : 0;
       if(!reduced && time-lastWake>.42) {
@@ -364,7 +369,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
         flight = null; landing = time; pulse(current.rgb, blob.position, travelDirection);
         won=f.qualifies; f.done();
       }
-    } else blob.position.copy(v3(current));
+    } else { blob.position.copy(v3(current));targetRecoil.multiplyScalar(Math.exp(-dt*5));target.position.copy(targetAnchor).add(targetRecoil); }
     if (won) blob.position.copy(target.position);
     const scale = (1 - activeHole.stage * .035) * (1 + Math.min(.35, Math.log1p(mass) * .05)) * (won ? .25 : 1-.7*captureAmount);
     const launchAge = time - releaseTime;
@@ -385,7 +390,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       positions.setXYZ(i, x * radius * bell*taper, y * radius * bell*taper, z * radius * (.8+tension*.22));
     }
     positions.needsUpdate = true;
-    const idleFacing = target.position.clone().sub(blob.position).normalize();
+    const idleFacing = targetAnchor.clone().sub(blob.position).normalize();
     const facing = charge?.tangent ?? (flight || won ? travelDirection : idleFacing);
     if (facing.lengthSq() > .001) body.quaternion.slerp(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), facing), 1 - Math.exp(-dt * 7));
     outline.quaternion.copy(body.quaternion); outline.scale.copy(body.scale).multiplyScalar(1.13);
@@ -453,6 +458,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     targetGlow.material.uniforms.strength.value = reduced ? .18 : .2 + Math.sin(time * 1.8) * .06;
     nodeUniforms.uTime.value = reduced ? 0 : time;
     nodeUniforms.uPlayer.value.copy(blob.position);
+    nodeUniforms.uTarget.value.copy(target.position);
     nodeUniforms.uMotion.value = reduced ? 0 : 1;
     wakeSamples.forEach((sample,i)=>{wakeGains[i]=reduced?0:wakeEnvelope(time-sample.w);});
     nodeUniforms.uFlight.value += ((flight && !reduced ? 1 : 0) - nodeUniforms.uFlight.value) * (1 - Math.exp(-dt * 3));
@@ -460,7 +466,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
 
     // Remain inside the lattice. Follow behind the glider, never zoom out to
     // fit the whole system. At rest, turn toward the destination from here.
-    const toTarget = target.position.clone().sub(blob.position);
+    const toTarget = targetAnchor.clone().sub(blob.position);
     const separation = toTarget.length();
     const heading = flight ? travelDirection.clone() : separation > .25 ? toTarget.clone().normalize() : travelDirection.clone();
     if (flight) { orbitYaw *= Math.exp(-dt * 1.2); orbitPitch *= Math.exp(-dt * 1.2); }
@@ -526,7 +532,6 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
 
   return {
     reset: setHole,
-    skipIntro() { introElapsed = introSeconds; },
     charge(rgb: RGB, ratio: number, power: number, tangent?: ColorPoint) { charge = { rgb, ratio, power, tangent: tangent ? v3(tangent).sub(blob.position).normalize() : undefined }; },
     cancelCharge() { charge = null; },
     launch(path: ColorPoint[], fromMass: number, toMass: number, done: () => void) {
@@ -534,7 +539,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       if (path.length === 1) path = baseLaunchPath(activeHole.start, path[0]);
       const endpoint=path[path.length-1];
       const qualifies=fromMass>0 && colorDistance(endpoint,activeHole.target)<=activeHole.tolerance;
-      path=targetFlightPath(path,activeHole.target,qualifies);
+      const diverted=targetFlightPath(path,activeHole.target,qualifies);
+      const response=splitTargetResponse(path,diverted,qualifies);
+      path=response.path;const recoil=response.recoil;
       const distances = [0];
       for (let i = 1; i < path.length; i++) distances.push(distances[i - 1] + v3(path[i]).distanceTo(v3(path[i - 1])));
       const length = distances[distances.length - 1];
@@ -546,7 +553,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       yawGoal = closestHeading(cameraYaw,Math.atan2(travelDirection.x,travelDirection.z));
       orbitYaw = 0; orbitPitch = 0;
       pulse(path[0].rgb, blob.position, travelDirection);
-      flight = { path, endpoint, qualifies, distances, length, elapsed: 0, duration: reduced ? .4 : Math.max(.7, Math.min(3.2, .5 + Math.sqrt(length) * .35 + Math.log1p(toMass) * .018)), fromMass, toMass, done, ribbon: makeRibbon(path, toMass) };
+      flight = { path, recoil, endpoint, qualifies, distances, length, elapsed: 0, duration: reduced ? .4 : Math.max(.7, Math.min(3.2, .5 + Math.sqrt(length) * .35 + Math.log1p(toMass) * .018)), fromMass, toMass, done, ribbon: makeRibbon(path, toMass) };
     },
     celebrate() { won = true; pulse(activeHole.target.rgb, target.position, new THREE.Vector3(0, 0, 1)); },
     dispose() {

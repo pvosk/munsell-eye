@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
+import courseBank from '../app/generated/play-courses.json';
+import { paletteSignature, PROFILES, replayRoute, playerPar } from '../app/play-course-analysis';
 
 test('landing tolerances are ten percent tighter across every palette', () => {
   const previous = [.038,.032,.028,.032,.03,.032,.032,.032,.032,.032];
@@ -64,27 +66,36 @@ test('pour endpoints are exactly the cumulative mixture, even after a large corr
   for (const point of path) assert.ok([...point.lab, ...point.rgb, ...point.position].every(Number.isFinite));
 });
 
-test('every generated target has a constructive route at guide par within the hold limits', () => {
-  const began = performance.now(); const pars: number[][] = PLAY_LEVELS.map(() => []);
-  for (let index = 0; index < PLAY_LEVELS.length; index++) for (let seed = 1; seed <= 16; seed++) {
-    const level = PLAY_LEVELS[index]; const hole = generateHole(index, seed * 7919);
-    const recipe = hole.recipe;
-    const order = recipe.map((amount, i) => ({ i, amount })).filter((p) => p.amount > 0).sort((a, b) => b.amount - a.amount);
-    assert.equal(order.length - 1, hole.par);
-    assert.ok(hole.par >= 1 && hole.par < level.paints.length);
-    let state = level.paints.map(() => 0);
-    const base = order[0].amount;
-    for (const { i, amount } of order) {
-      const dose = amount / base;
-      if (totalMass(state)) { assert.ok(dose <= chargeAmount(totalMass(state), CHARGE_SECONDS)); assert.ok(dose >= chargeAmount(totalMass(state), 0)); }
-      state = addPaint(state, i, dose);
+test('every bank entry replays through the real charge controls and checks every base', () => {
+  assert.equal(courseBank.signature,paletteSignature());
+  let count=0;
+  courseBank.palettes.forEach((palette,index)=>palette.rounds.flat().forEach(hole=>{
+    const level=PLAY_LEVELS[index],target=mixtureColor(level.paints,hole.target);
+    assert.equal(hole.solutionShots,hole.times.length);
+    assert.equal(hole.order.length,hole.times.length+1);
+    assert.ok(hole.times.every(t=>t>=0 && t<=CHARGE_SECONDS));
+    const result=replayRoute(index,hole.order,hole.times);
+    assert.deepEqual(result,hole.recipe);
+    assert.ok(colorDistance(mixtureColor(level.paints,result),target)<level.tolerance,hole.id);
+    assert.equal(hole.par,playerPar(hole.solutionShots,hole.timingWindow,PROFILES[index].challenge));
+    assert.ok(hole.par>=2 && hole.par<=6 && hole.par>=hole.solutionShots);
+    assert.deepEqual(hole.checks.map(c=>c.base),level.paints.map((_,i)=>i));
+    assert.ok(hole.checks.every(c=>Number.isFinite(c.one)&&Number.isFinite(c.two)));
+    // Never ignore a sampled easier route merely because it is off-center.
+    if(hole.solutionShots>1)assert.ok(hole.checks.every(c=>c.one>=level.tolerance-1e-8));
+    if(hole.solutionShots>2)assert.ok(hole.checks.every(c=>c.two>=level.tolerance-1e-8));
+    assert.ok(hole.nearestBase>=level.tolerance*1.8);
+    assert.ok(hole.timingWindow>0);
+    for(const direction of [-1,1])for(let i=0;i<hole.times.length;i++) {
+      const times=[...hole.times];times[i]+=direction*hole.timingWindow*.5;
+      if(times[i]<0||times[i]>CHARGE_SECONDS)continue;
+      assert.ok(colorDistance(mixtureColor(level.paints,replayRoute(index,hole.order,times)),target)<=level.tolerance,hole.id+' timing margin');
     }
-    const result = mixtureColor(level.paints, state);
-    assert.ok(colorDistance(result, hole.target) <= hole.tolerance, `Level ${index}, seed ${seed} is unreachable`);
-    assert.ok(level.paints.every((_, i) => colorDistance(mixtureColor(level.paints, level.paints.map((_, j) => i === j ? 1 : 0)), hole.target) > hole.tolerance));
-    pars[index].push(hole.par);
-  }
-  console.log(`${PLAY_LEVELS.length * 16} target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
+    count++;
+  }));
+  assert.equal(count,200);
+  assert.equal(playerPar(3,.01,1),6,'difficult profiles support par six without equating it to six necessary shots');
+  console.log(`${count} evaluated course routes replayed, including mass-dependent later doses.`);
 });
 
 test('smooth calibration retains a broad color volume; scoring is independent of its projection', () => {
@@ -155,37 +166,35 @@ test('the empty neutral start launches straight to pure paint without adding gra
   }
 });
 
-test('all five holes retain a constant landing tolerance and reachable recipes', () => {
+test('every palette round has its own verified requirements, separation and tougher finish', () => {
+  courseBank.palettes.forEach((palette,index)=>palette.rounds.forEach(round=>{
+    const level=PLAY_LEVELS[index];
+    assert.equal(round.length,HOLES_PER_PALETTE);
+    for(const [tag,n] of Object.entries(PROFILES[index].required??{}))assert.ok(round.filter(h=>h.tags.includes(tag)).length>=n,`${level.name}: ${tag}`);
+    assert.ok(round.every(h=>h.par<=round.at(-1)!.par));
+    round.forEach((h,i)=>round.slice(i+1).forEach(other=>{
+      assert.ok(colorDistance(mixtureColor(level.paints,h.target),mixtureColor(level.paints,other.target))>level.tolerance*1.4);
+    }));
+  }));
+});
+
+test('round lookup is reproducible and does not change tolerance or route metadata', () => {
   for (let palette = 0; palette < PLAY_LEVELS.length; palette++) for (const seed of [190926, 17, 391]) {
     const level = PLAY_LEVELS[palette];
     const round = Array.from({ length: HOLES_PER_PALETTE }, (_, stage) => generateHole(palette, seed, stage));
     for (const hole of round) {
       assert.equal(hole.tolerance, level.tolerance);
       assert.ok(hole.timingWindow > 0 && Number.isFinite(hole.timingWindow));
-      assert.equal(hole.par, hole.recipe.filter(q => q > 0).length - 1);
-      const base = Math.max(...hole.recipe);
-      const recipe = hole.recipe.map(q => q / base);
-      assert.ok(colorDistance(mixtureColor(level.paints, recipe), hole.target) <= hole.tolerance);
-      let mass = 0;
-      for (const amount of recipe.filter(q => q > 0).sort((a,b) => b-a)) {
-        if (mass) assert.ok(amount >= chargeAmount(mass, 0) && amount <= chargeAmount(mass, CHARGE_SECONDS));
-        mass += amount;
-      }
+      assert.equal(hole.solutionShots,hole.routeTimes.length);
+      assert.ok(colorDistance(mixtureColor(level.paints,replayRoute(palette,hole.routeOrder,hole.routeTimes)),hole.target)<hole.tolerance);
+      assert.deepEqual(hole,generateHole(palette,seed,hole.stage));
     }
-    assert.ok(round.at(-1)!.par >= round[0].par);
-    round.slice(1).forEach((hole,i) => {
-      assert.ok(hole.par >= round[i].par);
-      if (hole.par === round[i].par) assert.ok(hole.timingWindow <= round[i].timingWindow);
-      assert.equal(hole.stage,i+1);
-    });
-    assert.equal(round[0].par,1);
+    assert.ok(round.every(h=>round.at(-1)!.par>=h.par));
+    round.forEach((hole,i)=>assert.equal(hole.stage,i));
     const closest = Math.min(...round.flatMap((h,i)=>round.slice(i+1).map(other=>colorDistance(h.target,other.target))));
-    assert.ok(closest > level.tolerance, `${level.name} repeated visually overlapping targets: ${closest}`);
-    assert.ok(new Set(round.map(h=>h.recipe.map(q=>q>0?1:0).join(''))).size >= 2);
-    console.log(`${level.name} seed ${seed}: pars ${round.map(h => h.par).join('/')}; estimated timing windows ${round.map(h => Math.round(h.timingWindow * 1000)).join('/')}ms`);
-    const recipe = round.at(-1)!.recipe;
-    assert.ok(recipeTimingWindow(level, recipe, .02) < recipeTimingWindow(level, recipe, .04));
+    assert.ok(closest > level.tolerance*1.4, `${level.name} repeated visually overlapping targets: ${closest}`);
   }
+  const recipe=[1,.5,3];assert.ok(recipeTimingWindow(PLAY_LEVELS[0],recipe,.02)<recipeTimingWindow(PLAY_LEVELS[0],recipe,.04));
 });
 
 test('arrival follows one uninterrupted curve into its settled pose', async () => {
@@ -229,6 +238,44 @@ test('capture and solid-target deflection preserve mixture data and miss endpoin
   assert.equal(JSON.stringify(path),before,'presentation cannot mutate the scored path');
   let previous=0;for(let i=0;i<=100;i++){const p=captureProgress(i/100);assert.ok(p>=previous && p<=1);previous=p;}
   assert.ok((captureProgress(1)-captureProgress(.99))>(captureProgress(.65)-captureProgress(.64)),'arrival accelerates rather than stalls');
+});
+
+test('arrival varies its landscape reveal without axial overshoot or endpoint jumps', async()=>{
+  const {planArrival}=await import('../app/play-motion');const {Vector3}=await import('three');
+  const target=new Vector3(20,9,-15),rest=new Vector3(3,2,7),look=new Vector3(1,0,0);
+  const poses=[1,2,3,4,5,6,7,8].map(seed=>planArrival(target,rest,look,seed));
+  const bows=poses.map(p=>p(.5).position.clone().sub(poses[0](0).position.clone().lerp(rest,.5)));
+  assert.ok(bows.some((a,i)=>bows.slice(i+1).some(b=>a.clone().normalize().dot(b.clone().normalize())<-.7)),'both sides of the gamut must be revealed');
+  for(const pose of poses) {
+    assert.ok(pose(1).position.distanceTo(rest)<1e-10);
+    assert.ok(pose(1).quaternion.angleTo(poses[0](1).quaternion)<1e-7);
+    assert.ok(pose(.9999).position.distanceTo(pose(1).position)<1e-6);
+    const start=pose(0).position,axis=rest.clone().sub(start),length=axis.length();axis.normalize();let previous=0;
+    for(let i=0;i<=100;i++) {
+      const along=pose(i/100).position.clone().sub(start).dot(axis);
+      assert.ok(along>=previous-1e-7&&along<=length+1e-7);previous=along;
+      if(i)assert.ok(pose(i/100).quaternion.angleTo(pose((i-1)/100).quaternion)<.07,'no abrupt look-around');
+    }
+  }
+});
+
+test('near misses move the destination more than the glider, without changing color or endpoints',async()=>{
+  const {targetFlightPath,splitTargetResponse}=await import('../app/play-motion');const {Vector3}=await import('three');
+  const goal={rgb:[120,80,70] as [number,number,number],lab:[.5,0,0] as [number,number,number],position:[0,0,0] as [number,number,number]};
+  const original=Array.from({length:401},(_,i)=>({...goal,position:[-5+i/40,0,0] as [number,number,number]}));
+  const diverted=targetFlightPath(original,goal,false),response=splitTargetResponse(original,diverted,false);
+  response.path.forEach((p,i)=>{
+    const relative=new Vector3(...p.position).sub(response.recoil[i]);
+    assert.ok(relative.distanceTo(new Vector3(...diverted[i].position))<1e-10);
+    const gliderMove=new Vector3(...p.position).distanceTo(new Vector3(...original[i].position));
+    assert.ok(response.recoil[i].length()>=gliderMove*5-1e-9);
+    assert.deepEqual(p.lab,original[i].lab);assert.deepEqual(p.rgb,original[i].rgb);
+  });
+  assert.deepEqual(response.path.at(-1)!.position,original.at(-1)!.position);
+  assert.equal(response.recoil.at(-1)!.length(),0);
+  assert.ok(response.recoil[200].length()>.8);
+  const win=splitTargetResponse(original,targetFlightPath(original,goal,true),true);
+  assert.ok(win.recoil.every(p=>p.length()===0));assert.deepEqual(win.path.at(-1)!.position,goal.position);
 });
 
 test('wake decays to rest after ten seconds and fin attachments taper', async () => {

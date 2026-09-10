@@ -110,7 +110,7 @@ export default function PlayView() {
       if (landed) {
         scene.current?.celebrate();
         setResults((current) => current.map((round, i) => i === s.levelIndex ? round.map((score, j) => j === s.hole.stage ? Math.min(score ?? Infinity, nextPours) : score) : round));
-        setAnnouncement(`Landed in ${nextPours} pours. Guide par ${s.hole.par}.`);
+        setAnnouncement(`Landed in ${nextPours} pours. Player par ${s.hole.par}.`);
       } else setAnnouncement(`${beforeMass ? 'Settled' : 'Base chosen'}. ${nearestNotation(result)}. Choose a paint and hold to pour.`);
     });
   }, []);
@@ -160,8 +160,11 @@ export default function PlayView() {
     setFinishPaused(false);
     cancelCharge(); setReady(false); setError(false); setSelected(0); setPours(0); setPhase('intro'); setHelp(false);
     setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
-    // New object also restarts an identical cached hole and its scene effect.
-    setHole({ ...generateHole(index, same ? hole.seed : crypto.getRandomValues(new Uint32Array(1))[0], stage) });
+    // Keep a round's seed through all five holes. A requested new target should
+    // not immediately repeat the same bank entry when the random variant repeats.
+    let next=generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    if(!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    setHole(next);
     setAnnouncement(`Hole ${stage + 1} of ${HOLES_PER_PALETTE}. Arriving in color space.`);
   };
   const nextHole = () => hole.stage < HOLES_PER_PALETTE - 1
@@ -232,16 +235,15 @@ export default function PlayView() {
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>
       <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span><span>Destination</span></div>
       <div className="play-score"><span><b>{hole.stage + 1}/{HOLES_PER_PALETTE}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span><span><b>{hole.par}</b> Par</span><span><b>{massLabel(mass)}</b> Parts</span></div>
-      {phase === 'intro' && ready && <button type="button" className="play-skip-intro" onClick={() => scene.current?.skipIntro()}>Skip Fly-through</button>}
       <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
-      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette has five holes with a consistent color tolerance. Early holes keep simple two-paint routes; later mixtures become more demanding. A qualifying endpoint is drawn into the cup, then advances automatically; par is a personal challenge. All palettes are available to explore.</p><p className="play-fineprint">Guide par comes from sampled recipes. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
+      {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette draws from four evaluated five-hole rounds, with its own balance of colorful rides, value changes and quieter mixtures. The final hole carries the round’s toughest par or timing margin. A qualifying endpoint is drawn into the cup, then advances automatically. All palettes are available to explore.</p><p className="play-fineprint">Player par includes room for adjustment; it is not the fewest possible shots. It is provisionally calibrated from sampled routes and timing margins. Every starting paint is checked for one- and two-pour alternatives, but the search is not a mathematical proof. Landing tolerance stays fixed within each palette. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
       {phase === 'landed' && !help && <div className="play-arrival" data-result={pours<=hole.par?'within':'over'} onFocus={()=>setFinishPaused(true)} onPointerDown={()=>setFinishPaused(true)}>
         <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Shots</span></div><div><strong>{massLabel(mass)}</strong><span>Total parts</span></div></div>
-        <p className="play-par-difference">{pours===hole.par?'On guide par':`${pours>hole.par?'+':''}${pours-hole.par} vs guide par`} <span>· {hole.par} estimated</span></p>
+        <p className="play-par-difference">{pours===hole.par?'On par':`${pours>hole.par?'+':''}${pours-hole.par} vs par`} <span>· Player par {hole.par}</span></p>
         <span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span>
-        <h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
+        <h2>{pours < hole.par ? 'Beautifully Judged.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
         <div><button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button></div>
       </div>}
     </div>
