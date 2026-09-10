@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { flightProgress, ribbonEdges } from './play-motion';
-import { SPACE_NODES, baseLaunchPath, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
+import { FIELD_POINTS, baseLaunchPath, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
 type SceneCallbacks = { targetPosition: (x: number, y: number, offscreen: boolean, angle: number) => void; onIntroEnd: () => void; onError: () => void };
@@ -12,14 +12,14 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: SceneCallbacks) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-  renderer.setClearColor('#2b3233');
+  renderer.setClearColor('#353e44');
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute('aria-label', 'Three-dimensional paint space. Hold a paint below, then release to pour toward the target.');
   renderer.domElement.setAttribute('role', 'img');
   host.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2('#2b3233', .009);
-  const camera = new THREE.PerspectiveCamera(62, 1, .06, 240);
+  scene.fog = new THREE.FogExp2('#353e44', .005);
+  const camera = new THREE.PerspectiveCamera(58, 1, .06, 240);
   camera.position.set(12, 9, 20);
   const blob = new THREE.Group();
   const noise = new ImprovedNoise();
@@ -45,52 +45,46 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const satellite = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshBasicMaterial({ color: '#ffffff' }));
   satellite.visible = false; scene.add(satellite);
 
-  // Actual renotation chips in a broad, absolute-chroma Munsell volume.
-  const nodesGeometry = new THREE.BufferGeometry();
-  const nodePositions: number[] = []; const nodeColors: number[] = [];
-  SPACE_NODES.forEach(({ point }) => { nodePositions.push(...point.position); const c = color(point.rgb); nodeColors.push(c.r, c.g, c.b); });
-  nodesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nodePositions, 3));
-  nodesGeometry.setAttribute('color', new THREE.Float32BufferAttribute(nodeColors, 3));
-  const nodeMaterial = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, vertexColors: true,
-    uniforms: { uTime: { value: 0 }, uIntro: { value: 0 }, uFlight: { value: 0 }, uTarget: { value: new THREE.Vector3() }, uPlayer: { value: new THREE.Vector3() }, uPixelRatio: { value: renderer.getPixelRatio() } },
-    vertexShader: `uniform float uTime; uniform float uIntro; uniform float uFlight; uniform float uPixelRatio; uniform vec3 uPlayer; uniform vec3 uTarget; varying vec3 vTint; varying float vAlpha; varying float vWind; varying float vGrass;
-      void main(){ float d=distance(position,uPlayer); float nearby=1.0-smoothstep(2.0,24.0,d); float breath=.8+.2*sin(uTime*.8+sin(position.y*.4)+position.x*.2);
-      vWind=sin(uTime*.9+position.x*.18+sin(position.z*.15)); vGrass=uIntro;
-      vec3 sway=vec3(vWind,0.,cos(uTime*.7+position.z*.13))*(.12+uIntro*.7)*nearby;
-      vec4 mv=modelViewMatrix*vec4(position+sway,1.0); gl_Position=projectionMatrix*mv;
-      gl_PointSize=clamp((140.0+nearby*420.0*(1.0+uFlight*.6+uIntro*2.0))*uPixelRatio/max(1.2,-mv.z),1.0,44.0+uIntro*36.0)*smoothstep(.35,2.0,d)*breath;
+  // One instanced draw: crisp matte cells throughout the color volume. No
+  // ring scaffolding, point-sprite blur, lighting glare, or empty neutral grid.
+  const nodesGeometry = new THREE.BoxGeometry(.64, .64, .64);
+  const nodeUniforms = { uTime: { value: 0 }, uIntro: { value: 0 }, uFlight: { value: 0 }, uTarget: { value: new THREE.Vector3() }, uPlayer: { value: new THREE.Vector3() } };
+  const nodeMaterial = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false });
+  nodeMaterial.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, nodeUniforms);
+    shader.vertexShader = 'uniform float uTime; uniform float uIntro; uniform float uFlight; uniform vec3 uPlayer; uniform vec3 uTarget; varying float vFieldAlpha;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `
+      vec3 base=instanceMatrix[3].xyz;
+      vec3 delta=base-uPlayer;
+      float d=length(delta);
+      float nearby=1.0-smoothstep(3.0,26.0,d);
+      float wave=sin(uTime*.7+base.y*.25+sin(base.z*.2));
+      vec3 outward=delta/max(.01,d);
+      vec3 swirl=vec3(-outward.z,0.0,outward.x);
+      float wake=uFlight*exp(-d*d/70.0);
+      vec3 displacement=outward*wake*3.5+swirl*wake*1.3;
+      displacement+=vec3(wave,0.0,cos(uTime*.6+base.x*.2))*(.08+uIntro*.3)*nearby;
+      float size=mix(.6,1.35,nearby)*(1.0+uIntro*.3)*(1.0+wave*.035);
+      vec3 transformed=position*size+displacement;
+      vec4 cell=projectionMatrix*modelViewMatrix*vec4(base+displacement,1.0);
       vec4 goal=projectionMatrix*modelViewMatrix*vec4(uTarget,1.0);
-      float clearGoal=smoothstep(.06,.22,length(gl_Position.xy/max(.01,gl_Position.w)-goal.xy/max(.01,goal.w)));
-      vTint=color; vAlpha=(.08+nearby*.7+uIntro*.15)*exp(-.025*max(0.0,-mv.z))*mix(.12,1.0,clearGoal); }`,
-    fragmentShader: `varying vec3 vTint; varying float vAlpha; varying float vWind; varying float vGrass; void main(){vec2 p=gl_PointCoord-.5;p.x-=vWind*p.y*p.y*vGrass*.9;p.x*=1.0+vGrass*2.2;float d=length(p); if(d>.5)discard; gl_FragColor=vec4(vTint,vAlpha*(1.0-smoothstep(.12,.5,d))); #include <colorspace_fragment> }`.replace(' #include', '\n#include').replace('> }', '>\n}'),
-  });
-  scene.add(new THREE.Points(nodesGeometry, nodeMaterial));
-
-  // Quiet value strata and a neutral spine give the camera a stable vertical.
-  [2, 5, 8].forEach((value) => {
-    const row = SPACE_NODES.filter(({ chip }) => chip.v === value && chip.c === 4);
-    if (row.length < 3) return;
-    const points = row.map(({ point }) => v3(point));
-    points.push(points[0]);
-    const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal');
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(160)), new THREE.LineBasicMaterial({ color: '#c4c6b9', transparent: true, opacity: .07 })));
-  });
-  const spine = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -20, 0), new THREE.Vector3(0, 20, 0)]);
-  scene.add(new THREE.Line(spine, new THREE.LineBasicMaterial({ color: '#dfded0', transparent: true, opacity: .075 })));
-
-  // A second, very sparse neutral lattice supplies distant parallax.
-  const dust: number[] = [];
-  for (let x = -52; x <= 52; x += 8) for (let y = -28; y <= 28; y += 8) for (let z = -52; z <= 52; z += 8) dust.push(x, y, z);
-  const dustGeometry = new THREE.BufferGeometry();
-  dustGeometry.setAttribute('position', new THREE.Float32BufferAttribute(dust, 3));
-  scene.add(new THREE.Points(dustGeometry, new THREE.PointsMaterial({ color: '#b7c3bb', size: .038, transparent: true, opacity: .22, sizeAttenuation: true })));
+      float clearGoal=smoothstep(.05,.18,length(cell.xy/max(.01,cell.w)-goal.xy/max(.01,goal.w)));
+      float depth=-(modelViewMatrix*vec4(base,1.0)).z;
+      vFieldAlpha=(.3+nearby*.65)*exp(-.009*max(0.0,depth))*smoothstep(.5,2.1,d)*mix(.08,1.0,clearGoal);
+    `);
+    shader.fragmentShader = 'varying float vFieldAlpha;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', 'diffuseColor.a *= vFieldAlpha;\n#include <opaque_fragment>');
+  };
+  const field = new THREE.InstancedMesh(nodesGeometry, nodeMaterial, FIELD_POINTS.length);
+  const transform = new THREE.Matrix4();
+  FIELD_POINTS.forEach((point, i) => { field.setMatrixAt(i, transform.makeTranslation(...point.position)); field.setColorAt(i, color(point.rgb)); });
+  field.instanceMatrix.needsUpdate = true;
+  field.frustumCulled = false;
+  scene.add(field);
 
   const target = new THREE.Group(); scene.add(target);
   const targetMaterial = new THREE.MeshBasicMaterial({ color: color(hole.target.rgb) });
-  const targetCore = new THREE.Mesh(new THREE.SphereGeometry(.3, 24, 16), targetMaterial); target.add(targetCore);
-  const targetMist = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ color: color(hole.target.rgb), transparent: true, opacity: .065, depthWrite: false }));
-  target.add(targetMist);
+  const targetCore = new THREE.Mesh(new THREE.SphereGeometry(.62, 28, 20), targetMaterial); target.add(targetCore);
   const targetBoundary = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#e9dfc9', transparent: true, opacity: .35 }));
   target.add(targetBoundary);
   const targetGlow = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.ShaderMaterial({
@@ -100,7 +94,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     fragmentShader: 'uniform vec3 tint; uniform float strength; varying vec2 vUv; void main(){float r=length(vUv-.5)*2.0;gl_FragColor=vec4(tint,exp(-r*r*7.0)*strength*(1.0-smoothstep(.7,1.0,r)));\n#include <colorspace_fragment>\n}',
   }));
   target.add(targetGlow);
-  const targetRings = Array.from({ length: 3 }, (_, i) => {
+  const targetRings = Array.from({ length: 1 }, (_, i) => {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(1, .009, 5, 100), new THREE.MeshBasicMaterial({ color: '#e9dfc9', transparent: true, opacity: i === 0 ? .7 : .24 }));
     target.add(ring); return ring;
   });
@@ -162,27 +156,25 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     travelDirection.copy(cameraDirection);
     lookAt.copy(blob.position).addScaledVector(cameraDirection, 2.5);
     target.position.copy(v3(next.target));
-    targetMaterial.color.copy(color(next.target.rgb)); targetMist.material.color.copy(targetMaterial.color);
-    // Warp the actual OKLab tolerance surface through the same display map.
-    // Its visible boundary therefore follows scoring even in this wider world.
-    const shell = new THREE.SphereGeometry(1, 32, 20);
-    const shellPositions = shell.getAttribute('position');
+    targetMaterial.color.copy(color(next.target.rgb));
+    // A readable spherical marker, sized from the local perceptual tolerance.
+    // It is an approximate cue; settlement is still scored in OKLab.
     let radius = 0;
-    for (let i = 0; i < shellPositions.count; i++) {
-      const point = new THREE.Vector3(...landingBoundary(next.target, next.tolerance, [shellPositions.getX(i), shellPositions.getY(i), shellPositions.getZ(i)])).sub(target.position);
-      radius = Math.max(radius, point.length()); shellPositions.setXYZ(i, point.x, point.y, point.z);
+    for (let axis = 0; axis < 3; axis++) for (const sign of [-1, 1]) {
+      const direction: [number, number, number] = [0, 0, 0]; direction[axis] = sign;
+      radius += new THREE.Vector3(...landingBoundary(next.target, next.tolerance, direction)).distanceTo(target.position) / 6;
     }
-    targetMist.geometry.dispose(); targetMist.geometry = shell;
+    radius = Math.max(.9, radius);
     const boundaryLines: THREE.Vector3[] = [];
     for (let axis = 0; axis < 3; axis++) for (let segment = 0; segment < 80; segment++) for (const t of [segment, segment + 1]) {
       const angle = t / 80 * Math.PI * 2;
       const direction: [number, number, number] = [0, 0, 0]; direction[(axis + 1) % 3] = Math.cos(angle); direction[(axis + 2) % 3] = Math.sin(angle);
-      boundaryLines.push(new THREE.Vector3(...landingBoundary(next.target, next.tolerance, direction)).sub(target.position));
+      boundaryLines.push(new THREE.Vector3(...direction).multiplyScalar(radius));
     }
     targetBoundary.geometry.dispose(); targetBoundary.geometry = new THREE.BufferGeometry().setFromPoints(boundaryLines);
     targetGlow.material.uniforms.tint.value.copy(targetMaterial.color);
     targetRings.forEach((ring) => ring.scale.setScalar(Math.min(2.2, radius * .55)));
-    nodeMaterial.uniforms.uTarget.value.copy(target.position);
+    nodeUniforms.uTarget.value.copy(target.position);
     trails.splice(0).forEach((mesh) => { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); });
     pulses.splice(0).forEach(({ mesh }) => { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); });
     const side = cameraDirection.clone().cross(new THREE.Vector3(0, 1, 0)).normalize();
@@ -212,9 +204,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const envelope = Math.sin(Math.PI * i / Math.max(1, path.length - 1)) ** .6;
       for (let strand = 0; strand < 4; strand++) {
         const phase = strand * Math.PI / 2;
-        const wave = traveled * (.35 + strand * .06) + phase;
-        const offset = across.clone().multiplyScalar(Math.cos(wave) * (.4 + strand * .12) * envelope)
-          .addScaledVector(binormal, (Math.sin(wave) * .5 + noise.noise(traveled * .24, strand * 2, 0) * .35) * envelope);
+        const wave = traveled * (.16 + strand * .025) + phase;
+        const offset = across.clone().multiplyScalar(Math.cos(wave) * (.22 + strand * .08) * envelope)
+          .addScaledVector(binormal, (Math.sin(wave) * .3 + noise.noise(traveled * .12, strand * 2, 0) * .1) * envelope);
         const center = v3(point).add(offset);
         const halfWidth = (.022 + strand * .008) * (.7 + .3 * Math.sin(traveled * 1.1 + phase));
         vertices.push(...center.clone().addScaledVector(across, -halfWidth).toArray(), ...center.clone().addScaledVector(across, halfWidth).toArray());
@@ -237,7 +229,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\ntransformed += aTaper * .045 * vec3(sin(position.z*2.0+uFlutter),sin(position.x*1.7+uFlutter*.8),sin(position.y*2.4-uFlutter*.7));');
     };
     mesh.frustumCulled = false; scene.add(mesh); trails.push(mesh);
-    if (trails.length > 8) { const old = trails.shift()!; scene.remove(old); old.geometry.dispose(); old.material.dispose(); }
+    if (trails.length > 4) { const old = trails.shift()!; scene.remove(old); old.geometry.dispose(); old.material.dispose(); }
     return mesh;
   }
 
@@ -327,7 +319,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       ring.material.opacity = (i === 0 ? .65 : .21) + (won ? .15 : 0);
     });
     targetCore.scale.setScalar(1 + (reduced ? 0 : Math.sin(time * 2.2) * .12));
-    targetMist.material.opacity = won ? .2 : .055 + (reduced ? 0 : Math.sin(time * 1.8) * .025);
+    targetBoundary.material.opacity = won ? .8 : .5;
     targetRings.forEach((ring, i) => {
       ring.quaternion.copy(camera.quaternion);
       const pulsePhase = reduced ? .3 : (time * .4 + i / 3) % 1;
@@ -343,10 +335,10 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     });
     targetGlow.quaternion.copy(camera.quaternion);
     targetGlow.material.uniforms.strength.value = reduced ? .18 : .2 + Math.sin(time * 1.8) * .06;
-    nodeMaterial.uniforms.uTime.value = reduced ? 0 : time;
-    nodeMaterial.uniforms.uPlayer.value.copy(introducing ? camera.position : blob.position);
-    nodeMaterial.uniforms.uIntro.value = introducing && !reduced ? Math.sin(Math.PI * Math.min(1, introElapsed / 3.6)) : 0;
-    nodeMaterial.uniforms.uFlight.value += ((flight ? 1 : 0) - nodeMaterial.uniforms.uFlight.value) * (1 - Math.exp(-dt * 3));
+    nodeUniforms.uTime.value = reduced ? 0 : time;
+    nodeUniforms.uPlayer.value.copy(introducing ? camera.position : blob.position);
+    nodeUniforms.uIntro.value = introducing && !reduced ? Math.sin(Math.PI * Math.min(1, introElapsed / 3.6)) : 0;
+    nodeUniforms.uFlight.value += ((flight && !reduced ? 1 : 0) - nodeUniforms.uFlight.value) * (1 - Math.exp(-dt * 3));
 
     // Remain inside the lattice. Follow behind the glider, never zoom out to
     // fit the whole system. At rest, turn toward the destination from here.
@@ -378,7 +370,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       blob.visible = progress > .55;
       if (progress === 1) { introducing = false; blob.visible = true; callbacks.onIntroEnd(); }
     }
-    const desiredFov = reduced ? 62 : 62 + Math.min(8, speed * .2);
+    const desiredFov = reduced ? 58 : 58 + Math.min(3, speed * .06);
     camera.fov += (desiredFov - camera.fov) * (1 - Math.exp(-dt * 5));
     camera.updateProjectionMatrix();
     camera.lookAt(lookAt);

@@ -52,19 +52,45 @@ export function munsellPosition(chip: MunsellColor): XYZ {
 const spatialReferences = [...PRACTICAL_MUNSELL_COLORS, ...NEUTRALS,
   { h: 'N', v: 0, c: 0, rgb: [0, 0, 0] as RGB }, { h: 'N', v: 10, c: 0, rgb: [255, 255, 255] as RGB },
 ].map(chip => ({ lab: rgbToLab(chip.rgb), position: munsellPosition(chip) }));
-// Continuous inverse-distance interpolation of the renotation samples, in
-// Cartesian coordinates so the red/purple seam never jumps. Exact at samples;
-// intermediate positions are display estimates, not new pigment measurements.
-export function labPosition(lab: XYZ): XYZ {
-  const out: XYZ = [0, 0, 0]; let sum = 0;
+// A single smooth calibration replaces the sample-attracting interpolation.
+// The old inverse-distance weights flattened motion near individual chips and
+// bent paths between them. A low-order global fit cannot create those wells.
+const features = ([l, a, b]: XYZ) => {
+  const L = (l - .6) * 2, A = a * 4, B = b * 4;
+  return [1, L, L * L, L * L * L, A, B, L * A, L * B, A * A, A * B, B * B];
+};
+function fitSpatialAxis(axis: number) {
+  // Horizontal axes contain a/b in every term: true neutrals stay on the axis.
+  const terms = axis === 1 ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] : [4, 5, 6, 7, 8, 9, 10];
+  const n = terms.length;
+  const matrix = Array.from({ length: n }, () => Array(n + 1).fill(0));
   for (const sample of spatialReferences) {
-    const d2 = (lab[0] - sample.lab[0]) ** 2 + (lab[1] - sample.lab[1]) ** 2 + (lab[2] - sample.lab[2]) ** 2;
-    if (d2 < 1e-18) return [...sample.position];
-    const weight = 1 / (d2 * d2 * d2);
-    sum += weight;
-    for (let i = 0; i < 3; i++) out[i] += sample.position[i] * weight;
+    const f = features(sample.lab);
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) matrix[row][col] += f[terms[row]] * f[terms[col]];
+      matrix[row][n] += f[terms[row]] * sample.position[axis];
+    }
   }
-  return out.map(n => n / sum) as XYZ;
+  for (let i = 0; i < n; i++) matrix[i][i] += .001;
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let row = col + 1; row < n; row++) if (Math.abs(matrix[row][col]) > Math.abs(matrix[pivot][col])) pivot = row;
+    [matrix[col], matrix[pivot]] = [matrix[pivot], matrix[col]];
+    const scale = matrix[col][col];
+    for (let j = col; j <= n; j++) matrix[col][j] /= scale;
+    for (let row = 0; row < n; row++) if (row !== col) {
+      const factor = matrix[row][col];
+      for (let j = col; j <= n; j++) matrix[row][j] -= factor * matrix[col][j];
+    }
+  }
+  const coefficients = Array(11).fill(0);
+  terms.forEach((term, i) => { coefficients[term] = matrix[i][n]; });
+  return coefficients;
+}
+const spatialCalibration = [0, 1, 2].map(fitSpatialAxis);
+export function labPosition(lab: XYZ): XYZ {
+  const f = features(lab);
+  return spatialCalibration.map(axis => axis.reduce((sum, c, i) => sum + c * f[i], 0)) as XYZ;
 }
 export function landingBoundary(target: ColorPoint, tolerance: number, direction: XYZ): XYZ {
   const length = Math.hypot(...direction) || 1;
@@ -139,7 +165,20 @@ export function pourPath(paints: PaintColor[], before: Mixture, index: number, a
 }
 
 const chips = [...PRACTICAL_MUNSELL_COLORS, ...NEUTRALS].map((chip) => ({ chip, point: colorPoint(chip.rgb) }));
-export const SPACE_NODES = chips.filter(({ chip }) => chip.h === 'N' || ((chip.h.startsWith('5') || chip.h.startsWith('10')) && chip.c % 4 === 0));
+export const SPACE_NODES = chips;
+// Fill between adjacent reference samples, throughout the volume rather than
+// only on hue rings. These are display colors, not additional paint recipes.
+export const FIELD_POINTS = (() => {
+  const lookup = new Map(chips.map(item => [`${item.chip.h}:${item.chip.v}:${item.chip.c}`, item.point]));
+  const points = chips.map(item => item.point);
+  for (const { chip, point } of chips) {
+    for (const [v, c] of [[chip.v + 1, chip.c], [chip.v, chip.c + 2], [chip.v + 1, chip.c + 2]]) {
+      const other = lookup.get(`${chip.h}:${v}:${c}`);
+      if (other) points.push(colorPoint(point.rgb.map((n, i) => (n + other.rgb[i]) / 2) as RGB));
+    }
+  }
+  return points;
+})();
 export function nearestNotation(point: ColorPoint) {
   const nearest = chips.reduce((best, item) => colorDistance(item.point, point) < colorDistance(best.point, point) ? item : best);
   return chipNotation(nearest.chip);

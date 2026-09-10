@@ -71,11 +71,20 @@ test('every generated target has a constructive route at guide par within the ho
   console.log(`${PLAY_LEVELS.length * 16} target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
 });
 
-test('Munsell nodes preserve absolute chroma and value; scoring survives the display warp', () => {
+test('smooth calibration retains a broad color volume; scoring is independent of its projection', () => {
   const a = mixtureColor(PLAY_LEVELS[0].paints, [3, 1, 4]);
+  let error = 0;
   for (const { chip, point } of SPACE_NODES) {
-    assert.deepEqual(point.position, munsellPosition(chip));
-    assert.ok(Math.abs(Math.hypot(point.position[0], point.position[2]) - chip.c * 2.6) < 1e-9);
+    const reference = munsellPosition(chip);
+    error += point.position.reduce((sum, n, i) => sum + (n - reference[i]) ** 2, 0);
+    assert.ok(point.position.every(Number.isFinite));
+  }
+  const rms = Math.sqrt(error / SPACE_NODES.length);
+  console.log(`Global Munsell display calibration RMS: ${rms.toFixed(2)} world units.`);
+  assert.ok(rms < 5);
+  for (const l of [.2, .4, .6, .8, 1]) {
+    const p = labPosition([l, 0, 0]);
+    assert.ok(Math.hypot(p[0], p[2]) < 1e-9);
   }
   for (const direction of [[1,0,0], [0,1,0], [0,0,1], [-1,2,-3]]) {
     const tolerance = .038;
@@ -85,6 +94,21 @@ test('Munsell nodes preserve absolute chroma and value; scoring survives the dis
     assert.deepEqual(landingBoundary(a, tolerance, direction as [number,number,number]), labPosition(lab));
     const shifted = labPosition(lab.map((n,i) => n + (i === 1 ? 1e-7 : 0)) as [number,number,number]);
     assert.ok(Math.hypot(...shifted.map((n,i) => n - labPosition(lab)[i])) < .001);
+  }
+});
+
+test('straight color changes do not acquire sample-well jitter or reversals', () => {
+  for (const [from, to] of [
+    [[.45, .08, .07], [.75, .02, .02]],
+    [[.5, .15, .06], [.4, -.07, -.15]],
+    [[.3, 0, 0], [.9, 0, 0]],
+  ]) {
+    const path = Array.from({ length: 201 }, (_, i) => labPosition(from.map((n, axis) => n + (to[axis] - n) * i / 200) as [number, number, number]));
+    const steps = path.slice(1).map((p, i) => p.map((n, axis) => n - path[i][axis]));
+    for (let i = 1; i < steps.length; i++) {
+      const cosine = steps[i].reduce((sum, n, axis) => sum + n * steps[i - 1][axis], 0) / (Math.hypot(...steps[i]) * Math.hypot(...steps[i - 1]));
+      assert.ok(cosine > .999, `local color path abruptly turned: ${cosine}`);
+    }
   }
 });
 
