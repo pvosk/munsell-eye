@@ -3,15 +3,16 @@ import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
 test('landing tolerances are ten percent tighter across every palette', () => {
-  const previous = [.038,.032,.028,.032,.03,.032,.032];
+  const previous = [.038,.032,.028,.032,.03,.032,.032,.032,.032];
   PLAY_LEVELS.forEach((level,i) => assert.ok(Math.abs(level.tolerance-previous[i]*.9)<1e-12));
 });
 
-test('the seven palettes have the requested pigments and names', () => {
-  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light']);
+test('the nine palettes have the requested pigments and names', () => {
+  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift']);
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
     ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
     ['PB15:3', 'PR122', 'PY3'], ['PO20', 'PV23', 'PG36', 'PW6'], ['PW1', 'PY35', 'PY43', 'PR108', 'PR83', 'PB28', 'PB29', 'PG18'],
+    ['PV19', 'PG36', 'PB29', 'PW1'], ['PB28', 'PR108', 'PY3/PG36', 'PV23'],
   ]);
 });
 
@@ -171,6 +172,11 @@ test('all five holes retain a constant landing tolerance and reachable recipes',
       }
     }
     assert.ok(round.at(-1)!.par >= round[0].par);
+    round.slice(1).forEach((hole,i) => {
+      assert.ok(hole.par >= round[i].par);
+      if (hole.par === round[i].par) assert.ok(hole.timingWindow <= round[i].timingWindow);
+      assert.equal(hole.stage,i+1);
+    });
     assert.equal(round[0].par,1);
     const closest = Math.min(...round.flatMap((h,i)=>round.slice(i+1).map(other=>colorDistance(h.target,other.target))));
     assert.ok(closest > level.tolerance, `${level.name} repeated visually overlapping targets: ${closest}`);
@@ -181,18 +187,33 @@ test('all five holes retain a constant landing tolerance and reachable recipes',
   }
 });
 
-test('arrival dollies without close-up rotation and joins its settled pose continuously', async () => {
+test('arrival follows one uninterrupted curve into its settled pose', async () => {
   const {planArrival} = await import('../app/play-motion');
   const {Vector3} = await import('three');
   for (const target of [new Vector3(20,8,-15),new Vector3(-20,-15,6),new Vector3(0,15,.1)]) {
     const rest=new Vector3(3,2,7), look=new Vector3(1,0,0);
     const pose=planArrival(target,rest,look);
-    assert.ok(pose(0).quaternion.angleTo(pose(.3).quaternion)<1e-7);
     assert.ok(pose(.3).position.distanceTo(target)>pose(0).position.distanceTo(target));
     assert.ok(pose(1).position.distanceTo(rest)<1e-9);
     for (const t of [.36,.7]) {
       assert.ok(pose(t-1e-6).position.distanceTo(pose(t+1e-6).position)<.001);
       assert.ok(pose(t-1e-6).quaternion.angleTo(pose(t+1e-6).quaternion)<.001);
+      assert.ok(pose(t-.001).position.distanceTo(pose(t+.001).position)>.001);
+    }
+    const forward = new Vector3(0,0,-1).applyQuaternion(pose(1).quaternion);
+    assert.ok(forward.distanceTo(look.clone().sub(rest).normalize())<1e-9);
+  }
+});
+
+test('camera chooses the closest equivalent heading after repeated manual orbits', async () => {
+  const {wrapAngle,closestHeading} = await import('../app/play-motion');
+  for (const turns of [-8,-4,0,4,8]) for (const heading of [-3,.2,3]) {
+    const current = wrapAngle(turns*Math.PI*2+heading);
+    assert.ok(Math.abs(wrapAngle(current-heading))<1e-12);
+    for (const target of [-3.1,0,3.1]) {
+      const goal = closestHeading(current,target);
+      assert.ok(Math.abs(goal-current)<=Math.PI);
+      assert.ok(Math.abs(wrapAngle(goal-target))<1e-12);
     }
   }
 });

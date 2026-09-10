@@ -1,27 +1,29 @@
-import { Vector3, Quaternion, Matrix4, CatmullRomCurve3 } from 'three';
+import { Vector3, Quaternion, Matrix4, CubicBezierCurve3 } from 'three';
 import type { ColorPoint } from './play-engine';
 
 export const flightProgress = (t: number) => 1 - (1 - Math.max(0, Math.min(1, t))) ** 2;
+export const wrapAngle = (angle: number) => Math.atan2(Math.sin(angle),Math.cos(angle));
+export const closestHeading = (current: number, target: number) => current + wrapAngle(target-current);
 
-// Plan backward from the settled composition. Close-up motion is translation
-// only; the broad turn is deliberately deferred until the camera is distant.
+// A single arc-length-parameterized flight, with no stops or segment handoffs.
+// Both control points are derived from the final playing composition.
 export function planArrival(target: Vector3, rest: Vector3, restLook: Vector3) {
   const up = new Vector3(0,1,0);
   const backward = rest.clone().sub(restLook).normalize();
   const openingDirection = backward.clone().applyAxisAngle(up,.45);
   const near = target.clone().addScaledVector(openingDirection,3.8);
   const distance = Math.max(12,target.distanceTo(rest)*.85);
-  const far = target.clone().addScaledVector(openingDirection,distance);
-  const approach = rest.clone().addScaledVector(backward,distance*.6);
-  const middle = far.clone().lerp(approach,.5).addScaledVector(up,3);
-  const orbit = new CatmullRomCurve3([far,middle,approach],false,'centripetal');
+  const side = backward.clone().cross(up).normalize();
+  const far = near.clone().addScaledVector(openingDirection,distance).addScaledVector(side,distance*.4).addScaledVector(up,3);
+  const approach = rest.clone().addScaledVector(backward,distance*.7).addScaledVector(side,distance*.25);
+  const orbit = new CubicBezierCurve3(near,far,approach,rest);
+  orbit.arcLengthDivisions = 400;
   const initial = new Quaternion().setFromRotationMatrix(new Matrix4().lookAt(near,target,up));
   const final = new Quaternion().setFromRotationMatrix(new Matrix4().lookAt(rest,restLook,up));
   const ease = (x: number) => { const t=Math.max(0,Math.min(1,x)); return t*t*t*(t*(t*6-15)+10); };
   return (progress: number) => {
-    if (progress <= .36) return {position:near.clone().lerp(far,ease(progress/.36)),quaternion:initial.clone()};
-    if (progress <= .7) { const t=ease((progress-.36)/.34); return {position:orbit.getPoint(t),quaternion:initial.clone().slerp(final,t)}; }
-    return {position:approach.clone().lerp(rest,ease((progress-.7)/.3)),quaternion:final.clone()};
+    const t = ease(progress);
+    return {position:orbit.getPointAt(t),quaternion:initial.clone().slerp(final,t)};
   };
 }
 

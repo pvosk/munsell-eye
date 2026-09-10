@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { flightProgress, ribbonEdges, planArrival } from './play-motion';
+import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -164,7 +164,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   };
   const pointerMove = (event: PointerEvent) => {
     if (!drag || drag.id !== event.pointerId) return;
-    orbitYaw -= (event.clientX - drag.x) * .005;
+    orbitYaw = wrapAngle(orbitYaw - (event.clientX - drag.x) * .005);
     orbitPitch = THREE.MathUtils.clamp(orbitPitch + (event.clientY - drag.y) * .003, -.6, .6);
     drag.x = event.clientX; drag.y = event.clientY;
   };
@@ -480,6 +480,11 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const length = distances[distances.length - 1];
       const initialTangent = v3(path[Math.min(6, path.length - 1)]).sub(v3(path[0]));
       if (initialTangent.lengthSq() > .000001) travelDirection.copy(initialTangent.normalize());
+      // Discard turn history, not the visible camera pose. Resume toward the
+      // shot using the nearest equivalent heading, even after many full orbits.
+      cameraYaw = wrapAngle(cameraYaw);
+      yawGoal = closestHeading(cameraYaw,Math.atan2(travelDirection.x,travelDirection.z));
+      orbitYaw = 0; orbitPitch = 0;
       pulse(path[0].rgb, blob.position, travelDirection);
       flight = { path, distances, length, elapsed: 0, duration: reduced ? .4 : Math.max(.7, Math.min(3.2, .5 + Math.sqrt(length) * .35 + Math.log1p(toMass) * .018)), fromMass, toMass, done, ribbon: makeRibbon(path, toMass) };
     },

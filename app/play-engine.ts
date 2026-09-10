@@ -21,6 +21,12 @@ const paint = (id: string) => {
 // measured brand-specific reflectance data; PW1 is not PW6/PW4 replacement white.
 const flake: PaintColor = { ...paint('titanium-white'), id: 'play-flake-white', name: 'Flake White', pigment: 'PW1', rgb: [246, 243, 233], strength: .65, v: 9.5, notation: 'N9.5' };
 const oxide: PaintColor = { ...paint('transparent-earth-red'), name: 'Transparent Oxide Red' };
+// A modeled yellow/green tube premix, not a measured commercial paint.
+const chartreuseYellow = new Color(paint('hansa-yellow-light').rgb);
+chartreuseYellow.tintingStrength = paint('hansa-yellow-light').strength;
+const chartreuseGreen = new Color(paint('phthalo-green-yellow').rgb);
+chartreuseGreen.tintingStrength = paint('phthalo-green-yellow').strength;
+const chartreuse: PaintColor = { ...paint('hansa-yellow-light'), id: 'play-chartreuse', name: 'Chartreuse', pigment: 'PY3/PG36', rgb: mix([chartreuseYellow,1],[chartreuseGreen,.08]).sRGB as RGB, strength: .96, notation: 'Chartreuse premix' };
 export const PLAY_LEVELS: PlayLevel[] = [
 { name: 'UltraOx Dual', subtitle: 'The Classic Triad', paints: [oxide, paint('ultramarine-blue'), paint('titanium-white')], tolerance: .0342 },
   { name: 'Zorny', subtitle: 'Four Quiet Colors', paints: [paint('yellow-ochre'), paint('cadmium-red-light'), paint('ivory-black'), paint('titanium-white')], tolerance: .0288 },
@@ -29,6 +35,8 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'CMY', subtitle: 'Three Vivid Primaries', paints: [paint('phthalo-blue-green'), paint('quinacridone-magenta'), paint('hansa-yellow-light')], tolerance: .027 },
   { name: 'Secondaries', subtitle: 'Orange, Violet & Green', paints: [paint('cadmium-orange'), paint('dioxazine-purple'), paint('phthalo-green-yellow'), paint('titanium-white')], tolerance: .0288 },
   { name: 'French Light', subtitle: 'An Impressionist Palette', paints: [flake, paint('cadmium-yellow-light'), paint('yellow-ochre'), paint('cadmium-red-light'), paint('alizarin-crimson'), paint('cobalt-blue'), paint('ultramarine-blue'), paint('viridian')], tolerance: .0288 },
+  { name: 'Chromatic Dark', subtitle: 'Color Inside the Shadows', paints: [paint('quinacridone-red'),paint('phthalo-emerald'),paint('ultramarine-blue'),flake], tolerance: .0288 },
+  { name: 'Violet Shift', subtitle: 'Purple Holds the Depth', paints: [paint('cobalt-blue'),paint('cadmium-red-light'),chartreuse,paint('dioxazine-purple')], tolerance: .0288 },
 ];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
@@ -311,6 +319,10 @@ export function generateHole(levelIndex: number, seed: number, stage = 0): Hole 
       return { seed, stage: holeIndex, start: neutralStart(level), target: candidate.target, notation: nearestNotation(candidate.target), par: recipe.filter(q => q > 0).length - 1, recipe, tolerance, timingWindow: recipeTimingWindow(level, recipe, slack) };
     });
     // Bounded cache keeps repeated restarts cheap without accumulating rounds.
+    // Finish with the most demanding selected recipe: more required paints,
+    // then the narrower estimated timing window when par is equal.
+    round.sort((a,b) => a.par-b.par || b.timingWindow-a.timingWindow);
+    round = round.map((hole,stage) => ({...hole,stage}));
     if (roundCache.size >= 12) roundCache.delete(roundCache.keys().next().value!);
     roundCache.set(key, round);
   }
