@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
+import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, generateLabHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 import courseBank from '../app/generated/play-courses.json';
-import { paletteSignature, PROFILES, replayRoute, playerPar, compareRoutes, competingTags, type Route } from '../app/play-course-analysis';
+import { paletteSignature, PROFILES, replayRoute, playerPar, compareRoutes, competingTags, qualityFailures, type Route } from '../app/play-course-analysis';
+import labRound2 from '../app/generated/play-lab-round2.json';
 import {LAB_STARTERS,newLabAttempt,validLabEvent,labEntries,type LabEvent} from '../app/play-lab-model';
 
 test('competing routes expose shortcuts instead of rewarding only the demonstration',()=>{
@@ -10,9 +11,13 @@ test('competing routes expose shortcuts instead of rewarding only the demonstrat
   const result=compareRoutes(0,[route(0,1,10),route(0,2,60),route(1,1,45)],45);
   assert.equal(result.coverage,2/3);assert.equal(result.bases[2].shots,null);
   assert.equal(result.minTravel,10);assert.equal(result.travelBalance,10/45);
-  assert.deepEqual(competingTags(['chromatic-ride','precision'],result),['precision']);
+  assert.deepEqual(competingTags(['chromatic-ride','choice'],result),[],'relabeling must not rescue a short one-pour bypass');
   const balanced=compareRoutes(0,[route(0,1,24),route(1,1,30),route(2,2,35)],30);
   assert.deepEqual(competingTags(['chromatic-ride'],balanced),['chromatic-ride']);
+  const precise=compareRoutes(0,[route(0,2,10),route(1,2,12)],12);
+  assert.deepEqual(competingTags(['precision'],precise),['precision'],'short multi-shot precision is not automatically bad');
+  const neutral=compareRoutes(1,[{...route(2,1,25),order:[2,3]}],25);
+  assert.deepEqual(competingTags(['value-finish','quiet-cool','choice'],neutral),[],'neutral-only bypass applies across labels');
 });
 
 test('previous lab holes remain valid and exactly replayable after bank revision',()=>{
@@ -31,7 +36,7 @@ test('lab starter snapshots survive serialization and replay the exact hole',()=
     const event=JSON.parse(JSON.stringify({id:'test-event',attemptId:attempt.id,type:'attempt',attempt}));
     assert.ok(validLabEvent(event));
     assert.equal(event.type,'attempt');if(event.type!=='attempt')throw new Error('Expected attempt');
-    assert.deepEqual(generateHole(specimen.levelIndex,specimen.hole.seed,specimen.hole.stage),specimen.hole);
+    assert.deepEqual(generateLabHole(specimen.levelIndex,specimen.hole.stage,specimen.hole.seed),specimen.hole);
     event.attempt.specimen.hole.tolerance+=.01;assert.equal(validLabEvent(event),false);
   }
 });
@@ -42,13 +47,32 @@ test('lab replays retain earlier attempts and notes',()=>{
   assert.ok(validLabEvent(events[1]));assert.equal(validLabEvent({...events[1],review:{note:'bad'}}),false);
 });
 
+test('round 2 passes calibrated filters, is new, and has replayable routes',()=>{
+  assert.equal(labRound2.signature,paletteSignature());
+  assert.equal(LAB_STARTERS.length,12);
+  assert.equal(new Set(LAB_STARTERS.map(s=>s.hole.courseId)).size,12);
+  for(const p of labRound2.palettes)for(const [stage,h] of p.holes.entries()){
+    assert.deepEqual(qualityFailures(h.competition),[],h.id);
+    const hole=generateLabHole(p.levelIndex,stage);
+    assert.ok(colorDistance(mixtureColor(PLAY_LEVELS[p.levelIndex].paints,replayRoute(p.levelIndex,h.order,h.times)),hole.target)<hole.tolerance);
+    const attempt=newLabAttempt({levelIndex:p.levelIndex,hole},'round-two');
+    assert.ok(validLabEvent({id:'round-two-event',attemptId:attempt.id,type:'attempt',attempt}));
+    if(p.levelIndex<10)for(const oldStage of [0,2,4])for(const legacy of [true,false]){
+      assert.ok(colorDistance(hole.target,generateHole(p.levelIndex,190926,oldStage,legacy).target)>hole.tolerance*2);
+    }
+  }
+  const old=newLabAttempt({levelIndex:4,hole:generateHole(4,190926,0)},'old-current-bank');
+  assert.equal(old.engine,'glider-courses-3-controls-1');
+  assert.ok(validLabEvent({id:'old-current-event',attemptId:old.id,type:'attempt',attempt:old}));
+});
+
 test('every palette shares one perceptual landing tolerance', () => {
   PLAY_LEVELS.forEach(level=>assert.equal(level.tolerance,.028));
 });
 
-test('the ten palettes have the requested pigments and names', () => {
-  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift', 'Double Cross']);
-  assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
+test('original palettes are unchanged and the two experimental palettes are appended', () => {
+  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift', 'Double Cross','Cobalt Ember','Viridian Rust']);
+  assert.deepEqual(PLAY_LEVELS.slice(0,10).map((level) => level.paints.map((p) => p.pigment)), [
     ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
     ['PB15:3', 'PR122', 'PY3'], ['PO20', 'PV23', 'PG36', 'PW6'], ['PW1', 'PY35', 'PY43', 'PR108', 'PR83', 'PB28', 'PB29', 'PG18'],
     ['PV19', 'PG36', 'PB29', 'PW1'], ['PB28', 'PR108', 'PY3/PG36', 'PV23'],
@@ -104,7 +128,7 @@ test('pour endpoints are exactly the cumulative mixture, even after a large corr
 });
 
 test('every bank entry replays through the real charge controls and checks every base', () => {
-  assert.equal(courseBank.signature,paletteSignature());
+  assert.equal(courseBank.signature,paletteSignature(courseBank.palettes.length));
   let count=0;
   courseBank.palettes.forEach((palette,index)=>palette.rounds.flat().forEach(hole=>{
     const level=PLAY_LEVELS[index],target=mixtureColor(level.paints,hole.target);

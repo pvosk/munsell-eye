@@ -203,7 +203,7 @@ export default function PlayView() {
     setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
     // Keep a round's seed through all five holes. A requested new target should
     // not immediately repeat the same bank entry when the random variant repeats.
-    let next=exact??generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage);
+    let next=exact??(same&&index===levelIndex&&stage===hole.stage?{...hole}:generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage));
     if(!exact&&!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
     if(lab&&sync.signedIn){
       const previous=attemptRef.current;

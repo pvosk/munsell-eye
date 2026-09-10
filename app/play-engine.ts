@@ -4,6 +4,7 @@ import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
 import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
 import courseBank from './generated/play-courses.json';
 import legacyCourseBank from './generated/play-courses-v2.json';
+import labRoundBank from './generated/play-lab-round2.json';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
@@ -41,6 +42,8 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'Chromatic Dark', subtitle: 'Color Inside the Shadows', paints: [paint('quinacridone-red'),paint('phthalo-emerald'),paint('ultramarine-blue'),flake], tolerance: .0288 },
   { name: 'Violet Shift', subtitle: 'Purple Holds the Depth', paints: [paint('cobalt-blue'),paint('cadmium-red-light'),chartreuse,paint('dioxazine-purple')], tolerance: .0288 },
   { name: 'Double Cross', subtitle: 'Two Opposing Pairs', paints: [paint('cadmium-orange'),paint('cobalt-blue'),paint('cadmium-red-medium'),paint('permanent-green-light')], tolerance: .0288 },
+  { name: 'Cobalt Ember', subtitle: 'Blue, Orange & Magenta', paints: [paint('cobalt-blue'),paint('cadmium-orange'),paint('quinacridone-magenta'),flake], tolerance: .028 },
+  { name: 'Viridian Rust', subtitle: 'Green, Earth & Bright Color', paints: [paint('viridian'),oxide,paint('quinacridone-magenta'),paint('cadmium-lemon')], tolerance: .028 },
 ];
 // Palette identity belongs in routes, not a different-sized perceptual cup.
 PLAY_LEVELS.forEach(level=>{level.tolerance=LANDING_TOLERANCE;});
@@ -292,12 +295,24 @@ export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance:
   return best;
 }
 
-const courseSignature = JSON.stringify(PLAY_LEVELS.map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
+const courseSignature = (count=PLAY_LEVELS.length)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
+type StoredLabRoute={id:string;target:Mixture;recipe:Mixture;par:number;timingWindow:number;kind:string;solutionShots:number;order:number[];times:number[]};
+const labBank=labRoundBank as {version:string;signature:string;palettes:{levelIndex:number;holes:StoredLabRoute[]}[]};
+export function generateLabHole(levelIndex:number,stage:number,seed=20260911):Hole {
+  if(labBank.signature!==courseSignature())throw new Error('Lab palette model changed');
+  const holes=labBank.palettes.find(p=>p.levelIndex===levelIndex)?.holes;
+  if(!holes||!Number.isInteger(stage)||stage<0||stage>=holes.length)throw new Error('Unknown lab hole');
+  const offset=levelIndex>=10&&seed!==20260911?(seed>>>0)%holes.length:0;
+  const record=holes[(stage+offset)%holes.length];
+  if(!record)throw new Error('Unknown lab hole');
+  const level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,record.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:record.par,recipe:[...record.recipe],tolerance:level.tolerance,timingWindow:record.timingWindow,courseId:record.id,kind:record.kind,solutionShots:record.solutionShots,routeOrder:[...record.order],routeTimes:[...record.times]};
+}
 export function generateHole(levelIndex: number, seed: number, stage = 0, legacy = false): Hole {
   if (!PLAY_LEVELS[levelIndex] || !Number.isInteger(stage) || stage < 0 || stage >= HOLES_PER_PALETTE) throw new Error('Invalid hole');
-  if (courseBank.signature!==courseSignature) throw new Error('Paint model changed: regenerate the evaluated course bank');
+  if(levelIndex>=courseBank.palettes.length&&!legacy)return generateLabHole(levelIndex,stage,seed);
   const bank=legacy?legacyCourseBank:courseBank;
-  if(bank.signature!==courseSignature)throw new Error('Archived paint model does not match');
+  if(bank.signature!==courseSignature(bank.palettes.length))throw new Error('Archived paint model does not match');
   const level=PLAY_LEVELS[levelIndex],rounds=bank.palettes[levelIndex].rounds;
   // Stable course selection. No candidate search runs on the player's device.
   let hash=seed>>>0;hash=Math.imul(hash^(hash>>>16),0x7feb352d);hash=Math.imul(hash^(hash>>>15),0x846ca68b);hash=(hash^(hash>>>16))>>>0;

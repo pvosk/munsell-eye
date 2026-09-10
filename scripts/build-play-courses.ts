@@ -41,7 +41,9 @@ for(let palette=0;palette<PLAY_LEVELS.length;palette++) {
   console.log(`${level.name}: ${candidates.length} eligible. Pars: ${selected.map(r=>r.map(h=>h.par).join('/')).join(' | ')}.`);
 }
 mkdirSync('app/generated',{recursive:true});mkdirSync('docs',{recursive:true});
-writeFileSync('app/generated/play-courses.json',JSON.stringify({version:COURSE_VERSION,signature:paletteSignature(),palettes}));
+const nextBank={version:COURSE_VERSION,signature:paletteSignature(),palettes};
+if(previous.version===COURSE_VERSION&&JSON.stringify(previous)!==JSON.stringify(nextBank))throw new Error('Changed courses require a new bank version and archived lab replay support before replacement.');
+writeFileSync('app/generated/play-courses.json',JSON.stringify(nextBank));
 writeFileSync('docs/play-candidate-audit.json',JSON.stringify({version:COURSE_VERSION,palettes:allCandidates}));
 const median=(values:number[])=>{const s=[...values].sort((a,b)=>a-b);return s.length?(s[Math.floor((s.length-1)/2)]+s[Math.ceil((s.length-1)/2)])/2:null;};
 const kinds=['chromatic-ride','value-finish','quiet-cool','interior','choice','precision','muted'] as const;

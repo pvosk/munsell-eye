@@ -15,14 +15,16 @@ export const PROFILES: {name:string;challenge:number;preferences:Partial<Record<
   {name:'Chromatic depth',challenge:.8,preferences:{'value-finish':4,precision:3,interior:2},required:{'value-finish':1}},
   {name:'Value with a hue cost',challenge:1,preferences:{precision:4,interior:3,choice:2},required:{interior:2}},
   {name:'Opposing pulls',challenge:.9,preferences:{choice:4,interior:3,precision:2},required:{interior:2}},
+  {name:'Blue and ember',challenge:.65,preferences:{'chromatic-ride':3,interior:3,'value-finish':2}},
+  {name:'Earth and green',challenge:.8,preferences:{choice:3,interior:4,muted:3}},
 ];
 export type Route={order:number[];times:number[];recipe:Mixture;error:number;window:number;length:number;lastLength:number;valueChange:number;minChroma:number};
-export type Competition={bases:{base:number;shots:number|null;minTravel:number|null;minFinish:number|null;bestWindow:number|null}[];coverage:number;efficientCoverage:number;minTravel:number;minFinish:number;travelBalance:number;exampleTravelRatio:number;multiShotBases:number};
+export type Competition={bases:{base:number;shots:number|null;minTravel:number|null;minFinish:number|null;bestWindow:number|null}[];coverage:number;efficientCoverage:number;minTravel:number;minFinish:number;travelBalance:number;exampleTravelRatio:number;multiShotBases:number;neutralOnlyShortcut:boolean};
 export type CourseRecord={id:string;target:Mixture;recipe:Mixture;order:number[];times:number[];solutionShots:number;par:number;timingWindow:number;kind:HoleKind;tags:HoleKind[];proposedTags:HoleKind[];competition:Competition;nearestBase:number;nearestWorld:number;tapError:number;routeLength:number;alternativeBases:number;alternativeRecipes:number;checks:{base:number;one:number;two:number}[]};
 type Atlas={order:number[];samples:{times:number[];lab:number[]}[]};
 const clamp=(n:number)=>Math.max(0,Math.min(CHARGE_SECONDS,n));
 const distance=(a:readonly number[],b:readonly number[])=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
-export const paletteSignature=()=>JSON.stringify(PLAY_LEVELS.map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
+export const paletteSignature=(count=PLAY_LEVELS.length)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
 
 export function replayRoute(palette:number,order:number[],times:number[]) {
   let q=PLAY_LEVELS[palette].paints.map((_,i)=>+(i===order[0]));
@@ -120,13 +122,25 @@ export function compareRoutes(palette:number,routes:Route[],exampleLength:number
   // three-pour rescue from another base should not invalidate a two-base ride.
   return {bases,coverage:found.length/bases.length,efficientCoverage:efficient.length/bases.length,minTravel,minFinish:found.length?Math.min(...found.map(b=>b.minFinish!)):0,
     travelBalance:maxTravel>0?Math.min(...efficientLengths)/maxTravel:0,exampleTravelRatio:exampleLength>0?Math.min(1,minTravel/exampleLength):0,
-    multiShotBases:found.filter(b=>b.shots!>=2).length};
+    multiShotBases:found.filter(b=>b.shots!>=2).length,
+    neutralOnlyShortcut:routes.some(r=>r.times.length===1&&r.order.every(i=>['White','Black'].includes(PLAY_LEVELS[palette].paints[i].category)))};
+}
+
+export function qualityFailures(c:Competition):string[] {
+  const one=c.bases.some(b=>b.shots===1),reasons:string[]=[];
+  // Provisional cross-label exclusions. Never allow a failed ride to slip back
+  // in as "choice". These protect current course intentions, not universal fun.
+  if(one&&c.minTravel<14)reasons.push('short-single-pour-bypass');
+  if(one&&c.travelBalance<.4)reasons.push('unequal-single-pour-starts');
+  if(c.neutralOnlyShortcut)reasons.push('neutral-only-single-pour-bypass');
+  return reasons;
 }
 
 export function competingTags(tags:HoleKind[],c:Competition):HoleKind[] {
   // Design parameters in display-world units, not laws of color perception.
   // A ride must survive the easiest found starting choice. Interior/precision
   // retain their independent no-one-pour and timing tests below.
+  if(qualityFailures(c).length)return [];
   return tags.filter(tag=>tag!=='chromatic-ride'||(c.minTravel>=14&&c.travelBalance>=.4));
 }
 
@@ -168,13 +182,16 @@ export function auditFreeStarts(palette:number,recipe:Mixture) {
     const viable=routes.filter(r=>r.order[0]===base),shots=Math.min(...viable.map(r=>r.times.length));
     const competitors=viable.filter(r=>r.times.length===shots).map(r=>geometry(palette,r));
     const best=competitors.reduce<Route|null>((a,b)=>!a||b.window>a.window?b:a,null);
+    const shortest=competitors.reduce<Route|null>((a,b)=>!a||b.length<a.length?b:a,null);
     const basePoint=mixtureColor(level.paints,level.paints.map((_,i)=>+(i===base)));
     return {base:paint.name,distanceInTolerances:colorDistance(basePoint,target)/level.tolerance,
       onePourErrorInTolerances:bestOne[base]/level.tolerance,additionsFound:best?shots:null,
       route:best?.order.map(i=>level.paints[i].name),timingMarginMs:best?best.window*1000:null,
       travel:best?.length,finishTravel:best?.lastLength,
       shortestTravelFound:competitors.length?Math.min(...competitors.map(r=>r.length)):null,
-      shortestFinishFound:competitors.length?Math.min(...competitors.map(r=>r.lastLength)):null};
+      shortestFinishFound:competitors.length?Math.min(...competitors.map(r=>r.lastLength)):null,
+      shortestOrder:shortest?.order,shortestTimes:shortest?.times,
+      shortestArcRatio:shortest?shortest.length/Math.max(.00001,distance(basePoint.position,mixtureColor(level.paints,shortest.recipe).position)):null};
   });
 }
 export function analyzeCandidate(palette:number,seed:number,atlas:Atlas[],forced?:Mixture):CourseRecord|null {

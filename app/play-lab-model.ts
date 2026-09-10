@@ -1,7 +1,8 @@
-import { PLAY_LEVELS, generateHole, type Hole, type Mixture } from './play-engine';
+import { PLAY_LEVELS, generateHole, generateLabHole, type Hole, type Mixture } from './play-engine';
 
 export const LAB_ENGINE = 'glider-courses-3-controls-1';
-export const supportedLabEngine=(engine:string)=>engine===LAB_ENGINE||engine==='glider-courses-2-controls-1';
+export const LAB_ROUND_ENGINE='glider-lab-2-controls-1';
+export const supportedLabEngine=(engine:string)=>engine===LAB_ENGINE||engine==='glider-courses-2-controls-1'||engine===LAB_ROUND_ENGINE;
 export type LabSpecimen = { levelIndex: number; hole: Hole };
 export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
 export type LabAttempt = {
@@ -13,11 +14,11 @@ export type LabReview = { verdict: string; challenge: string; issue: string; not
 export type LabEvent = { id: string; attemptId: string; type: 'attempt'; attempt: LabAttempt } |
   { id: string; attemptId: string; type: 'review'; review: LabReview };
 export type LabEntry = { attempt: LabAttempt; review?: LabReview };
-export const LAB_STARTERS: LabSpecimen[] = [4,5,1,8].flatMap(levelIndex =>
-  [0,2,4].map(stage=>({levelIndex,hole:generateHole(levelIndex,190926,stage)})));
+export const LAB_STARTERS: LabSpecimen[] = [4,5,1,8,10,11].flatMap(levelIndex =>
+  [0,1].map(stage=>({levelIndex,hole:generateLabHole(levelIndex,stage)})));
 
 export function newLabAttempt(specimen:LabSpecimen,id:string):LabAttempt {
-  return {id,engine:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE,specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
+  return {id,engine:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE,specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
     paints:PLAY_LEVELS[specimen.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}))};
 }
 export function labEntries(events:LabEvent[]):LabEntry[] {
@@ -52,7 +53,11 @@ export function validLabEvent(value:unknown):value is LabEvent {
   if(a.id!==e.attemptId||!supportedLabEngine(a.engine)||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
   if(!s||!Number.isInteger(s.levelIndex)||!PLAY_LEVELS[s.levelIndex]||!s.hole)return false;
   if(!Number.isInteger(s.hole.seed)||s.hole.seed<0||s.hole.seed>0xffffffff||!Number.isInteger(s.hole.stage)||s.hole.stage<0||s.hole.stage>4)return false;
-  const original=generateHole(s.levelIndex,s.hole.seed,s.hole.stage,a.engine==='glider-courses-2-controls-1');
+  let original:Hole;
+  try {
+    if(a.engine!==LAB_ROUND_ENGINE&&s.levelIndex>=10)return false;
+    original=a.engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,a.engine==='glider-courses-2-controls-1');
+  }catch{return false;}
   // Snapshot equality catches accidental edits to the target, cup or controls.
   if(!sameSnapshot(s.hole,original))return false;
   const paints=PLAY_LEVELS[s.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}));

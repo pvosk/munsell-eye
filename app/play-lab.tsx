@@ -61,10 +61,10 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
 
 export function LabPicker({current,onChoose,disabled}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;disabled:boolean}) {
   const index=LAB_STARTERS.findIndex(s=>s.hole.courseId===current.hole.courseId&&s.levelIndex===current.levelIndex);
-  return <label className="lab-picker">Test hole<select disabled={disabled} value={index} onChange={e=>onChoose(LAB_STARTERS[Number(e.target.value)])}>
+  return <><label className="lab-picker">Round 2 · Test hole<select disabled={disabled} value={index} onChange={e=>onChoose(LAB_STARTERS[Number(e.target.value)])}>
     {index<0&&<option value={-1}>Current course hole · {PLAY_LEVELS[current.levelIndex].name}</option>}
     {LAB_STARTERS.map((s,i)=><option key={i} value={i}>{String(i+1).padStart(2,'0')} · {PLAY_LEVELS[s.levelIndex].name} · {s.hole.notation}</option>)}
-  </select></label>;
+  </select></label>{index<LAB_STARTERS.length-1&&<button type="button" disabled={disabled} onClick={()=>onChoose(LAB_STARTERS[index+1])}>{index<0?'Start round 2':'Next test →'}</button>}</>;
 }
 
 export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<typeof usePlayLabSync>;current:LabAttempt|null;onReplay:(specimen:LabSpecimen)=>void;onReveal:()=>void}) {
@@ -77,11 +77,12 @@ export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<t
     <header><div><h2>Hole Lab</h2><p>Repeat the hole. Keep the evidence.</p></div><div className="lab-sync"><span role="status">{sync.status}</span><button type="button" onClick={sync.retry}>Refresh / retry</button></div></header>
     {!sync.signedIn?<p><a href="/signin-with-chatgpt?return_to=%2F%3Fmode%3Dplay%26lab%3D1" target="_top">Sign in with ChatGPT</a> to save private attempts and notes across devices.</p>:<>
       <div className="lab-toolbar"><button type="button" disabled={!entry} onClick={()=>{setReviewing(!reviewing);if(!reviewing)onReveal();}}>{reviewing?'Hide review':'Review routes & feedback'}</button><button type="button" onClick={sync.exportFile}>Export backup</button><label className="lab-import">Import backup<input type="file" accept="application/json,.json" onChange={e=>{const file=e.target.files?.[0];if(file)void sync.importFile(file);e.target.value='';}}/></label></div>
-      <p className="lab-muted">Twelve repeatable starter holes—not yet curated favorites. Free base selection stays on. No auto-advance. Par and route analysis stay hidden until review.</p>
+      <p className="lab-muted">Round 2: twelve new holes across six palettes, checked with the calibrated shortcut filters. Choose 01 in the test-hole menu to begin. Free base selection stays on; replay any hole. No auto-advance. Earlier attempts remain in your history.</p>
       {entries.length>0&&<label className="lab-history">Attempt<select value={entry?.attempt.id??''} onChange={e=>{setChosen(e.target.value);setReviewing(true);onReveal();}}>{entries.map((e,i)=><option key={e.attempt.id} value={e.attempt.id}>{e.attempt.id===currentId?'Current · ':''}{PLAY_LEVELS[e.attempt.specimen.levelIndex].name} · {e.attempt.specimen.hole.notation} · {e.attempt.outcome} · {new Date(e.attempt.started).toLocaleString()} · {entries.length-i}</option>)}</select><button type="button" onClick={()=>setChosen(null)}>Current attempt</button></label>}
       {reviewing&&entry&&<div className="lab-review" key={entry.attempt.id}>
         <div className="lab-review-heading"><h3>{PLAY_LEVELS[entry.attempt.specimen.levelIndex].name} · {entry.attempt.specimen.hole.notation}</h3><button type="button" onClick={()=>{onReplay(entry.attempt.specimen);setChosen(null);setReviewing(false);}}>Replay this exact hole ↗</button></div>
         <p>{entry.attempt.specimen.hole.courseId} · {entry.attempt.engine} · {entry.attempt.revealed?'Analysis revealed':'Unassisted attempt'}</p>
+        <p>Design intent: {entry.attempt.specimen.hole.kind.replaceAll('-',' ')}. This describes the test—not a required starting paint or route.</p>
         <div className="lab-comparison">{same.map((e,i)=>{const shots=e.attempt.shots.filter(s=>!s.cancelled),last=shots.at(-1),error=last?colorDistance(mixtureColor(PLAY_LEVELS[e.attempt.specimen.levelIndex].paints,last.after),e.attempt.specimen.hole.target)/e.attempt.specimen.hole.tolerance:null;return <button type="button" key={e.attempt.id} aria-pressed={entry.attempt.id===e.attempt.id} onClick={()=>setChosen(e.attempt.id)}><strong>Attempt {same.length-i}</strong><span>{Math.max(0,shots.length-1)} pours · {last?totalMass(last.after).toFixed(2):0} parts</span><span>{error===null?'No base yet':`${error.toFixed(2)} × tolerance`} · {e.attempt.outcome}</span></button>;})}</div>
         <RouteReview entry={entry}/>
         <ReviewForm entry={entry} onSave={review=>sync.save({id:crypto.randomUUID(),attemptId:entry.attempt.id,type:'review',review})}/>
