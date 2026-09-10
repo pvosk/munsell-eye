@@ -3,16 +3,17 @@ import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
 test('landing tolerances are ten percent tighter across every palette', () => {
-  const previous = [.038,.032,.028,.032,.03,.032,.032,.032,.032];
+  const previous = [.038,.032,.028,.032,.03,.032,.032,.032,.032,.032];
   PLAY_LEVELS.forEach((level,i) => assert.ok(Math.abs(level.tolerance-previous[i]*.9)<1e-12));
 });
 
-test('the nine palettes have the requested pigments and names', () => {
-  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift']);
+test('the ten palettes have the requested pigments and names', () => {
+  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift', 'Double Cross']);
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
     ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
     ['PB15:3', 'PR122', 'PY3'], ['PO20', 'PV23', 'PG36', 'PW6'], ['PW1', 'PY35', 'PY43', 'PR108', 'PR83', 'PB28', 'PB29', 'PG18'],
     ['PV19', 'PG36', 'PB29', 'PW1'], ['PB28', 'PR108', 'PY3/PG36', 'PV23'],
+    ['PO20', 'PB28', 'PR108', 'PG7/PY74'],
   ]);
 });
 
@@ -202,7 +203,40 @@ test('arrival follows one uninterrupted curve into its settled pose', async () =
     }
     const forward = new Vector3(0,0,-1).applyQuaternion(pose(1).quaternion);
     assert.ok(forward.distanceTo(look.clone().sub(rest).normalize())<1e-9);
+    const start=pose(0).position, axis=rest.clone().sub(start), length=axis.length(); axis.normalize();
+    let previous=0, maxBow=0;
+    for(let i=0;i<=100;i++) {
+      const delta=pose(i/100).position.clone().sub(start), along=delta.dot(axis);
+      assert.ok(along>=previous-1e-6 && along<=length+1e-6,'intro must not reverse/overshoot along sightline');
+      maxBow=Math.max(maxBow,delta.clone().addScaledVector(axis,-along).length()); previous=along;
+    }
+    assert.ok(maxBow>2,'intro should expose the landscape laterally');
   }
+});
+
+test('capture and solid-target deflection preserve mixture data and miss endpoints', async () => {
+  const {targetFlightPath,captureProgress}=await import('../app/play-motion');
+  const {Vector3}=await import('three');
+  const rgb:[number,number,number]=[120,80,70];
+  const goal={rgb,lab:[.5,0,0] as [number,number,number],position:[0,0,0] as [number,number,number]};
+  const path=Array.from({length:401},(_,i)=>({...goal,position:[-5+i/40,0,0] as [number,number,number]}));
+  const before=JSON.stringify(path);
+  const miss=targetFlightPath(path,goal,false);
+  assert.deepEqual(miss[0].position,path[0].position);assert.deepEqual(miss.at(-1)!.position,path.at(-1)!.position);
+  miss.forEach((p,i)=>{assert.deepEqual(p.rgb,path[i].rgb);assert.deepEqual(p.lab,path[i].lab);assert.ok(new Vector3(...p.position).length()>=1.1499);});
+  const win=targetFlightPath(path,goal,true);
+  assert.deepEqual(win[0].position,path[0].position);assert.deepEqual(win.at(-1)!.position,goal.position);
+  assert.equal(JSON.stringify(path),before,'presentation cannot mutate the scored path');
+  let previous=0;for(let i=0;i<=100;i++){const p=captureProgress(i/100);assert.ok(p>=previous && p<=1);previous=p;}
+  assert.ok((captureProgress(1)-captureProgress(.99))>(captureProgress(.65)-captureProgress(.64)),'arrival accelerates rather than stalls');
+});
+
+test('wake decays to rest after ten seconds and fin attachments taper', async () => {
+  const {wakeEnvelope,finWidth}=await import('../app/play-motion');
+  assert.equal(wakeEnvelope(-1),0); assert.equal(wakeEnvelope(0),0);assert.equal(wakeEnvelope(10),0);assert.equal(wakeEnvelope(20),0);
+  assert.ok(wakeEnvelope(1)>.8);assert.ok(wakeEnvelope(9)<.02);
+  assert.ok(finWidth(0)>finWidth(1)*30);
+  for(let i=1;i<=100;i++) assert.ok(finWidth(i/100)<=finWidth((i-1)/100));
 });
 
 test('camera chooses the closest equivalent heading after repeated manual orbits', async () => {

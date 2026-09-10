@@ -37,6 +37,7 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'French Light', subtitle: 'An Impressionist Palette', paints: [flake, paint('cadmium-yellow-light'), paint('yellow-ochre'), paint('cadmium-red-light'), paint('alizarin-crimson'), paint('cobalt-blue'), paint('ultramarine-blue'), paint('viridian')], tolerance: .0288 },
   { name: 'Chromatic Dark', subtitle: 'Color Inside the Shadows', paints: [paint('quinacridone-red'),paint('phthalo-emerald'),paint('ultramarine-blue'),flake], tolerance: .0288 },
   { name: 'Violet Shift', subtitle: 'Purple Holds the Depth', paints: [paint('cobalt-blue'),paint('cadmium-red-light'),chartreuse,paint('dioxazine-purple')], tolerance: .0288 },
+  { name: 'Double Cross', subtitle: 'Two Opposing Pairs', paints: [paint('cadmium-orange'),paint('cobalt-blue'),paint('cadmium-red-medium'),paint('permanent-green-light')], tolerance: .0288 },
 ];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {

@@ -2172,9 +2172,9 @@ export default function Home() {
   };
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-view={view}>
       <header className="topbar">
-        <div className="brand">
+        <div className="brand" aria-label="Munsell Eye">
           <span className="brand-mark" aria-hidden="true" />
           <span>Munsell Eye</span>
         </div>

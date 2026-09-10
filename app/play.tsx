@@ -8,6 +8,26 @@ type Phase = 'intro' | 'seed' | 'rest' | 'flight' | 'landed';
 type Charge = { index: number; started: number; source: string };
 const massLabel = (mass: number) => mass < 1000 ? mass.toLocaleString(undefined, { maximumFractionDigits: mass < 10 ? 2 : 1 }) : mass.toExponential(1);
 
+function PaletteRail({value,disabled,onChange}:{value:number;disabled:boolean;onChange:(index:number)=>void}) {
+  const [open,setOpen]=useState(false);
+  const root=useRef<HTMLDivElement>(null), trigger=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{
+    if(!open) return;
+    root.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus({preventScroll:true});
+    const outside=(event:globalThis.PointerEvent)=>{if(!root.current?.contains(event.target as Node)) setOpen(false);};
+    document.addEventListener('pointerdown',outside);
+    return ()=>document.removeEventListener('pointerdown',outside);
+  },[open]);
+  const close=()=>{setOpen(false);trigger.current?.focus({preventScroll:true});};
+  return <div ref={root} className={`play-palette-rail mobile-choice-rail ${open?'open':''}`} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();close();}}} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setOpen(false);}}>
+    <button ref={trigger} className="mobile-choice-trigger" aria-expanded={open} aria-controls="play-palette-options" disabled={disabled} tabIndex={open?-1:0} onClick={()=>setOpen(true)} type="button"><span>Palette</span><strong>{PLAY_LEVELS[value].name}</strong><i aria-hidden="true">›</i></button>
+    <div id="play-palette-options" className="mobile-choice-options" aria-label="Palette choices" inert={!open}>
+      {PLAY_LEVELS.map((entry,index)=><button key={entry.name} className={index===value?'active':''} aria-pressed={index===value} disabled={disabled} onClick={()=>{onChange(index);close();}} type="button">{entry.name}</button>)}
+      <button aria-label="Close palette choices" onClick={close} type="button">×</button>
+    </div>
+  </div>;
+}
+
 export default function PlayView() {
   const [levelIndex, setLevelIndex] = useState(0);
   const [hole, setHole] = useState<Hole>(() => generateHole(0, 190926));
@@ -19,7 +39,8 @@ export default function PlayView() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
   const [help, setHelp] = useState(false);
-  const [results, setResults] = useState<(number | null)[][]>(PLAY_LEVELS.map(() => Array(HOLES_PER_PALETTE).fill(null)));
+  const [, setResults] = useState<(number | null)[][]>(PLAY_LEVELS.map(() => Array(HOLES_PER_PALETTE).fill(null)));
+  const [finishPaused,setFinishPaused]=useState(false);
   const [announcement, setAnnouncement] = useState('Choose your first paint.');
   const host = useRef<HTMLDivElement>(null);
   const targetLabel = useRef<HTMLDivElement>(null);
@@ -136,6 +157,7 @@ export default function PlayView() {
   }, [begin, release, cancelCharge]);
 
   const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0) => {
+    setFinishPaused(false);
     cancelCharge(); setReady(false); setError(false); setSelected(0); setPours(0); setPhase('intro'); setHelp(false);
     setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
     // New object also restarts an identical cached hole and its scene effect.
@@ -191,19 +213,18 @@ export default function PlayView() {
   const advance = useRef(nextHole);
   useEffect(() => { advance.current = nextHole; });
   useEffect(() => {
-    if (phase !== 'landed' || help) return;
-    const timer = window.setTimeout(() => advance.current(), 2300);
+    if (phase !== 'landed' || help || finishPaused) return;
+    const timer = window.setTimeout(() => advance.current(), 5200);
     return () => window.clearTimeout(timer);
-  }, [phase, help, hole]);
+  }, [phase, help, hole, finishPaused]);
   const amount = charged === null ? 0 : chargeAmount(mass, charged);
   const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help;
   const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 2 ? 'Within Reach' : 'Choose Your Next Pour';
 
   return <section className="paint-play" aria-label="Paint mixing game">
     <div className="play-topline">
-      <div className="play-name"><span className="play-eyebrow">Munsell Eye / Play</span><h1>Chroma Glider</h1></div>
-      <select className="play-palette-select" aria-label="Palette" value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={event => startHole(Number(event.target.value))}>{PLAY_LEVELS.map((entry, i) => <option key={entry.name} value={i}>{entry.name}</option>)}</select>
-      <div className="play-levels" aria-label="Palette levels">{PLAY_LEVELS.map((entry, i) => <button key={entry.name} type="button" aria-pressed={levelIndex === i} onClick={() => startHole(i)} disabled={phase === 'flight' || charged !== null}><span>{results[i].every(score => score !== null) ? '✓' : `0${i + 1}`}</span>{entry.name}</button>)}</div>
+      <div className="play-name"><h1>Chroma Glider</h1></div>
+      <PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />
       <div className="play-upper-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button><button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button></div>
     </div>
     <div className="play-world">
@@ -216,7 +237,13 @@ export default function PlayView() {
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
       {help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>Each palette has five holes with a consistent color tolerance. Early holes keep simple two-paint routes; later mixtures become more demanding. A qualifying endpoint is drawn into the cup, then advances automatically; par is a personal challenge. All palettes are available to explore.</p><p className="play-fineprint">Guide par comes from sampled recipes. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint behavior uses approximate pigment colors and tinting strengths.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
-      {phase === 'landed' && !help && <div className="play-arrival"><span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span><h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2><p>{pours} pours · Guide par {hole.par} · {massLabel(mass)} parts</p><div><button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : levelIndex < PLAY_LEVELS.length - 1 ? 'Next Palette' : 'Play Again'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button></div></div>}
+      {phase === 'landed' && !help && <div className="play-arrival" data-result={pours<=hole.par?'within':'over'} onFocus={()=>setFinishPaused(true)} onPointerDown={()=>setFinishPaused(true)}>
+        <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Shots</span></div><div><strong>{massLabel(mass)}</strong><span>Total parts</span></div></div>
+        <p className="play-par-difference">{pours===hole.par?'On guide par':`${pours>hole.par?'+':''}${pours-hole.par} vs guide par`} <span>· {hole.par} estimated</span></p>
+        <span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span>
+        <h2>{pours < hole.par ? 'Beautiful Shortcut.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
+        <div><button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button><button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button></div>
+      </div>}
     </div>
     <div className="play-dock">
       <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb) } as CSSProperties}><i /><b /></div></div></div>
