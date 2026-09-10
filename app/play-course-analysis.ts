@@ -31,11 +31,11 @@ export function replayRoute(palette:number,order:number[],times:number[]) {
   for(let i=0;i<times.length;i++) q=addPaint(q,order[i+1],chargeAmount(totalMass(q),times[i]));
   return q;
 }
-function evaluate(palette:number,order:number[],times:number[],target:ColorPoint) {
+export function evaluate(palette:number,order:number[],times:number[],target:ColorPoint) {
   const recipe=replayRoute(palette,order,times);
   return {recipe,error:colorDistance(mixtureColor(PLAY_LEVELS[palette].paints,recipe),target)};
 }
-function refine(palette:number,order:number[],initial:number[],target:ColorPoint,step:number,limit=CHARGE_SECONDS) {
+export function refine(palette:number,order:number[],initial:number[],target:ColorPoint,step:number,limit=CHARGE_SECONDS) {
   let times=[...initial], result=evaluate(palette,order,times,target);
   for(let iteration=0;iteration<9;iteration++,step*=.5) {
     for(let dimension=0;dimension<times.length;dimension++) for(const sign of [-1,1]) {
@@ -46,7 +46,7 @@ function refine(palette:number,order:number[],initial:number[],target:ColorPoint
   }
   return {...result,times};
 }
-function routeDetails(palette:number,order:number[],times:number[],target:ColorPoint):Route {
+export function routeDetails(palette:number,order:number[],times:number[],target:ColorPoint):Route {
   const level=PLAY_LEVELS[palette], result=evaluate(palette,order,times,target);
   let window=Infinity;
   // Replay all later charge TIMES after each perturbation, so accumulated-mass
@@ -62,7 +62,7 @@ function routeDetails(palette:number,order:number[],times:number[],target:ColorP
   }
   return {order,times,recipe:result.recipe,error:result.error,window:Number.isFinite(window)?window:.3,length:0,lastLength:0,valueChange:0,minChroma:0};
 }
-function geometry(palette:number,route:Route) {
+export function geometry(palette:number,route:Route) {
   const level=PLAY_LEVELS[palette];let q=level.paints.map((_,i)=>+(i===route.order[0])), length=0,lastLength=0,valueChange=0,minChroma=Infinity;
   for(let i=0;i<route.times.length;i++) {
     const amount=chargeAmount(totalMass(q),route.times[i]),path=pourPath(level.paints,q,route.order[i+1],amount,48);
@@ -72,21 +72,21 @@ function geometry(palette:number,route:Route) {
   }
   return {...route,length,lastLength,valueChange,minChroma};
 }
-export function makeAtlas(palette:number):Atlas[] {
+export function makeAtlas(palette:number,oneSteps=64,twoSteps=16):Atlas[] {
   const count=PLAY_LEVELS[palette].paints.length,atlas:Atlas[]=[];
   for(let base=0;base<count;base++) for(let first=0;first<count;first++) if(first!==base) {
     const one:Atlas={order:[base,first],samples:[]};
-    for(let i=0;i<=64;i++) {const times=[i*CHARGE_SECONDS/64];one.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,one.order,times)).lab});}
+    for(let i=0;i<=oneSteps;i++) {const times=[i*CHARGE_SECONDS/oneSteps];one.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,one.order,times)).lab});}
     atlas.push(one);
     for(let second=0;second<count;second++) {
       const two:Atlas={order:[base,first,second],samples:[]};
-      for(let i=0;i<=16;i++) for(let j=0;j<=16;j++) {const times=[i*CHARGE_SECONDS/16,j*CHARGE_SECONDS/16];two.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,two.order,times)).lab});}
+      for(let i=0;i<=twoSteps;i++) for(let j=0;j<=twoSteps;j++) {const times=[i*CHARGE_SECONDS/twoSteps,j*CHARGE_SECONDS/twoSteps];two.samples.push({times,lab:mixtureColor(PLAY_LEVELS[palette].paints,replayRoute(palette,two.order,times)).lab});}
       atlas.push(two);
     }
   }
   return atlas;
 }
-function witnessRoutes(palette:number,recipe:Mixture,target:ColorPoint):Route[] {
+export function witnessRoutes(palette:number,recipe:Mixture,target:ColorPoint):Route[] {
   const active=recipe.map((q,i)=>q>0?i:-1).filter(i=>i>=0),routes:Route[]=[];
   const visit=(order:number[])=>{
     if(order.length<active.length){for(const i of active)if(!order.includes(i))visit([...order,i]);return;}

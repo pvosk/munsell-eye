@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {LAB_STARTERS,newLabAttempt,type LabEvent} from '../app/play-lab-model';
+import {LAB_PAIRED,newLabAttempt,type LabEvent} from '../app/play-lab-model';
 // Intentionally local-only: never seed QA records into the public lab.
 const root='http://localhost:3000',url=`${root}/api/play-lab`;
 const headers={'Cookie':'__sites_local_auth=1','Origin':root,'Content-Type':'application/json'};
@@ -7,11 +7,14 @@ assert.equal((await fetch(url)).status,401);
 assert.equal((await fetch(url,{headers:{'oai-authenticated-user-id':'spoof'}})).status,401);
 assert.equal((await fetch(url,{method:'POST',headers:{...headers,Origin:'https://example.com'},body:'{}'})).status,403);
 assert.equal((await fetch(url,{method:'POST',headers,body:'{}'})).status,400);
-const attempt=newLabAttempt(LAB_STARTERS[0],crypto.randomUUID());
+const attempt=newLabAttempt({...LAB_PAIRED[0],comparison:{base:1,sourceAttemptId:crypto.randomUUID()}},crypto.randomUUID());
 const event:LabEvent={id:crypto.randomUUID(),attemptId:attempt.id,type:'attempt',attempt};
 for(let i=0;i<2;i++)assert.equal((await fetch(url,{method:'POST',headers,body:JSON.stringify(event)})).status,200);
+const review:LabEvent={id:crypto.randomUUID(),attemptId:attempt.id,type:'review',review:{verdict:'keep',routeVerdict:'revise',comparison:'both-good',challenge:'setup',issue:'',note:'Local paired-start QA',shot:null}};
+assert.equal((await fetch(url,{method:'POST',headers,body:JSON.stringify(review)})).status,200);
 let cursor=0,more=true;const events:LabEvent[]=[];
 while(more){const r=await fetch(`${url}?after=${cursor}`,{headers});assert.equal(r.status,200);const data=await r.json() as {events:LabEvent[];cursor:number;more:boolean};events.push(...data.events);cursor=data.cursor;more=data.more;}
 assert.equal(events.filter(e=>e.id===event.id).length,1,'retry is idempotent');
+assert.deepEqual(events.find(e=>e.id===review.id),review,'paired feedback survives persistence');
 assert.equal((await fetch(url)).status,401,'records remain private after writes');
 console.log('Lab API: sign-in enforcement, spoof rejection, origin checks, validation, persistence and idempotence passed.');

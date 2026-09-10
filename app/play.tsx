@@ -194,7 +194,7 @@ export default function PlayView() {
     return () => { window.removeEventListener('keydown', keyDown); window.removeEventListener('keyup', keyUp); window.removeEventListener('blur', cancelCharge); document.removeEventListener('visibilitychange', visibility); cancelCharge(); };
   }, [begin, release, cancelCharge, cancelShot]);
 
-  const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole) => {
+  const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole, comparison?:LabSpecimen['comparison']) => {
     cancelShot();
     scene.current?.cancelFlight();
     rollback.current=null;
@@ -208,12 +208,12 @@ export default function PlayView() {
     if(lab&&sync.signedIn){
       const previous=attemptRef.current;
       if(previous&&previous.outcome==='playing')record({...previous,outcome:previous.specimen.hole.courseId===next.courseId?'replayed':'left'});
-      record(newLabAttempt({levelIndex:index,hole:next},crypto.randomUUID()));
+      record(newLabAttempt({levelIndex:index,hole:next,...(comparison?{comparison}:{})},crypto.randomUUID()));
     }
     setHole(next);
     setAnnouncement(`Hole ${stage + 1} of ${HOLES_PER_PALETTE}. Arriving in color space.`);
   };
-  const replaySpecimen=(specimen:LabSpecimen)=>startHole(specimen.levelIndex,true,specimen.hole.stage,{...specimen.hole});
+  const replaySpecimen=(specimen:LabSpecimen)=>startHole(specimen.levelIndex,true,specimen.hole.stage,{...specimen.hole},specimen.comparison);
   const toggleLab=()=>{
     cancelCharge();cancelShot();
     if(lab&&attemptRef.current&&attemptRef.current.outcome==='playing')record({...attemptRef.current,outcome:'left'});

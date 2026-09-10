@@ -5,6 +5,8 @@ import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
 import courseBank from './generated/play-courses.json';
 import legacyCourseBank from './generated/play-courses-v2.json';
 import labRoundBank from './generated/play-lab-round2.json';
+import pairedRoundBank from './generated/play-lab-round3.json';
+import type {HoleAnalysis} from './play-route-analysis';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
@@ -298,6 +300,14 @@ export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance:
 const courseSignature = (count=PLAY_LEVELS.length)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
 type StoredLabRoute={id:string;target:Mixture;recipe:Mixture;par:number;timingWindow:number;kind:string;solutionShots:number;order:number[];times:number[]};
 const labBank=labRoundBank as {version:string;signature:string;palettes:{levelIndex:number;holes:StoredLabRoute[]}[]};
+export const pairedLabBank=pairedRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:HoleAnalysis}[]};
+export function generatePairedHole(levelIndex:number,stage:number,seed=20260912):Hole {
+  if(seed!==20260912||pairedLabBank.signature!==courseSignature())throw new Error('Paired lab model changed');
+  const item=pairedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown paired lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:level.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:item.analysis.style,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateLabHole(levelIndex:number,stage:number,seed=20260911):Hole {
   if(labBank.signature!==courseSignature())throw new Error('Lab palette model changed');
   const holes=labBank.palettes.find(p=>p.levelIndex===levelIndex)?.holes;
