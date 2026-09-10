@@ -232,9 +232,9 @@ function generateCandidate(levelIndex: number, seed: number) {
     const ids = level.paints.map((_, i) => i);
     for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
     recipe = level.paints.map(() => 0);
-    ids.slice(0, count).forEach((i) => { recipe[i] = 2 + Math.floor(rng() * 9); });
-    // The introductory dark triad needs some white for a readable first hole.
-    if (levelIndex === 0) recipe[2] = 3 + Math.floor(rng() * 8);
+    // Log-spread doses sample edge runs, tints and muted interiors, rather than
+    // concentrating almost every recipe near equal-parts mixtures.
+    ids.slice(0, count).forEach((i) => { recipe[i] = Math.exp(Math.log(.3) + rng() * Math.log(40)); });
     target = mixtureColor(level.paints, recipe);
     if (level.paints.every((p) => colorDistance(colorPoint(p.rgb), target) > level.tolerance * 1.7)) break;
   }
@@ -285,14 +285,26 @@ export function generateHole(levelIndex: number, seed: number, stage = 0): Hole 
   let round = roundCache.get(key);
   if (!round) {
     const level = PLAY_LEVELS[levelIndex];
-    const candidates = Array.from({ length: 36 }, (_, i) => {
+    const candidates = Array.from({ length: 80 }, (_, i) => {
       const candidate = generateCandidate(levelIndex, (seed + Math.imul(i + 1, 7919)) >>> 0);
       const timing = recipeTimingWindow(level, candidate.recipe, level.tolerance);
       const support = candidate.simple.filter(q => q > 0).length;
-      return { ...candidate, score: (support - 2) * .7 + Math.log1p(1 / Math.max(.01, timing)) };
+      return { ...candidate, support, route: candidate.simple.map(q => q > 0 ? 1 : 0).join(''), score: (support - 2) * .7 + Math.log1p(1 / Math.max(.01, timing)) };
     }).sort((a, b) => a.score - b.score);
+    const chosen: typeof candidates = [];
     round = Array.from({ length: HOLES_PER_PALETTE }, (_, holeIndex) => {
-      const candidate = candidates[Math.round((candidates.length - 1) * (.08 + holeIndex * .21))];
+      const unused = candidates.filter(c => !chosen.includes(c) && level.paints.every(p => colorDistance(colorPoint(p.rgb),c.target) > level.tolerance * 1.4));
+      const stagePool = unused.filter(c => holeIndex < 2 ? c.support === 2 : c.support >= 3);
+      const pool = stagePool.length ? stagePool : unused.length ? unused : candidates.filter(c => !chosen.includes(c));
+      const rankGoal = .1 + holeIndex * .2;
+      const merit = (c: typeof candidates[number]) => {
+        const novelty = chosen.length ? Math.min(...chosen.map(other => colorDistance(c.target,other.target))) : .1;
+        const repeatedRoute = chosen.some(other => other.route === c.route);
+        return Math.min(.3,novelty)*12 - (novelty < level.tolerance*1.8 ? 3 : 0)
+          - (repeatedRoute ? .55 : 0) - Math.abs(candidates.indexOf(c)/(candidates.length-1)-rankGoal)*.65;
+      };
+      const candidate = pool.reduce((best,c) => merit(c)>merit(best) ? c : best);
+      chosen.push(candidate);
       const tolerance = level.tolerance;
       const recipe = simplestRecipe({ ...level, tolerance }, candidate.target, candidate.recipe);
       const slack = Math.max(.001, tolerance - colorDistance(mixtureColor(level.paints, recipe), candidate.target));

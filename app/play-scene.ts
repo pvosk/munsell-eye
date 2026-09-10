@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { flightProgress, ribbonEdges } from './play-motion';
+import { flightProgress, ribbonEdges, planArrival } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, landingBoundary, type ColorPoint, type Hole, type RGB } from './play-engine';
 
 type Flight = { path: ColorPoint[]; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -46,8 +46,11 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     mesh.userData.phase = strand * Math.PI * 2 / 5;
     mesh.frustumCulled = false; blob.add(mesh); return mesh;
   });
-  const outline = new THREE.Mesh(blobGeometry, new THREE.MeshBasicMaterial({ color: '#f9f4dd', side: THREE.BackSide, transparent: true, opacity: .08 }));
+  const outline = new THREE.Mesh(blobGeometry, new THREE.MeshBasicMaterial({ color: '#fff5d9', side: THREE.BackSide, transparent: true, opacity: .9, depthWrite: false }));
   outline.scale.setScalar(1.025); blob.add(outline);
+  const darkOutline = new THREE.Mesh(blobGeometry,new THREE.MeshBasicMaterial({color:'#17242d',side:THREE.BackSide}));
+  blob.add(darkOutline);
+  darkOutline.renderOrder = 1; outline.renderOrder = 2; body.renderOrder = 3;
   scene.add(blob);
 
   const chargeRing = new THREE.Mesh(new THREE.TorusGeometry(.45, .012, 6, 90), new THREE.MeshBasicMaterial({ color: '#f3e6bf', transparent: true, opacity: 0 }));
@@ -58,11 +61,11 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   // One instanced draw: crisp matte cells throughout the color volume. No
   // ring scaffolding, point-sprite blur, lighting glare, or empty neutral grid.
   const nodesGeometry = new THREE.BoxGeometry(.64, .64, .64);
-  const nodeUniforms = { uTime: { value: 0 }, uIntro: { value: 0 }, uFlight: { value: 0 }, uTarget: { value: new THREE.Vector3() }, uPlayer: { value: new THREE.Vector3() } };
+  const nodeUniforms = { uTime: { value: 0 }, uIntro: { value: 0 }, uFlight: { value: 0 }, uSpeed: {value:0}, uTarget: { value: new THREE.Vector3() }, uPlayer: { value: new THREE.Vector3() } };
   const nodeMaterial = new THREE.MeshBasicMaterial({ depthWrite: true });
   nodeMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, nodeUniforms);
-    shader.vertexShader = `uniform float uTime; uniform float uIntro; uniform float uFlight; uniform vec3 uPlayer; uniform vec3 uTarget; varying float vFieldAlpha;
+    shader.vertexShader = `uniform float uTime; uniform float uIntro; uniform float uFlight; uniform float uSpeed; uniform vec3 uPlayer; uniform vec3 uTarget; varying float vFieldAlpha;
       vec3 corridor(vec3 p, vec3 endPoint) {
         vec3 axis=endPoint-cameraPosition;
         float t=clamp(dot(p-cameraPosition,axis)/max(.01,dot(axis,axis)),0.0,1.0);
@@ -75,11 +78,12 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       vec3 delta=base-uPlayer;
       float d=length(delta);
       float nearby=1.0-smoothstep(3.0,26.0,d);
-      float wave=sin(uTime*.7+base.y*.25+sin(base.z*.2));
+      float region=sin(atan(base.z,base.x)*2.0+base.y*.11);
+      float wave=sin(uTime*(.6+region*.12)+base.y*.25+sin(base.z*.2));
       vec3 outward=delta/max(.01,d);
       vec3 swirl=vec3(-outward.z,0.0,outward.x);
-      float wake=(.45+uFlight*.55)*exp(-d*d/40.0);
-      vec3 displacement=outward*wake*3.5+swirl*wake*1.3;
+      float wake=(.45+uFlight*.55)*exp(-d*d/(40.0+uSpeed*24.0));
+      vec3 displacement=outward*wake*(3.5+uSpeed*.9)+swirl*wake*(1.0+region*.35+uSpeed*.4);
       displacement+=vec3(wave,0.0,cos(uTime*.6+base.x*.2))*(.08+uIntro*.3)*nearby;
       displacement+=corridor(base,uPlayer)+corridor(base,uTarget);
       vec3 targetDelta=base-uTarget;
@@ -112,6 +116,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const target = new THREE.Group(); scene.add(target);
   const targetMaterial = new THREE.MeshBasicMaterial({ color: color(hole.target.rgb) });
   const targetCore = new THREE.Mesh(new THREE.SphereGeometry(.62, 28, 20), targetMaterial); target.add(targetCore);
+  const targetRim = new THREE.Mesh(targetCore.geometry,new THREE.MeshBasicMaterial({color:'#fff5dc',side:THREE.BackSide}));
+  target.add(targetRim);
   const targetBoundary = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#e9dfc9', transparent: true, opacity: .35 }));
   target.add(targetBoundary);
   const targetGlow = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), new THREE.ShaderMaterial({
@@ -138,7 +144,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   let previousHue: number | null = null;
   let lastGate = -10;
   let introElapsed = 0; let introducing = true;
-  let introCurve: THREE.CatmullRomCurve3;
+  let introPose: ReturnType<typeof planArrival>;
   const introFinishLook = new THREE.Vector3();
   let won = false; let disposed = false;
   let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -213,11 +219,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const nearGoal = 1 - smooth(Math.min(1, separation / 12));
     const restPosition = blob.position.clone().addScaledVector(cameraDirection, -((camera.aspect < .85 ? 6.3 : 5.4) + nearGoal * 2.5)).addScaledVector(side, 2.8 + nearGoal * 2).add(new THREE.Vector3(0, 1.8, 0));
     introFinishLook.copy(blob.position).lerp(target.position, Math.min(.5, 4 / Math.max(1, separation)));
-    const startPosition = target.position.clone().addScaledVector(cameraDirection, -3.8).addScaledVector(side, .9);
-    const passage = target.position.clone().lerp(blob.position, .35).addScaledVector(side, 20).add(new THREE.Vector3(0, 8, 0));
-    introCurve = new THREE.CatmullRomCurve3([startPosition, passage, restPosition], false, 'centripetal');
+    introPose = planArrival(target.position,restPosition,introFinishLook);
     introElapsed = 0; introducing = true;
-    camera.position.copy(reduced ? restPosition : startPosition);
+    camera.position.copy(reduced ? restPosition : introPose(0).position);
     lookAt.copy(reduced ? introFinishLook : target.position);
     camera.lookAt(lookAt);
   }
@@ -302,7 +306,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       f.ribbon.geometry.setDrawRange(0, Math.max(0, (index - 1) * 24));
       const chroma = Math.hypot(a.lab[1], a.lab[2]);
       const hueSector = Math.floor((Math.atan2(a.lab[2], a.lab[1]) + Math.PI) / (Math.PI / 5));
-      if (f.length > 12 && chroma > .035 && previousHue !== null && hueSector !== previousHue && time - lastGate > .7 && !reduced) {
+      if (f.length > 7 && progress > .1 && progress < .9 && time - lastGate > .5 && !reduced &&
+        ((chroma > .035 && previousHue !== null && hueSector !== previousHue) || speed > 6)) {
         lastGate = time;
         for (let ring = 0; ring < 3; ring++) {
           pulse(f.path[Math.min(f.path.length - 1, index + ring * 5)].rgb, p.clone().addScaledVector(travelDirection, ring * .55), travelDirection);
@@ -343,9 +348,11 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       positions.setXYZ(i, x * radius * bell, y * radius * bell, z * radius * .8);
     }
     positions.needsUpdate = true;
-    const facing = charge?.tangent ?? travelDirection;
+    const idleFacing = target.position.clone().sub(blob.position).normalize();
+    const facing = charge?.tangent ?? (flight || capture || won ? travelDirection : idleFacing);
     if (facing.lengthSq() > .001) body.quaternion.slerp(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), facing), 1 - Math.exp(-dt * 7));
-    outline.quaternion.copy(body.quaternion); outline.scale.copy(body.scale).multiplyScalar(1.025);
+    outline.quaternion.copy(body.quaternion); outline.scale.copy(body.scale).multiplyScalar(1.13);
+    darkOutline.quaternion.copy(body.quaternion); darkOutline.scale.copy(body.scale).multiplyScalar(1.22);
     blobMaterial.color.copy(mass ? color(movingPoint.rgb) : new THREE.Color('#d8d5c7'));
     tendrils.forEach(mesh => {
       mesh.quaternion.copy(body.quaternion);
@@ -364,7 +371,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       }
       attribute.needsUpdate = true;
     });
-    outline.material.opacity = mass ? .06 : .15;
+    outline.material.opacity = reduced ? .85 : .83 + .09*Math.sin(time*1.7);
 
     chargeRing.visible = !!charge;
     satellite.visible = !!charge;
@@ -384,6 +391,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       ring.material.opacity = (i === 0 ? .65 : .21) + (won ? .15 : 0);
     });
     targetCore.scale.setScalar(1 + (reduced ? 0 : Math.sin(time * 2.2) * .12));
+    targetRim.scale.copy(targetCore.scale).multiplyScalar(1.055);
     targetBoundary.material.opacity = won ? .8 : .5;
     targetRings.forEach((ring, i) => {
       ring.quaternion.copy(camera.quaternion);
@@ -404,6 +412,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     nodeUniforms.uPlayer.value.copy(introducing ? camera.position : blob.position);
     nodeUniforms.uIntro.value = introducing && !reduced ? Math.sin(Math.PI * Math.min(1, introElapsed / 3.6)) : 0;
     nodeUniforms.uFlight.value += ((flight && !reduced ? 1 : 0) - nodeUniforms.uFlight.value) * (1 - Math.exp(-dt * 3));
+    nodeUniforms.uSpeed.value += ((reduced ? 0 : Math.min(1.5,speed/16))-nodeUniforms.uSpeed.value)*(1-Math.exp(-dt*3));
 
     // Remain inside the lattice. Follow behind the glider, never zoom out to
     // fit the whole system. At rest, turn toward the destination from here.
@@ -437,8 +446,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     lookAt.lerp(desiredLook, 1 - Math.exp(-dt * (reduced ? 12 : 2.8)));
     if (introducing) {
       const progress = reduced ? 1 : Math.min(1, introElapsed / 3.6);
-      camera.position.copy(introCurve.getPoint(smooth(progress)));
-      lookAt.copy(target.position).lerp(introFinishLook, smooth(Math.max(0, (progress - .2) / .8)));
+      const pose = introPose(progress);
+      camera.position.copy(pose.position);
+      lookAt.copy(camera.position).add(new THREE.Vector3(0,0,-1).applyQuaternion(pose.quaternion));
       blob.visible = progress > .55;
       if (progress === 1) { introducing = false; blob.visible = true; callbacks.onIntroEnd(); }
     }

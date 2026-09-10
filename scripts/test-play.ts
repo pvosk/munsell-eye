@@ -166,9 +166,29 @@ test('all five holes retain a constant landing tolerance and reachable recipes',
       }
     }
     assert.ok(round.at(-1)!.par >= round[0].par);
+    assert.equal(round[0].par,1);
+    const closest = Math.min(...round.flatMap((h,i)=>round.slice(i+1).map(other=>colorDistance(h.target,other.target))));
+    assert.ok(closest > level.tolerance, `${level.name} repeated visually overlapping targets: ${closest}`);
+    assert.ok(new Set(round.map(h=>h.recipe.map(q=>q>0?1:0).join(''))).size >= 2);
     console.log(`${level.name} seed ${seed}: pars ${round.map(h => h.par).join('/')}; estimated timing windows ${round.map(h => Math.round(h.timingWindow * 1000)).join('/')}ms`);
     const recipe = round.at(-1)!.recipe;
     assert.ok(recipeTimingWindow(level, recipe, .02) < recipeTimingWindow(level, recipe, .04));
+  }
+});
+
+test('arrival dollies without close-up rotation and joins its settled pose continuously', async () => {
+  const {planArrival} = await import('../app/play-motion');
+  const {Vector3} = await import('three');
+  for (const target of [new Vector3(20,8,-15),new Vector3(-20,-15,6),new Vector3(0,15,.1)]) {
+    const rest=new Vector3(3,2,7), look=new Vector3(1,0,0);
+    const pose=planArrival(target,rest,look);
+    assert.ok(pose(0).quaternion.angleTo(pose(.3).quaternion)<1e-7);
+    assert.ok(pose(.3).position.distanceTo(target)>pose(0).position.distanceTo(target));
+    assert.ok(pose(1).position.distanceTo(rest)<1e-9);
+    for (const t of [.36,.7]) {
+      assert.ok(pose(t-1e-6).position.distanceTo(pose(t+1e-6).position)<.001);
+      assert.ok(pose(t-1e-6).quaternion.angleTo(pose(t+1e-6).quaternion)<.001);
+    }
   }
 });
 
