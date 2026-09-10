@@ -2,6 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
+test('landing tolerances are ten percent tighter across every palette', () => {
+  const previous = [.038,.032,.028,.032,.03,.032,.032];
+  PLAY_LEVELS.forEach((level,i) => assert.ok(Math.abs(level.tolerance-previous[i]*.9)<1e-12));
+});
+
 test('the seven palettes have the requested pigments and names', () => {
   assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light']);
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
