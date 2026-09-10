@@ -101,6 +101,46 @@ export function playerPar(shots:number,window:number,challenge:number) {
   const courseAllowance=+(challenge>=.8 && shots>=2);
   return Math.max(2,Math.min(6,shots+1+timingAllowance+courseAllowance));
 }
+
+// Diagnostic only: does not change the live bank or previously saved holes.
+// A denser two-pour grid and several local starts reduce reliance on one
+// attractive witness. Still a sampled search, not an exhaustive proof.
+export function auditFreeStarts(palette:number,recipe:Mixture) {
+  const level=PLAY_LEVELS[palette],target=mixtureColor(level.paints,recipe);
+  const routes=witnessRoutes(palette,recipe,target).filter(r=>r.error<level.tolerance);
+  const bestOne=level.paints.map(()=>Infinity);
+  for(let base=0;base<level.paints.length;base++)for(let first=0;first<level.paints.length;first++)if(first!==base){
+    for(const last of [-1,...level.paints.map((_,i)=>i)]) {
+      const order=last<0?[base,first]:[base,first,last],steps=last<0?128:24;
+      const samples:{times:number[];error:number}[]=[];
+      for(let i=0;i<=steps;i++)for(let j=0;j<=(last<0?0:steps);j++){
+        const times=last<0?[i*CHARGE_SECONDS/steps]:[i*CHARGE_SECONDS/steps,j*CHARGE_SECONDS/steps];
+        samples.push({times,error:evaluate(palette,order,times,target).error});
+      }
+      samples.sort((a,b)=>a.error-b.error);const starts:number[][]=[];
+      for(const sample of samples){
+        if(starts.some(t=>Math.hypot(...t.map((v,i)=>v-sample.times[i]))<.12))continue;
+        starts.push(sample.times);
+        const result=refine(palette,order,sample.times,target,CHARGE_SECONDS/steps);
+        if(last<0)bestOne[base]=Math.min(bestOne[base],result.error);
+        if(result.error<level.tolerance)routes.push(routeDetails(palette,order,result.times,target));
+        if(starts.length===5)break;
+      }
+    }
+  }
+  return level.paints.map((paint,base)=>{
+    const viable=routes.filter(r=>r.order[0]===base),shots=Math.min(...viable.map(r=>r.times.length));
+    const competitors=viable.filter(r=>r.times.length===shots).map(r=>geometry(palette,r));
+    const best=competitors.reduce<Route|null>((a,b)=>!a||b.window>a.window?b:a,null);
+    const basePoint=mixtureColor(level.paints,level.paints.map((_,i)=>+(i===base)));
+    return {base:paint.name,distanceInTolerances:colorDistance(basePoint,target)/level.tolerance,
+      onePourErrorInTolerances:bestOne[base]/level.tolerance,additionsFound:best?shots:null,
+      route:best?.order.map(i=>level.paints[i].name),timingMarginMs:best?best.window*1000:null,
+      travel:best?.length,finishTravel:best?.lastLength,
+      shortestTravelFound:competitors.length?Math.min(...competitors.map(r=>r.length)):null,
+      shortestFinishFound:competitors.length?Math.min(...competitors.map(r=>r.lastLength)):null};
+  });
+}
 export function analyzeCandidate(palette:number,seed:number,atlas:Atlas[],forced?:Mixture):CourseRecord|null {
   const level=PLAY_LEVELS[palette], candidate=forced?{recipe:forced,target:mixtureColor(level.paints,forced)}:generateCandidate(palette,seed,false);
   const target=candidate.target,nearestBase=Math.min(...level.paints.map((_,i)=>colorDistance(target,mixtureColor(level.paints,level.paints.map((_,j)=>+(i===j))))));

@@ -5,7 +5,7 @@ import {LAB_ENGINE,LAB_STARTERS,labEntries,type LabAttempt,type LabReview,type L
 import type {usePlayLabSync} from './play-lab-sync';
 
 const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
-  const {attempt}=entry,[showSolution,setShowSolution]=useState(false),[step,setStep]=useState(0);
+  const {attempt}=entry,[showSolution,setShowSolution]=useState(false),[step,setStep]=useState(0),[inspectExample,setInspectExample]=useState(false);
   const paths=useMemo(()=>{
     if(attempt.engine!==LAB_ENGINE)return [];
     const paints=PLAY_LEVELS[attempt.specimen.levelIndex].paints;
@@ -13,15 +13,18 @@ const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
   },[attempt]);
   const solution=useMemo(()=>{
     const {hole,levelIndex}=attempt.specimen,paints=PLAY_LEVELS[levelIndex].paints;
-    let q=paints.map(()=>0);const path:ColorPoint[]=[];
+    let q=paints.map(()=>0);const path:ColorPoint[]=[],stops:ColorPoint[]=[];
     hole.routeOrder.forEach((paint,i)=>{
       const amount=i?chargeAmount(totalMass(q),hole.routeTimes[i-1]):1;
-      path.push(...pourPath(paints,q,paint,amount));q=addPaint(q,paint,amount);
-    });return path;
+      if(i)path.push(...pourPath(paints,q,paint,amount));
+      q=addPaint(q,paint,amount);stops.push(mixtureColor(paints,q));
+      if(!i)path.push(stops[0]);
+    });return {path,stops};
   },[attempt]);
   const points=paths.flat(),target=attempt.specimen.hole.target;
-  const selected=points[Math.min(step,points.length-1)];
-  const all=[...points,...(showSolution?solution:[]),target];
+  const inspected=showSolution&&inspectExample?solution.path:points;
+  const selected=inspected[Math.min(step,inspected.length-1)];
+  const all=[...points,...(showSolution?solution.path:[]),target];
   const bounds=[0,1,2].map(axis=>{const values=all.map(p=>p.position[axis]);return [Math.min(...values),Math.max(...values)];});
   const project=(p:ColorPoint,axes:[number,number])=>axes.map((axis,i)=>{
     const [min,max]=bounds[axis],ratio=(p.position[axis]-min)/Math.max(1,max-min);
@@ -29,14 +32,15 @@ const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
   });
   return <div className="lab-route">
     <div className="lab-maps">{([[0,2],[0,1]] as [number,number][]).map((axes,i)=><figure key={i}><figcaption>{i?'Side · value rises':'Above · hue + chroma'}</figcaption><svg viewBox="0 0 300 170" role="img" aria-label={i?'Side projection of the shot paths':'Top projection of the shot paths'}>
-      {showSolution&&<polyline points={solution.map(p=>project(p,axes).join(',')).join(' ')} fill="none" stroke="#eee8d7" strokeWidth="1.5" strokeDasharray="4 4" opacity=".55"/>}
+      {showSolution&&<g><polyline points={solution.path.map(p=>project(p,axes).join(',')).join(' ')} fill="none" stroke="#eee8d7" strokeWidth="7" opacity=".35"/>{solution.path.slice(1).map((p,k)=>{const a=project(solution.path[k],axes),b=project(p,axes);return <line key={k} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={rgbStyle(p.rgb)} strokeWidth="4"/>;})}</g>}
       {paths.map((path,j)=><g key={j}>{path.slice(1).map((p,k)=>{const a=project(path[k],axes),b=project(p,axes);return <line key={k} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={rgbStyle(p.rgb)} strokeWidth="3"/>;})}</g>)}
       <circle cx={project(target,axes)[0]} cy={project(target,axes)[1]} r="7" fill={rgbStyle(target.rgb)} stroke="white"/>
+      {showSolution&&solution.stops.map((p,j)=>{const [x,y]=project(p,axes);return <g key={j}><circle cx={x} cy={y} r={j===0?8:4} fill={rgbStyle(p.rgb)} stroke="#fff" strokeWidth={j===0?2:1}/>{j===0&&<text x={Math.max(22,Math.min(265,x))} y={y>32?y-13:y+22} fill="white" fontSize="11" textAnchor="middle">Start</text>}</g>;})}
       {selected&&<circle cx={project(selected,axes)[0]} cy={project(selected,axes)[1]} r="4" fill={rgbStyle(selected.rgb)} stroke="white"/>}
     </svg></figure>)}</div>
-    {points.length>0&&<label className="lab-scrubber">Inspect your path<input type="range" min="0" max={points.length-1} value={Math.min(step,points.length-1)} onChange={e=>setStep(Number(e.target.value))}/><span>{selected?`${(colorDistance(selected,target)/attempt.specimen.hole.tolerance).toFixed(2)} × landing tolerance`:''}</span></label>}
-    <button type="button" aria-pressed={showSolution} onClick={()=>setShowSolution(!showSolution)}>{showSolution?'Hide':'Show'} best-found route</button>
-    {showSolution&&<p>Dashed route: {attempt.specimen.hole.solutionShots} additions found, excluding the free base. Not a proven minimum. {attempt.specimen.hole.routeOrder.map(i=>attempt.paints[i].name).join(' → ')}.</p>}
+    {inspected.length>0&&<label className="lab-scrubber">Inspect {showSolution&&inspectExample?'example route':'your path'}<input type="range" min="0" max={inspected.length-1} value={Math.min(step,inspected.length-1)} onChange={e=>setStep(Number(e.target.value))}/><span>{selected?`${(colorDistance(selected,target)/attempt.specimen.hole.tolerance).toFixed(2)} × landing tolerance`:''}</span></label>}
+    <button type="button" aria-pressed={showSolution} onClick={()=>{setShowSolution(!showSolution);setInspectExample(!showSolution);setStep(0);}}>{showSolution?'Hide':'Show'} example route</button>
+    {showSolution&&<><button type="button" aria-pressed={inspectExample} onClick={()=>{setInspectExample(!inspectExample);setStep(0);}}>Inspect {inspectExample?'my path':'example'}</button><div className="lab-route-stops">{solution.stops.map((p,i)=><div key={i}><i style={{background:rgbStyle(p.rgb)}}/><span>{i===0?'Start with':`After adding`}<strong>{attempt.paints[attempt.specimen.hole.routeOrder[i]].name}</strong></span></div>)}</div><p>Wide outlined line: example route, colored by its mixture at every point. Thin line: your route. {attempt.specimen.hole.solutionShots} additions found, excluding the free base. This is the most timing-forgiving shortest route found by the search—not a required start or a proven minimum.</p></>}
     <p className="lab-muted">These are two projections of the same 3D paths, not aim guides. Screen overlap is not a color match.</p>
   </div>;
 });

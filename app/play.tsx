@@ -14,16 +14,19 @@ const massLabel = (mass: number) => mass < 1000 ? mass.toLocaleString(undefined,
 function PaletteRail({value,disabled,onChange}:{value:number;disabled:boolean;onChange:(index:number)=>void}) {
   const [open,setOpen]=useState(false);
   const root=useRef<HTMLDivElement>(null), trigger=useRef<HTMLButtonElement>(null);
+  const keyboardOpen=useRef(false);
   useEffect(()=>{
     if(!open) return;
-    root.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus({preventScroll:true});
+    if(keyboardOpen.current)root.current?.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.focus({preventScroll:true});
     const outside=(event:globalThis.PointerEvent)=>{if(!root.current?.contains(event.target as Node)) setOpen(false);};
     document.addEventListener('pointerdown',outside);
     return ()=>document.removeEventListener('pointerdown',outside);
   },[open]);
-  const close=()=>{setOpen(false);trigger.current?.focus({preventScroll:true});};
-  return <div ref={root} className={`play-palette-rail mobile-choice-rail ${open?'open':''}`} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();close();}}} onBlur={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setOpen(false);}}>
-    <button ref={trigger} className="mobile-choice-trigger" aria-expanded={open} aria-controls="play-palette-options" disabled={disabled} tabIndex={open?-1:0} onClick={()=>setOpen(true)} type="button"><span>Palette</span><strong>{PLAY_LEVELS[value].name}</strong><i aria-hidden="true">›</i></button>
+  const close=()=>{setOpen(false);if(keyboardOpen.current)trigger.current?.focus({preventScroll:true});};
+  // Safari may blur a button with relatedTarget=null before dispatching the
+  // next touch click. That is not evidence that focus left the menu.
+  return <div ref={root} className={`play-palette-rail mobile-choice-rail ${open?'open':''}`} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();keyboardOpen.current=true;close();}}} onBlur={event=>{if(event.relatedTarget&&!event.currentTarget.contains(event.relatedTarget as Node))setOpen(false);}}>
+    <button ref={trigger} className="mobile-choice-trigger" aria-expanded={open} aria-controls="play-palette-options" disabled={disabled} tabIndex={open?-1:0} onClick={event=>{keyboardOpen.current=event.detail===0;setOpen(true);}} type="button"><span>Palette</span><strong>{PLAY_LEVELS[value].name}</strong><i aria-hidden="true">›</i></button>
     <div id="play-palette-options" className="mobile-choice-options" aria-label="Palette choices" inert={!open}>
       {PLAY_LEVELS.map((entry,index)=><button key={entry.name} className={index===value?'active':''} aria-pressed={index===value} disabled={disabled} onClick={()=>{onChange(index);close();}} type="button">{entry.name}</button>)}
       <button aria-label="Close palette choices" onClick={close} type="button">×</button>

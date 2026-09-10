@@ -12,7 +12,7 @@ Par is hidden until analysis is revealed. Looking at analysis marks the current 
 
 ## Review
 
-Top and side projections plot the same sampled paths as gameplay, without its decorative deflection. The path scrubber shows distance as a multiple of the fixed OKLab tolerance. The dashed optional route is the bank's best-found witness, not a global minimum or every possible alternative. Review compares attempts on the same target, and feedback can reference an individual action.
+Top and side projections plot the same sampled paths as gameplay, without its decorative deflection. The path scrubber shows distance as a multiple of the fixed OKLab tolerance. The optional example has a wide outlined, mixture-colored path and a labeled pure-paint starting point; it omits the empty-mix launch. Step swatches show the mixture after each addition. The example is the bank's best-found witness, not a required starting paint, global minimum, or every possible alternative. Review compares attempts on the same target, and feedback can reference an individual action.
 
 Current engine snapshots alone are replayable/importable. A future mixing-engine change must version the format or add migration/read-only compatibility; it must not silently reinterpret old shots.
 

@@ -238,6 +238,12 @@
 .lab-feedback label { display:grid; gap:8px; font-size:14px; }
 .lab-note { grid-column:1/-1; }.lab-note textarea { width:100%; resize:vertical; font-size:16px; }
 .lab-feedback button { justify-self:start; }
+.lab-route-stops { display:flex; gap:18px; flex-wrap:wrap; margin:18px 0; }
+.lab-route-stops > div { display:flex; align-items:center; gap:9px; font-size:12px; color:var(--play-muted); }
+.lab-route-stops i { display:block; width:36px; height:36px; border:1px solid #ffffff70; border-radius:50%; flex:none; }
+.lab-route-stops strong { display:block; font-size:14px; color:var(--play-ivory); font-weight:500; }
+.lab-route > button { margin:0 8px 8px 0; }
+.play-palette-rail .mobile-choice-options { touch-action:pan-x; z-index:2; }
 @media(max-width:760px) {
   .play-lab-bar { gap:6px; padding:0 4px; }.play-lab-bar button { font-size:12px; padding:7px 10px; }
   .lab-picker { order:3; flex-basis:100%; }.lab-picker select { font-size:16px; max-width:none; }
