@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PLAY_LEVELS, HOLES_PER_PALETTE, CHARGE_SECONDS, SPACE_NODES, baseLaunchPath, neutralStart, recipeTimingWindow, labPosition, landingBoundary, munsellPosition, addPaint, chargeAmount, chargePower, chargeRatio, colorDistance, generateHole, mixtureColor, pourPath, totalMass } from '../app/play-engine';
 
-test('the four requested palettes have the correct pigments, including actual PW1', () => {
+test('the seven palettes have the requested pigments and names', () => {
+  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light']);
   assert.deepEqual(PLAY_LEVELS.map((level) => level.paints.map((p) => p.pigment)), [
     ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
+    ['PB15:3', 'PR122', 'PY3'], ['PO20', 'PV23', 'PG36', 'PW6'], ['PW1', 'PY35', 'PY43', 'PR108', 'PR83', 'PB28', 'PB29', 'PG18'],
   ]);
 });
 
@@ -66,7 +68,7 @@ test('every generated target has a constructive route at guide par within the ho
     assert.ok(level.paints.every((_, i) => colorDistance(mixtureColor(level.paints, level.paints.map((_, j) => i === j ? 1 : 0)), hole.target) > hole.tolerance));
     pars[index].push(hole.par);
   }
-  console.log(`64 target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
+  console.log(`${PLAY_LEVELS.length * 16} target routes checked in ${Math.round(performance.now() - began)}ms. Guide pars: ${pars.map((values) => [...new Set(values)].join('/')).join(', ')}.`);
 });
 
 test('Munsell nodes preserve absolute chroma and value; scoring survives the display warp', () => {

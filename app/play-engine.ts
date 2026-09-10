@@ -22,10 +22,13 @@ const paint = (id: string) => {
 const flake: PaintColor = { ...paint('titanium-white'), id: 'play-flake-white', name: 'Flake White', pigment: 'PW1', rgb: [246, 243, 233], strength: .65, v: 9.5, notation: 'N9.5' };
 const oxide: PaintColor = { ...paint('transparent-earth-red'), name: 'Transparent Oxide Red' };
 export const PLAY_LEVELS: PlayLevel[] = [
-  { name: 'Earth & Air', subtitle: 'The Classic Triad', paints: [oxide, paint('ultramarine-blue'), paint('titanium-white')], tolerance: .038 },
-  { name: 'Zorn', subtitle: 'Four Quiet Colors', paints: [paint('yellow-ochre'), paint('cadmium-red-light'), paint('ivory-black'), paint('titanium-white')], tolerance: .032 },
-  { name: 'Full Bloom', subtitle: 'The Chromatic Palette', paints: [flake, paint('cadmium-lemon'), paint('cadmium-red-medium'), paint('phthalo-blue-green')], tolerance: .028 },
-  { name: 'Wild Color', subtitle: 'Without White', paints: [paint('cadmium-lemon'), paint('quinacridone-magenta'), paint('phthalo-blue-green'), oxide], tolerance: .032 },
+  { name: 'UltraOx Dual', subtitle: 'The Classic Triad', paints: [oxide, paint('ultramarine-blue'), paint('titanium-white')], tolerance: .038 },
+  { name: 'Zorny', subtitle: 'Four Quiet Colors', paints: [paint('yellow-ochre'), paint('cadmium-red-light'), paint('ivory-black'), paint('titanium-white')], tolerance: .032 },
+  { name: 'RYB', subtitle: 'The Chromatic Palette', paints: [flake, paint('cadmium-lemon'), paint('cadmium-red-medium'), paint('phthalo-blue-green')], tolerance: .028 },
+  { name: 'EarthPop', subtitle: 'Without White', paints: [paint('cadmium-lemon'), paint('quinacridone-magenta'), paint('phthalo-blue-green'), oxide], tolerance: .032 },
+  { name: 'CMY', subtitle: 'Three Vivid Primaries', paints: [paint('phthalo-blue-green'), paint('quinacridone-magenta'), paint('hansa-yellow-light')], tolerance: .03 },
+  { name: 'Secondaries', subtitle: 'Orange, Violet & Green', paints: [paint('cadmium-orange'), paint('dioxazine-purple'), paint('phthalo-green-yellow'), paint('titanium-white')], tolerance: .032 },
+  { name: 'French Light', subtitle: 'An Impressionist Palette', paints: [flake, paint('cadmium-yellow-light'), paint('yellow-ochre'), paint('cadmium-red-light'), paint('alizarin-crimson'), paint('cobalt-blue'), paint('ultramarine-blue'), paint('viridian')], tolerance: .032 },
 ];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
@@ -158,7 +161,10 @@ export function simplestRecipe(level: PlayLevel, target: ColorPoint, witness: Mi
     let found: Mixture | undefined;
     let closest = level.tolerance * .8;
     const search = (start: number, ids: number[]) => {
-      if (ids.length !== size) { for (let i = start; i < count; i++) search(i + 1, [...ids, i]); return; }
+      // On a large palette, simplify within the witness's pigments to bound
+      // startup cost. Guide par is constructive; players may find shortcuts
+      // using any of the other paints, which remain fully available in play.
+      if (ids.length !== size) { for (let i = start; i < count; i++) if (count <= 4 || witness[i] > 0) search(i + 1, [...ids, i]); return; }
       const distribute = (remaining: number, weights: number[]) => {
         if (weights.length === size - 1) {
           const q = Array(count).fill(0) as number[];

@@ -70,6 +70,13 @@
 }
 @media (prefers-reduced-motion: reduce) { .paint-play *, .paint-play *::before, .paint-play *::after { animation: none !important; transition: none !important; } }
 .play-palette-select, .play-mobile-actions { display: none; }
+.play-paints[data-wide=true] { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.play-paint-name { overflow-wrap: anywhere; }
+@media (min-width: 761px) and (max-width: 1499px) {
+  .play-topline { display: flex; min-height: 72px; gap: 20px; }
+  .play-levels { display: none; }
+  .play-palette-select { display: block; min-height: 36px; background: #2b3233; color: var(--play-ivory); border: 1px solid var(--play-line); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; }
+}
 .play-canvas canvas { touch-action: pan-y; cursor: grab; }
 .play-canvas canvas:active { cursor: grabbing; }
 .play-guess-swatch { text-align: left; }
