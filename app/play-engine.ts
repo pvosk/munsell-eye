@@ -302,8 +302,16 @@ export function generateLabHole(levelIndex:number,stage:number,seed=20260911):Ho
   if(labBank.signature!==courseSignature())throw new Error('Lab palette model changed');
   const holes=labBank.palettes.find(p=>p.levelIndex===levelIndex)?.holes;
   if(!holes||!Number.isInteger(stage)||stage<0||stage>=holes.length)throw new Error('Unknown lab hole');
-  const offset=levelIndex>=10&&seed!==20260911?(seed>>>0)%holes.length:0;
-  const record=holes[(stage+offset)%holes.length];
+  // The fixed lab seed preserves the planned test order. Other seeds expose
+  // an experimental course: vary the opening order, keep its toughest finish.
+  let slot=stage;
+  if(levelIndex>=10&&seed!==20260911){
+    const finish=holes.reduce((a,b)=>b.par>a.par||(b.par===a.par&&b.timingWindow<a.timingWindow)?b:a);
+    const opening=holes.filter(h=>h!==finish),offset=(seed>>>0)%opening.length;
+    const ordered=[...opening.slice(offset),...opening.slice(0,offset),finish];
+    slot=holes.indexOf(ordered[stage]);
+  }
+  const record=holes[slot];
   if(!record)throw new Error('Unknown lab hole');
   const level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,record.target);
   return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:record.par,recipe:[...record.recipe],tolerance:level.tolerance,timingWindow:record.timingWindow,courseId:record.id,kind:record.kind,solutionShots:record.solutionShots,routeOrder:[...record.order],routeTimes:[...record.times]};
