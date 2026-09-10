@@ -14,8 +14,8 @@ const median=(a:number[])=>a.length?[...a].sort((a,b)=>a-b)[Math.floor(a.length/
 
 // Success intervals are found across the whole rising meter leg, not only a
 // binary search about one root. Local refinement catches narrow near-misses.
-export function finishingIntervals(palette:number,before:Mixture,paint:number,target:ColorPoint,steps=96) {
-  const level=PLAY_LEVELS[palette],error=(t:number)=>colorDistance(mixtureColor(level.paints,addPaint(before,paint,chargeAmount(totalMass(before),t))),target)/level.tolerance;
+export function finishingIntervals(palette:number,before:Mixture,paint:number,target:ColorPoint,steps=96,tolerance=PLAY_LEVELS[palette].tolerance) {
+  const level=PLAY_LEVELS[palette],error=(t:number)=>colorDistance(mixtureColor(level.paints,addPaint(before,paint,chargeAmount(totalMass(before),t))),target)/tolerance;
   const samples=Array.from({length:steps+1},(_,i)=>({t:i*CHARGE_SECONDS/steps,e:error(i*CHARGE_SECONDS/steps)}));
   for(let i=1;i<steps;i++)if(samples[i].e<samples[i-1].e&&samples[i].e<samples[i+1].e){
     let lo=samples[i-1].t,hi=samples[i+1].t;
@@ -32,7 +32,7 @@ export function finishingIntervals(palette:number,before:Mixture,paint:number,ta
   return intervals;
 }
 
-export function measureRoute(palette:number,route:Route,target:ColorPoint,withSetup=false):MeasuredRoute {
+export function measureRoute(palette:number,route:Route,target:ColorPoint,withSetup=false,tolerance=PLAY_LEVELS[palette].tolerance):MeasuredRoute {
   const level=PLAY_LEVELS[palette];let q=level.paints.map((_,i)=>+(i===route.order[0]));
   const stops=[mixtureColor(level.paints,q)],pourLengths:number[]=[];
   for(let i=0;i<route.times.length;i++){
@@ -53,20 +53,20 @@ export function measureRoute(palette:number,route:Route,target:ColorPoint,withSe
     // Remove the pour and replay subsequent controls. A tiny token dose must
     // not count merely because a recipe names an additional paint.
     const order=route.order.filter((_,j)=>j!==i+1),times=route.times.filter((_,j)=>j!==i);
-    return length>=3&&evaluate(palette,order,times,target).error>level.tolerance;
+    return length>=3&&evaluate(palette,order,times,target).error>tolerance;
   }).length;
   let finishBefore=level.paints.map((_,i)=>+(i===route.order[0]));
   for(let i=0;i<route.times.length-1;i++)finishBefore=addPaint(finishBefore,route.order[i+1],chargeAmount(totalMass(finishBefore),route.times[i]));
-  const intervals=finishingIntervals(palette,finishBefore,route.order.at(-1)!,target);
+  const intervals=finishingIntervals(palette,finishBefore,route.order.at(-1)!,target,96,tolerance);
   const interval=intervals.find(x=>route.times.at(-1)!>=x.lo-.00001&&route.times.at(-1)!<=x.hi+.00001);
   const finishWindowMs=interval?(interval.hi-interval.lo)*1000:0;
   const result:MeasuredRoute={...geometry(palette,route),pourLengths,meaningfulPours,finishValue,finishHueChroma,chromaReduction,anticipatory,styles:[],finishWindowMs,setup:null};
-  if(withSetup&&route.times.length>=2)result.setup=measureSetup(palette,route,target);
+  if(withSetup&&route.times.length>=2)result.setup=measureSetup(palette,route,target,tolerance);
   result.styles=routeStyles(result,level.paints[route.order.at(-1)!].category);
   return result;
 }
 
-export function measureSetup(palette:number,route:Route,target:ColorPoint):SetupRegion {
+export function measureSetup(palette:number,route:Route,target:ColorPoint,tolerance=PLAY_LEVELS[palette].tolerance):SetupRegion {
   const dimensions=route.times.length-1,radius=.18,counts=7,widths:number[]=[];let cells=0;
   // A local Cartesian region, varying EVERY setup dose together and then
   // searching all finishing doses. Bounds clip to the actual meter domain.
@@ -74,7 +74,7 @@ export function measureSetup(palette:number,route:Route,target:ColorPoint):Setup
     if(times.length<dimensions){const center=route.times[times.length],lo=Math.max(0,center-radius),hi=Math.min(CHARGE_SECONDS,center+radius);for(let n=0;n<counts;n++)walk([...times,lo+(hi-lo)*n/(counts-1)]);return;}
     cells++;let q=PLAY_LEVELS[palette].paints.map((_,i)=>+(i===route.order[0]));
     times.forEach((t,i)=>{q=addPaint(q,route.order[i+1],chargeAmount(totalMass(q),t));});
-    const intervals=finishingIntervals(palette,q,route.order.at(-1)!,target,64);
+    const intervals=finishingIntervals(palette,q,route.order.at(-1)!,target,64,tolerance);
     if(intervals.length)widths.push(Math.max(...intervals.map(x=>(x.hi-x.lo)*1000)));
   };
   walk([]);
@@ -92,22 +92,22 @@ export function routeStyles(r:MeasuredRoute,finishCategory:string):RouteStyle[] 
   return styles;
 }
 
-export function searchCompetingRoutes(palette:number,recipe:Mixture,atlas=makeAtlas(palette,128,24)) {
-  const level=PLAY_LEVELS[palette],target=mixtureColor(level.paints,recipe),routes=witnessRoutes(palette,recipe,target).filter(r=>r.times.length<=3);
+export function searchCompetingRoutes(palette:number,recipe:Mixture,atlas=makeAtlas(palette,128,24),tolerance=PLAY_LEVELS[palette].tolerance) {
+  const level=PLAY_LEVELS[palette],target=mixtureColor(level.paints,recipe),routes=witnessRoutes(palette,recipe,target,tolerance).filter(r=>r.times.length<=3);
   const errors=level.paints.map(()=>({one:Infinity,two:Infinity}));
   for(const entry of atlas){
     const ranked=entry.samples.map(s=>({...s,error:dist(s.lab,target.lab)})).sort((a,b)=>a.error-b.error),starts:number[][]=[];
     for(const sample of ranked){
       if(starts.some(t=>dist(t,sample.times)<.10))continue;starts.push(sample.times);
       const result=refine(palette,entry.order,sample.times,target,CHARGE_SECONDS/(entry.order.length===2?128:24));
-      const key=entry.order.length===2?'one':'two',base=entry.order[0];errors[base][key]=Math.min(errors[base][key],result.error/level.tolerance);
-      if(result.error<=level.tolerance)routes.push(routeDetails(palette,entry.order,result.times,target));
+      const key=entry.order.length===2?'one':'two',base=entry.order[0];errors[base][key]=Math.min(errors[base][key],result.error/tolerance);
+      if(result.error<=tolerance)routes.push(routeDetails(palette,entry.order,result.times,target,tolerance));
       if(starts.length===6)break;
     }
   }
   // Three-addition coverage is witnessed through recipe permutations. It is
   // deliberately not described as an exhaustive arbitrary three-pour search.
-  return {target,errors,routes:routes.filter(r=>r.error<=level.tolerance)};
+  return {target,errors,routes:routes.filter(r=>r.error<=tolerance)};
 }
 
 export function analyzeRoutes(palette:number,recipe:Mixture,style:RouteStyle,atlas?:ReturnType<typeof makeAtlas>,deep=true):HoleAnalysis {

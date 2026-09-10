@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
 import { HOLES_PER_PALETTE, PLAY_LEVELS, withLiveLanding, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
-import {newLabAttempt,type LabAttempt,type LabSpecimen} from './play-lab-model';
+import {newLabAttempt,LAB_DESIGN,type LabAttempt,type LabSpecimen} from './play-lab-model';
 import {usePlayLabSync} from './play-lab-sync';
 import {LabPicker,PlayLabPanel} from './play-lab';
 import './play.css';
@@ -28,7 +28,7 @@ function PaletteRail({value,disabled,onChange}:{value:number;disabled:boolean;on
   return <div ref={root} className={`play-palette-rail mobile-choice-rail ${open?'open':''}`} onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();keyboardOpen.current=true;close();}}} onBlur={event=>{if(event.relatedTarget&&!event.currentTarget.contains(event.relatedTarget as Node))setOpen(false);}}>
     <button ref={trigger} className="mobile-choice-trigger" aria-expanded={open} aria-controls="play-palette-options" disabled={disabled} tabIndex={open?-1:0} onClick={event=>{keyboardOpen.current=event.detail===0;setOpen(true);}} type="button"><span>Palette</span><strong>{PLAY_LEVELS[value].name}</strong><i aria-hidden="true">›</i></button>
     <div id="play-palette-options" className="mobile-choice-options" aria-label="Palette choices" inert={!open}>
-      {PLAY_LEVELS.map((entry,index)=><button key={entry.name} className={index===value?'active':''} aria-pressed={index===value} disabled={disabled} onClick={()=>{onChange(index);close();}} type="button">{entry.name}</button>)}
+      {PLAY_LEVELS.map((entry,index)=>entry.labOnly?null:<button key={entry.name} className={index===value?'active':''} aria-pressed={index===value} disabled={disabled} onClick={()=>{onChange(index);close();}} type="button">{entry.name}</button>)}
       <button aria-label="Close palette choices" onClick={close} type="button">×</button>
     </div>
   </div>;
@@ -195,6 +195,12 @@ export default function PlayView() {
   }, [begin, release, cancelCharge, cancelShot]);
 
   const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole, comparison?:LabSpecimen['comparison']) => {
+    // New target/next on a fixed experiment advances the experiment bank,
+    // never asks the ordinary course generator for a lab-only palette.
+    if(!exact&&index===levelIndex&&hole.courseId.startsWith('lab-4-')&&(!same||stage!==hole.stage)&&LAB_DESIGN.length){
+      const at=LAB_DESIGN.findIndex(s=>s.hole.courseId===hole.courseId),next=LAB_DESIGN[(at+1)%LAB_DESIGN.length];
+      index=next.levelIndex;stage=next.hole.stage;exact=next.hole;
+    }
     cancelShot();
     scene.current?.cancelFlight();
     rollback.current=null;
@@ -227,7 +233,7 @@ export default function PlayView() {
   const reveal=()=>{if(attemptRef.current&&!attemptRef.current.revealed)record({...attemptRef.current,revealed:true});};
   const nextHole = () => hole.stage < HOLES_PER_PALETTE - 1
     ? startHole(levelIndex, true, hole.stage + 1)
-    : startHole((levelIndex + 1) % PLAY_LEVELS.length, false, 0);
+    : startHole((levelIndex + 1) % PLAY_LEVELS.filter(p=>!p.labOnly).length, false, 0);
   const controls = (index: number) => ({
     onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0 || !event.isPrimary || charge.current) return;

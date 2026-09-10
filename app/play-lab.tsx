@@ -1,12 +1,12 @@
 'use client';
 import {memo,useMemo,useState} from 'react';
-import {PLAY_LEVELS,LANDING_TOLERANCE,withLiveLanding,pairedLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
-import {supportedLabEngine,LAB_STARTERS,LAB_PAIRED,suggestedComparison,labEntries,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
+import {PLAY_LEVELS,LANDING_TOLERANCE,withLiveLanding,designLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
+import {supportedLabEngine,LAB_STARTERS,LAB_PAIRED,LAB_DESIGN,analysisForHole,suggestedComparison,labEntries,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
 import type {usePlayLabSync} from './play-lab-sync';
 
 const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
   const {attempt}=entry,[showSolution,setShowSolution]=useState(false),[step,setStep]=useState(0),[inspectExample,setInspectExample]=useState(false),[example,setExample]=useState(-1);
-  const analysis=pairedLabBank.holes.find(h=>h.record.id===attempt.specimen.hole.courseId)?.analysis;
+  const analysis=analysisForHole(attempt.specimen.hole.courseId);
   const alternatives=analysis?.bases.flatMap(b=>b.routes)??[];
   const exampleOrder=alternatives[example]?.order??attempt.specimen.hole.routeOrder,exampleTimes=alternatives[example]?.times??attempt.specimen.hole.routeTimes;
   const measurement=alternatives[example]??alternatives.find(r=>r.order.join()===exampleOrder.join()&&r.times.every((t,i)=>Math.abs(t-exampleTimes[i])<1e-8));
@@ -17,7 +17,7 @@ const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
   },[attempt]);
   const solution=useMemo(()=>{
     const {levelIndex}=attempt.specimen,paints=PLAY_LEVELS[levelIndex].paints;
-    const alternatives=pairedLabBank.holes.find(h=>h.record.id===attempt.specimen.hole.courseId)?.analysis.bases.flatMap(b=>b.routes)??[];
+    const alternatives=analysisForHole(attempt.specimen.hole.courseId)?.bases.flatMap(b=>b.routes)??[];
     const order=alternatives[example]?.order??attempt.specimen.hole.routeOrder,times=alternatives[example]?.times??attempt.specimen.hole.routeTimes;
     let q=paints.map(()=>0);const path:ColorPoint[]=[],stops:ColorPoint[]=[];
     order.forEach((paint,i)=>{
@@ -55,12 +55,14 @@ const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
 function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>void}) {
   const [form,setForm]=useState<LabReview>(entry.review??{verdict:'',challenge:'',issue:'',note:'',shot:null});
   const [saved,setSaved]=useState(false);
+  const experiment=designLabBank.holes.find(h=>h.record.id===entry.attempt.specimen.hole.courseId);
   const field=<K extends keyof LabReview>(key:K,value:LabReview[K])=>{setForm({...form,[key]:value});setSaved(false);};
   return <form className="lab-feedback" onSubmit={e=>{e.preventDefault();onSave(form);setSaved(true);}}>
     <label>Keep the hole overall?<select value={form.verdict} onChange={e=>field('verdict',e.target.value)}><option value="">Choose…</option><option value="keep">Keep</option><option value="revise">Revise</option><option value="reject">Reject</option></select></label>
     <label>Was this particular route worthwhile?<select value={form.routeVerdict??''} onChange={e=>field('routeVerdict',e.target.value)}><option value="">Choose…</option><option value="keep">Yes</option><option value="revise">With changes</option><option value="reject">No</option></select></label>
     {entry.attempt.specimen.comparison&&<label>Compared with your first start<select value={form.comparison??''} onChange={e=>field('comparison',e.target.value)}><option value="">Choose…</option><option value="both-good">Both worthwhile</option><option value="first-better">First start better</option><option value="second-better">This start better</option><option value="neither">Neither worthwhile</option></select></label>}
-    <label>What drove the challenge?<select value={form.challenge} onChange={e=>field('challenge',e.target.value)}><option value="">Choose…</option><option value="paint-choice">Choosing paints</option><option value="setup">Setting up</option><option value="timing">Timing the finish</option></select></label>
+    {experiment&&!experiment.reference&&<label>After playing both palettes<select value={form.paletteVerdict??''} onChange={e=>field('paletteVerdict',e.target.value)}><option value="">Not compared yet</option><option value="original">Original palette better</option><option value="variant">Substituted palette better</option><option value="both">Both worthwhile</option><option value="neither">Neither worthwhile</option></select></label>}
+    <label>What drove the challenge?<select value={form.challenge} onChange={e=>field('challenge',e.target.value)}><option value="">Choose…</option><option value="paint-choice">Choosing which paints to use</option><option value="setup">Setting up the next pour</option><option value="timing">Timing the finish</option></select></label>
     <label>What hurt it?<select value={form.issue} onChange={e=>field('issue',e.target.value)}><option value="">Nothing / not sure</option><option value="too-close">Too close to a base</option><option value="repetitive">Repetitive</option><option value="visibility">Unclear space</option><option value="correction">Frustrating correction</option><option value="other">Other</option></select></label>
     <label>Attach note to<select value={form.shot??''} onChange={e=>field('shot',e.target.value===''?null:Number(e.target.value))}><option value="">Whole attempt</option>{entry.attempt.shots.map((s,i)=><option key={i} value={i}>Action {i+1}: {entry.attempt.paints[s.paint].name}{s.cancelled?' (cancelled)':''}</option>)}</select></label>
     <label className="lab-note">Your note<textarea maxLength={3000} rows={3} value={form.note} onChange={e=>field('note',e.target.value)} placeholder="What made this route worth keeping—or changing?"/></label>
@@ -69,13 +71,14 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
 }
 
 export function LabPicker({current,onChoose,disabled}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;disabled:boolean}) {
-  const tests=LAB_PAIRED.length?LAB_PAIRED:LAB_STARTERS;
+  const tests=[...LAB_DESIGN,...LAB_PAIRED,...LAB_STARTERS];
   const choose=(s:LabSpecimen)=>onChoose({...s,hole:withLiveLanding(s.hole)});
   const index=tests.findIndex(s=>s.hole.courseId===current.hole.courseId&&s.levelIndex===current.levelIndex);
-  return <><label className="lab-picker">Paired starts · Round 3<select disabled={disabled} value={index} onChange={e=>choose(tests[Number(e.target.value)])}>
+  const experiment=designLabBank.holes.find(h=>h.record.id===current.hole.courseId);
+  return <><label className="lab-picker">Route & palette lab<select disabled={disabled} value={index} onChange={e=>choose(tests[Number(e.target.value)])}>
     {index<0&&<option value={-1}>Current course hole · {PLAY_LEVELS[current.levelIndex].name}</option>}
-    {tests.map((s,i)=><option key={i} value={i}>{String(i+1).padStart(2,'0')} · {PLAY_LEVELS[s.levelIndex].name} · {s.hole.notation}</option>)}
-  </select></label>{index<tests.length-1&&<button type="button" disabled={disabled} onClick={()=>choose(tests[index+1])}>{index<0?'Start round 3':'Next test →'}</button>}</>;
+    {[{name:'Round 4 · Routes & paint substitutions',items:LAB_DESIGN,offset:0},{name:'Round 3 · Previous paired starts',items:LAB_PAIRED,offset:LAB_DESIGN.length},{name:'Round 2 · Earlier tests',items:LAB_STARTERS,offset:LAB_DESIGN.length+LAB_PAIRED.length}].map(group=><optgroup key={group.name} label={group.name}>{group.items.map((s,i)=><option key={i} value={group.offset+i}>{String(i+1).padStart(2,'0')} · {PLAY_LEVELS[s.levelIndex].name} · {s.hole.kind.replaceAll('-',' ')} · {s.hole.notation}</option>)}</optgroup>)}
+  </select></label>{index<tests.length-1&&<button type="button" disabled={disabled} onClick={()=>choose(tests[index+1])}>{index<0?'Start round 4':'Next test →'}</button>}{experiment&&<p className="lab-muted">{experiment.reference?'Reference · ':''}{experiment.brief} Free base choice; the brief is not an instruction to take a particular route.</p>}</>;
 }
 
 export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<typeof usePlayLabSync>;current:LabAttempt|null;onReplay:(specimen:LabSpecimen)=>void;onReveal:()=>void}) {
@@ -85,19 +88,23 @@ export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<t
   const same=entry?entries.filter(e=>e.attempt.specimen.hole.courseId===entry.attempt.specimen.hole.courseId&&e.attempt.specimen.levelIndex===entry.attempt.specimen.levelIndex):[];
   const currentId=current?.id;
   const comparison=entry?suggestedComparison(entry.attempt):null;
-  const analysis=pairedLabBank.holes.find(h=>h.record.id===entry?.attempt.specimen.hole.courseId)?.analysis;
+  const analysis=entry?analysisForHole(entry.attempt.specimen.hole.courseId):undefined;
+  const experiment=designLabBank.holes.find(h=>h.record.id===entry?.attempt.specimen.hole.courseId);
+  const counterpart=experiment&&!experiment.reference?designLabBank.holes.find(h=>h.pair===experiment.pair&&h.levelIndex!==experiment.levelIndex):undefined;
+  const pairedSpecimen=counterpart?LAB_DESIGN.find(s=>s.hole.courseId===counterpart.record.id):undefined;
   return <section className="play-lab-panel" aria-label="Hole design lab">
     <header><div><h2>Hole Lab</h2><p>Repeat the hole. Keep the evidence.</p></div><div className="lab-sync"><span role="status">{sync.status}</span><button type="button" onClick={sync.retry}>Refresh / retry</button></div></header>
     {!sync.signedIn?<p><a href="/signin-with-chatgpt?return_to=%2F%3Fmode%3Dplay%26lab%3D1" target="_top">Sign in with ChatGPT</a> to save private attempts and notes across devices.</p>:<>
       <div className="lab-toolbar"><button type="button" disabled={!entry} onClick={()=>{setReviewing(!reviewing);if(!reviewing)onReveal();}}>{reviewing?'Hide review':'Review routes & feedback'}</button><button type="button" onClick={sync.exportFile}>Export backup</button><label className="lab-import">Import backup<input type="file" accept="application/json,.json" onChange={e=>{const file=e.target.files?.[0];if(file)void sync.importFile(file);e.target.value='';}}/></label></div>
-      <p className="lab-muted">Round 3: five new holes and one reference—06 repeats your earlier Secondaries interior target. Play from your natural base before opening the analysis. Then replay from a contrasting base. No forced paints or auto-advance. Earlier attempts remain in your history.</p>
+      <p className="lab-muted">Round 4 compares long chromatic rides, setup → lift, and coupled balancing. Each palette variant replaces one paint; matched pairs use the same recipe proportions, so their target colors differ. Two earlier interior targets are references. Start naturally, replay from another base, then compare the paired palette. Earlier rounds remain available.</p>
       {current?.specimen.comparison&&<p className="lab-paired" role="status">Comparison attempt: try <strong>{current.paints[current.specimen.comparison.base].name}</strong> as your base. You remain free to choose otherwise.</p>}
       {entries.length>0&&<label className="lab-history">Attempt<select value={entry?.attempt.id??''} onChange={e=>{setChosen(e.target.value);setReviewing(true);onReveal();}}>{entries.map((e,i)=><option key={e.attempt.id} value={e.attempt.id}>{e.attempt.id===currentId?'Current · ':''}{PLAY_LEVELS[e.attempt.specimen.levelIndex].name} · {e.attempt.specimen.hole.notation} · {e.attempt.outcome} · {new Date(e.attempt.started).toLocaleString()} · {entries.length-i}</option>)}</select><button type="button" onClick={()=>setChosen(null)}>Current attempt</button></label>}
       {reviewing&&entry&&<div className="lab-review" key={entry.attempt.id}>
         <div className="lab-review-heading"><h3>{PLAY_LEVELS[entry.attempt.specimen.levelIndex].name} · {entry.attempt.specimen.hole.notation}</h3><button type="button" onClick={()=>{onReplay(entry.attempt.specimen);setChosen(null);setReviewing(false);}}>Replay this exact hole ↗</button></div>
         <p>{entry.attempt.specimen.hole.courseId} · {entry.attempt.engine} · {entry.attempt.specimen.comparison?'Suggested-base comparison':entry.attempt.revealed?'Analysis revealed':'Unassisted attempt'}</p>
         <p>Design intent: {entry.attempt.specimen.hole.kind.replaceAll('-',' ')}. This describes the test—not a required starting paint or route.</p>
-        <p className="lab-muted">Landing tolerance: {entry.attempt.specimen.hole.tolerance.toFixed(4)}. Exact replays retain this setting. The spherical outline is a visual marker, not the exact scoring boundary.{entry.attempt.specimen.hole.tolerance!==LANDING_TOLERANCE?' Route measurements and par below were calculated at the original 0.028 tolerance.':''}</p>
+        <p className="lab-muted">Landing tolerance: {entry.attempt.specimen.hole.tolerance.toFixed(4)}. Exact replays retain this setting. The spherical outline is a visual marker, not the exact scoring boundary.{analysis&&'tolerance' in analysis?' Route measurements use this same landing tolerance.':entry.attempt.specimen.hole.tolerance!==LANDING_TOLERANCE?' Archived route measurements and par use the original 0.028 tolerance.':''}</p>
+        {pairedSpecimen&&<div className="lab-paired"><p>{experiment?.brief} Compare with <strong>{PLAY_LEVELS[pairedSpecimen.levelIndex].name}</strong>.</p><button type="button" onClick={()=>{onReplay(pairedSpecimen);setChosen(null);setReviewing(false);}}>Try paired palette ↗</button></div>}
         {comparison&&<div className="lab-paired"><p>Compare the same target from <strong>{PLAY_LEVELS[comparison.levelIndex].paints[comparison.comparison!.base].name}</strong>. Choose that base yourself; other paints remain available.</p><button type="button" onClick={()=>{onReplay(comparison);setChosen(null);setReviewing(false);}}>Replay with suggested start ↗</button></div>}
         {analysis&&<details className="lab-base-analysis"><summary>Starting-choice measurements</summary><p>{analysis.qualifyingBases.length}/{analysis.bases.length} starts meet provisional route-quality checks. {analysis.robustThree?'Three additions found from every base; no one- or two-addition solution found.':''} This predicts candidates, not enjoyment.</p><div className="lab-base-scroll"><table><thead><tr><th>Base</th><th>Additions found</th><th>Shortest travel</th><th>Measured support</th></tr></thead><tbody>{analysis.bases.map(b=><tr key={b.base}><td>{entry.attempt.paints[b.base].name}</td><td>{b.fewestFound??'Not found'}</td><td>{b.minimumTravel?.toFixed(1)??'—'}</td><td>{b.qualifies?'Supported':'Uncertain'}</td></tr>)}</tbody></table></div><p>Travel is in display-world units. Search is sampled, not exhaustive. Setup tests vary earlier release times within ±0.18 seconds and search for a successful finish; they do not prove global difficulty.</p></details>}
         <div className="lab-comparison">{same.map((e,i)=>{const shots=e.attempt.shots.filter(s=>!s.cancelled),last=shots.at(-1),error=last?colorDistance(mixtureColor(PLAY_LEVELS[e.attempt.specimen.levelIndex].paints,last.after),e.attempt.specimen.hole.target)/e.attempt.specimen.hole.tolerance:null;return <button type="button" key={e.attempt.id} aria-pressed={entry.attempt.id===e.attempt.id} onClick={()=>setChosen(e.attempt.id)}><strong>Attempt {same.length-i}</strong><span>{Math.max(0,shots.length-1)} pours · {last?totalMass(last.after).toFixed(2):0} parts</span><span>{error===null?'No base yet':`${error.toFixed(2)} × tolerance`} · {e.attempt.outcome}</span></button>;})}</div>

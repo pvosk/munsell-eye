@@ -24,7 +24,7 @@ export type CourseRecord={id:string;target:Mixture;recipe:Mixture;order:number[]
 type Atlas={order:number[];samples:{times:number[];lab:number[]}[]};
 const clamp=(n:number)=>Math.max(0,Math.min(CHARGE_SECONDS,n));
 const distance=(a:readonly number[],b:readonly number[])=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
-export const paletteSignature=(count=PLAY_LEVELS.length)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
+export const paletteSignature=(count=12)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
 
 export function replayRoute(palette:number,order:number[],times:number[]) {
   let q=PLAY_LEVELS[palette].paints.map((_,i)=>+(i===order[0]));
@@ -46,8 +46,8 @@ export function refine(palette:number,order:number[],initial:number[],target:Col
   }
   return {...result,times};
 }
-export function routeDetails(palette:number,order:number[],times:number[],target:ColorPoint):Route {
-  const level=PLAY_LEVELS[palette], result=evaluate(palette,order,times,target);
+export function routeDetails(palette:number,order:number[],times:number[],target:ColorPoint,tolerance=PLAY_LEVELS[palette].tolerance):Route {
+  const result=evaluate(palette,order,times,target);
   let window=Infinity;
   // Replay all later charge TIMES after each perturbation, so accumulated-mass
   // changes affect subsequent doses exactly as in the controls.
@@ -55,7 +55,7 @@ export function routeDetails(palette:number,order:number[],times:number[],target
     let low=0,high=Math.min(.3,sign<0?times[i]:CHARGE_SECONDS-times[i]);
     for(let k=0;k<10;k++) {
       const amount=(low+high)/2,trial=[...times];trial[i]+=sign*amount;
-      if(evaluate(palette,order,trial,target).error<=level.tolerance) low=amount;else high=amount;
+      if(evaluate(palette,order,trial,target).error<=tolerance) low=amount;else high=amount;
     }
     // The peak/zero boundary is not a failure: the meter reverses there.
     if(high>.0001) window=Math.min(window,low);
@@ -86,7 +86,7 @@ export function makeAtlas(palette:number,oneSteps=64,twoSteps=16):Atlas[] {
   }
   return atlas;
 }
-export function witnessRoutes(palette:number,recipe:Mixture,target:ColorPoint):Route[] {
+export function witnessRoutes(palette:number,recipe:Mixture,target:ColorPoint,tolerance=PLAY_LEVELS[palette].tolerance):Route[] {
   const active=recipe.map((q,i)=>q>0?i:-1).filter(i=>i>=0),routes:Route[]=[];
   const visit=(order:number[])=>{
     if(order.length<active.length){for(const i of active)if(!order.includes(i))visit([...order,i]);return;}
@@ -95,7 +95,7 @@ export function witnessRoutes(palette:number,recipe:Mixture,target:ColorPoint):R
       const ratio=normalized[i]/Math.max(1,mass)**.8;if(ratio<.005 || ratio>8)return;
       const power=((ratio-.005)/7.995)**.25;times.push(CHARGE_SECONDS*(1-(1-power)**(1/3)));mass+=normalized[i];
     }
-    routes.push(routeDetails(palette,order,times,target));
+    routes.push(routeDetails(palette,order,times,target,tolerance));
   };
   visit([]);return routes;
 }

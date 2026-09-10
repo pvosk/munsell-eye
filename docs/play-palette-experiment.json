@@ -1,0 +1,275 @@
+{
+  "version": "routes-2",
+  "tolerance": 0.0294,
+  "cohort": "96 seeded recipes per palette; identical ratios within each single-paint substitution pair",
+  "report": [
+    {
+      "palette": "CMY",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 1,
+      "confirmed": 1,
+      "rejections": {
+        "short-competing-route": 67,
+        "no-efficient-style-route": 8,
+        "short-or-muted-ride": 93,
+        "near-pure-target": 43,
+        "fewer-than-two-supported-starts": 2
+      }
+    },
+    {
+      "palette": "CMY",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 4,
+      "confirmed": 4,
+      "rejections": {
+        "short-competing-route": 67,
+        "one-pour-style-bypass": 85,
+        "near-pure-target": 43,
+        "no-efficient-style-route": 65,
+        "fewer-than-two-supported-starts": 2
+      }
+    },
+    {
+      "palette": "CMY",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 7,
+      "confirmed": 7,
+      "rejections": {
+        "short-competing-route": 67,
+        "no-efficient-style-route": 26,
+        "one-pour-style-bypass": 85,
+        "near-pure-target": 43,
+        "fewer-than-two-supported-starts": 2
+      }
+    },
+    {
+      "palette": "CMY · Cobalt",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 6,
+      "confirmed": 6,
+      "rejections": {
+        "near-pure-target": 31,
+        "short-competing-route": 53,
+        "short-or-muted-ride": 90,
+        "no-efficient-style-route": 1,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "CMY · Cobalt",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 3,
+      "confirmed": 3,
+      "rejections": {
+        "near-pure-target": 31,
+        "short-competing-route": 53,
+        "one-pour-style-bypass": 81,
+        "no-efficient-style-route": 63,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "CMY · Cobalt",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 14,
+      "confirmed": 14,
+      "rejections": {
+        "near-pure-target": 31,
+        "short-competing-route": 53,
+        "one-pour-style-bypass": 81,
+        "no-efficient-style-route": 50,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "Zorny",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 0,
+      "confirmed": 0,
+      "rejections": {
+        "short-competing-route": 73,
+        "no-efficient-style-route": 88,
+        "short-or-muted-ride": 96,
+        "near-pure-target": 28,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "Zorny",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 1,
+      "confirmed": 1,
+      "rejections": {
+        "short-competing-route": 73,
+        "no-efficient-style-route": 58,
+        "one-pour-style-bypass": 81,
+        "near-pure-target": 28,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "Zorny",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 10,
+      "confirmed": 10,
+      "rejections": {
+        "short-competing-route": 73,
+        "one-pour-style-bypass": 81,
+        "no-efficient-style-route": 38,
+        "near-pure-target": 28,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "Zorny · Ultra",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 0,
+      "confirmed": 0,
+      "rejections": {
+        "no-efficient-style-route": 89,
+        "short-or-muted-ride": 95,
+        "short-competing-route": 58,
+        "near-pure-target": 28
+      }
+    },
+    {
+      "palette": "Zorny · Ultra",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 4,
+      "confirmed": 4,
+      "rejections": {
+        "no-efficient-style-route": 58,
+        "one-pour-style-bypass": 75,
+        "short-competing-route": 58,
+        "near-pure-target": 28
+      }
+    },
+    {
+      "palette": "Zorny · Ultra",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 18,
+      "confirmed": 18,
+      "rejections": {
+        "one-pour-style-bypass": 75,
+        "short-competing-route": 58,
+        "near-pure-target": 28,
+        "no-efficient-style-route": 22
+      }
+    },
+    {
+      "palette": "Secondaries",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 0,
+      "confirmed": 0,
+      "rejections": {
+        "near-pure-target": 27,
+        "short-competing-route": 62,
+        "short-or-muted-ride": 96,
+        "no-efficient-style-route": 29
+      }
+    },
+    {
+      "palette": "Secondaries",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 4,
+      "confirmed": 4,
+      "rejections": {
+        "near-pure-target": 27,
+        "short-competing-route": 62,
+        "no-efficient-style-route": 47,
+        "one-pour-style-bypass": 77
+      }
+    },
+    {
+      "palette": "Secondaries",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 15,
+      "confirmed": 15,
+      "rejections": {
+        "near-pure-target": 27,
+        "short-competing-route": 62,
+        "one-pour-style-bypass": 77,
+        "no-efficient-style-route": 23
+      }
+    },
+    {
+      "palette": "Secondaries · Lemon",
+      "style": "chromatic-ride",
+      "tested": 96,
+      "screened": 0,
+      "confirmed": 0,
+      "rejections": {
+        "near-pure-target": 32,
+        "short-competing-route": 66,
+        "short-or-muted-ride": 96,
+        "fewer-than-two-supported-starts": 1,
+        "no-efficient-style-route": 2
+      }
+    },
+    {
+      "palette": "Secondaries · Lemon",
+      "style": "setup-lift",
+      "tested": 96,
+      "screened": 2,
+      "confirmed": 2,
+      "rejections": {
+        "near-pure-target": 32,
+        "short-competing-route": 66,
+        "no-efficient-style-route": 41,
+        "one-pour-style-bypass": 92,
+        "fewer-than-two-supported-starts": 1
+      }
+    },
+    {
+      "palette": "Secondaries · Lemon",
+      "style": "coupled-balance",
+      "tested": 96,
+      "screened": 3,
+      "confirmed": 3,
+      "rejections": {
+        "near-pure-target": 32,
+        "short-competing-route": 66,
+        "one-pour-style-bypass": 92,
+        "fewer-than-two-supported-starts": 1,
+        "no-efficient-style-route": 16
+      }
+    }
+  ],
+  "pairOutcomes": {
+    "ride": "Same recipe ratios in both palettes; targets differ because one paint changed.",
+    "lift": "Same recipe ratios in both palettes; targets differ because one paint changed.",
+    "balance": "Same recipe ratios in both palettes; targets differ because one paint changed."
+  },
+  "focusedSearches": [
+    {
+      "pair": "ride",
+      "tested": 28,
+      "matched": true
+    },
+    {
+      "pair": "lift",
+      "tested": 24,
+      "matched": true
+    },
+    {
+      "pair": "balance",
+      "tested": 0,
+      "matched": true
+    }
+  ]
+}

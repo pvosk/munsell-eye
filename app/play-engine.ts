@@ -6,13 +6,15 @@ import courseBank from './generated/play-courses.json';
 import legacyCourseBank from './generated/play-courses-v2.json';
 import labRoundBank from './generated/play-lab-round2.json';
 import pairedRoundBank from './generated/play-lab-round3.json';
+import designRoundBank from './generated/play-lab-round4.json';
 import type {HoleAnalysis} from './play-route-analysis';
+import type {DesignAnalysis} from './play-route-design';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
 export type Mixture = number[];
 export type ColorPoint = { rgb: RGB; lab: XYZ; position: XYZ };
-export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number };
+export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number; labOnly?:boolean };
 export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number; courseId: string; kind: string; solutionShots: number; routeOrder: number[]; routeTimes: number[] };
 export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
@@ -53,6 +55,13 @@ export const PLAY_LEVELS: PlayLevel[] = [
 ];
 // Palette identity belongs in routes, not a different-sized perceptual cup.
 PLAY_LEVELS.forEach(level=>{level.tolerance=LANDING_TOLERANCE;});
+// Controlled single-paint substitutions, exposed in the lab only. Old indices,
+// pigment definitions and bank signatures remain unchanged.
+PLAY_LEVELS.push(
+  {...PLAY_LEVELS[4],name:'CMY · Cobalt',subtitle:'Cobalt replaces Phthalo Blue',labOnly:true,paints:[paint('cobalt-blue'),...PLAY_LEVELS[4].paints.slice(1)]},
+  {...PLAY_LEVELS[1],name:'Zorny · Ultra',subtitle:'Ultramarine replaces Ivory Black',labOnly:true,paints:PLAY_LEVELS[1].paints.map((p,i)=>i===2?paint('ultramarine-blue'):p)},
+  {...PLAY_LEVELS[5],name:'Secondaries · Lemon',subtitle:'Lemon replaces Titanium White',labOnly:true,paints:PLAY_LEVELS[5].paints.map((p,i)=>i===3?paint('cadmium-lemon'):p)},
+);
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
   const [r, g, b] = rgb.map((n) => { const v = n / 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });
@@ -310,10 +319,18 @@ export function recipeTimingWindow(level: PlayLevel, recipe: Mixture, tolerance:
   return best;
 }
 
-const courseSignature = (count=PLAY_LEVELS.length)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
+const courseSignature = (count=12)=>JSON.stringify(PLAY_LEVELS.slice(0,count).map(l=>({name:l.name,tolerance:l.tolerance,paints:l.paints.map(p=>[p.id,p.rgb,p.strength])})));
 type StoredLabRoute={id:string;target:Mixture;recipe:Mixture;par:number;timingWindow:number;kind:string;solutionShots:number;order:number[];times:number[]};
 const labBank=labRoundBank as {version:string;signature:string;palettes:{levelIndex:number;holes:StoredLabRoute[]}[]};
 export const pairedLabBank=pairedRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:HoleAnalysis}[]};
+export const designLabBank=designRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;pair:string;reference:boolean}[]};
+export function generateDesignHole(levelIndex:number,stage:number,seed=20260913):Hole {
+  if(seed!==20260913||designLabBank.signature!==courseSignature(15))throw new Error('Design lab model changed');
+  const item=designLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown design lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:item.analysis.style,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generatePairedHole(levelIndex:number,stage:number,seed=20260912):Hole {
   if(seed!==20260912||pairedLabBank.signature!==courseSignature())throw new Error('Paired lab model changed');
   const item=pairedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);

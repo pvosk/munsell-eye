@@ -71,7 +71,7 @@ test('every palette shares one perceptual landing tolerance', () => {
 });
 
 test('original palettes are unchanged and the two experimental palettes are appended', () => {
-  assert.deepEqual(PLAY_LEVELS.map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift', 'Double Cross','Cobalt Ember','Viridian Rust']);
+  assert.deepEqual(PLAY_LEVELS.filter(level=>!level.labOnly).map(level => level.name), ['UltraOx Dual', 'Zorny', 'RYB', 'EarthPop', 'CMY', 'Secondaries', 'French Light', 'Chromatic Dark', 'Violet Shift', 'Double Cross','Cobalt Ember','Viridian Rust']);
   assert.deepEqual(PLAY_LEVELS.slice(0,10).map((level) => level.paints.map((p) => p.pigment)), [
     ['PR101', 'PB29', 'PW6'], ['PY43', 'PR108', 'PBk9', 'PW6'], ['PW1', 'PY35', 'PR108', 'PB15:3'], ['PY35', 'PR122', 'PB15:3', 'PR101'],
     ['PB15:3', 'PR122', 'PY3'], ['PO20', 'PV23', 'PG36', 'PW6'], ['PW1', 'PY35', 'PY43', 'PR108', 'PR83', 'PB28', 'PB29', 'PG18'],
@@ -253,7 +253,7 @@ test('every palette round has its own verified requirements, separation and toug
 });
 
 test('round lookup is reproducible and does not change tolerance or route metadata', () => {
-  for (let palette = 0; palette < PLAY_LEVELS.length; palette++) for (const seed of [190926, 17, 391]) {
+  for (let palette = 0; palette < PLAY_LEVELS.filter(p=>!p.labOnly).length; palette++) for (const seed of [190926, 17, 391]) {
     const level = PLAY_LEVELS[palette];
     const round = Array.from({ length: HOLES_PER_PALETTE }, (_, stage) => generateHole(palette, seed, stage));
     for (const hole of round) {
