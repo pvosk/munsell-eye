@@ -25,6 +25,7 @@ export default function PlayView() {
   const targetLabel = useRef<HTMLDivElement>(null);
   const scene = useRef<PlayScene | null>(null);
   const charge = useRef<Charge | null>(null);
+  const paintPress = useRef<{ id: number; x: number; y: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
   const level = PLAY_LEVELS[levelIndex];
   const point = useMemo(() => mixtureColor(level.paints, quantities), [level.paints, quantities]);
   const notation = useMemo(() => nearestNotation(point), [point]);
@@ -56,6 +57,7 @@ export default function PlayView() {
   }, [hole]);
 
   const cancelCharge = useCallback(() => {
+    if (paintPress.current) { paintPress.current.cancelled = true; clearTimeout(paintPress.current.timer); }
     charge.current = null; setCharged(null); scene.current?.cancelCharge();
   }, []);
   const begin = useCallback((index: number, source: string) => {
@@ -145,14 +147,41 @@ export default function PlayView() {
     : startHole((levelIndex + 1) % PLAY_LEVELS.length, false, 0);
   const controls = (index: number) => ({
     onPointerDown: (event: PointerEvent<HTMLButtonElement>) => {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || !event.isPrimary || charge.current) return;
       if (event.pointerType !== 'touch') event.preventDefault();
       event.currentTarget.focus({ preventScroll: true });
-      event.currentTarget.setPointerCapture(event.pointerId); begin(index, `pointer:${event.pointerId}`);
+      clearTimeout(paintPress.current?.timer);
+      const rail = event.currentTarget.closest<HTMLElement>('.play-paints[data-wide=true]');
+      const press = { id: event.pointerId, x: event.clientX, y: event.clientY, scroll: rail?.scrollLeft ?? 0, rail, cancelled: false, timer: undefined as ReturnType<typeof setTimeout> | undefined };
+      paintPress.current = press;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      setSelected(index);
+      if (event.pointerType === 'touch') {
+        // Let native scrolling win before committing to a hold. Moving later
+        // still cancels the pour, even after the charge animation has begun.
+        press.timer = setTimeout(() => {
+          if (paintPress.current === press && !press.cancelled) begin(index, `pointer:${press.id}`);
+        }, 150);
+      } else begin(index, `pointer:${event.pointerId}`);
     },
-    onPointerUp: (event: PointerEvent<HTMLButtonElement>) => { event.preventDefault(); release(`pointer:${event.pointerId}`); },
+    onPointerMove: (event: PointerEvent<HTMLButtonElement>) => {
+      const press = paintPress.current;
+      if (!press || press.id !== event.pointerId) return;
+      const dx = event.clientX - press.x, dy = event.clientY - press.y;
+      if (Math.hypot(dx,dy) > 8) cancelCharge();
+      if (press.cancelled && event.pointerType === 'mouse' && press.rail && Math.abs(dx) > Math.abs(dy)) {
+        press.rail.scrollLeft = press.scroll - dx;
+      }
+    },
+    onPointerUp: (event: PointerEvent<HTMLButtonElement>) => {
+      const press = paintPress.current;
+      if (!press || press.id !== event.pointerId) return;
+      clearTimeout(press.timer);
+      if (!press.cancelled) release(`pointer:${event.pointerId}`);
+      paintPress.current = null;
+    },
     onPointerCancel: cancelCharge,
-    onLostPointerCapture: () => { if (charge.current?.source.startsWith('pointer:')) cancelCharge(); },
+    onLostPointerCapture: () => { if (paintPress.current) { cancelCharge(); paintPress.current = null; } },
     onContextMenu: (event: MouseEvent<HTMLButtonElement>) => event.preventDefault(),
     onClick: (event: MouseEvent<HTMLButtonElement>) => {
       if (event.detail === 0 && !charge.current) { begin(index, 'accessible'); release('accessible'); }
@@ -191,7 +220,7 @@ export default function PlayView() {
     </div>
     <div className="play-dock">
       <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb) } as CSSProperties}><i /><b /></div></div></div>
-      <div className="play-paints" data-wide={level.paints.length > 4} style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '').replace(' (Yellow Shade)', '')}</span></button>)}</div>
+      <div className="play-paints" data-wide={level.paints.length > 4} role="group" aria-label="Paint palette" onScroll={() => { if (paintPress.current) cancelCharge(); }} style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '').replace(' (Yellow Shade)', '')}</span></button>)}</div>
       <div className="play-control-hint"><span>{phase === 'flight' ? 'Follow the color as it settles.' : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>
     </div>

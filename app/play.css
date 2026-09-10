@@ -112,3 +112,35 @@
   .play-mobile-actions button { background: none; border: 0; font: inherit; font-size: 12px; color: var(--play-muted); padding: 8px 0; }
 }
 .paint-play .play-paint { touch-action: pan-y; }
+.play-paints[data-wide=true] {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(5.5rem,22vw,6rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 2px 8px;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: #eee8d755 transparent;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.paint-play .play-paints[data-wide=true] .play-paint {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 92px;
+  padding: 9px 8px;
+  gap: 7px;
+  scroll-snap-align: start;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.play-paints[data-wide=true] .play-paint-name {
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: normal;
+  word-break: normal;
+  white-space: normal;
+}
