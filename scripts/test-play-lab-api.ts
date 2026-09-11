@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {LAB_DESIGN,LAB_FOCUSED,LAB_DIRECTED,newLabAttempt,type LabEvent} from '../app/play-lab-model';
+import {LAB_DESIGN,LAB_FOCUSED,LAB_DIRECTED,LAB_PROTECTED,newLabAttempt,type LabEvent} from '../app/play-lab-model';
 // Intentionally local-only: never seed QA records into the public lab.
 const root='http://localhost:3000',url=`${root}/api/play-lab`;
 const headers={'Cookie':'__sites_local_auth=1','Origin':root,'Content-Type':'application/json'};
@@ -20,6 +20,9 @@ const directedEvent:LabEvent={id:crypto.randomUUID(),attemptId:directed.id,type:
 assert.equal((await fetch(url,{method:'POST',headers,body:JSON.stringify(directedEvent)})).status,200);
 const directedReview:LabEvent={id:crypto.randomUUID(),attemptId:directed.id,type:'review',review:{verdict:'keep',challenge:'setup',issue:'',note:'Local directed-round QA',shot:null,styleExperience:'partial',shortcutVerdict:'fun'}};
 assert.equal((await fetch(url,{method:'POST',headers,body:JSON.stringify(directedReview)})).status,200);
+const protectedAttempt=newLabAttempt(LAB_PROTECTED[0],crypto.randomUUID());
+const protectedEvent:LabEvent={id:crypto.randomUUID(),attemptId:protectedAttempt.id,type:'attempt',attempt:protectedAttempt};
+assert.equal((await fetch(url,{method:'POST',headers,body:JSON.stringify(protectedEvent)})).status,200);
 let cursor=0,more=true;const events:LabEvent[]=[];
 while(more){const r=await fetch(`${url}?after=${cursor}`,{headers});assert.equal(r.status,200);const data=await r.json() as {events:LabEvent[];cursor:number;more:boolean};events.push(...data.events);cursor=data.cursor;more=data.more;}
 assert.equal(events.filter(e=>e.id===event.id).length,1,'retry is idempotent');
@@ -27,5 +30,6 @@ assert.deepEqual(events.find(e=>e.id===review.id),review,'paired feedback surviv
 assert.deepEqual(events.find(e=>e.id===focusedEvent.id),focusedEvent,'new focused round and suggested-base replay survive persistence');
 assert.deepEqual(events.find(e=>e.id===directedEvent.id),directedEvent,'directed attempts survive persistence');
 assert.deepEqual(events.find(e=>e.id===directedReview.id),directedReview,'style and shortcut feedback survive persistence');
+assert.deepEqual(events.find(e=>e.id===protectedEvent.id),protectedEvent,'round 7 attempts survive persistence');
 assert.equal((await fetch(url)).status,401,'records remain private after writes');
 console.log('Lab API: sign-in enforcement, spoof rejection, origin checks, validation, persistence and idempotence passed.');

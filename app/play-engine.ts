@@ -9,6 +9,7 @@ import pairedRoundBank from './generated/play-lab-round3.json';
 import designRoundBank from './generated/play-lab-round4.json';
 import focusedRoundBank from './generated/play-lab-round5.json';
 import directedRoundBank from './generated/play-lab-round6.json';
+import protectedRoundBank from './generated/play-lab-round7.json';
 import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
@@ -342,6 +343,14 @@ export const pairedLabBank=pairedRoundBank as {version:string;signature:string;h
 export const designLabBank=designRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;pair:string;reference:boolean}[]};
 export const focusedLabBank=focusedRoundBank as {version:string;signature:string;minimumCoverage:number;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:FocusStyle;coverage:StyleCoverage}[]};
 export const directedLabBank=directedRoundBank as {version:string;signature:string;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:AuditStyle;label:string;emphasis:'experience'|'flexibility';coverage:StyleAudit;roles:{intended:AuditRoute;shortest:AuditRoute;closest:AuditRoute}}[]};
+export const protectedLabBank=protectedRoundBank as typeof directedLabBank;
+export function generateProtectedHole(levelIndex:number,stage:number,seed=20261108):Hole {
+  if(seed!==20261108||protectedLabBank.signature!==courseSignature(21))throw new Error('Protected lab model changed');
+  const item=protectedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown protected lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:r.kind,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateDirectedHole(levelIndex:number,stage:number,seed=20260929):Hole {
   if(seed!==20260929||directedLabBank.signature!==courseSignature(21))throw new Error('Directed lab model changed');
   const item=directedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
