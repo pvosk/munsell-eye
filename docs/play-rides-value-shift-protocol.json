@@ -1,0 +1,19 @@
+{
+  "version": "rides-shifts-1",
+  "frozenBeforeSearch": true,
+  "seeds": [20261013, 20271013],
+  "palettes": [0, 1, 2, 4, 5, 7, 8, 10, 16, 17, 19, 20],
+  "proposalsPerPalettePerSeed": 180,
+  "shortlistPerDirection": 3,
+  "directions": ["ride", "rise", "drop"],
+  "scoringTolerance": 0.0294,
+  "general": {"minimumTravelEveryBase": 14, "pureSeparationTolerances": 1.8, "minimumFinishMs": 55, "minimumLocalSetupCoverage": 0.04, "noSupportedTokenBypass": true},
+  "ride": {"longestChromaticPour": 36, "chromaticPathFraction": 0.8, "chromaCutoff": 0.06, "curvature": "measured separately, not a pass threshold"},
+  "valueShift": {"absoluteFinalOklabLChangeGreaterThan": 0.10, "setupTravel": 6, "finishTravel": 9, "minimumMeaningfulAdditions": 2, "baseSelectionDoesNotCount": true, "noOneAdditionShortcutFromAnyBase": true},
+  "opportunity": "General every-base protection plus style available from at least half of bases; alternate good styles allowed.",
+  "resistance": "General every-base protection plus no retained supported efficient non-style route from any base.",
+  "selection": "Generate legal route endpoints, qualify proposal style, then prioritize minimum pure-paint world separation before featured magnitude. Audit every base before acceptance. No failed style is relabeled as a success.",
+  "validation": "Same fixed rules and palette set on both seeds. Second seed is fresh numerical replication, not player validation. Dense-check leading passing opportunities and strongest protected near-misses.",
+  "labels": "Intended style stays visible in any subsequent lab.",
+  "scope": "Offline feasibility only; no live holes, par, tolerance, palette definitions, or animations changed."
+}
