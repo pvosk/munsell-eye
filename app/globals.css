@@ -66,7 +66,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px s
 .palette-access i:nth-of-type(1) { background: #6b3038; margin-left: 0; }.palette-access i:nth-of-type(2) { background: #c4942f; }.palette-access i:nth-of-type(3) { background: #4c8b78; }
 .top-actions { align-items: center; display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; }
 .top-actions::-webkit-scrollbar { display: none; }
-.top-actions button { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 12px; padding: 10px 0; position: relative; }
+.top-actions :is(button, a) { background: transparent; border: 0; color: var(--muted); cursor: pointer; font-size: 12px; padding: 10px 0; position: relative; }
 .top-actions button.active { color: var(--ink); font-weight: 680; }
 .top-actions button.active::after { background: var(--ink); bottom: 3px; content: ''; height: 1px; left: 0; position: absolute; right: 0; }
 .mobile-section-nav { display: none; }
@@ -816,9 +816,9 @@ button.chart-chip { cursor: pointer; }
   .mobile-section-trigger:active { transform: scale(.96); }
   .mobile-section-options { background: rgba(248,247,243,.97); border: 1px solid rgba(255,255,255,.82); border-radius: 20px; box-shadow: 0 16px 38px rgba(29,29,27,.15), inset 0 1px 0 white; display: grid; gap: 4px; grid-template-columns: repeat(2, minmax(0, 1fr)); opacity: 0; padding: 7px; pointer-events: none; position: absolute; right: 0; top: calc(100% + 8px); transform: translateY(-6px) scale(.98); transform-origin: top right; transition: opacity .15s ease, transform .18s ease, visibility 0s linear .18s; visibility: hidden; width: min(276px, calc(100vw - 24px)); z-index: 30; }
   .mobile-section-nav.open .mobile-section-options { opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); transition-delay: 0s; visibility: visible; }
-  .mobile-section-options button { background: transparent; border: 0; border-radius: 14px; color: var(--muted); font-size: 11px; min-height: 46px; padding: 0 12px; text-align: left; }
+  .mobile-section-options :is(button, a) { background: transparent; border: 0; border-radius: 14px; color: var(--muted); font-size: 11px; min-height: 46px; padding: 0 12px; text-align: left; }
   .mobile-section-options button.active { background: rgba(29,29,27,.07); color: var(--ink); font-weight: 680; }
-  .mobile-section-options button:active { background: rgba(29,29,27,.11); transform: scale(.98); }
+  .mobile-section-options :is(button, a):active { background: rgba(29,29,27,.11); transform: scale(.98); }
   .quiet-button { padding-left: 5px; }
   .workspace { padding: 12px 16px 24px; }
   .desktop-practice-controls { display: none; }
@@ -971,3 +971,6 @@ button.chart-chip { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+.top-actions a { text-decoration: none; white-space: nowrap; }
+.mobile-section-options a { text-decoration: none; display: flex; align-items: center; }
