@@ -7,14 +7,16 @@ import legacyCourseBank from './generated/play-courses-v2.json';
 import labRoundBank from './generated/play-lab-round2.json';
 import pairedRoundBank from './generated/play-lab-round3.json';
 import designRoundBank from './generated/play-lab-round4.json';
+import focusedRoundBank from './generated/play-lab-round5.json';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
+import type {FocusStyle,StyleCoverage} from './play-style-coverage';
 
 export type RGB = [number, number, number];
 export type XYZ = [number, number, number];
 export type Mixture = number[];
 export type ColorPoint = { rgb: RGB; lab: XYZ; position: XYZ };
-export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number; labOnly?:boolean };
+export type PlayLevel = { name: string; subtitle: string; paints: PaintColor[]; tolerance: number; labOnly?:boolean; retired?:boolean };
 export type Hole = { seed: number; stage: number; start: ColorPoint; target: ColorPoint; notation: string; par: number; recipe: Mixture; tolerance: number; timingWindow: number; courseId: string; kind: string; solutionShots: number; routeOrder: number[]; routeTimes: number[] };
 export const HOLES_PER_PALETTE = 5;
 export const CHARGE_SECONDS = 2.2;
@@ -51,7 +53,8 @@ export const PLAY_LEVELS: PlayLevel[] = [
   { name: 'Violet Shift', subtitle: 'Purple Holds the Depth', paints: [paint('cobalt-blue'),paint('cadmium-red-light'),chartreuse,paint('dioxazine-purple')], tolerance: .0288 },
   { name: 'Double Cross', subtitle: 'Two Opposing Pairs', paints: [paint('cadmium-orange'),paint('cobalt-blue'),paint('cadmium-red-medium'),paint('permanent-green-light')], tolerance: .0288 },
   { name: 'Cobalt Ember', subtitle: 'Blue, Orange & Magenta', paints: [paint('cobalt-blue'),paint('cadmium-orange'),paint('quinacridone-magenta'),flake], tolerance: .028 },
-  { name: 'Viridian Rust', subtitle: 'Green, Earth & Bright Color', paints: [paint('viridian'),oxide,paint('quinacridone-magenta'),paint('cadmium-lemon')], tolerance: .028 },
+  // Retained only for immutable historical attempts. Never offered for new play.
+  { name: 'Viridian Rust', subtitle: 'Green, Earth & Bright Color', paints: [paint('viridian'),oxide,paint('quinacridone-magenta'),paint('cadmium-lemon')], tolerance: .028, retired:true },
 ];
 // Palette identity belongs in routes, not a different-sized perceptual cup.
 PLAY_LEVELS.forEach(level=>{level.tolerance=LANDING_TOLERANCE;});
@@ -62,6 +65,15 @@ PLAY_LEVELS.push(
   {...PLAY_LEVELS[1],name:'Zorny · Ultra',subtitle:'Ultramarine replaces Ivory Black',labOnly:true,paints:PLAY_LEVELS[1].paints.map((p,i)=>i===2?paint('ultramarine-blue'):p)},
   {...PLAY_LEVELS[5],name:'Secondaries · Lemon',subtitle:'Lemon replaces Titanium White',labOnly:true,paints:PLAY_LEVELS[5].paints.map((p,i)=>i===3?paint('cadmium-lemon'):p)},
 );
+// Novel discovery candidates live only in the lab until player review.
+PLAY_LEVELS.push(
+  {name:'Cobalt Tide',subtitle:'Ochre, Orange, Blue & Teal',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['yellow-ochre','cadmium-orange','cobalt-blue','cobalt-teal'].map(paint)},
+  {name:'Crimson Current',subtitle:'Lemon, Magenta, Crimson & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','quinacridone-magenta','alizarin-crimson','cerulean-blue'].map(paint)},
+  {name:'Orange Echo',subtitle:'Two Oranges, Ultramarine & Green',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-orange','transparent-orange','ultramarine-blue','permanent-green-light'].map(paint)},
+  {name:'Violet Circuit',subtitle:'Lemon, Red, Purple & Cobalt',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-red-light','dioxazine-purple','cobalt-blue'].map(paint)},
+);
+export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
+export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
   const [r, g, b] = rgb.map((n) => { const v = n / 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });
@@ -324,6 +336,14 @@ type StoredLabRoute={id:string;target:Mixture;recipe:Mixture;par:number;timingWi
 const labBank=labRoundBank as {version:string;signature:string;palettes:{levelIndex:number;holes:StoredLabRoute[]}[]};
 export const pairedLabBank=pairedRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:HoleAnalysis}[]};
 export const designLabBank=designRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;pair:string;reference:boolean}[]};
+export const focusedLabBank=focusedRoundBank as {version:string;signature:string;minimumCoverage:number;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:FocusStyle;coverage:StyleCoverage}[]};
+export function generateFocusedHole(levelIndex:number,stage:number,seed=20260926):Hole {
+  if(seed!==20260926||focusedLabBank.signature!==courseSignature(19))throw new Error('Focused lab model changed');
+  const item=focusedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown focused lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:item.focus,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateDesignHole(levelIndex:number,stage:number,seed=20260913):Hole {
   if(seed!==20260913||designLabBank.signature!==courseSignature(15))throw new Error('Design lab model changed');
   const item=designLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
