@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
 import {
@@ -595,6 +596,7 @@ function MobileSectionNav({ view, open, onToggle, onChange, onProgress }: {
         {APP_SECTIONS.map((section) => (
           <button className={section.id === view ? 'active' : ''} key={section.id} onClick={() => onChange(section.id)} tabIndex={open ? 0 : -1} type="button">{section.label}</button>
         ))}
+        <Link href="/sound-lab" tabIndex={open ? 0 : -1}>Sound Lab</Link>
         <button onClick={onProgress} tabIndex={open ? 0 : -1} type="button">Progress</button>
       </nav>
     </div>
@@ -2186,6 +2188,7 @@ export default function Home() {
           <button className={view === 'play' ? 'active' : ''} onClick={() => setView('play')} type="button">Play</button>
           <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
+          <Link href="/sound-lab">Sound Lab</Link>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
         <MobileSectionNav
