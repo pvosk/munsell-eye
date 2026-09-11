@@ -1,7 +1,7 @@
 import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, generateDesignHole, generateFocusedHole, generateDirectedHole, directedLabBank, pairedLabBank, designLabBank, focusedLabBank, type Hole, type Mixture } from './play-engine';
 import {contrastLabBank,generateContrastHole,journeyLabBank,generateJourneyHole,protectedLabBank,generateProtectedHole} from './play-engine';
 
-import {campaignSourceId,campaignForHole,campaignSnapshot,nextCampaignSpecimen} from './play-campaign';
+import {campaignSourceId,campaignForHole,campaignSnapshot,nextCampaignSpecimen,campaignAnalysis} from './play-campaign';
 export const LAB_CAMPAIGN_ENGINE='glider-campaign-draft-1-controls-1';
 export const LAB_ENGINE = 'glider-courses-3-controls-1';
 export const LAB_ROUND_ENGINE='glider-lab-2-controls-1';
@@ -55,7 +55,7 @@ export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
   for(let step=1;step<=bank.length;step++){const s=bank[(at+step)%bank.length];if(!PLAY_LEVELS[s.levelIndex].retired)return s;}
   return null;
 }
-export const analysisForHole=(raw:string)=>{const id=campaignSourceId(raw);return directedForHole(id)?.analysis??focusedLabBank.holes.find(h=>h.record.id===id)?.analysis??designLabBank.holes.find(h=>h.record.id===id)?.analysis??pairedLabBank.holes.find(h=>h.record.id===id)?.analysis;};
+export const analysisForHole=(raw:string)=>{const id=campaignSourceId(raw);return campaignAnalysis(id)??directedForHole(id)?.analysis??focusedLabBank.holes.find(h=>h.record.id===id)?.analysis??designLabBank.holes.find(h=>h.record.id===id)?.analysis??pairedLabBank.holes.find(h=>h.record.id===id)?.analysis;};
 export function suggestedComparison(attempt:LabAttempt):LabSpecimen|null {
   const first=attempt.shots.find(s=>!s.cancelled),item=analysisForHole(attempt.specimen.hole.courseId);
   if(!first||!item)return null;

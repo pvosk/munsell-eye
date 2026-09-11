@@ -5,13 +5,38 @@ import {newLabAttempt,validLabEvent,nextFixedLabSpecimen,labHoleProgress,analysi
 import {PLAY_LEVELS,LIVE_LANDING_TOLERANCE,mixtureColor,colorDistance,type ColorPoint} from '../app/play-engine';
 import {replayRoute} from '../app/play-course-analysis';
 import {routeGraphBounds} from '../app/play-lab-graph';
+import original from '../app/generated/play-campaign-lab.json';
 
-test('campaign preserves the requested palette sequence and explicit gaps',()=>{
+test('campaign preserves the requested sequence and fills all 13 gaps',()=>{
  assert.deepEqual(CAMPAIGN_CHAPTERS.map(c=>c.name),['UltraOx Dual','Maroon Drift','Zorny','RYB','Orange Echo','CMY','Secondaries','Sienna Field','Maroon Arc','Teal Ember','French Light','Cobalt Ember']);
- assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots).filter(s=>s.specimen).length,21);
+ assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots).filter(s=>s.specimen).length,34);
  assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots).length,34);
  assert.equal(CAMPAIGN_CHAPTERS[9].slots.length,2);
- assert.equal(CAMPAIGN_CHAPTERS[10].slots[0].specimen,null);
+ assert.ok(CAMPAIGN_CHAPTERS[10].slots[0].specimen);
+ assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots.flatMap(s=>s.alternatives??[])).length,14);
+ for(const c of original.chapters)for(const slot of c.slots)if(slot.specimen)assert.deepEqual(campaignForHole(slot.id)?.slot,slot);
+});
+test('alternatives retain distinct identities, save, replay and advance by slot',()=>{
+ for(const chapter of CAMPAIGN_CHAPTERS)for(const [stage,slot] of chapter.slots.entries())for(const alternate of slot.alternatives??[]){
+  const specimen=alternate.specimen,attempt=newLabAttempt(specimen,crypto.randomUUID());
+  assert.notEqual(alternate.id,slot.id);
+  assert.equal(specimen.hole.stage,stage);
+  assert.equal(labHoleProgress(specimen.hole),`${stage+1}/${chapter.slots.length}`);
+  assert.ok(validLabEvent({id:crypto.randomUUID(),attemptId:attempt.id,type:'attempt',attempt}));
+  assert.deepEqual(campaignSnapshot(alternate.id,specimen.levelIndex,stage,specimen.hole.seed),specimen.hole);
+  assert.equal(nextFixedLabSpecimen(specimen)?.hole.courseId,chapter.slots[(stage+1)%chapter.slots.length].id);
+  const audit=analysisForHole(alternate.id);assert.ok(audit);
+  for(const base of audit.bases)for(const route of base.routes)assert.ok(colorDistance(mixtureColor(PLAY_LEVELS[specimen.levelIndex].paints,replayRoute(specimen.levelIndex,route.order,route.times)),specimen.hole.target)<=specimen.hole.tolerance+1e-8);
+ }
+});
+test('new primaries have per-base analysis and unchanged featured target recipes',()=>{
+ for(const chapter of CAMPAIGN_CHAPTERS)for(const slot of chapter.slots){
+  if(!slot.alternatives)continue;
+  const {hole,levelIndex}=slot.specimen!,audit=analysisForHole(slot.id)!;
+  assert.ok(audit);assert.equal(audit.bases.length,PLAY_LEVELS[levelIndex].paints.length);
+  assert.ok(colorDistance(mixtureColor(PLAY_LEVELS[levelIndex].paints,hole.recipe),hole.target)<1e-9);
+  assert.ok(audit.bases.every(b=>b.qualifies));
+ }
 });
 test('every featured route lands, saves and replays without changing paints',()=>{
  const before=JSON.stringify(PLAY_LEVELS);
