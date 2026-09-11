@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
 import { HOLES_PER_PALETTE, PLAY_LEVELS, nextCoursePalette, withLiveLanding, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
-import {newLabAttempt,nextFixedLabSpecimen,type LabAttempt,type LabSpecimen} from './play-lab-model';
+import {newLabAttempt,nextFixedLabSpecimen,labHoleProgress,type LabAttempt,type LabSpecimen} from './play-lab-model';
 import {usePlayLabSync} from './play-lab-sync';
 import {LabPicker,PlayLabPanel} from './play-lab';
 import './play.css';
@@ -63,6 +63,7 @@ export default function PlayView() {
   const host = useRef<HTMLDivElement>(null);
   const targetLabel = useRef<HTMLDivElement>(null);
   const scene = useRef<PlayScene | null>(null);
+  const lastRevealedPalette=useRef<number|null>(null);
   const charge = useRef<Charge | null>(null);
   const rollback=useRef<{quantities:Mixture;pours:number;phase:Phase}|null>(null);
   const paintPress = useRef<{ id: number; x: number; y: number; started: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
@@ -92,12 +93,13 @@ export default function PlayView() {
           },
           onError() { charge.current = null; setCharged(null); setReady(false); setError(true); },
           onIntroEnd() { setPhase('seed'); setAnnouncement('Choose your first paint.'); },
-        });
+        },{paints:PLAY_LEVELS[levelIndex].paints,revealPalette:lastRevealedPalette.current!==levelIndex});
+        lastRevealedPalette.current=levelIndex;
         scene.current = mounted; setError(false); setReady(true);
       } catch { setError(true); setReady(false); }
     }).catch(() => { if (!cancelled) { setError(true); setReady(false); } });
     return () => { cancelled = true; mounted?.dispose(); if (scene.current === mounted) scene.current = null; };
-  }, [hole]);
+  }, [hole,levelIndex]);
 
   const cancelCharge = useCallback(() => {
     if (paintPress.current) { paintPress.current.cancelled = true; clearTimeout(paintPress.current.timer); }
@@ -218,7 +220,7 @@ export default function PlayView() {
       record(newLabAttempt({levelIndex:index,hole:next,...(comparison?{comparison}:{})},crypto.randomUUID()));
     }
     setHole(next);
-    setAnnouncement(`Hole ${stage + 1} of ${next.courseId.startsWith('lab-5-')?2:HOLES_PER_PALETTE}. Arriving in color space.`);
+    setAnnouncement(`Hole ${labHoleProgress(next)}. Arriving in color space.`);
   };
   const replaySpecimen=(specimen:LabSpecimen)=>startHole(specimen.levelIndex,true,specimen.hole.stage,{...specimen.hole},specimen.comparison);
   const toggleLab=()=>{
@@ -307,7 +309,7 @@ export default function PlayView() {
       <div className="play-canvas" ref={host} /><div className="play-world-vignette" />
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>
       <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span><span>Destination</span></div>
-      <div className="play-score"><span><b>{hole.stage + 1}/{hole.courseId.startsWith('lab-5-')?2:HOLES_PER_PALETTE}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span>{(!lab||attempt?.revealed)&&<span><b>{hole.par}</b> Par</span>}<span><b>{massLabel(mass)}</b> Parts</span></div>
+      <div className="play-score"><span><b>{labHoleProgress(hole)}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span>{(!lab||attempt?.revealed)&&<span><b>{hole.par}</b> Par</span>}<span><b>{massLabel(mass)}</b> Parts</span></div>
       <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
@@ -326,7 +328,7 @@ export default function PlayView() {
       <div className="play-control-hint"><span>{phase === 'flight' ? <button type="button" onClick={cancelShot}>Cancel shot · Esc</button> : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>
     </div>
-    {lab&&<PlayLabPanel sync={sync} current={attempt} onReplay={replaySpecimen} onReveal={reveal}/>}
+    {lab&&<PlayLabPanel key={attempt?.id??'empty'} sync={sync} current={attempt} onReplay={replaySpecimen} onReveal={reveal}/>}
     <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
   </section>;
 }

@@ -1,0 +1,18 @@
+{
+  "sourceHash": "aa5431b3b906ec6c90853ec1d64fc80d011ddaae2249753a884461529ad78969",
+  "finalists": [
+    "focused-1-3-10-11",
+    "focused-1-6-7-11",
+    "reopen-1-3-8-11"
+  ],
+  "benchmarkIds": [
+    "focused-2-3-10-12",
+    "focused-1-6-7-11",
+    "focused-3-4-9-16",
+    "focused-1-5-8-10",
+    "control-Secondaries",
+    "control-Zorny",
+    "control-Cobalt Ember"
+  ],
+  "seed": 20270317
+}

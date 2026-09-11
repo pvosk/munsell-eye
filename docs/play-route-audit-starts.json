@@ -1,0 +1,2602 @@
+{
+  "sourceHash": "aa5431b3b906ec6c90853ec1d64fc80d011ddaae2249753a884461529ad78969",
+  "policy": "starts-1-closest-paint",
+  "note": "Post-hoc diagnostic motivated by the stated closest-start behavior, not a new independent validation cohort. No claim of predicting actual human starting choices. Course selection should require closest-safe when the brief demands the intended style survive that behavior.",
+  "results": [
+    {
+      "trial": {
+        "id": "focused-1-3-10-11",
+        "paints": [
+          {
+            "id": "cadmium-lemon",
+            "name": "Cadmium Lemon",
+            "pigment": "PY35",
+            "category": "Yellow",
+            "brands": "Winsor & Newton",
+            "h": "10Y",
+            "v": 9,
+            "c": 12,
+            "strength": 0.76,
+            "opacity": "opaque",
+            "rgb": [
+              243,
+              236,
+              15
+            ],
+            "notation": "10Y 9/12"
+          },
+          {
+            "id": "cadmium-orange",
+            "name": "Cadmium Orange",
+            "pigment": "PO20",
+            "category": "Orange",
+            "h": "5YR",
+            "v": 7,
+            "c": 16,
+            "strength": 0.82,
+            "opacity": "opaque",
+            "rgb": [
+              252,
+              151,
+              53
+            ],
+            "notation": "5YR 7/16"
+          },
+          {
+            "id": "cobalt-blue",
+            "name": "Cobalt Blue",
+            "pigment": "PB28",
+            "category": "Blue",
+            "h": "6.25PB",
+            "v": 3,
+            "c": 12,
+            "strength": 0.65,
+            "opacity": "semi-transparent",
+            "rgb": [
+              22,
+              73,
+              127
+            ],
+            "notation": "6.25PB 3/12"
+          },
+          {
+            "id": "cerulean-blue",
+            "name": "Cerulean Blue",
+            "pigment": "PB35",
+            "category": "Blue",
+            "h": "2.5PB",
+            "v": 4,
+            "c": 12,
+            "strength": 0.55,
+            "opacity": "opaque",
+            "rgb": [
+              29,
+              102,
+              151
+            ],
+            "notation": "2.5PB 4/12"
+          }
+        ],
+        "control": false,
+        "proxy": [
+          131.52394193991006,
+          44.947429409221854,
+          2.089806968074425
+        ]
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 8,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 1,
+          "closestSafe": 1
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0,
+            0.2905646778783252,
+            0.7094353221216749,
+            0
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.4716393955380533,
+              0.3478521623383327,
+              0.14762019099158835,
+              0.1154291093143355
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.795529006626396
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.795529006626396
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.795529006626396
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.795529006626396
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.795529006626396
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.39229632287722993,
+            0.34676925737143816,
+            0.2609344197513319,
+            0
+          ],
+          "confirmed": [
+            "chromatic-ride",
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.19358118277404035,
+              0.15326784436951624,
+              0.40711556615457395,
+              0.33261722866795645
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.5,
+                "freeStartEligible": false,
+                "minimumClosestRide": 17.95154924398113
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 17.95154924398113
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 17.95154924398113
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.25,
+                "freeStartEligible": false,
+                "minimumClosestRide": 17.95154924398113
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 17.95154924398113
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.0799087687789756,
+            0.12801551452712484,
+            0,
+            0.7920757166938995
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.45759202499811596,
+              0.34057539685607036,
+              0.14882825243464667,
+              0.09594251515843548
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.5125074978046594,
+            0,
+            0.33997422887807444,
+            0.1475182733172661
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              0
+            ],
+            "distances": [
+              0.17732319205540079,
+              0.20191474858082573,
+              0.4398398315450694,
+              0.36300828763190673
+            ],
+            "globallyEfficientBases": [
+              0,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 16.164627506612863
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 16.164627506612863
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 16.164627506612863
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 16.164627506612863
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 16.164627506612863
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.19091196666531798,
+            0.5228411562509787,
+            0.2250465575271191,
+            0.061200319556584136
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.2424687194414083,
+              0.1321829338665721,
+              0.3606156398747567,
+              0.2905752743534663
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.834082452191172
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.834082452191172
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.834082452191172
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.834082452191172
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.834082452191172
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0,
+            0.5835108545753548,
+            0.4164891454246451,
+            0
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.309044845711526,
+              0.1988527350386919,
+              0.29529747333006406,
+              0.22908878517804554
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 28.284220488309444
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 28.284220488309444
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 28.284220488309444
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 28.284220488309444
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 28.284220488309444
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.08943826634473717,
+            0.5009095781286423,
+            0,
+            0.40965215552662054
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.29318298179342955,
+              0.19193628477938784,
+              0.31051135185385165,
+              0.24243847505902938
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 27.17198713537429
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 27.17198713537429
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 27.17198713537429
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 27.17198713537429
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 27.17198713537429
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.08852473291064844,
+            0.06144876232386879,
+            0.48480839765136224,
+            0.3652181071141205
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.5055750546030207,
+              0.3798486078966688,
+              0.11187818816197129,
+              0.09354499569258362
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 18.713998139192274
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 18.713998139192274
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 18.713998139192274
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 18.713998139192274
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 18.713998139192274
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "focused-1-5-8-10",
+        "paints": [
+          {
+            "id": "cadmium-lemon",
+            "name": "Cadmium Lemon",
+            "pigment": "PY35",
+            "category": "Yellow",
+            "brands": "Winsor & Newton",
+            "h": "10Y",
+            "v": 9,
+            "c": 12,
+            "strength": 0.76,
+            "opacity": "opaque",
+            "rgb": [
+              243,
+              236,
+              15
+            ],
+            "notation": "10Y 9/12"
+          },
+          {
+            "id": "cadmium-red-light",
+            "name": "Cadmium Red Light",
+            "pigment": "PR108",
+            "category": "Red",
+            "h": "7.5R",
+            "v": 5,
+            "c": 16,
+            "strength": 0.86,
+            "opacity": "opaque",
+            "rgb": [
+              230,
+              53,
+              42
+            ],
+            "notation": "7.5R 5/16"
+          },
+          {
+            "id": "dioxazine-purple",
+            "name": "Dioxazine Purple",
+            "pigment": "PV23",
+            "category": "Violet",
+            "h": "2.5P",
+            "v": 2,
+            "c": 10,
+            "strength": 1.25,
+            "opacity": "transparent",
+            "rgb": [
+              71,
+              28,
+              100
+            ],
+            "notation": "2.5P 2/10"
+          },
+          {
+            "id": "cobalt-blue",
+            "name": "Cobalt Blue",
+            "pigment": "PB28",
+            "category": "Blue",
+            "h": "6.25PB",
+            "v": 3,
+            "c": 12,
+            "strength": 0.65,
+            "opacity": "semi-transparent",
+            "rgb": [
+              22,
+              73,
+              127
+            ],
+            "notation": "6.25PB 3/12"
+          }
+        ],
+        "control": false,
+        "proxy": [
+          106.70484380969802,
+          31.465922703177128,
+          4.343867122873489
+        ]
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 3,
+          "closestSafe": 3
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.39229632287722993,
+            0.34676925737143816,
+            0.2609344197513319,
+            0
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.35988738237695816,
+              0.09863704739315927,
+              0.33601740531262014,
+              0.3063856427129887
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 14.427408491601962
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 14.427408491601962
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 14.427408491601962
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 14.427408491601962
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 14.427408491601962
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.5714800772002258,
+            0.2210124911339069,
+            0.2075074316658675,
+            0
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.22948568518546605,
+              0.18897109687986177,
+              0.45244218427260585,
+              0.39764070988348776
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.434886998408228
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.434886998408228
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.434886998408228
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.434886998408228
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.5,
+                "freeStartEligible": true,
+                "minimumClosestRide": 23.434886998408228
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.5103993182525954,
+            0.33067234229114395,
+            0,
+            0.15892833945626048
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.26164277627547494,
+              0.16404727638535074,
+              0.4225358617561402,
+              0.371920014994418
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 21.173741595758532
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 21.173741595758532
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 21.173741595758532
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 21.173741595758532
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.5,
+                "freeStartEligible": true,
+                "minimumClosestRide": 21.173741595758532
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "focused-1-6-7-11",
+        "paints": [
+          {
+            "id": "cadmium-lemon",
+            "name": "Cadmium Lemon",
+            "pigment": "PY35",
+            "category": "Yellow",
+            "brands": "Winsor & Newton",
+            "h": "10Y",
+            "v": 9,
+            "c": 12,
+            "strength": 0.76,
+            "opacity": "opaque",
+            "rgb": [
+              243,
+              236,
+              15
+            ],
+            "notation": "10Y 9/12"
+          },
+          {
+            "id": "quinacridone-magenta",
+            "name": "Quinacridone Magenta",
+            "pigment": "PR122",
+            "category": "Red",
+            "h": "5RP",
+            "v": 3,
+            "c": 10,
+            "strength": 1.12,
+            "opacity": "transparent",
+            "rgb": [
+              131,
+              30,
+              88
+            ],
+            "notation": "5RP 3/10"
+          },
+          {
+            "id": "alizarin-crimson",
+            "name": "Alizarin Crimson",
+            "pigment": "PR83",
+            "category": "Red",
+            "brands": "Winsor & Newton",
+            "h": "10RP",
+            "v": 2,
+            "c": 8,
+            "strength": 1.04,
+            "opacity": "transparent",
+            "rgb": [
+              95,
+              16,
+              54
+            ],
+            "notation": "10RP 2/8"
+          },
+          {
+            "id": "cerulean-blue",
+            "name": "Cerulean Blue",
+            "pigment": "PB35",
+            "category": "Blue",
+            "h": "2.5PB",
+            "v": 4,
+            "c": 12,
+            "strength": 0.55,
+            "opacity": "opaque",
+            "rgb": [
+              29,
+              102,
+              151
+            ],
+            "notation": "2.5PB 4/12"
+          }
+        ],
+        "control": false,
+        "proxy": [
+          94.29782401832436,
+          33.358364068032685,
+          0.6730003345060966
+        ]
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 1,
+          "closestSafe": 1
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.6300851267188281,
+            0.11914170201143726,
+            0,
+            0.2507731712697347
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              0
+            ],
+            "distances": [
+              0.13436643661689943,
+              0.4571505534761717,
+              0.5182816097374762,
+              0.38481744317764
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.231792493587804
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.231792493587804
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.231792493587804
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.25,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.231792493587804
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 11.231792493587804
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "focused-3-4-9-16",
+        "paints": [
+          {
+            "id": "cadmium-orange",
+            "name": "Cadmium Orange",
+            "pigment": "PO20",
+            "category": "Orange",
+            "h": "5YR",
+            "v": 7,
+            "c": 16,
+            "strength": 0.82,
+            "opacity": "opaque",
+            "rgb": [
+              252,
+              151,
+              53
+            ],
+            "notation": "5YR 7/16"
+          },
+          {
+            "id": "transparent-orange",
+            "name": "Transparent Orange",
+            "pigment": "PO62",
+            "category": "Orange",
+            "h": "8.75R",
+            "v": 4,
+            "c": 14,
+            "strength": 1.02,
+            "opacity": "transparent",
+            "rgb": [
+              188,
+              34,
+              33
+            ],
+            "notation": "8.75R 4/14"
+          },
+          {
+            "id": "ultramarine-blue",
+            "name": "Ultramarine Blue",
+            "pigment": "PB29",
+            "category": "Blue",
+            "h": "7.5PB",
+            "v": 2,
+            "c": 10,
+            "strength": 0.92,
+            "opacity": "transparent",
+            "rgb": [
+              36,
+              40,
+              112
+            ],
+            "notation": "7.5PB 2/10"
+          },
+          {
+            "id": "permanent-green-light",
+            "name": "Permanent Green Light",
+            "pigment": "PG7/PY74",
+            "category": "Green",
+            "brands": "Gamblin · Winsor & Newton",
+            "h": "5G",
+            "v": 6,
+            "c": 12,
+            "strength": 0.94,
+            "opacity": "semi-transparent",
+            "rgb": [
+              51,
+              168,
+              123
+            ],
+            "notation": "5G 6/12"
+          }
+        ],
+        "control": false,
+        "proxy": [
+          75.65702736870904,
+          13.955990318645512,
+          6.212153450637007
+        ]
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 2,
+          "closestSafe": 2
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.5714800772002258,
+            0.2210124911339069,
+            0.2075074316658675,
+            0
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.14828067827374453,
+              0.14388312117766214,
+              0.3784517727636387,
+              0.20519362248549514
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.55087113690925
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.55087113690925
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.55087113690925
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.25,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.55087113690925
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 13.55087113690925
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.5103993182525954,
+            0.33067234229114395,
+            0,
+            0.15892833945626048
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.20219557529750756,
+              0.10580842142003281,
+              0.3301758389964075,
+              0.2193371914527299
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.561074378753045
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.561074378753045
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.561074378753045
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.25,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.561074378753045
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 15.561074378753045
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "control-Zorny",
+        "paints": [
+          {
+            "id": "yellow-ochre",
+            "name": "Yellow Ochre",
+            "pigment": "PY43",
+            "category": "Earth",
+            "h": "10YR",
+            "v": 5,
+            "c": 10,
+            "strength": 0.62,
+            "opacity": "opaque",
+            "rgb": [
+              163,
+              113,
+              28
+            ],
+            "notation": "10YR 5/10"
+          },
+          {
+            "id": "cadmium-red-light",
+            "name": "Cadmium Red Light",
+            "pigment": "PR108",
+            "category": "Red",
+            "h": "7.5R",
+            "v": 5,
+            "c": 16,
+            "strength": 0.86,
+            "opacity": "opaque",
+            "rgb": [
+              230,
+              53,
+              42
+            ],
+            "notation": "7.5R 5/16"
+          },
+          {
+            "id": "ivory-black",
+            "name": "Ivory Black",
+            "pigment": "PBk9",
+            "category": "Black",
+            "v": 1,
+            "strength": 1.08,
+            "opacity": "semi-transparent",
+            "rgb": [
+              24,
+              24,
+              22
+            ],
+            "notation": "N1"
+          },
+          {
+            "id": "titanium-white",
+            "name": "Titanium White",
+            "pigment": "PW6",
+            "category": "White",
+            "v": 10,
+            "strength": 1.2,
+            "opacity": "opaque",
+            "rgb": [
+              249,
+              248,
+              242
+            ],
+            "notation": "N10"
+          }
+        ],
+        "control": true,
+        "proxy": []
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 2,
+          "closestSafe": 2
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.04656637963635241,
+            0.35486608342794174,
+            0.36540276747010236,
+            0.23316476946560352
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              0
+            ],
+            "distances": [
+              0.08393082103326097,
+              0.14620485245099699,
+              0.36604828125675226,
+              0.41724224926937103
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 0
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.07977786438516399,
+            0.2467618511990382,
+            0.36553503489653066,
+            0.3079252495192671
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              0
+            ],
+            "distances": [
+              0.10620590994693078,
+              0.17449631112629996,
+              0.44497511911935295,
+              0.3301238267613872
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "control-Secondaries",
+        "paints": [
+          {
+            "id": "cadmium-orange",
+            "name": "Cadmium Orange",
+            "pigment": "PO20",
+            "category": "Orange",
+            "h": "5YR",
+            "v": 7,
+            "c": 16,
+            "strength": 0.82,
+            "opacity": "opaque",
+            "rgb": [
+              252,
+              151,
+              53
+            ],
+            "notation": "5YR 7/16"
+          },
+          {
+            "id": "dioxazine-purple",
+            "name": "Dioxazine Purple",
+            "pigment": "PV23",
+            "category": "Violet",
+            "h": "2.5P",
+            "v": 2,
+            "c": 10,
+            "strength": 1.25,
+            "opacity": "transparent",
+            "rgb": [
+              71,
+              28,
+              100
+            ],
+            "notation": "2.5P 2/10"
+          },
+          {
+            "id": "phthalo-green-yellow",
+            "name": "Phthalo Green (Yellow Shade)",
+            "pigment": "PG36",
+            "category": "Green",
+            "brands": "Gamblin · Winsor & Newton",
+            "h": "10G",
+            "v": 3,
+            "c": 10,
+            "strength": 1.34,
+            "opacity": "transparent",
+            "rgb": [
+              27,
+              81,
+              69
+            ],
+            "notation": "10G 3/10"
+          },
+          {
+            "id": "titanium-white",
+            "name": "Titanium White",
+            "pigment": "PW6",
+            "category": "White",
+            "v": 10,
+            "strength": 1.2,
+            "opacity": "opaque",
+            "rgb": [
+              249,
+              248,
+              242
+            ],
+            "notation": "N10"
+          }
+        ],
+        "control": true,
+        "proxy": []
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "interior-weave": {
+          "majority": 2,
+          "closestSafe": 1
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.02469616975909798,
+            0.25033419343641883,
+            0.1257279929336711,
+            0.5992416438708121
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.19505403294138793,
+              0.5033618645128329,
+              0.4389133342775742,
+              0.16057265273296606
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 0
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.04656637963635241,
+            0.35486608342794174,
+            0.36540276747010236,
+            0.23316476946560352
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              2
+            ],
+            "distances": [
+              0.33283876634955833,
+              0.20819627675082197,
+              0.1308256259978411,
+              0.4736959074330571
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 10.104220469766856
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 10.104220469766856
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 10.104220469766856
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 10.104220469766856
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 10.104220469766856
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "control-Cobalt Ember",
+        "paints": [
+          {
+            "id": "cobalt-blue",
+            "name": "Cobalt Blue",
+            "pigment": "PB28",
+            "category": "Blue",
+            "h": "6.25PB",
+            "v": 3,
+            "c": 12,
+            "strength": 0.65,
+            "opacity": "semi-transparent",
+            "rgb": [
+              22,
+              73,
+              127
+            ],
+            "notation": "6.25PB 3/12"
+          },
+          {
+            "id": "cadmium-orange",
+            "name": "Cadmium Orange",
+            "pigment": "PO20",
+            "category": "Orange",
+            "h": "5YR",
+            "v": 7,
+            "c": 16,
+            "strength": 0.82,
+            "opacity": "opaque",
+            "rgb": [
+              252,
+              151,
+              53
+            ],
+            "notation": "5YR 7/16"
+          },
+          {
+            "id": "quinacridone-magenta",
+            "name": "Quinacridone Magenta",
+            "pigment": "PR122",
+            "category": "Red",
+            "h": "5RP",
+            "v": 3,
+            "c": 10,
+            "strength": 1.12,
+            "opacity": "transparent",
+            "rgb": [
+              131,
+              30,
+              88
+            ],
+            "notation": "5RP 3/10"
+          },
+          {
+            "id": "play-flake-white",
+            "name": "Flake White",
+            "pigment": "PW1",
+            "category": "White",
+            "v": 9.5,
+            "strength": 0.65,
+            "opacity": "opaque",
+            "rgb": [
+              246,
+              243,
+              233
+            ],
+            "notation": "N9.5"
+          }
+        ],
+        "control": true,
+        "proxy": []
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 1,
+          "closestSafe": 1
+        },
+        "interior-weave": {
+          "majority": 3,
+          "closestSafe": 2
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.02469616975909798,
+            0.25033419343641883,
+            0.1257279929336711,
+            0.5992416438708121
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.46003381427856505,
+              0.09469052276637202,
+              0.4238650647741677,
+              0.15959011610840695
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.860066829384527
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.860066829384527
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.860066829384527
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 15.860066829384527
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 15.860066829384527
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.19091196666531798,
+            0.5228411562509787,
+            0.2250465575271191,
+            0.061200319556584136
+          ],
+          "confirmed": [
+            "opposing-colors",
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              1
+            ],
+            "distances": [
+              0.29405596096553294,
+              0.1636415608590044,
+              0.2434579837562091,
+              0.3593088490849716
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 12.435976141285193
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 12.435976141285193
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 12.435976141285193
+              },
+              "opposing-colors": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": true,
+                "minimumClosestRide": 12.435976141285193
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 12.435976141285193
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.07977786438516399,
+            0.2467618511990382,
+            0.36553503489653066,
+            0.3079252495192671
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              2
+            ],
+            "distances": [
+              0.26823262083326666,
+              0.2242472864176831,
+              0.16759363770049152,
+              0.40431769060099476
+            ],
+            "globallyEfficientBases": [
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.838391081301829
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.838391081301829
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.838391081301829
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.838391081301829
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.3333333333333333,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.838391081301829
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "trial": {
+        "id": "reopen-1-3-8-11",
+        "paints": [
+          {
+            "id": "cadmium-lemon",
+            "name": "Cadmium Lemon",
+            "pigment": "PY35",
+            "category": "Yellow",
+            "brands": "Winsor & Newton",
+            "h": "10Y",
+            "v": 9,
+            "c": 12,
+            "strength": 0.76,
+            "opacity": "opaque",
+            "rgb": [
+              243,
+              236,
+              15
+            ],
+            "notation": "10Y 9/12"
+          },
+          {
+            "id": "cadmium-orange",
+            "name": "Cadmium Orange",
+            "pigment": "PO20",
+            "category": "Orange",
+            "h": "5YR",
+            "v": 7,
+            "c": 16,
+            "strength": 0.82,
+            "opacity": "opaque",
+            "rgb": [
+              252,
+              151,
+              53
+            ],
+            "notation": "5YR 7/16"
+          },
+          {
+            "id": "dioxazine-purple",
+            "name": "Dioxazine Purple",
+            "pigment": "PV23",
+            "category": "Violet",
+            "h": "2.5P",
+            "v": 2,
+            "c": 10,
+            "strength": 1.25,
+            "opacity": "transparent",
+            "rgb": [
+              71,
+              28,
+              100
+            ],
+            "notation": "2.5P 2/10"
+          },
+          {
+            "id": "cerulean-blue",
+            "name": "Cerulean Blue",
+            "pigment": "PB35",
+            "category": "Blue",
+            "h": "2.5PB",
+            "v": 4,
+            "c": 12,
+            "strength": 0.55,
+            "opacity": "opaque",
+            "rgb": [
+              29,
+              102,
+              151
+            ],
+            "notation": "2.5PB 4/12"
+          }
+        ],
+        "control": false,
+        "proxy": [
+          109.85280500709513,
+          42.45065061516134,
+          18.240764774140867
+        ]
+      },
+      "counts": {
+        "chromatic-ride": {
+          "majority": 3,
+          "closestSafe": 0
+        },
+        "setup-lift": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "value-hue-balance": {
+          "majority": 0,
+          "closestSafe": 0
+        },
+        "opposing-colors": {
+          "majority": 1,
+          "closestSafe": 1
+        },
+        "interior-weave": {
+          "majority": 3,
+          "closestSafe": 3
+        }
+      },
+      "targets": [
+        {
+          "recipe": [
+            0.0799087687789756,
+            0.12801551452712484,
+            0,
+            0.7920757166938995
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.45759202499811596,
+              0.34057539685607036,
+              0.253115887921396,
+              0.09594251515843548
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 19.37895635360011
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0,
+            0.4532211259865165,
+            0.20073555128115544,
+            0.346043322732328
+          ],
+          "confirmed": [
+            "opposing-colors",
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.3640941166951228,
+              0.2251606222680952,
+              0.3131554944289543,
+              0.18723070809426584
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.02326180815488
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.02326180815488
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 13.02326180815488
+              },
+              "opposing-colors": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.5,
+                "freeStartEligible": true,
+                "minimumClosestRide": 13.02326180815488
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 13.02326180815488
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.028318719945819654,
+            0.24704596447393348,
+            0.06155124417254868,
+            0.6630840714076982
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.4254957676416507,
+              0.31158809774820434,
+              0.2809220081919469,
+              0.13132571894383419
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 25.616913927814405
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 25.616913927814405
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 25.616913927814405
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 25.616913927814405
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 25.616913927814405
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.07183025940602264,
+            0.01822922916202374,
+            0.3485655721146766,
+            0.5613749393172769
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              2
+            ],
+            "distances": [
+              0.6097771011606397,
+              0.45673400953529103,
+              0.09007234961584011,
+              0.1284952092669038
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.373776003057689
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.373776003057689
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.373776003057689
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 11.373776003057689
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 1,
+                "freeStartEligible": true,
+                "minimumClosestRide": 11.373776003057689
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.07977786438516399,
+            0.2467618511990382,
+            0.36553503489653066,
+            0.3079252495192671
+          ],
+          "confirmed": [
+            "interior-weave"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.5315056105768357,
+              0.3706489437346394,
+              0.14823766945863492,
+              0.13184999240726733
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 36.62467742053989
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 36.62467742053989
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 36.62467742053989
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.25,
+                "freeStartEligible": false,
+                "minimumClosestRide": 36.62467742053989
+              },
+              "interior-weave": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": true,
+                "globalStyleCoverage": 0.5,
+                "freeStartEligible": true,
+                "minimumClosestRide": 36.62467742053989
+              }
+            }
+          }
+        },
+        {
+          "recipe": [
+            0.05787223609935959,
+            0.1976449381290499,
+            0.06612233224231527,
+            0.6783604935292752
+          ],
+          "confirmed": [
+            "chromatic-ride"
+          ],
+          "starts": {
+            "version": "starts-1-closest-paint",
+            "closestBases": [
+              3
+            ],
+            "distances": [
+              0.4419017915148355,
+              0.32550767935176617,
+              0.2661592041824068,
+              0.11684339534809267
+            ],
+            "globallyEfficientBases": [
+              0,
+              1,
+              3
+            ],
+            "styles": {
+              "chromatic-ride": {
+                "majorityEligible": true,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0.6666666666666666,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.063425160305698
+              },
+              "setup-lift": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.063425160305698
+              },
+              "value-hue-balance": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.063425160305698
+              },
+              "opposing-colors": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.063425160305698
+              },
+              "interior-weave": {
+                "majorityEligible": false,
+                "closestStartResistsBypass": false,
+                "globalStyleCoverage": 0,
+                "freeStartEligible": false,
+                "minimumClosestRide": 23.063425160305698
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -8,6 +8,8 @@ import labRoundBank from './generated/play-lab-round2.json';
 import pairedRoundBank from './generated/play-lab-round3.json';
 import designRoundBank from './generated/play-lab-round4.json';
 import focusedRoundBank from './generated/play-lab-round5.json';
+import directedRoundBank from './generated/play-lab-round6.json';
+import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
 import type {FocusStyle,StyleCoverage} from './play-style-coverage';
@@ -71,6 +73,8 @@ PLAY_LEVELS.push(
   {name:'Crimson Current',subtitle:'Lemon, Magenta, Crimson & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','quinacridone-magenta','alizarin-crimson','cerulean-blue'].map(paint)},
   {name:'Orange Echo',subtitle:'Two Oranges, Ultramarine & Green',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-orange','transparent-orange','ultramarine-blue','permanent-green-light'].map(paint)},
   {name:'Violet Circuit',subtitle:'Lemon, Red, Purple & Cobalt',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-red-light','dioxazine-purple','cobalt-blue'].map(paint)},
+  {name:'Cerulean Arc',subtitle:'Lemon, Orange, Cobalt & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-orange','cobalt-blue','cerulean-blue'].map(paint)},
+  {name:'Violet Estuary',subtitle:'Lemon, Orange, Violet & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-orange','dioxazine-purple','cerulean-blue'].map(paint)},
 );
 export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
@@ -337,6 +341,14 @@ const labBank=labRoundBank as {version:string;signature:string;palettes:{levelIn
 export const pairedLabBank=pairedRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:HoleAnalysis}[]};
 export const designLabBank=designRoundBank as {version:string;signature:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;pair:string;reference:boolean}[]};
 export const focusedLabBank=focusedRoundBank as {version:string;signature:string;minimumCoverage:number;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:FocusStyle;coverage:StyleCoverage}[]};
+export const directedLabBank=directedRoundBank as {version:string;signature:string;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:AuditStyle;label:string;emphasis:'experience'|'flexibility';coverage:StyleAudit;roles:{intended:AuditRoute;shortest:AuditRoute;closest:AuditRoute}}[]};
+export function generateDirectedHole(levelIndex:number,stage:number,seed=20260929):Hole {
+  if(seed!==20260929||directedLabBank.signature!==courseSignature(21))throw new Error('Directed lab model changed');
+  const item=directedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown directed lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:item.focus,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateFocusedHole(levelIndex:number,stage:number,seed=20260926):Hole {
   if(seed!==20260926||focusedLabBank.signature!==courseSignature(19))throw new Error('Focused lab model changed');
   const item=focusedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
