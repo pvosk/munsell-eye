@@ -63,6 +63,7 @@ export default function PlayView() {
   const host = useRef<HTMLDivElement>(null);
   const targetLabel = useRef<HTMLDivElement>(null);
   const scene = useRef<PlayScene | null>(null);
+  const sceneEpoch=useRef(0);
   const lastRevealedPalette=useRef<number|null>(null);
   const charge = useRef<Charge | null>(null);
   const rollback=useRef<{quantities:Mixture;pours:number;phase:Phase}|null>(null);
@@ -80,9 +81,10 @@ export default function PlayView() {
 
   useEffect(() => {
     let cancelled = false;
+    const epoch=sceneEpoch.current;
     let mounted: PlayScene | null = null;
     import('./play-scene').then(({ createPlayScene }) => {
-      if (cancelled || !host.current) return;
+      if (cancelled || epoch!==sceneEpoch.current || !host.current) return;
       try {
         mounted = createPlayScene(host.current, hole, {
           targetPosition(x, y, offscreen, angle) {
@@ -92,7 +94,7 @@ export default function PlayView() {
             targetLabel.current.style.setProperty('--bearing', `${angle}rad`);
           },
           onError() { charge.current = null; setCharged(null); setReady(false); setError(true); },
-          onIntroEnd() { setPhase('seed'); setAnnouncement('Choose your first paint.'); },
+          onIntroEnd() { if(cancelled||epoch!==sceneEpoch.current)return;setPhase('seed'); setAnnouncement('Choose your first paint.'); },
         },{paints:PLAY_LEVELS[levelIndex].paints,revealPalette:lastRevealedPalette.current!==levelIndex});
         lastRevealedPalette.current=levelIndex;
         scene.current = mounted; setError(false); setReady(true);
@@ -141,7 +143,9 @@ export default function PlayView() {
     setPhase('flight'); setPours(nextPours);
     setAnnouncement(`Pour ${nextPours}: ${palette[held.index].name}.`);
     if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,shots:[...attemptRef.current.shots,{paint:held.index,seconds,amount,before:[...before],after:[...after],cancelled:false}]});
+    const epoch=sceneEpoch.current;
     scene.current.launch(path, beforeMass, totalMass(after), () => {
+      if(epoch!==sceneEpoch.current)return;
       rollback.current=null;
       const result = mixtureColor(palette, after);
       const landed = colorDistance(result, s.hole.target) <= s.hole.tolerance;
@@ -197,6 +201,7 @@ export default function PlayView() {
   }, [begin, release, cancelCharge, cancelShot]);
 
   const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole, comparison?:LabSpecimen['comparison']) => {
+    sceneEpoch.current++;
     // New target/next on a fixed experiment advances the experiment bank,
     // never asks the ordinary course generator for a lab-only palette.
     if(!exact&&index===levelIndex&&(!same||stage!==hole.stage)){
@@ -214,11 +219,15 @@ export default function PlayView() {
     let next=exact??(same&&index===levelIndex&&stage===hole.stage?{...hole}:generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage));
     if(!exact&&!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
     if(!exact&&!(same&&index===levelIndex&&stage===hole.stage))next=withLiveLanding(next);
-    if(labLive.current.enabled&&sync.signedIn){
+    if(labLive.current.enabled){
       const previous=attemptRef.current;
       if(previous&&previous.outcome==='playing')record({...previous,outcome:previous.specimen.hole.courseId===next.courseId?'replayed':'left'});
-      record(newLabAttempt({levelIndex:index,hole:next,...(comparison?{comparison}:{})},crypto.randomUUID()));
+      if(sync.signedIn)record(newLabAttempt({levelIndex:index,hole:next,...(comparison?{comparison}:{})},crypto.randomUUID()));
+      else {attemptRef.current=null;setAttempt(null);}
     }
+    // Navigation is allowed during a shot/charge. Block stale input before
+    // React installs the new scene, and never attach it to the previous attempt.
+    live.current={...live.current,levelIndex:index,hole:next,quantities:PLAY_LEVELS[index].paints.map(()=>0),phase:'intro',ready:false,pours:0,selected:0,help:false,error:false};
     setHole(next);
     setAnnouncement(`Hole ${labHoleProgress(next)}. Arriving in color space.`);
   };
@@ -304,7 +313,7 @@ export default function PlayView() {
       <PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />
       <div className="play-upper-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button><button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button></div>
     </div>
-    <div className="play-lab-bar"><button type="button" aria-pressed={lab} onClick={toggleLab} disabled={phase==='flight'}>{lab?'Return to course':'Hole Lab'}</button>{lab&&<><LabPicker current={{levelIndex,hole}} disabled={phase==='flight'||!sync.signedIn} onChoose={replaySpecimen}/><button type="button" disabled={phase==='flight'||!sync.signedIn} onClick={()=>startHole(levelIndex,true)}>Replay hole</button></>}</div>
+    <div className="play-lab-bar"><button type="button" aria-pressed={lab} onClick={toggleLab}>{lab?'Return to course':'Hole Lab'}</button>{lab&&<><LabPicker current={{levelIndex,hole}} onChoose={replaySpecimen}/><button type="button" onClick={()=>startHole(levelIndex,true)}>Replay hole</button></>}</div>
     <div className="play-world">
       <div className="play-canvas" ref={host} /><div className="play-world-vignette" />
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>

@@ -97,34 +97,34 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
   </form>;
 }
 
-export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;disabled:boolean}) {
- const {current,onChoose,disabled}=props;
+export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
+ const {current,onChoose}=props;
  const [view,setView]=useState('campaign'),[selected,setSelected]=useState(()=>Math.max(0,CAMPAIGN_CHAPTERS.findIndex(c=>c.levelIndex===current.levelIndex)));
  const chapter=CAMPAIGN_CHAPTERS[selected],playable=chapter.slots.filter(s=>s.specimen),at=playable.findIndex(s=>s.id===current.hole.courseId||s.alternatives?.some(a=>a.id===current.hole.courseId));
  const choose=(id:string)=>{const match=campaignForHole(id);if(match?.chapter.id===chapter.id&&match.slot.specimen)onChoose(structuredClone(match.slot.specimen));};
  return <div className="lab-campaign-picker"><label>Test collection<select value={view} onChange={e=>setView(e.target.value)}><option value="campaign">Campaign · one palette at a time</option><option value="archive">Earlier lab rounds</option></select></label>
  {view==='archive'?<LegacyLabPicker {...props}/>:<>
-  <label>Campaign palette<select value={selected} disabled={disabled} onChange={e=>{const i=Number(e.target.value);setSelected(i);const first=CAMPAIGN_CHAPTERS[i].slots.find(s=>s.specimen);if(first?.specimen)onChoose(structuredClone(first.specimen));}}>{CAMPAIGN_CHAPTERS.map((c,i)=><option key={c.id} value={i}>{i+1}. {c.name} · {c.slots.filter(s=>s.specimen).length}/{c.slots.length} candidates</option>)}</select></label>
-  <label>Hole in this palette<select disabled={disabled||!playable.length} value={at<0?'':playable[at].id} onChange={e=>choose(e.target.value)}>{at<0&&<option value="">Choose a candidate…</option>}{chapter.slots.map((s,i)=><option key={s.id} value={s.id} disabled={!s.specimen}>{i+1}. {s.title}{s.specimen?` · ${s.specimen.hole.notation}`:' · Still to find'}</option>)}</select></label>
-  {at>=0&&!!playable[at].alternatives?.length&&<label>Candidate version<select disabled={disabled} value={current.hole.courseId} onChange={e=>choose(e.target.value)}><option value={playable[at].id}>Primary · {playable[at].specimen!.hole.notation}</option>{playable[at].alternatives!.map((a,i)=><option key={a.id} value={a.id}>Alternative {i+1} · {a.specimen.hole.notation}</option>)}</select></label>}
-  {playable.length>0&&<button type="button" disabled={disabled} onClick={()=>choose(playable[at>=0&&at<playable.length-1?at+1:0].id)}>{at<0?'Start this palette':at<playable.length-1?'Next candidate →':'Replay palette'}</button>}
+  <label>Campaign palette<select value={selected} onChange={e=>{const i=Number(e.target.value);setSelected(i);const first=CAMPAIGN_CHAPTERS[i].slots.find(s=>s.specimen);if(first?.specimen)onChoose(structuredClone(first.specimen));}}>{CAMPAIGN_CHAPTERS.map((c,i)=><option key={c.id} value={i}>{i+1}. {c.name} · {c.slots.filter(s=>s.specimen).length}/{c.slots.length} candidates</option>)}</select></label>
+  <label>Hole in this palette<select disabled={!playable.length} value={at<0?'':playable[at].id} onChange={e=>choose(e.target.value)}>{at<0&&<option value="">Choose a candidate…</option>}{chapter.slots.map((s,i)=><option key={s.id} value={s.id} disabled={!s.specimen}>{i+1}. {s.title}{s.specimen?` · ${s.specimen.hole.notation}`:' · Still to find'}</option>)}</select></label>
+  {at>=0&&!!playable[at].alternatives?.length&&<label>Candidate version<select value={current.hole.courseId} onChange={e=>choose(e.target.value)}><option value={playable[at].id}>Primary · {playable[at].specimen!.hole.notation}</option>{playable[at].alternatives!.map((a,i)=><option key={a.id} value={a.id}>Alternative {i+1} · {a.specimen.hole.notation}</option>)}</select></label>}
+  {playable.length>0&&<button type="button" onClick={()=>choose(playable[at>=0&&at<playable.length-1?at+1:0].id)}>{at<0?'Start this palette':at<playable.length-1?'Next candidate →':'Replay palette'}</button>}
   <p className="lab-muted">{!playable.length?`No ${chapter.name} candidate is ready yet. The game below remains on your previous hole.`:at>=0?campaignForHole(current.hole.courseId)?.slot.note:'Review this palette on its own.'} Free base choice. Alternatives compare the same slot; next advances to the next primary. No unlock requirements or changes to existing pars.</p>
   <details><summary>Planned sequence · {chapter.name}</summary><ol>{chapter.slots.map(s=><li key={s.id}><strong>{s.title}</strong> — {s.specimen?'Ready to test':'Still to find'}. {s.note}</li>)}</ol></details>
  </>}
  </div>;
 }
 
-function LegacyLabPicker({current,onChoose,disabled}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;disabled:boolean}) {
+function LegacyLabPicker({current,onChoose}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
   const tests=LAB_GROUPS.flatMap(g=>g.items);
   const choose=(s:LabSpecimen)=>onChoose({...s,hole:withLiveLanding(s.hole)});
   const index=tests.findIndex(s=>s.hole.courseId===current.hole.courseId&&s.levelIndex===current.levelIndex);
   const experiment=designLabBank.holes.find(h=>h.record.id===current.hole.courseId);
   const focused=focusedLabBank.holes.find(h=>h.record.id===current.hole.courseId);
   const directed=directedForHole(current.hole.courseId);
-  return <><label className="lab-picker">Route & palette lab<select disabled={disabled} value={index} onChange={e=>choose(tests[Number(e.target.value)])}>
+  return <><label className="lab-picker">Route & palette lab<select value={index} onChange={e=>choose(tests[Number(e.target.value)])}>
     {index<0&&<option value={-1}>Current course hole · {PLAY_LEVELS[current.levelIndex].name}</option>}
     {LAB_GROUPS.map((group,j)=><optgroup key={group.name} label={group.name}>{group.items.map((s,i)=><option key={s.hole.courseId} value={LAB_GROUPS.slice(0,j).reduce((n,g)=>n+g.items.length,0)+i}>{String(i+1).padStart(2,'0')} · {PLAY_LEVELS[s.levelIndex].name} · {directedForHole(s.hole.courseId)?.label??s.hole.kind.replaceAll('-',' ')}{directedForHole(s.hole.courseId)?` · ${directedForHole(s.hole.courseId)!.emphasis==='experience'?'Experience':'Start flexibility'}`:''} · {s.hole.notation}</option>)}</optgroup>)}
-  </select></label>{index<tests.length-1&&<button type="button" disabled={disabled} onClick={()=>choose(tests[index+1])}>{index<0?'Start round 9':'Next test →'}</button>}{directed?<p className="lab-muted"><strong>{directed.label} · {directed.emphasis==='experience'?'Experience-led candidate':'Starting-flexibility candidate'}.</strong> {directed.brief} Choose your base freely. Review reveals the intended route and competing shortcuts.</p>:focused?<p className="lab-muted"><strong>{focused.coverage.styleBases.length}/{focused.coverage.total} starts support this style.</strong> {focused.brief} All starts meet route-support checks; choose your base freely.</p>:experiment&&<p className="lab-muted">{experiment.reference?'Reference · ':''}{experiment.brief} Free base choice; the brief is not an instruction to take a particular route.</p>}</>;
+  </select></label>{index<tests.length-1&&<button type="button" onClick={()=>choose(tests[index+1])}>{index<0?'Start round 9':'Next test →'}</button>}{directed?<p className="lab-muted"><strong>{directed.label} · {directed.emphasis==='experience'?'Experience-led candidate':'Starting-flexibility candidate'}.</strong> {directed.brief} Choose your base freely. Review reveals the intended route and competing shortcuts.</p>:focused?<p className="lab-muted"><strong>{focused.coverage.styleBases.length}/{focused.coverage.total} starts support this style.</strong> {focused.brief} All starts meet route-support checks; choose your base freely.</p>:experiment&&<p className="lab-muted">{experiment.reference?'Reference · ':''}{experiment.brief} Free base choice; the brief is not an instruction to take a particular route.</p>}</>;
 }
 
 export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<typeof usePlayLabSync>;current:LabAttempt|null;onReplay:(specimen:LabSpecimen)=>void;onReveal:()=>void}) {
