@@ -1,0 +1,2751 @@
+{
+  "policy": {
+    "version": "finish-profile-1",
+    "valueAlignment": 0.8,
+    "relativeToSetup": 0.8
+  },
+  "holes": [
+    {
+      "id": "lab-9-24-0-5e2d38157f76",
+      "palette": "Teal Ember",
+      "intent": "Interior · known-good reference",
+      "featured": {
+        "kind": "no-setup-finish",
+        "valueLed": false,
+        "valueMovement": false,
+        "direction": null,
+        "deltaL": 0,
+        "hueChroma": 0,
+        "valueAlignment": 0,
+        "largestSetupShift": 0,
+        "relativeToSetup": 0,
+        "reasons": [
+          "No substantial value finish after setup."
+        ]
+      },
+      "bases": [
+        {
+          "base": 0,
+          "name": "Quinacridone Magenta",
+          "retained": 9,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "times": [
+                0.5748725967272184,
+                0.4539542613294908,
+                0.5136794834840113
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "times": [
+                0.5732453437824732,
+                0.450590159452986,
+                0.5184878694661893
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "times": [
+                0.5742528057319466,
+                0.45026374469482344,
+                0.5182021824226292
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3,
+                2
+              ],
+              "times": [
+                0.5742528057319466,
+                0.571450517934427,
+                0.38408110000317514
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.5425487090800005,
+                0.48495206122347384,
+                0.5182021824226292
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                3,
+                1
+              ],
+              "times": [
+                0.5425487090800005,
+                0.584327353131338,
+                0.4085876516356391
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "times": [
+                0.70193396103623,
+                0.43791434862464945,
+                0.38408110000317514
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                3,
+                1,
+                2
+              ],
+              "times": [
+                0.7300835991813802,
+                0.4310955247399397,
+                0.37797026115236804
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                3,
+                2,
+                1
+              ],
+              "times": [
+                0.70193396103623,
+                0.4156191490538488,
+                0.4085876516356391
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 1,
+          "name": "Cobalt Teal",
+          "retained": 6,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                1,
+                0,
+                2,
+                3
+              ],
+              "times": [
+                0.5675685017577016,
+                0.44977679861760395,
+                0.517617445982295
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                0,
+                3,
+                2
+              ],
+              "times": [
+                0.5675685017577016,
+                0.5707817392576914,
+                0.3836802274257941
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0,
+                3
+              ],
+              "times": [
+                0.5394469312097769,
+                0.4806063193228772,
+                0.517617445982295
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                3,
+                0
+              ],
+              "times": [
+                0.5394469312097769,
+                0.5821536481788775,
+                0.4055294336149811
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                3,
+                0,
+                2
+              ],
+              "times": [
+                0.6974135796391657,
+                0.43442247619916763,
+                0.3836802274257941
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                3,
+                2,
+                0
+              ],
+              "times": [
+                0.6974135796391657,
+                0.41453658045056657,
+                0.40552943361498084
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 2,
+          "name": "Permanent Orange",
+          "retained": 8,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                2,
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.6013721017248237,
+                0.4896924682026278,
+                0.5233791425350499
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                3,
+                1
+              ],
+              "times": [
+                0.6013721017248237,
+                0.5904427301852813,
+                0.41240560470308346
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0,
+                3
+              ],
+              "times": [
+                0.6049866493667413,
+                0.4858281841095464,
+                0.5233791425350499
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "times": [
+                0.6046393033559433,
+                0.5888835646980441,
+                0.410337775030639
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3,
+                0
+              ],
+              "times": [
+                0.6049866493667413,
+                0.5889345141824877,
+                0.40974586725758966
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                3,
+                0,
+                1
+              ],
+              "times": [
+                0.7437550110008518,
+                0.44549827299127037,
+                0.41240560470308346
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                3,
+                1,
+                0
+              ],
+              "times": [
+                0.7437550110008518,
+                0.44791037253828786,
+                0.40974586725758966
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.6040876197512262,
+                0.5244501727097668,
+                0.5168197375326418
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 3,
+          "name": "King’s Blue",
+          "retained": 6,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                3,
+                0,
+                1,
+                2
+              ],
+              "times": [
+                0.4719100850059485,
+                0.4224164524751148,
+                0.3708462502651157
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                3,
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.4719100850059485,
+                0.40108047000387415,
+                0.3943450319322424
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                3,
+                1,
+                0,
+                2
+              ],
+              "times": [
+                0.47450621175468016,
+                0.4195227619441435,
+                0.3708462502651157
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                3,
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.47450621175468016,
+                0.4004650553143784,
+                0.3918251134553179
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                3,
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.44986066329690927,
+                0.42565209848373836,
+                0.3943450319322424
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                3,
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.44986066329690927,
+                0.4279306924414127,
+                0.3918251134553179
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lab-9-4-0-17c84fce87a9",
+      "palette": "CMY",
+      "intent": "Chromatic ride · warm target",
+      "featured": {
+        "kind": "value-led-finish",
+        "valueLed": true,
+        "valueMovement": true,
+        "direction": "rise",
+        "deltaL": 0.3735652160506021,
+        "hueChroma": 0.19517927760483356,
+        "valueAlignment": 0.8863164518092156,
+        "largestSetupShift": 0.060335260285211356,
+        "relativeToSetup": 6.191490917329578,
+        "reasons": []
+      },
+      "bases": [
+        {
+          "base": 0,
+          "name": "Phthalo Blue (Green Shade)",
+          "retained": 4,
+          "valueLed": true,
+          "valueLedResistant": true,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                2.15380859375,
+                0.8726236979166669
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.35391641036425625,
+                "hueChroma": 0.18926317510140214,
+                "valueAlignment": 0.8818270744819334,
+                "largestSetupShift": 0.08361061029944133,
+                "relativeToSetup": 4.2329126542283,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                1.2820833333333335,
+                0.8097416178385417
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.3491408010149321,
+                "hueChroma": 0.18517943695580039,
+                "valueAlignment": 0.8834317156728579,
+                "largestSetupShift": 0.07074666761079951,
+                "relativeToSetup": 4.935084758135458,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                1.4220833333333338,
+                0.8177100830078124
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.34349243412558167,
+                "hueChroma": 0.18318345832344785,
+                "valueAlignment": 0.8823662807175343,
+                "largestSetupShift": 0.07633533456940689,
+                "relativeToSetup": 4.499782912633543,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                1.120773547256831,
+                0.8266972419495583
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.3735652160506021,
+                "hueChroma": 0.19517927760483356,
+                "valueAlignment": 0.8863164518092156,
+                "largestSetupShift": 0.060335260285211356,
+                "relativeToSetup": 6.191490917329578,
+                "reasons": []
+              }
+            }
+          ]
+        },
+        {
+          "base": 1,
+          "name": "Quinacridone Magenta",
+          "retained": 2,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                1,
+                2
+              ],
+              "times": [
+                0.7543701171875
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2
+              ],
+              "times": [
+                0.7089843750000001
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 2,
+          "name": "Hansa Yellow Light",
+          "retained": 0,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": []
+        }
+      ]
+    },
+    {
+      "id": "lab-9-29-0-b83acde81b54",
+      "palette": "Sienna Field",
+      "intent": "Value shift · muted triad",
+      "featured": {
+        "kind": "value-led-finish",
+        "valueLed": true,
+        "valueMovement": true,
+        "direction": "rise",
+        "deltaL": 0.22206574305267796,
+        "hueChroma": 0.04101322373929875,
+        "valueAlignment": 0.9833691560230379,
+        "largestSetupShift": 0.13890150091533054,
+        "relativeToSetup": 1.5987281749247721,
+        "reasons": []
+      },
+      "bases": [
+        {
+          "base": 0,
+          "name": "Burnt Sienna",
+          "retained": 8,
+          "valueLed": true,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                0.6456698024127032,
+                0.4125565163299516
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                0.6416666666666668,
+                0.37032035319010426
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.527083333333333,
+                0.5729166666666669
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.23923345532273477,
+                "hueChroma": 0.04624033272566455,
+                "valueAlignment": 0.9818279913177084,
+                "largestSetupShift": 0.026714118107620366,
+                "relativeToSetup": 8.955319219558739,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.48125000000000007,
+                0.527083333333333
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.2100635307296309,
+                "hueChroma": 0.034420487253421554,
+                "valueAlignment": 0.9868397798353978,
+                "largestSetupShift": 0.010611134614609163,
+                "relativeToSetup": 19.796519256331017,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.5188186759499974,
+                0.5499036493118383
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.22206574305267746,
+                "hueChroma": 0.041013223739298645,
+                "valueAlignment": 0.983369156023038,
+                "largestSetupShift": 0.023504375990037518,
+                "relativeToSetup": 9.447846781671696,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.5487500000000002,
+                0.5256375756305751
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.1900529629794792,
+                "hueChroma": 0.0364271373202748,
+                "valueAlignment": 0.9821227067668978,
+                "largestSetupShift": 0.03554756456469704,
+                "relativeToSetup": 5.34644117837047,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.5729166666666669,
+                0.5729166666666669
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.22244686590979101,
+                "hueChroma": 0.04726814342693528,
+                "valueAlignment": 0.9781604741053085,
+                "largestSetupShift": 0.04581432452734946,
+                "relativeToSetup": 4.855399882126353,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                2
+              ],
+              "times": [
+                0.61875,
+                0.36666666666666664
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 1,
+          "name": "Nickel Titanate Yellow",
+          "retained": 9,
+          "valueLed": true,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                1,
+                0,
+                2
+              ],
+              "times": [
+                0.5079447489159652,
+                0.40353507647058007
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                0,
+                2
+              ],
+              "times": [
+                0.5041666666666669,
+                0.36666666666666664
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                0,
+                2
+              ],
+              "times": [
+                0.5077603073396557,
+                0.4037247614281178
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                0,
+                2
+              ],
+              "times": [
+                0.527083333333333,
+                0.35842248535156257
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.4631342381354126,
+                0.4534288477407012
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10228516584571201,
+                "hueChroma": 0.05951532953531478,
+                "valueAlignment": 0.8643337906783777,
+                "largestSetupShift": 0.08069908143177862,
+                "relativeToSetup": 1.2674886012448832,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.45797526041666664,
+                0.45546875000000003
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10421345765277534,
+                "hueChroma": 0.06051691606236678,
+                "valueAlignment": 0.8647677720550765,
+                "largestSetupShift": 0.07774906090300693,
+                "relativeToSetup": 1.3403822045231277,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.4701497395833332,
+                0.4504557291666666
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.4583333333333332,
+                0.4316121255265
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.48250000000000015,
+                0.42211536017375145
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 2,
+          "name": "Cobalt Green",
+          "retained": 15,
+          "valueLed": true,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.6306404485506937,
+                0.5606048162269871
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.22206574305267796,
+                "hueChroma": 0.04101322373929875,
+                "valueAlignment": 0.9833691560230379,
+                "largestSetupShift": 0.13890150091533054,
+                "relativeToSetup": 1.5987281749247721,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.5954752604166669,
+                0.5521484375000001
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.21053498541784488,
+                "hueChroma": 0.041348912319731576,
+                "valueAlignment": 0.9812542625744194,
+                "largestSetupShift": 0.12728845281948808,
+                "relativeToSetup": 1.6539990922539645,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7178133574766312,
+                0.4721534859090942
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10228516584571223,
+                "hueChroma": 0.05951532953531518,
+                "valueAlignment": 0.8643337906783766,
+                "largestSetupShift": 0.18544940798305964,
+                "relativeToSetup": 0.5515529381202217,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.6633333333333333,
+                0.4728728820983046
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10619751688213841,
+                "hueChroma": 0.0613112556846424,
+                "valueAlignment": 0.8660321457044262,
+                "largestSetupShift": 0.16648170006649654,
+                "relativeToSetup": 0.6378930347282659,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.71005859375,
+                0.46943359375000004
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10061068473307877,
+                "hueChroma": 0.058624742837565566,
+                "valueAlignment": 0.8640210896818626,
+                "largestSetupShift": 0.18301938291831132,
+                "relativeToSetup": 0.5497269367255229,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7104166666666667,
+                0.4443814564186173
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.6633333333333333,
+                0.4298102743849626
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.6871419270833334,
+                0.4611979166666666
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7566080729166669,
+                0.48483072916666664
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.10978392207180576,
+                "hueChroma": 0.06325236374980883,
+                "valueAlignment": 0.8664741683700067,
+                "largestSetupShift": 0.19640478374963544,
+                "relativeToSetup": 0.5589676584036337,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7779166666666668,
+                0.5126664451952812
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.13102312384587966,
+                "hueChroma": 0.07349394734992988,
+                "valueAlignment": 0.8721624382982656,
+                "largestSetupShift": 0.2016460460990228,
+                "relativeToSetup": 0.6497678798102385,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7795247395833332,
+                0.4916341145833332
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.1135896170645937,
+                "hueChroma": 0.06495280989941818,
+                "valueAlignment": 0.8680967461113233,
+                "largestSetupShift": 0.20202118796427992,
+                "relativeToSetup": 0.5622658603743973,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.61875,
+                0.5347652417329243
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.19746669358430508,
+                "hueChroma": 0.03607328617621174,
+                "valueAlignment": 0.983720294966522,
+                "largestSetupShift": 0.1352941625124276,
+                "relativeToSetup": 1.459535946838553,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.5716666666666668,
+                0.5260795495164138
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.1832095726242275,
+                "hueChroma": 0.03694655568445599,
+                "valueAlignment": 0.9802659639748852,
+                "largestSetupShift": 0.11778601810936945,
+                "relativeToSetup": 1.5554441483377885,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.5716666666666668,
+                0.5473725292070653
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "rise",
+                "deltaL": 0.20224622053608793,
+                "hueChroma": 0.04172311720864856,
+                "valueAlignment": 0.9793764427477022,
+                "largestSetupShift": 0.11778601810936945,
+                "relativeToSetup": 1.7170647567718393,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.7779166666666668,
+                0.469054053502374
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lab-9-30-0-3baaea8d7013",
+      "palette": "Maroon Arc",
+      "intent": "Chromatic ride · three-start opportunity",
+      "featured": {
+        "kind": "coupled-or-earlier-shift",
+        "valueLed": false,
+        "valueMovement": true,
+        "direction": "drop",
+        "deltaL": -0.416135029580128,
+        "hueChroma": 0.16516816828308212,
+        "valueAlignment": 0.9294637388957562,
+        "largestSetupShift": 0.5684682081834547,
+        "relativeToSetup": 0.7320286756402636,
+        "reasons": [
+          "An earlier stroke carries the larger lightness change."
+        ]
+      },
+      "bases": [
+        {
+          "base": 0,
+          "name": "Perylene Maroon",
+          "retained": 7,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                2.2,
+                1.2833333333333337
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.416135029580128,
+                "hueChroma": 0.16516816828308212,
+                "valueAlignment": 0.9294637388957562,
+                "largestSetupShift": 0.5684682081834547,
+                "relativeToSetup": 0.7320286756402636,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                1.0983892967761495,
+                1.0345264259415987
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.36283908498025363,
+                "hueChroma": 0.15098077816243216,
+                "valueAlignment": 0.9232594604582052,
+                "largestSetupShift": 0.5374419251944001,
+                "relativeToSetup": 0.6751224048049652,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                1.4425000000000001,
+                1.0421443684895833
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.36910363184810824,
+                "hueChroma": 0.14761585907664482,
+                "valueAlignment": 0.9284988899695577,
+                "largestSetupShift": 0.5609063269927194,
+                "relativeToSetup": 0.6580486154025844,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.6658333333333333,
+                0.735409708658854
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.20332120018482736,
+                "hueChroma": 0.13941081870265193,
+                "valueAlignment": 0.8247466976677523,
+                "largestSetupShift": 0.39327130287979384,
+                "relativeToSetup": 0.5169998387778981,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.5958333333333332,
+                0.6645833333333334
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.15653187404504654,
+                "hueChroma": 0.13407683504856976,
+                "valueAlignment": 0.7594803391397915,
+                "largestSetupShift": 0.33572110089366913,
+                "relativeToSetup": 0.46625569149025253,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.6658333333333333,
+                0.8320432942708336
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.23823260488962705,
+                "hueChroma": 0.14894647091665195,
+                "valueAlignment": 0.8479165638048004,
+                "largestSetupShift": 0.39327130287979384,
+                "relativeToSetup": 0.6057716470668711,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                1,
+                3
+              ],
+              "times": [
+                0.6687639860878698,
+                0.7816770931751168
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.22227759447696965,
+                "hueChroma": 0.14407524270542812,
+                "valueAlignment": 0.8391419046777566,
+                "largestSetupShift": 0.3953630841617435,
+                "relativeToSetup": 0.5622113024240666,
+                "reasons": [
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 1,
+          "name": "Hansa Yellow Light",
+          "retained": 2,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": [
+            {
+              "order": [
+                1,
+                3
+              ],
+              "times": [
+                0.9636605412028444
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                3
+              ],
+              "times": [
+                0.893682861328125
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 2,
+          "name": "Raw Sienna",
+          "retained": 7,
+          "valueLed": true,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                2.2,
+                1.2833333333333337
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.4363214960086247,
+                "hueChroma": 0.16879662118793698,
+                "valueAlignment": 0.9326414939280776,
+                "largestSetupShift": 0.32908130706757444,
+                "relativeToSetup": 1.3258774857091147,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                1.3966666666666667,
+                1.0416484374999995
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.3955340801881956,
+                "hueChroma": 0.15092717659618593,
+                "valueAlignment": 0.9342930864382237,
+                "largestSetupShift": 0.32713659393436423,
+                "relativeToSetup": 1.2090792883524197,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.9352864583333332,
+                0.9854166666666667
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.39995488663990975,
+                "hueChroma": 0.15435437286603965,
+                "valueAlignment": 0.9329342405661973,
+                "largestSetupShift": 0.3143557959992328,
+                "relativeToSetup": 1.2723000235086674,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.4137499999999999,
+                0.6342465006510416
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.2064823186859458,
+                "hueChroma": 0.12234859300201892,
+                "valueAlignment": 0.8603121811176371,
+                "largestSetupShift": 0.1009022819646801,
+                "relativeToSetup": 2.046359256356789,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.4012186735984869,
+                0.5896831139796417
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.17923316710775394,
+                "hueChroma": 0.1148661130897777,
+                "valueAlignment": 0.8419366355062963,
+                "largestSetupShift": 0.08920265953721784,
+                "relativeToSetup": 2.0092805308453037,
+                "reasons": []
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.3822795290090621,
+                0.5652575011109003
+              ],
+              "finish": {
+                "kind": "no-setup-finish",
+                "valueLed": false,
+                "valueMovement": false,
+                "direction": null,
+                "deltaL": 0,
+                "hueChroma": 0,
+                "valueAlignment": 0,
+                "largestSetupShift": 0,
+                "relativeToSetup": 0,
+                "reasons": [
+                  "No substantial value finish after setup."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                3
+              ],
+              "times": [
+                0.7392516393284314,
+                0.883361062288145
+              ],
+              "finish": {
+                "kind": "value-led-finish",
+                "valueLed": true,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.37539705384464594,
+                "hueChroma": 0.14858610801680128,
+                "valueAlignment": 0.9298138678069725,
+                "largestSetupShift": 0.2898170809634557,
+                "relativeToSetup": 1.2952896102489604,
+                "reasons": []
+              }
+            }
+          ]
+        },
+        {
+          "base": 3,
+          "name": "Cobalt Blue",
+          "retained": 0,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": false,
+          "routes": []
+        }
+      ]
+    },
+    {
+      "id": "lab-9-4-1-f7becfb04cea",
+      "palette": "CMY",
+      "intent": "Value shift · same palette, new problem",
+      "featured": {
+        "kind": "coupled-or-earlier-shift",
+        "valueLed": false,
+        "valueMovement": true,
+        "direction": "drop",
+        "deltaL": -0.12967949008699398,
+        "hueChroma": 0.1241260698468024,
+        "valueAlignment": 0.7224057990583816,
+        "largestSetupShift": 0.30366538744269034,
+        "relativeToSetup": 0.4270473206679438,
+        "reasons": [
+          "Finish couples lightness with substantial hue/chroma movement.",
+          "An earlier stroke carries the larger lightness change."
+        ]
+      },
+      "bases": [
+        {
+          "base": 0,
+          "name": "Phthalo Blue (Green Shade)",
+          "retained": 2,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.6102917446383959,
+                0.5085901925149897
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.13399694576289262,
+                "hueChroma": 0.1178716675137803,
+                "valueAlignment": 0.7508403484929854,
+                "largestSetupShift": 0.30623919874592204,
+                "relativeToSetup": 0.4375564797440124,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                0,
+                2,
+                1
+              ],
+              "times": [
+                0.5945833333333334,
+                0.4751215088186015
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.1085522029191433,
+                "hueChroma": 0.0945195103456769,
+                "valueAlignment": 0.7541709029218052,
+                "largestSetupShift": 0.2909628865605321,
+                "relativeToSetup": 0.3730792067756038,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 1,
+          "name": "Quinacridone Magenta",
+          "retained": 5,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.5500514947950751,
+                0.4360335811236565
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12952441643643436,
+                "hueChroma": 0.12400919944958433,
+                "valueAlignment": 0.7223178706868759,
+                "largestSetupShift": 0.1946529791537892,
+                "relativeToSetup": 0.6654119397479202,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.55,
+                0.41163346354166674
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.1131316284498678,
+                "hueChroma": 0.10994523350925674,
+                "valueAlignment": 0.7171338296233942,
+                "largestSetupShift": 0.19460806725575208,
+                "relativeToSetup": 0.5813306202830291,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.5499521440151148,
+                0.4361492679528493
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12959839113187543,
+                "hueChroma": 0.12407259172391753,
+                "valueAlignment": 0.7223385640293731,
+                "largestSetupShift": 0.19456632553259523,
+                "relativeToSetup": 0.6660884959261059,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.5729166666666669,
+                0.48125000000000007
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.1594727147751243,
+                "hueChroma": 0.14439727908284553,
+                "valueAlignment": 0.7412756954407441,
+                "largestSetupShift": 0.21418851521746485,
+                "relativeToSetup": 0.7445437240797539,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                1,
+                2,
+                0
+              ],
+              "times": [
+                0.5729166666666669,
+                0.43541666666666684
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12934084703607251,
+                "hueChroma": 0.12319489027051461,
+                "valueAlignment": 0.7241012169210235,
+                "largestSetupShift": 0.21418851521746485,
+                "relativeToSetup": 0.6038645298266959,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "base": 2,
+          "name": "Hansa Yellow Light",
+          "retained": 8,
+          "valueLed": false,
+          "valueLedResistant": false,
+          "movement": true,
+          "routes": [
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.5349609375000001,
+                0.5023763020833332
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.13409984865018615,
+                "hueChroma": 0.11797087256362698,
+                "valueAlignment": 0.7508162315625126,
+                "largestSetupShift": 0.29950777448890586,
+                "relativeToSetup": 0.44773411601425184,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.527083333333333,
+                0.48125000000000007
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12348790756224726,
+                "hueChroma": 0.10687812224938718,
+                "valueAlignment": 0.756127515198573,
+                "largestSetupShift": 0.2904434384340856,
+                "relativeToSetup": 0.4251702439140215,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.5349857182554826,
+                0.502228834768204
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.13399694576289273,
+                "hueChroma": 0.1178716675137808,
+                "valueAlignment": 0.7508403484929843,
+                "largestSetupShift": 0.29953610179411805,
+                "relativeToSetup": 0.4473482326847989,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                0,
+                1
+              ],
+              "times": [
+                0.55,
+                0.48125000000000007
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.11438370415072324,
+                "hueChroma": 0.10025268717194534,
+                "valueAlignment": 0.752032488989455,
+                "largestSetupShift": 0.31646417516078074,
+                "relativeToSetup": 0.36144282079515067,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.592432882395727,
+                0.43921087590279073
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12967949008699398,
+                "hueChroma": 0.1241260698468024,
+                "valueAlignment": 0.7224057990583816,
+                "largestSetupShift": 0.30366538744269034,
+                "relativeToSetup": 0.4270473206679438,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.5958333333333332,
+                0.41250000000000003
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.11158022318960659,
+                "hueChroma": 0.1085618821482773,
+                "valueAlignment": 0.7167344687517992,
+                "largestSetupShift": 0.30632372245100226,
+                "relativeToSetup": 0.3642558999244804,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.5928698865787229,
+                0.4390422662169437
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.12952441643643448,
+                "hueChroma": 0.12400919944958408,
+                "valueAlignment": 0.7223178706868768,
+                "largestSetupShift": 0.3040086311205764,
+                "relativeToSetup": 0.42605506284149636,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            },
+            {
+              "order": [
+                2,
+                1,
+                0
+              ],
+              "times": [
+                0.61875,
+                0.40752571004738253
+              ],
+              "finish": {
+                "kind": "coupled-or-earlier-shift",
+                "valueLed": false,
+                "valueMovement": true,
+                "direction": "drop",
+                "deltaL": -0.1064314993130645,
+                "hueChroma": 0.10376220534610281,
+                "valueAlignment": 0.7160287439696045,
+                "largestSetupShift": 0.3234876700096353,
+                "relativeToSetup": 0.3290125379736865,
+                "reasons": [
+                  "Finish couples lightness with substantial hue/chroma movement.",
+                  "An earlier stroke carries the larger lightness change."
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

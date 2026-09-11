@@ -5,9 +5,10 @@ import {searchAuditRoutes} from './play-route-audit';
 import {measureDesignRoute,type DesignRoute} from './play-route-design';
 import {measureSetup} from './play-route-analysis';
 import {experienceSupported,EXPERIENCE_POLICY} from './play-experience-audit';
+import {finishProfile,FINISH_PROFILE_POLICY} from './play-finish-profile';
 
-export const JOURNEY_POLICY=Object.freeze({...EXPERIENCE_POLICY,version:'journeys-1',
-  journeyVersion:'journeys-1',cleanupFraction:.35,finishDominance:.25,closeTolerances:3,
+export const JOURNEY_POLICY=Object.freeze({...EXPERIENCE_POLICY,version:'journeys-2-value-led',finishProfile:FINISH_PROFILE_POLICY,
+  journeyVersion:'journeys-2-value-led',cleanupFraction:.35,finishDominance:.25,closeTolerances:3,
   excursionTolerances:.5,excessTravel:6,specialistFraction:2/3,routeSeparation:.05,targetSeparation:2});
 export type JourneyStyle='interior'|'ride'|'value-shift'|'balance';
 const d=(a:readonly number[],b:readonly number[])=>Math.hypot(...a.map((v,i)=>v-b[i]));
@@ -68,8 +69,9 @@ export function measureJourney(palette:number,r:DesignRoute,target:ColorPoint){
  const fingerprint=Array.from({length:9},(_,i)=>{const at=g.length*i/8;const j=cumulative.findIndex(n=>n>=at);if(j<1)return points[0].lab;const t=(at-cumulative[j-1])/Math.max(1e-12,cumulative[j]-cumulative[j-1]);return points[j].lab.map((v,k)=>points[j-1].lab[k]+t*(v-points[j-1].lab[k]));});
  const ride=r.longestChromaticPour>=36&&r.chromaticFraction>=.8;
  const balance=r.meaningfulPours>=2&&(r.opposedPairs>0||coupled>0);
- return {...r,journey:g,finish,coupled,couplingStrength,fingerprint,
-  traits:{interior:r.times.length===3&&r.meaningfulPours===3,ride,'value-shift':!!finish?.dominant&&r.meaningfulPours>=2,balance}};
+ const valueFinish=finishProfile(strokes,finish,r.meaningfulPours);
+ return {...r,journey:g,finish,valueFinish,coupled,couplingStrength,fingerprint,
+  traits:{interior:r.times.length===3&&r.meaningfulPours===3,ride,'value-shift':valueFinish.valueLed,balance}};
 }
 export type JourneyRoute=ReturnType<typeof measureJourney>;
 export function routeDistance(a:JourneyRoute,b:JourneyRoute){return sum(a.fingerprint.map((p,i)=>d(p,b.fingerprint[i])))/a.fingerprint.length;}
@@ -135,7 +137,11 @@ export function analyzeJourney(palette:number,recipe:number[],atlas=makeAtlas(pa
   minTravel:Math.min(...bases.map(b=>b.approach.minTravel??0))};
 }
 export type JourneyAudit=ReturnType<typeof analyzeJourney>;
+export function requireCurrentValuePolicy(a:{version:string},style:JourneyStyle){
+ if(style==='value-shift'&&a.version!==JOURNEY_POLICY.journeyVersion)throw Error('Archived value-shift labels require remeasurement before current selection.');
+}
 export function rankJourney(a:JourneyAudit,style:JourneyStyle){
+ requireCurrentValuePolicy(a,style);
  const s=a.styles[style];return [Number(!a.failures.length),-a.failures.length,Number(s.eligible),s.available.length/a.bases.length,s.resistant.length/a.bases.length,
   Math.min(60,a.minTravel)];
 }

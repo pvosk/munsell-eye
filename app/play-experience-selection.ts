@@ -1,6 +1,6 @@
 // Selection-only revision. Historical audits, scoring and charge controls stay fixed.
 import {LIVE_LANDING_TOLERANCE,colorDistance,type ColorPoint} from './play-engine';
-import {sampleJourney,rankJourney,compareRank,type JourneyAudit,type JourneyStyle} from './play-journey-analysis';
+import {sampleJourney,rankJourney,compareRank,requireCurrentValuePolicy,type JourneyAudit,type JourneyStyle} from './play-journey-analysis';
 import {experienceSupported} from './play-experience-audit';
 
 export const SELECTION_POLICY={version:'experience-selection-1',focusedFinishMs:[55,125],
@@ -39,6 +39,7 @@ export function setVariety(targets:ColorPoint[]){
 export function selectContrastSet<T extends {id:string;audit:JourneyAudit}>(slots:{style:JourneyStyle;candidates:T[]}[],measure:(c:T)=>ReturnType<typeof measureSelection>){
  const selected:T[]=[],excluded:{id:string;reason:string}[]=[];
  for(const slot of slots){
+  for(const c of slot.candidates)requireCurrentValuePolicy(c.audit,slot.style);
   const ranked=slot.candidates.filter(c=>!c.audit.failures.length&&c.audit.styles[slot.style].eligible)
    .sort((a,b)=>compareRank(selectionRank(a.audit,slot.style,measure(a)),selectionRank(b.audit,slot.style,measure(b)))||a.id.localeCompare(b.id));
   const c=ranked.find(c=>{
