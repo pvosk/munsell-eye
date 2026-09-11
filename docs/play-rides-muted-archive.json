@@ -1,0 +1,7 @@
+{
+  "version": "rides-muted-1",
+  "fullEvidence": "outputs/play-rides-muted-evidence-82c4ffd4bf1a.tar.gz",
+  "sha256": "c1c380fb37b93c7334aaec8ffcbb4ffd5e58a42e22cc52cdc0172f87bd00ffda",
+  "storage": "Full cache archive is local and ignored by Git. Compact outcomes and all 30 dense finalist route sets are tracked in play-rides-muted-results.json.",
+  "publicLab": "Unchanged; these search results are not published as playable holes."
+}
