@@ -1,0 +1,12 @@
+import { cpSync, mkdirSync, copyFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import '../sound-lab/build-synthdefs.mjs';
+const root = fileURLToPath(new URL('../', import.meta.url));
+const dest = root + 'public/sound-lab/runtime';
+mkdirSync(dest, { recursive: true });
+cpSync(root + 'node_modules/supersonic-scsynth/dist', dest, { recursive: true });
+cpSync(root + 'node_modules/supersonic-scsynth-core/workers', dest + '/workers', { recursive: true });
+cpSync(root + 'node_modules/supersonic-scsynth-core/wasm', dest + '/wasm', { recursive: true });
+copyFileSync(root + 'node_modules/supersonic-scsynth/LICENSE', dest + '/LICENSE');
+copyFileSync(root + 'node_modules/supersonic-scsynth-core/LICENSE', dest + '/LICENSE-core');
+console.log('Prepared self-hosted SuperSonic 0.80.0 assets.');

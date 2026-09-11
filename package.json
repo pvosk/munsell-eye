@@ -14,7 +14,8 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "sound-lab:prepare": "node scripts/prepare-sound-lab.mjs"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -22,6 +23,8 @@
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "spectral.js": "^3.0.0",
+    "supersonic-scsynth": "0.80.0",
+    "supersonic-scsynth-core": "0.80.0",
     "three": "^0.180.0"
   },
   "devDependencies": {
