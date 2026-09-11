@@ -1,0 +1,55 @@
+[
+  {
+    "name": "chroma_chime",
+    "nodes": 54,
+    "ugens": [
+      "Control",
+      "Impulse",
+      "BinaryOpUGen",
+      "Decay2",
+      "PinkNoise",
+      "Ringz",
+      "LeakDC",
+      "Pan2",
+      "Out",
+      "Line"
+    ]
+  },
+  {
+    "name": "chroma_field",
+    "nodes": 96,
+    "ugens": [
+      "Control",
+      "Lag",
+      "SinOsc",
+      "BinaryOpUGen",
+      "Pan2",
+      "Out"
+    ]
+  },
+  {
+    "name": "chroma_space",
+    "nodes": 151,
+    "ugens": [
+      "Control",
+      "In",
+      "BinaryOpUGen",
+      "BufFrames",
+      "Phasor",
+      "RecordBuf",
+      "LFNoise1",
+      "Dust",
+      "GrainBuf",
+      "Lag",
+      "SinOsc",
+      "BPF",
+      "CombC",
+      "LPF",
+      "FreeVerb2",
+      "LeakDC",
+      "HPF",
+      "Limiter",
+      "Out"
+    ]
+  }
+]
