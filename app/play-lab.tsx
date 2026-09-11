@@ -108,8 +108,9 @@ export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>v
   <label>Hole in this palette<select disabled={!playable.length} value={at<0?'':playable[at].id} onChange={e=>choose(e.target.value)}>{at<0&&<option value="">Choose a candidate…</option>}{chapter.slots.map((s,i)=><option key={s.id} value={s.id} disabled={!s.specimen}>{i+1}. {s.title}{s.specimen?` · ${s.specimen.hole.notation}`:' · Still to find'}</option>)}</select></label>
   {at>=0&&!!playable[at].alternatives?.length&&<label>Candidate version<select value={current.hole.courseId} onChange={e=>choose(e.target.value)}><option value={playable[at].id}>Primary · {playable[at].specimen!.hole.notation}</option>{playable[at].alternatives!.map((a,i)=><option key={a.id} value={a.id}>Alternative {i+1} · {a.specimen.hole.notation}</option>)}</select></label>}
   {playable.length>0&&<button type="button" onClick={()=>choose(playable[at>=0&&at<playable.length-1?at+1:0].id)}>{at<0?'Start this palette':at<playable.length-1?'Next candidate →':'Replay palette'}</button>}
+  <details><summary>Hole notes & planned sequence · {chapter.name}</summary>
   <p className="lab-muted">{!playable.length?`No ${chapter.name} candidate is ready yet. The game below remains on your previous hole.`:at>=0?campaignForHole(current.hole.courseId)?.slot.note:'Review this palette on its own.'} Free base choice. Alternatives compare the same slot; next advances to the next primary. No unlock requirements or changes to existing pars.</p>
-  <details><summary>Planned sequence · {chapter.name}</summary><ol>{chapter.slots.map(s=><li key={s.id}><strong>{s.title}</strong> — {s.specimen?'Ready to test':'Still to find'}. {s.note}</li>)}</ol></details>
+  <ol>{chapter.slots.map(s=><li key={s.id}><strong>{s.title}</strong> — {s.specimen?'Ready to test':'Still to find'}. {s.note}</li>)}</ol></details>
  </>}
  </div>;
 }

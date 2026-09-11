@@ -248,7 +248,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     width = nextWidth; height = nextHeight;
     renderer.setSize(width, height, false); camera.aspect = width / height; camera.updateProjectionMatrix();
   }
-  const observer = new ResizeObserver(resize); observer.observe(host); resize();
+  let resizePending = true;
+  const observer = new ResizeObserver(() => { resizePending = true; }); observer.observe(host);
   const onContextLost = (event: Event) => { event.preventDefault(); callbacks.onError(); };
   renderer.domElement.addEventListener('webglcontextlost', onContextLost);
 
@@ -353,6 +354,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   }
 
   function render(now: number) {
+    // Resize and draw in the same frame, never clear the buffer between frames.
+    if (resizePending) { resize(); resizePending = false; }
     if (disposed) return;
     const stamp=Number.isFinite(now)?now:performance.now();
     const dt = Math.min(.05, Math.max(0, (stamp - last) / 1000)); last = stamp;

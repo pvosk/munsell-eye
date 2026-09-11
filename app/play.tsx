@@ -67,7 +67,20 @@ export default function PlayView() {
   const lastRevealedPalette=useRef<number|null>(null);
   const charge = useRef<Charge | null>(null);
   const rollback=useRef<{quantities:Mixture;pours:number;phase:Phase}|null>(null);
-  const paintPress = useRef<{ id: number; x: number; y: number; started: number; scroll: number; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
+  const paintPress = useRef<{ id: number; x: number; y: number; started: number; scroll: number; pageScroll: number; axis?: 'x' | 'y'; rail: HTMLElement | null; cancelled: boolean; timer?: ReturnType<typeof setTimeout> } | null>(null);
+  useEffect(() => {
+    const root = host.current?.closest<HTMLElement>('.paint-play');
+    const world = root?.querySelector<HTMLElement>('.play-world');
+    const dock = root?.querySelector<HTMLElement>('.play-dock');
+    if (!root || !world || !dock) return;
+    // Document position is invariant during scrolling; svh ignores browser-bar collapse.
+    const measure = () => root.style.setProperty('--play-overhead', `${Math.ceil(world.getBoundingClientRect().top + window.scrollY + dock.getBoundingClientRect().height + 16)}px`);
+    const observer = new ResizeObserver(measure);
+    [dock, ...root.querySelectorAll('.play-topline, .play-lab-bar'), document.querySelector('header')].forEach(el => { if (el) observer.observe(el); });
+    measure();
+    window.addEventListener('resize', measure);
+    return () => { observer.disconnect(); window.removeEventListener('resize', measure); };
+  }, [lab, levelIndex]);
   const level = PLAY_LEVELS[levelIndex];
   useEffect(()=>{
     if(lab&&sync.signedIn&&!attemptRef.current)record(newLabAttempt({levelIndex,hole},crypto.randomUUID()));
@@ -184,7 +197,7 @@ export default function PlayView() {
   }, []);
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') { cancelCharge(); cancelShot(); setHelp(false); return; }
+      if (event.key === 'Escape') { cancelCharge(); setHelp(false); return; }
       const target = event.target as HTMLElement | null;
       if (target?.matches('input, textarea, select') || target?.isContentEditable || event.ctrlKey || event.metaKey || event.altKey) return;
       const index = Number(event.key) - 1;
@@ -253,13 +266,12 @@ export default function PlayView() {
       if (event.pointerType !== 'touch') event.currentTarget.focus({ preventScroll: true });
       clearTimeout(paintPress.current?.timer);
       const rail = event.currentTarget.closest<HTMLElement>('.play-paints[data-wide=true]');
-      const press = { id: event.pointerId, x: event.clientX, y: event.clientY, started: performance.now(), scroll: rail?.scrollLeft ?? 0, rail, cancelled: false, timer: undefined as ReturnType<typeof setTimeout> | undefined };
+      const press = { id: event.pointerId, x: event.clientX, y: event.clientY, started: performance.now(), scroll: rail?.scrollLeft ?? 0, pageScroll: window.scrollY, rail, cancelled: false, timer: undefined as ReturnType<typeof setTimeout> | undefined };
       paintPress.current = press;
       event.currentTarget.setPointerCapture(event.pointerId);
       setSelected(index);
       if (event.pointerType === 'touch') {
-        // Let native scrolling win before committing to a hold. Moving later
-        // still cancels the pour, even after the charge animation has begun.
+        // A deliberate early swipe scrolls. Once holding, thumb drift is harmless.
         press.timer = setTimeout(() => {
           if (paintPress.current === press && !press.cancelled) begin(index, `pointer:${press.id}`, press.started);
         }, 150);
@@ -267,12 +279,14 @@ export default function PlayView() {
     },
     onPointerMove: (event: PointerEvent<HTMLButtonElement>) => {
       const press = paintPress.current;
-      if (!press || press.id !== event.pointerId) return;
+      if (!press || press.id !== event.pointerId || event.pointerType !== 'touch') return;
       const dx = event.clientX - press.x, dy = event.clientY - press.y;
-      if (Math.hypot(dx,dy) > 8) cancelCharge();
-      if (press.cancelled && event.pointerType === 'mouse' && press.rail && Math.abs(dx) > Math.abs(dy)) {
-        press.rail.scrollLeft = press.scroll - dx;
+      if (!charge.current && !press.cancelled && Math.hypot(dx,dy) > 20) {
+        press.axis = press.rail && Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        cancelCharge();
       }
+      if (press.axis === 'x' && press.rail) press.rail.scrollLeft = press.scroll - dx;
+      if (press.axis === 'y') window.scrollTo({top: press.pageScroll - dy, behavior: 'instant'});
     },
     onPointerUp: (event: PointerEvent<HTMLButtonElement>) => {
       const press = paintPress.current;
@@ -307,7 +321,7 @@ export default function PlayView() {
   const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help || (lab&&!sync.signedIn);
   const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 1.6 ? 'Just Outside the Landing Zone' : 'Choose Your Next Pour';
 
-  return <section className="paint-play" aria-label="Paint mixing game">
+  return <section className="paint-play" data-lab={lab} aria-label="Paint mixing game">
     <div className="play-topline">
       <div className="play-name"><h1>Chroma Glider</h1></div>
       <PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />
@@ -334,7 +348,7 @@ export default function PlayView() {
     <div className="play-dock">
       <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb), '--paint-muted':mutedPaint } as CSSProperties}><i /><b /></div></div></div>
       <div className="play-paints" data-wide={level.paints.length > 4} role="group" aria-label="Paint palette" onScroll={() => { if (paintPress.current) cancelCharge(); }} style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '').replace(' (Yellow Shade)', '')}</span></button>)}</div>
-      <div className="play-control-hint"><span>{phase === 'flight' ? <button type="button" onClick={cancelShot}>Cancel shot · Esc</button> : charged !== null ? 'Release to pour · Escape to cancel' : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
+      <div className="play-control-hint"><span>{phase === 'flight' ? 'Following your pour…' : charged !== null ? <button type="button" onPointerDown={cancelCharge} onClick={cancelCharge}>Cancel charge · Esc</button> : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>
     </div>
     {lab&&<PlayLabPanel key={attempt?.id??'empty'} sync={sync} current={attempt} onReplay={replaySpecimen} onReveal={reveal}/>}

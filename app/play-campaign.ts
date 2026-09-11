@@ -9,6 +9,9 @@ export const CAMPAIGN_CHAPTERS=raw.chapters.map(chapter=>({...chapter,slots:chap
  const added=extra.additions.find(g=>g.slotId===slot.id);
  return added&&!slot.specimen?{...slot,...added.primary,alternatives:added.alternatives}:slot;
 })})) as {id:string;name:string;levelIndex:number;slots:CampaignSlot[]}[];
+// Presentation order only: specimen IDs and saved reviews remain unchanged.
+const zornIndex = CAMPAIGN_CHAPTERS.findIndex(chapter => chapter.name === 'Zorny');
+if (zornIndex > 1) CAMPAIGN_CHAPTERS.splice(1, 0, ...CAMPAIGN_CHAPTERS.splice(zornIndex, 1));
 export function campaignForHole(id:string){
  for(const chapter of CAMPAIGN_CHAPTERS)for(const slot of chapter.slots){
   if(slot.id===id&&slot.specimen)return{chapter,slot};

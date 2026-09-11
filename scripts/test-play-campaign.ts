@@ -8,7 +8,7 @@ import {routeGraphBounds} from '../app/play-lab-graph';
 import original from '../app/generated/play-campaign-lab.json';
 
 test('campaign preserves the requested sequence and fills all 13 gaps',()=>{
- assert.deepEqual(CAMPAIGN_CHAPTERS.map(c=>c.name),['UltraOx Dual','Maroon Drift','Zorny','RYB','Orange Echo','CMY','Secondaries','Sienna Field','Maroon Arc','Teal Ember','French Light','Cobalt Ember']);
+ assert.deepEqual(CAMPAIGN_CHAPTERS.map(c=>c.name),['UltraOx Dual','Zorny','Maroon Drift','RYB','Orange Echo','CMY','Secondaries','Sienna Field','Maroon Arc','Teal Ember','French Light','Cobalt Ember']);
  assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots).filter(s=>s.specimen).length,34);
  assert.equal(CAMPAIGN_CHAPTERS.flatMap(c=>c.slots).length,34);
  assert.equal(CAMPAIGN_CHAPTERS[9].slots.length,2);
