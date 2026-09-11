@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, ribbonChargeSpeed, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
 import { FIELD_POINTS, baseLaunchPath, colorDistance, targetDisplayRadius, type ColorPoint, type Hole, type RGB } from './play-engine';
-import {paletteReveal,revealPosition,planPaletteReveal,PALETTE_REVEAL_SECONDS} from './play-palette-reveal';
+import {paletteReveal,revealPosition,planPaletteReveal,bridgeRevealRange,PALETTE_REVEAL_SECONDS,PALETTE_INTRO_SECONDS} from './play-palette-reveal';
 import type {PaintColor} from './paint-mixing';
 
 type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -28,7 +28,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const reveal=options?.revealPalette?paletteReveal(options.paints):null;
   const paletteGroup=new THREE.Group();scene.add(paletteGroup);
   const paletteSeeds=(reveal?.seeds??[]).map(point=>{
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(4.8,28,20),new THREE.MeshBasicMaterial({color:color(point.rgb),transparent:true}));
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(3.3,28,20),new THREE.MeshBasicMaterial({color:color(point.rgb),transparent:true}));
     mesh.position.copy(v3(point));paletteGroup.add(mesh);return mesh;
   });
   const paletteBridges=(reveal?.bridges??[]).map(path=>{
@@ -289,10 +289,11 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const restPosition = blob.position.clone().addScaledVector(cameraDirection, -((camera.aspect < .85 ? 6.3 : 5.4) + nearGoal * 2.5)).addScaledVector(side, 2.8 + nearGoal * 2).add(new THREE.Vector3(0, 1.8, 0));
     introFinishLook.copy(blob.position).lerp(target.position, Math.min(.5, 4 / Math.max(1, separation)));
     introPose = planArrival(target.position,restPosition,introFinishLook,next.seed+Math.imul(next.stage+1,7919));
-    palettePose=reveal?planPaletteReveal(reveal,introPose(0),camera.aspect):null;
+    palettePose=reveal?planPaletteReveal(reveal,restPosition,introFinishLook,target.position,camera.aspect):null;
     introElapsed = 0; introducing = true;
     camera.position.copy(reduced ? restPosition : palettePose?palettePose(0).position:introPose(0).position);
-    lookAt.copy(reduced ? introFinishLook : target.position);
+    if(reduced)lookAt.copy(introFinishLook);
+    else {const pose=palettePose?palettePose(0):introPose(0);lookAt.copy(camera.position).add(new THREE.Vector3(0,0,-1).applyQuaternion(pose.quaternion));}
     camera.lookAt(lookAt);
   }
   setHole(hole);
@@ -359,15 +360,16 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     time += dt;
     if (introducing) introElapsed += dt;
     const paletteSeconds=reveal&&!reduced?PALETTE_REVEAL_SECONDS:0;
+    const introProgress=reduced?1:Math.min(1,introElapsed/(palettePose?PALETTE_INTRO_SECONDS:introSeconds));
     const paletteProgress=paletteSeconds?Math.min(1,introElapsed/paletteSeconds):1;
     const inPaletteReveal=introducing&&paletteProgress<1;
     paletteGroup.visible=inPaletteReveal;
     nodeUniforms.uReveal.value=inPaletteReveal?easeQuint((paletteProgress-.48)/.42):1;
-    target.visible=!inPaletteReveal||paletteProgress>.58;
+    target.visible=!inPaletteReveal||paletteProgress>.45;
     if(inPaletteReveal&&reveal){
-      const fade=1-easeQuint((paletteProgress-.5)/.35),bloom=.3+.7*easeQuint(paletteProgress/.14);
+      const fade=1-easeQuint((paletteProgress-.78)/.22),bloom=.3+.7*easeQuint(paletteProgress/.14);
       paletteSeeds.forEach((mesh,i)=>{mesh.scale.setScalar(bloom*(1+.045*Math.sin(time*1.5+i)));mesh.material.opacity=fade;});
-      paletteBridges.forEach((mesh,i)=>{mesh.geometry.setDrawRange(0,Math.floor(easeQuint((paletteProgress-.12-(i%3)*.02)/.3)*48)*6);mesh.material.opacity=fade*.8;});
+      paletteBridges.forEach((mesh,i)=>{const range=bridgeRevealRange(reveal.bridgeTimings[i],paletteProgress);mesh.geometry.setDrawRange(range.start,range.count);mesh.material.opacity=fade*.8;});
       if(paletteCloud){
         reveal.samples.forEach((sample,i)=>{
           const position=revealPosition(reveal,sample,paletteProgress),scale=easeQuint((paletteProgress-.17)/.24)*(1+.18*Math.sin(sample.phase+paletteProgress*4));
@@ -547,8 +549,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     camera.position.lerp(desiredPosition, 1 - Math.exp(-dt * damping));
     lookAt.lerp(desiredLook, 1 - Math.exp(-dt * (reduced ? 12 : 2.8)));
     if (introducing) {
-      const progress = reduced ? 1 : Math.max(0,Math.min(1,(introElapsed-paletteSeconds)/introSeconds));
-      const pose = inPaletteReveal&&palettePose?palettePose(paletteProgress):introPose(progress);
+      const progress = introProgress;
+      const pose = palettePose?palettePose(progress):introPose(progress);
       camera.position.copy(pose.position);
       lookAt.copy(camera.position).add(new THREE.Vector3(0,0,-1).applyQuaternion(pose.quaternion));
       blob.visible = !inPaletteReveal&&progress > .55;
@@ -557,7 +559,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     // The intro samples its current altitude, settling to the empty start's
     // value near arrival. After base selection, only the mixture drives light.
     const mixtureValue=mass ? movingPoint.position[1] : activeHole.start.position[1];
-    const introBlend=introducing ? 1-easeQuint(((introElapsed-paletteSeconds)/introSeconds-.65)/.35) : 0;
+    const introBlend=introducing ? 1-easeQuint((introProgress-.65)/.35) : 0;
     const safeHeight=Number.isFinite(mixtureValue)?mixtureValue:activeHole.start.position[1];
     const viewHeight=Number.isFinite(camera.position.y)?camera.position.y:safeHeight;
     const valueHeight=THREE.MathUtils.lerp(safeHeight,viewHeight,introBlend);

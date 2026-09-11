@@ -29,8 +29,12 @@ Play naturally before revealing the analysis. Record whether the intended style 
 
 Do not infer that different starting paints guarantee the same experience, that par equals an optimal route length, or that a value-lift label means adding white. A qualifying lift is measured after setup; choosing a light base alone does not count.
 
-## Palette reveal
+## Original palette reveal (first round-6 release)
 
 Entering a different palette adds a 4.6-second reveal before the existing 4.8-second target-to-start arrival. Pure paints appear first, pairwise modeled mixing curves grow between them, and a cloud of modeled mixtures unfolds with palette-seeded quaternion rotations. Decorative cloud positions converge to actual modeled positions before fading into the full reference field. The reference field is not a promise that every visible color is reachable by this palette.
 
 This is quaternion-inspired unfolding, not a rendered quaternion Julia fractal. It never changes playable mixing paths or scoring. The reveal ends at the exact first pose of the existing arrival curve, with easing at the join. Replaying within the same palette retains only the shorter arrival; reduced-motion mode bypasses both. Structure varies deterministically with paint identity, color and strength.
+
+## Reveal refinement after feedback
+
+The palette entry now uses one 11.2-second camera curve directly from the overview to the playing view, not a stopped 4.6-second reveal plus a second arrival. The destination is a moving look-at anchor before the focus settles on the player/target composition. Framing fits projected palette curves rather than a bounding sphere. Paint spheres shrink from 4.8 to 3.3 world-unit radius. Pairwise curves propagate along the paint graph from one or two deterministic origin paints, with delayed starts at connected endpoints; their reveal takes 7.2 seconds. Same-palette replays retain the existing shorter arrival.
