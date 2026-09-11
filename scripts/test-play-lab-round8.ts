@@ -5,7 +5,7 @@ import {LAB_JOURNEYS,LAB_GROUPS,newLabAttempt,validLabEvent,nextFixedLabSpecimen
 import {replayRoute} from '../app/play-course-analysis';
 
 test('round 8 preserves exact replay, progress and validated persistence',()=>{
- assert.equal(LAB_JOURNEYS.length,10);assert.equal(LAB_GROUPS[0].items.length,10);
+ assert.equal(LAB_JOURNEYS.length,10);assert.equal(LAB_GROUPS.find(g=>g.name.startsWith('Round 8'))?.items.length,10);
  assert.equal(journeyLabBank.holes.filter(h=>h.record.kind==='ride').length,2);
  assert.equal(journeyLabBank.holes.filter(h=>h.label.startsWith('Close start')).length,1);
  for(const [i,s] of LAB_JOURNEYS.entries()){
