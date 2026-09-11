@@ -1,5 +1,5 @@
 import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, generateDesignHole, generateFocusedHole, generateDirectedHole, directedLabBank, pairedLabBank, designLabBank, focusedLabBank, type Hole, type Mixture } from './play-engine';
-import {protectedLabBank,generateProtectedHole} from './play-engine';
+import {journeyLabBank,generateJourneyHole,protectedLabBank,generateProtectedHole} from './play-engine';
 
 export const LAB_ENGINE = 'glider-courses-3-controls-1';
 export const LAB_ROUND_ENGINE='glider-lab-2-controls-1';
@@ -8,8 +8,9 @@ export const LAB_DESIGN_ENGINE='glider-lab-4-controls-1';
 export const LAB_FOCUSED_ENGINE='glider-lab-5-controls-1';
 export const LAB_DIRECTED_ENGINE='glider-lab-6-controls-1';
 export const LAB_PROTECTED_ENGINE='glider-lab-7-controls-1';
+export const LAB_JOURNEY_ENGINE='glider-lab-8-controls-1';
 const originalEngine=(engine:string)=>engine.endsWith('-landing-2')?engine.slice(0,-10):engine;
-export const supportedLabEngine=(engine:string)=>[LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE].includes(originalEngine(engine));
+export const supportedLabEngine=(engine:string)=>[LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE].includes(originalEngine(engine));
 export type LabSpecimen = { levelIndex: number; hole: Hole; comparison?:{base:number;sourceAttemptId:string} };
 export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
 export type LabAttempt = {
@@ -28,9 +29,11 @@ export const LAB_DESIGN:LabSpecimen[]=designLabBank.holes.map(h=>({levelIndex:h.
 export const LAB_FOCUSED:LabSpecimen[]=focusedLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateFocusedHole(h.levelIndex,h.stage)}));
 export const LAB_DIRECTED:LabSpecimen[]=directedLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateDirectedHole(h.levelIndex,h.stage)}));
 export const LAB_PROTECTED:LabSpecimen[]=protectedLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateProtectedHole(h.levelIndex,h.stage)}));
-export const directedForHole=(id:string)=>protectedLabBank.holes.find(h=>h.record.id===id)??directedLabBank.holes.find(h=>h.record.id===id);
-export const labHoleProgress=(hole:Hole)=>hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
+export const LAB_JOURNEYS:LabSpecimen[]=journeyLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateJourneyHole(h.levelIndex,h.stage)}));
+export const directedForHole=(id:string)=>journeyLabBank.holes.find(h=>h.record.id===id)??protectedLabBank.holes.find(h=>h.record.id===id)??directedLabBank.holes.find(h=>h.record.id===id);
+export const labHoleProgress=(hole:Hole)=>hole.courseId.startsWith('lab-8-')?`${LAB_JOURNEYS.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_JOURNEYS.length}`:hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
 export const LAB_GROUPS=[
+  {name:'Round 8 · New palettes & measured journeys',items:LAB_JOURNEYS},
   {name:'Round 7 · Interiors, value shifts & rides',items:LAB_PROTECTED},
   {name:'Round 6 · Directed routes & alternatives',items:LAB_DIRECTED},
   {name:'Round 5 · New palettes & style coverage',items:LAB_FOCUSED},
@@ -39,7 +42,7 @@ export const LAB_GROUPS=[
   {name:'Round 2 · Earlier tests',items:LAB_STARTERS},
 ].map(g=>({...g,items:g.items.filter(s=>!PLAY_LEVELS[s.levelIndex].retired)}));
 export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
-  const bank=current.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED:current.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED:current.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED:current.hole.courseId.startsWith('lab-4-')?LAB_DESIGN:current.hole.courseId.startsWith('lab-3-')?LAB_PAIRED:current.hole.courseId.startsWith('lab-2-')?LAB_STARTERS:null;
+  const bank=current.hole.courseId.startsWith('lab-8-')?LAB_JOURNEYS:current.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED:current.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED:current.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED:current.hole.courseId.startsWith('lab-4-')?LAB_DESIGN:current.hole.courseId.startsWith('lab-3-')?LAB_PAIRED:current.hole.courseId.startsWith('lab-2-')?LAB_STARTERS:null;
   if(!bank)return null;
   const at=bank.findIndex(s=>s.hole.courseId===current.hole.courseId);
   if(at<0)return null;
@@ -57,7 +60,7 @@ export function suggestedComparison(attempt:LabAttempt):LabSpecimen|null {
 }
 
 export function newLabAttempt(specimen:LabSpecimen,id:string):LabAttempt {
-  const base=specimen.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED_ENGINE:specimen.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED_ENGINE:specimen.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED_ENGINE:specimen.hole.courseId.startsWith('lab-4-')?LAB_DESIGN_ENGINE:specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE;
+  const base=specimen.hole.courseId.startsWith('lab-8-')?LAB_JOURNEY_ENGINE:specimen.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED_ENGINE:specimen.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED_ENGINE:specimen.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED_ENGINE:specimen.hole.courseId.startsWith('lab-4-')?LAB_DESIGN_ENGINE:specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE;
   return {id,engine:base+(specimen.hole.tolerance===LIVE_LANDING_TOLERANCE?'-landing-2':''),specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
     paints:PLAY_LEVELS[specimen.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}))};
 }
@@ -68,6 +71,17 @@ export function labEntries(events:LabEvent[]):LabEntry[] {
     else reviews.set(event.attemptId,event.review);
   }
   return [...rows.values()].map(row=>({...row,review:reviews.get(row.attempt.id)})).reverse();
+}
+
+// Keep the live attempt selectable while its persistence request is still in flight.
+export function labReviewEntries(events:LabEvent[],current:LabAttempt|null):LabEntry[] {
+  const entries=labEntries(events);
+  if(!current)return entries;
+  const saved=entries.find(e=>e.attempt.id===current.id);
+  return [{attempt:current,review:saved?.review},...entries.filter(e=>e.attempt.id!==current.id)];
+}
+export function selectedLabEntry(entries:LabEntry[],current:LabAttempt|null,chosen:string|null) {
+  return entries.find(e=>e.attempt.id===(chosen??current?.id))??entries[0];
 }
 
 function sameSnapshot(a:unknown,b:unknown):boolean {
@@ -98,12 +112,12 @@ export function validLabEvent(value:unknown):value is LabEvent {
   if(a.id!==e.attemptId||!supportedLabEngine(a.engine)||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
   if(!s||!Number.isInteger(s.levelIndex)||!PLAY_LEVELS[s.levelIndex]||!s.hole)return false;
   const engine=originalEngine(a.engine);
-  if(s.comparison&&(![LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE].includes(engine)||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
+  if(s.comparison&&(![LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE].includes(engine)||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
   if(!Number.isInteger(s.hole.seed)||s.hole.seed<0||s.hole.seed>0xffffffff||!Number.isInteger(s.hole.stage)||s.hole.stage<0||s.hole.stage>4)return false;
   let original:Hole;
   try {
-    if(![LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE].includes(engine)&&s.levelIndex>=10)return false;
-    original=engine===LAB_PROTECTED_ENGINE?generateProtectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DIRECTED_ENGINE?generateDirectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_FOCUSED_ENGINE?generateFocusedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DESIGN_ENGINE?generateDesignHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,engine==='glider-courses-2-controls-1');
+    if(![LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE].includes(engine)&&s.levelIndex>=10)return false;
+    original=engine===LAB_JOURNEY_ENGINE?generateJourneyHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PROTECTED_ENGINE?generateProtectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DIRECTED_ENGINE?generateDirectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_FOCUSED_ENGINE?generateFocusedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DESIGN_ENGINE?generateDesignHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,engine==='glider-courses-2-controls-1');
     if(a.engine.endsWith('-landing-2'))original=withLiveLanding(original);
   }catch{return false;}
   // Snapshot equality catches accidental edits to the target, cup or controls.

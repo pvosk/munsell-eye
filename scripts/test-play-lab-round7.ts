@@ -7,7 +7,7 @@ import {replayRoute} from '../app/play-course-analysis';
 import {experienceMatches,experienceSupported,analyzeExperience} from '../app/play-experience-audit';
 
 test('round 7 preserves replay, progress, and sync validation for all eight specimens',()=>{
- assert.equal(LAB_PROTECTED.length,8);assert.equal(LAB_GROUPS[0].items.length,8);
+ assert.equal(LAB_PROTECTED.length,8);assert.equal(LAB_GROUPS.find(g=>g.name.startsWith('Round 7'))?.items.length,8);
  for(const [i,s] of LAB_PROTECTED.entries()){
   assert.equal(labHoleProgress(s.hole),`${i+1}/8`);
   assert.equal(nextFixedLabSpecimen(s)?.hole.courseId,LAB_PROTECTED[(i+1)%8].hole.courseId);

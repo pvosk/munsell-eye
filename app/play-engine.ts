@@ -10,6 +10,7 @@ import designRoundBank from './generated/play-lab-round4.json';
 import focusedRoundBank from './generated/play-lab-round5.json';
 import directedRoundBank from './generated/play-lab-round6.json';
 import protectedRoundBank from './generated/play-lab-round7.json';
+import journeyRoundBank from './generated/play-lab-round8.json';
 import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
@@ -77,6 +78,8 @@ PLAY_LEVELS.push(
   {name:'Cerulean Arc',subtitle:'Lemon, Orange, Cobalt & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-orange','cobalt-blue','cerulean-blue'].map(paint)},
   {name:'Violet Estuary',subtitle:'Lemon, Orange, Violet & Cerulean',labOnly:true,tolerance:LANDING_TOLERANCE,paints:['cadmium-lemon','cadmium-orange','dioxazine-purple','cerulean-blue'].map(paint)},
 );
+// Append only: previous palette indices and archived bank signatures stay fixed.
+PLAY_LEVELS.push(...journeyRoundBank.palettes as PlayLevel[]);
 export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
@@ -344,6 +347,14 @@ export const designLabBank=designRoundBank as {version:string;signature:string;h
 export const focusedLabBank=focusedRoundBank as {version:string;signature:string;minimumCoverage:number;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:FocusStyle;coverage:StyleCoverage}[]};
 export const directedLabBank=directedRoundBank as {version:string;signature:string;selection:string;holes:{levelIndex:number;stage:number;record:StoredLabRoute;analysis:DesignAnalysis;brief:string;focus:AuditStyle;label:string;emphasis:'experience'|'flexibility';coverage:StyleAudit;roles:{intended:AuditRoute;shortest:AuditRoute;closest:AuditRoute}}[]};
 export const protectedLabBank=protectedRoundBank as typeof directedLabBank;
+export const journeyLabBank=journeyRoundBank as unknown as typeof directedLabBank & {seed:number;palettes:PlayLevel[]};
+export function generateJourneyHole(levelIndex:number,stage:number,seed=20261201):Hole {
+  if(seed!==journeyLabBank.seed||journeyLabBank.signature!==courseSignature(21+journeyLabBank.palettes.length))throw new Error('Journey lab model changed');
+  const item=journeyLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item)throw new Error('Unknown journey lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],target=mixtureColor(level.paints,r.target);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:r.kind,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateProtectedHole(levelIndex:number,stage:number,seed=20261108):Hole {
   if(seed!==20261108||protectedLabBank.signature!==courseSignature(21))throw new Error('Protected lab model changed');
   const item=protectedLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
