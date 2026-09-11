@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {shiftDirection,experienceMatches,analyzeExperience,experienceSupported,rideShape} from '../app/play-experience-audit';
 import {PLAY_LEVELS,LIVE_LANDING_TOLERANCE,mixtureColor,colorDistance} from '../app/play-engine';
 import {routeDetails,replayRoute} from '../app/play-course-analysis';
@@ -29,4 +31,24 @@ test('new direction-aware audit preserves valid witnesses and the weak natural-s
     assert.ok(colorDistance(mixtureColor(PLAY_LEVELS[h.levelIndex].paints,replayRoute(h.levelIndex,r.order,r.times)),a.target)<=LIVE_LANDING_TOLERANCE+1e-9);
     if(experienceSupported(r)){const shape=rideShape(h.levelIndex,r);assert.ok(shape.arcRatio>=1-1e-9);assert.ok(shape.bow>=0);}
   }
+});
+test('frozen-protocol finalists replay and failed dense candidates remain failed',()=>{
+  const result=JSON.parse(readFileSync('docs/play-rides-value-shift-results.json','utf8')) as {protocolHash:string;finalists:{id:string;audit:ReturnType<typeof analyzeExperience>}[]};
+  const protocol=JSON.parse(readFileSync('docs/play-rides-value-shift-protocol.json','utf8'));
+  assert.equal(createHash('sha256').update(JSON.stringify(protocol)).digest('hex'),result.protocolHash);
+  assert.equal(result.finalists.length,12);
+  for(const f of result.finalists)for(const b of f.audit.bases)for(const r of b.routes){
+    assert.equal(r.times.length,b.fewest);
+    assert.ok(colorDistance(mixtureColor(PLAY_LEVELS[f.audit.palette].paints,replayRoute(f.audit.palette,r.order,r.times)),f.audit.target)<=LIVE_LANDING_TOLERANCE+1e-9);
+  }
+  const failed=result.finalists.find(f=>f.id==='rs-20271013-20-38')!;
+  assert.ok(failed.audit.failures.includes('token-bypass'));assert.equal(failed.audit.styles.ride.everyBaseAvailable,false);
+});
+test('up/down union adds coverage without turning availability into resistance',()=>{
+  const result=JSON.parse(readFileSync('docs/play-rides-value-shift-results.json','utf8')) as {finalists:{id:string;audit:ReturnType<typeof analyzeExperience>}[]};
+  const a=result.finalists.find(f=>f.id==='rs-20271013-17-25')!.audit;
+  assert.equal(a.styles.rise.everyBaseAvailable,false);assert.equal(a.styles.drop.everyBaseAvailable,false);
+  assert.equal(a.styles['value-shift'].everyBaseAvailable,true);
+  assert.equal(a.styles['value-shift'].everyBaseResistant,false);
+  assert.equal(new Set([...a.styles.rise.available,...a.styles.drop.available]).size,a.bases.length);
 });
