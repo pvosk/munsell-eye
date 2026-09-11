@@ -1,0 +1,122 @@
+{
+  "sourceHash": "4aa4999d0b3019999d0faa7804ce1717d0b2c7de8b3092a16f33afe4ae74902e",
+  "oneSteps": 512,
+  "twoSteps": 96,
+  "rows": [
+    {
+      "id": "gap-1-1",
+      "palette": "Zorny",
+      "recipe": [
+        0.3332688415859073,
+        0.250125664503697,
+        0.24856769437057408,
+        0.1680377995398216
+      ],
+      "minimumTwoError": 1.1414892519250555,
+      "shortcut": false,
+      "replayErrors": [
+        6.807765378378778e-15,
+        9.440671978105074e-16,
+        5.0839574492192316e-15,
+        9.440671978105074e-16
+      ],
+      "passes": true
+    },
+    {
+      "id": "gap-2-5",
+      "palette": "RYB",
+      "recipe": [
+        0.5343441078369425,
+        0.2070034003594328,
+        0.19406347244228997,
+        0.06458901936133477
+      ],
+      "minimumTwoError": 1.9132637306311637,
+      "shortcut": false,
+      "replayErrors": [
+        4.22199685926407e-15,
+        5.340450539740732e-15,
+        6.540689409467904e-15,
+        4.22199685926407e-15
+      ],
+      "passes": true
+    },
+    {
+      "id": "gap-5-4",
+      "palette": "Secondaries",
+      "recipe": [
+        0.28285488634647643,
+        0.26415127584077064,
+        0.1368514866975807,
+        0.3161423511151721
+      ],
+      "minimumTwoError": 1.6803183427410846,
+      "shortcut": false,
+      "replayErrors": [
+        1.8881343956210147e-15,
+        3.7762687912420295e-15,
+        4.22199685926407e-15,
+        4.22199685926407e-15
+      ],
+      "passes": true
+    },
+    {
+      "id": "gap-5-2",
+      "palette": "Secondaries",
+      "recipe": [
+        0.28487259010069016,
+        0.29649817704847303,
+        0.18067197831135293,
+        0.23795725453948394
+      ],
+      "minimumTwoError": 2.0177456446067827,
+      "shortcut": false,
+      "replayErrors": [
+        0,
+        2.670225269870366e-15,
+        7.784977548507206e-15,
+        3.7762687912420295e-15
+      ],
+      "passes": true
+    },
+    {
+      "id": "gap-7-1",
+      "palette": "Chromatic Dark",
+      "recipe": [
+        0.2013046122701149,
+        0.16679334907246277,
+        0.38382641988072647,
+        0.24807561877669596
+      ],
+      "minimumTwoError": 1.1255921847443444,
+      "shortcut": false,
+      "replayErrors": [
+        7.552537582484059e-15,
+        4.326259395091498e-15,
+        5.7425365769253904e-15,
+        2.670225269870366e-15
+      ],
+      "passes": true
+    },
+    {
+      "id": "gap-10-3",
+      "palette": "Cobalt Ember",
+      "recipe": [
+        0.27297423824213385,
+        0.2314214496190629,
+        0.14628256442298979,
+        0.34932174771581337
+      ],
+      "minimumTwoError": 2.082099299588444,
+      "shortcut": false,
+      "replayErrors": [
+        0,
+        2.670225269870366e-15,
+        6.807765378378778e-15,
+        0
+      ],
+      "passes": true
+    }
+  ],
+  "note": "Higher-resolution shortcut check on representatives selected by worst-base travel. Sampled numerical evidence, not a global proof or a player-quality verdict."
+}
