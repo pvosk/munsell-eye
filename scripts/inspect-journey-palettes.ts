@@ -125,5 +125,7 @@ const result={protocol,sourceHash,seconds:(performance.now()-started)/1000,calls
  'Style and portfolio thresholds are provisional, frozen before this run; feedback calibrates them but does not independently validate enjoyment.',
  'Portfolio separation includes easiest routes, but is a conservative greedy subset, not optimal packing. Single-hole archive is not a human-approved collection.',
  'General safety replaces the old blanket 1.8-tolerance pure-distance exclusion with actual inside-cup and supported short-direct checks. Old warnings remain derivable; no live scoring changed.']};
-writeFileSync('docs/play-journey-inspection.json',JSON.stringify(result,null,2)+'\n');
+// Full route evidence is large; pretty-printing can exceed V8's string limit.
+// Presentation-only: leave every evaluation and candidate unchanged.
+writeFileSync('docs/play-journey-inspection.json',JSON.stringify(result)+'\n');
 PLAY_LEVELS.pop();console.log('DONE',calls,'calls',hits,'cached',((performance.now()-started)/1000).toFixed(1),'seconds');
