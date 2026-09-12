@@ -14,6 +14,7 @@ import journeyRoundBank from './generated/play-lab-round8.json';
 import contrastRoundBank from './generated/play-lab-round9.json';
 import inverseRoundBank from './generated/play-lab-round10.json';
 import hardRoundBank from './generated/play-lab-round11.json';
+import freshRoundBank from './generated/play-lab-round12.json';
 import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
@@ -86,6 +87,7 @@ PLAY_LEVELS.push(...journeyRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...contrastRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...inverseRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...hardRoundBank.palettes as PlayLevel[]);
+PLAY_LEVELS.push(...freshRoundBank.palettes as PlayLevel[]);
 export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
@@ -357,6 +359,15 @@ export const journeyLabBank=journeyRoundBank as unknown as typeof directedLabBan
 export const contrastLabBank=contrastRoundBank as unknown as typeof journeyLabBank;
 export const inverseLabBank=inverseRoundBank as unknown as typeof journeyLabBank;
 export const hardLabBank=hardRoundBank as unknown as typeof journeyLabBank;
+export const freshLabBank=freshRoundBank as unknown as typeof journeyLabBank;
+export function generateFreshHole(levelIndex:number,stage:number,seed=freshRoundBank.seed):Hole {
+  if(seed!==freshRoundBank.seed||freshRoundBank.signature!==courseSignature(freshRoundBank.paletteOffset+freshRoundBank.palettes.length))throw new Error('Fresh lab model changed');
+  const item=freshLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  const source=freshRoundBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item||!source)throw new Error('Unknown fresh lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],rgb=source.record.targetRGB,target=colorPoint([rgb[0],rgb[1],rgb[2]]);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:r.kind,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateHardHole(levelIndex:number,stage:number,seed=hardRoundBank.seed):Hole {
   if(seed!==hardRoundBank.seed||hardRoundBank.signature!==courseSignature(hardRoundBank.paletteOffset+hardRoundBank.palettes.length))throw new Error('Hard lab model changed');
   const item=hardLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
