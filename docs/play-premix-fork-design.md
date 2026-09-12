@@ -1,5 +1,7 @@
 # Premix-start experimental fork — discussion boundary
 
+Historical proposal at v67. The subsequent implemented A/B experiment and its measured limitations are documented in `play-premix-lab.md`; the proposal below is retained for context.
+
 The round-12 release does not enable premixed starts or normalize mass. These are proposed experiments, not implemented gameplay or validated puzzles.
 
 ## Preserve composition

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, ribbonChargeSpeed, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
-import { FIELD_POINTS, baseLaunchPath, colorDistance, targetDisplayRadius, type ColorPoint, type Hole, type RGB } from './play-engine';
+import { FIELD_POINTS, totalMass, baseLaunchPath, colorDistance, targetDisplayRadius, type ColorPoint, type Hole, type RGB } from './play-engine';
 import {paletteReveal,revealPosition,planPaletteReveal,bridgeRevealRange,PALETTE_REVEAL_SECONDS,PALETTE_INTRO_SECONDS} from './play-palette-reveal';
 import type {PaintColor} from './paint-mixing';
 
@@ -195,7 +195,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const pulses: { mesh: THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>; born: number }[] = [];
   const trails: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>[] = [];
   let current = hole.start;
-  let mass = 0;
+  let mass = hole.premix?totalMass(hole.premix.initial):0;
   let activeHole = hole;
   let flight: Flight | null = null;
   let captureAmount = 0;
@@ -255,7 +255,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
 
   function setHole(next: Hole) {
     flightWeight=0;shotLength=0;
-    activeHole = next; current = next.start; mass = 0; flight = null; charge = null; won = false; previousHue = null;
+    activeHole = next; current = next.start; mass = next.premix?totalMass(next.premix.initial):0; flight = null; charge = null; won = false; previousHue = null;
     orbitYaw = 0; orbitPitch = 0; drag = null;
     blob.position.copy(v3(current));
     cameraDirection.copy(v3(next.target).sub(blob.position).normalize());

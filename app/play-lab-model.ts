@@ -1,3 +1,5 @@
+import {PREMIX_ENGINE,PREMIX_SPECIMENS,generatePremixHole,premixBank} from './play-premix-bank';
+import {premixStep} from './play-premix';
 import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, generateDesignHole, generateFocusedHole, generateDirectedHole, directedLabBank, pairedLabBank, designLabBank, focusedLabBank, type Hole, type Mixture } from './play-engine';
 import {freshLabBank,generateFreshHole,hardLabBank,generateHardHole,inverseLabBank,generateInverseHole,contrastLabBank,generateContrastHole,journeyLabBank,generateJourneyHole,protectedLabBank,generateProtectedHole} from './play-engine';
 
@@ -16,7 +18,7 @@ export const LAB_PROTECTED_ENGINE='glider-lab-7-controls-1';
 export const LAB_JOURNEY_ENGINE='glider-lab-8-controls-1';
 export const LAB_CONTRAST_ENGINE='glider-lab-9-controls-1';
 const originalEngine=(engine:string)=>engine.endsWith('-landing-2')?engine.slice(0,-10):engine;
-export const supportedLabEngine=(engine:string)=>[LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(originalEngine(engine));
+export const supportedLabEngine=(engine:string)=>[PREMIX_ENGINE,LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(originalEngine(engine));
 export type LabSpecimen = { levelIndex: number; hole: Hole; comparison?:{base:number;sourceAttemptId:string} };
 export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
 export type LabAttempt = {
@@ -41,8 +43,9 @@ export const LAB_INVERSE:LabSpecimen[]=inverseLabBank.holes.map(h=>({levelIndex:
 export const LAB_FRESH:LabSpecimen[]=freshLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateFreshHole(h.levelIndex,h.stage)}));
 export const LAB_HARD:LabSpecimen[]=hardLabBank.holes.map(h=>({levelIndex:h.levelIndex,hole:generateHardHole(h.levelIndex,h.stage)}));
 export const directedForHole=(raw:string)=>{const id=campaignSourceId(raw);return freshLabBank.holes.find(h=>h.record.id===id)??hardLabBank.holes.find(h=>h.record.id===id)??inverseLabBank.holes.find(h=>h.record.id===id)??contrastLabBank.holes.find(h=>h.record.id===id)??journeyLabBank.holes.find(h=>h.record.id===id)??protectedLabBank.holes.find(h=>h.record.id===id)??directedLabBank.holes.find(h=>h.record.id===id);};
-export const labHoleProgress=(hole:Hole)=>campaignForHole(hole.courseId)?`${hole.stage+1}/${campaignForHole(hole.courseId)!.chapter.slots.length}`:hole.courseId.startsWith('lab-12-')?`${LAB_FRESH.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_FRESH.length}`:hole.courseId.startsWith('lab-11-')?`${LAB_HARD.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_HARD.length}`:hole.courseId.startsWith('lab-10-')?`${LAB_INVERSE.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_INVERSE.length}`:hole.courseId.startsWith('lab-9-')?`${LAB_CONTRAST.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_CONTRAST.length}`:hole.courseId.startsWith('lab-8-')?`${LAB_JOURNEYS.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_JOURNEYS.length}`:hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
+export const labHoleProgress=(hole:Hole)=>hole.premix?`${hole.stage+1}/${premixBank.holes.length} · ${hole.premix.massMode}`:campaignForHole(hole.courseId)?`${hole.stage+1}/${campaignForHole(hole.courseId)!.chapter.slots.length}`:hole.courseId.startsWith('lab-12-')?`${LAB_FRESH.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_FRESH.length}`:hole.courseId.startsWith('lab-11-')?`${LAB_HARD.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_HARD.length}`:hole.courseId.startsWith('lab-10-')?`${LAB_INVERSE.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_INVERSE.length}`:hole.courseId.startsWith('lab-9-')?`${LAB_CONTRAST.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_CONTRAST.length}`:hole.courseId.startsWith('lab-8-')?`${LAB_JOURNEYS.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_JOURNEYS.length}`:hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
 export const LAB_GROUPS=[
+  {name:'Premix · A/B mass experiment',items:PREMIX_SPECIMENS},
   {name:'Round 12 · Fresh harder palettes',items:LAB_FRESH},
   {name:'Round 11 · Harder setups',items:LAB_HARD},
   {name:'Round 10 · Inverse-planning portfolios',items:LAB_INVERSE},
@@ -56,6 +59,7 @@ export const LAB_GROUPS=[
   {name:'Round 2 · Earlier tests',items:LAB_STARTERS},
 ].map(g=>({...g,items:g.items.filter(s=>!PLAY_LEVELS[s.levelIndex].retired)}));
 export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
+  if(current.hole.premix){const i=PREMIX_SPECIMENS.findIndex(s=>s.hole.courseId===current.hole.courseId);return PREMIX_SPECIMENS[(i+1)%PREMIX_SPECIMENS.length]??null;}
   const campaign=nextCampaignSpecimen(current.hole.courseId);if(campaign)return campaign;
   const bank=current.hole.courseId.startsWith('lab-12-')?LAB_FRESH:current.hole.courseId.startsWith('lab-11-')?LAB_HARD:current.hole.courseId.startsWith('lab-10-')?LAB_INVERSE:current.hole.courseId.startsWith('lab-9-')?LAB_CONTRAST:current.hole.courseId.startsWith('lab-8-')?LAB_JOURNEYS:current.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED:current.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED:current.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED:current.hole.courseId.startsWith('lab-4-')?LAB_DESIGN:current.hole.courseId.startsWith('lab-3-')?LAB_PAIRED:current.hole.courseId.startsWith('lab-2-')?LAB_STARTERS:null;
   if(!bank)return null;
@@ -66,6 +70,7 @@ export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
 }
 export const analysisForHole=(raw:string)=>{const id=campaignSourceId(raw);return campaignAnalysis(id)??directedForHole(id)?.analysis??focusedLabBank.holes.find(h=>h.record.id===id)?.analysis??designLabBank.holes.find(h=>h.record.id===id)?.analysis??pairedLabBank.holes.find(h=>h.record.id===id)?.analysis;};
 export function suggestedComparison(attempt:LabAttempt):LabSpecimen|null {
+  if(attempt.specimen.hole.premix)return null;
   const first=attempt.shots.find(s=>!s.cancelled),item=analysisForHole(attempt.specimen.hole.courseId);
   if(!first||!item)return null;
   const candidates=item.bases.filter(b=>b.qualifies&&b.base!==first.paint);
@@ -75,7 +80,7 @@ export function suggestedComparison(attempt:LabAttempt):LabSpecimen|null {
 }
 
 export function newLabAttempt(specimen:LabSpecimen,id:string):LabAttempt {
-  const base=campaignForHole(specimen.hole.courseId)?LAB_CAMPAIGN_ENGINE:specimen.hole.courseId.startsWith('lab-12-')?LAB_FRESH_ENGINE:specimen.hole.courseId.startsWith('lab-11-')?LAB_HARD_ENGINE:specimen.hole.courseId.startsWith('lab-10-')?LAB_INVERSE_ENGINE:specimen.hole.courseId.startsWith('lab-9-')?LAB_CONTRAST_ENGINE:specimen.hole.courseId.startsWith('lab-8-')?LAB_JOURNEY_ENGINE:specimen.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED_ENGINE:specimen.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED_ENGINE:specimen.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED_ENGINE:specimen.hole.courseId.startsWith('lab-4-')?LAB_DESIGN_ENGINE:specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE;
+  const base=specimen.hole.premix?PREMIX_ENGINE:campaignForHole(specimen.hole.courseId)?LAB_CAMPAIGN_ENGINE:specimen.hole.courseId.startsWith('lab-12-')?LAB_FRESH_ENGINE:specimen.hole.courseId.startsWith('lab-11-')?LAB_HARD_ENGINE:specimen.hole.courseId.startsWith('lab-10-')?LAB_INVERSE_ENGINE:specimen.hole.courseId.startsWith('lab-9-')?LAB_CONTRAST_ENGINE:specimen.hole.courseId.startsWith('lab-8-')?LAB_JOURNEY_ENGINE:specimen.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED_ENGINE:specimen.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED_ENGINE:specimen.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED_ENGINE:specimen.hole.courseId.startsWith('lab-4-')?LAB_DESIGN_ENGINE:specimen.hole.courseId.startsWith('lab-3-')?LAB_PAIRED_ENGINE:specimen.hole.courseId.startsWith('lab-2-')?LAB_ROUND_ENGINE:specimen.hole.courseId.startsWith('courses-2-')?'glider-courses-2-controls-1':LAB_ENGINE;
   return {id,engine:base+(specimen.hole.tolerance===LIVE_LANDING_TOLERANCE?'-landing-2':''),specimen,started:new Date().toISOString(),shots:[],outcome:'playing',revealed:false,
     paints:PLAY_LEVELS[specimen.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}))};
 }
@@ -127,12 +132,13 @@ export function validLabEvent(value:unknown):value is LabEvent {
   if(a.id!==e.attemptId||!supportedLabEngine(a.engine)||typeof a.started!=='string'||!Number.isFinite(Date.parse(a.started))||typeof a.revealed!=='boolean')return false;
   if(!s||!Number.isInteger(s.levelIndex)||!PLAY_LEVELS[s.levelIndex]||!s.hole)return false;
   const engine=originalEngine(a.engine);
-  if(s.comparison&&(![LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(engine)||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
+  if(s.comparison&&(![PREMIX_ENGINE,LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(engine)||!id(s.comparison.sourceAttemptId)||!Number.isInteger(s.comparison.base)||!PLAY_LEVELS[s.levelIndex].paints[s.comparison.base]))return false;
   if(!Number.isInteger(s.hole.seed)||s.hole.seed<0||s.hole.seed>0xffffffff||!Number.isInteger(s.hole.stage)||s.hole.stage<0||s.hole.stage>4)return false;
   let original:Hole;
   try {
-    if(![LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(engine)&&s.levelIndex>=10)return false;
-    original=engine===LAB_FRESH_ENGINE?generateFreshHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_HARD_ENGINE?generateHardHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_INVERSE_ENGINE?generateInverseHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_CAMPAIGN_ENGINE?campaignSnapshot(s.hole.courseId,s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_CONTRAST_ENGINE?generateContrastHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_JOURNEY_ENGINE?generateJourneyHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PROTECTED_ENGINE?generateProtectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DIRECTED_ENGINE?generateDirectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_FOCUSED_ENGINE?generateFocusedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DESIGN_ENGINE?generateDesignHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,engine==='glider-courses-2-controls-1');
+    if(![PREMIX_ENGINE,LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(engine)&&s.levelIndex>=10)return false;
+    if(engine===PREMIX_ENGINE&&(!s.hole.premix||premixBank.holes.find(h=>h.id===s.hole.premix!.pairId)?.level!==s.levelIndex))return false;
+    original=engine===PREMIX_ENGINE?generatePremixHole(s.hole.premix!.pairId,s.hole.premix!.massMode):engine===LAB_FRESH_ENGINE?generateFreshHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_HARD_ENGINE?generateHardHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_INVERSE_ENGINE?generateInverseHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_CAMPAIGN_ENGINE?campaignSnapshot(s.hole.courseId,s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_CONTRAST_ENGINE?generateContrastHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_JOURNEY_ENGINE?generateJourneyHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PROTECTED_ENGINE?generateProtectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DIRECTED_ENGINE?generateDirectedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_FOCUSED_ENGINE?generateFocusedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_DESIGN_ENGINE?generateDesignHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_PAIRED_ENGINE?generatePairedHole(s.levelIndex,s.hole.stage,s.hole.seed):engine===LAB_ROUND_ENGINE?generateLabHole(s.levelIndex,s.hole.stage,s.hole.seed):generateHole(s.levelIndex,s.hole.seed,s.hole.stage,engine==='glider-courses-2-controls-1');
     if(a.engine.endsWith('-landing-2'))original=withLiveLanding(original);
   }catch{return false;}
   // Snapshot equality catches accidental edits to the target, cup or controls.
@@ -140,7 +146,18 @@ export function validLabEvent(value:unknown):value is LabEvent {
   const paints=PLAY_LEVELS[s.levelIndex].paints.map(({id,name,rgb,strength})=>({id,name,rgb:[...rgb],strength}));
   if(!sameSnapshot(a.paints,paints)||!Array.isArray(a.shots)||a.shots.length>200)return false;
   const q=(v:unknown)=>Array.isArray(v)&&v.length===paints.length&&v.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<1e15);
-  return ['playing','landed','replayed','left'].includes(a.outcome)&&a.shots.every(t=>Number.isInteger(t.paint)&&t.paint>=0&&t.paint<paints.length
+  const basic=['playing','landed','replayed','left'].includes(a.outcome)&&a.shots.every(t=>Number.isInteger(t.paint)&&t.paint>=0&&t.paint<paints.length
     &&Number.isFinite(t.seconds)&&t.seconds>=0&&t.seconds<86400&&Number.isFinite(t.amount)&&t.amount>0&&t.amount<1e15
     &&q(t.before)&&q(t.after)&&typeof t.cancelled==='boolean');
+  if(!basic)return false;
+  if(s.hole.premix){
+    let state=[...s.hole.premix.initial];const near=(a:number[],b:number[])=>a.length===b.length&&a.every((v,i)=>Math.abs(v-b[i])<=1e-9*Math.max(1,Math.abs(v),Math.abs(b[i])));
+    for(const shot of a.shots){
+      if(!near(state,shot.before))return false;
+      const step=premixStep(state,shot.paint,shot.seconds,s.hole.premix.massMode);
+      if(!near(step.after,shot.after)||Math.abs(step.amount-shot.amount)>1e-9*Math.max(1,step.amount))return false;
+      if(!shot.cancelled)state=step.after;
+    }
+  }
+  return true;
 }
