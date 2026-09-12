@@ -167,8 +167,8 @@ export const STARTERS: Preset[] = SOUND_MODELS.slice(0, 3).map((model, i) => ({
     },
     journey: {
       ...JOURNEY_DEFAULTS,
-      density: i === 0 ? 18 : 6,
-      duration: i === 1 ? 3.2 : 2.8,
+      density: i === 0 ? 18 : i === 2 ? 3 : 6,
+      duration: i === 1 ? 5 : 2.8,
       probe:
         i === 1
           ? {
@@ -181,31 +181,7 @@ export const STARTERS: Preset[] = SOUND_MODELS.slice(0, 3).map((model, i) => ({
             }
           : JOURNEY_DEFAULTS.probe,
     },
-    mappings:
-      i === 1
-        ? [
-            {
-              id: "grow",
-              enabled: true,
-              source: "edgeRun",
-              target: "voices",
-              low: 3,
-              high: 18,
-              curve: "ease",
-              smooth: 0.25,
-            },
-            {
-              id: "gather",
-              enabled: true,
-              source: "progress",
-              target: "converge",
-              low: 0,
-              high: 0.85,
-              curve: "grow",
-              smooth: 0.1,
-            },
-          ]
-        : DEFAULT_MAPPINGS,
+    mappings: i === 1 ? [] : DEFAULT_MAPPINGS,
   }),
 }));
 
@@ -236,3 +212,181 @@ STARTERS.push({
     ],
   }),
 });
+
+/** Audition hypotheses from the engine handoff's route styles and sonic addendum. */
+export const MAPPING_STUDIES: Preset[] = [
+  {
+    id: "close-glass",
+    name: "Close putt · glass breath",
+    model: "glass",
+    notes:
+      "Small correction: a few glass notes and a restrained ribbon sweep. Based on the sonic addendum’s close-putt gesture.",
+    probe: {
+      hue: 270,
+      hueTravel: 12,
+      lightness: 0.65,
+      lift: 0.025,
+      edge: 0.25,
+      edgeEnd: 0.3,
+      bow: 0,
+    },
+    duration: 1.6,
+    advance: "manual",
+    mappings: [
+      ["progress", "sweepOffset", -0.2, 0.2],
+      ["envelope", "density", 1, 3],
+      ["envelope", "ribbon", 0.35, 0.7],
+    ],
+  },
+  {
+    id: "edge-cloud",
+    name: "Boundary run · growing cloud",
+    model: "convergence",
+    notes:
+      "Accumulated boundary travel grows 6→18 voices. sRGB boundary audition, not a certified palette hull or ride test.",
+    probe: {
+      hue: 300,
+      hueTravel: 170,
+      lightness: 0.6,
+      lift: 0.05,
+      edge: 0.96,
+      edgeEnd: 0.96,
+      bow: 0,
+    },
+    duration: 5,
+    advance: "manual",
+    mappings: [
+      ["edgeRun", "voices", 6, 18],
+      ["chroma", "wander", 0.5, 4],
+      ["progress", "width", 0.4, 1],
+    ],
+  },
+  {
+    id: "value-up",
+    name: "Value lift · opening space",
+    model: "glass",
+    notes:
+      "A value-led episode opens filtering and space without forcing an octave rise. Inspired by value-shift routes.",
+    probe: {
+      hue: 220,
+      hueTravel: 10,
+      lightness: 0.25,
+      lift: 0.5,
+      edge: 0.08,
+      edgeEnd: 0.12,
+      bow: 0,
+    },
+    duration: 3.5,
+    advance: "manual",
+    mappings: [
+      ["value", "brightness", 600, 6500],
+      ["neutralLift", "width", 0.25, 0.95],
+      ["progress", "sweepOffset", -0.4, 0.3],
+    ],
+  },
+  {
+    id: "value-down",
+    name: "Value descent · closing space",
+    model: "synth",
+    notes:
+      "Downward value movement is its own gesture, not a failed lift. Register stays stable as filtering closes.",
+    probe: {
+      hue: 40,
+      hueTravel: -20,
+      lightness: 0.82,
+      lift: -0.48,
+      edge: 0.25,
+      edgeEnd: 0.3,
+      bow: 0,
+    },
+    duration: 3.5,
+    advance: "manual",
+    mappings: [
+      ["value", "brightness", 450, 5500],
+      ["progress", "width", 0.9, 0.3],
+      ["progress", "density", 8, 2],
+    ],
+  },
+  {
+    id: "interior",
+    name: "Interior setup · hanging voices",
+    model: "piano",
+    notes:
+      "A setup gesture through the interior: modest chord development and sustained notes. This sketch does not claim a real multi-pour route.",
+    probe: {
+      hue: 20,
+      hueTravel: 150,
+      lightness: 0.6,
+      lift: -0.1,
+      edge: 0.65,
+      edgeEnd: 0.35,
+      bow: -0.3,
+    },
+    duration: 4.5,
+    advance: "progress",
+    mappings: [
+      ["chroma", "density", 2, 12],
+      ["progress", "sweepOffset", -0.25, 0.3],
+      ["envelope", "grains", 0, 0.2],
+    ],
+  },
+  {
+    id: "near-pass",
+    name: "Near pass · ribbon suspension",
+    model: "glass",
+    notes:
+      "Passes a separate target without a success gesture. A restrained sweep leaves the musical state open.",
+    probe: {
+      hue: 270,
+      hueTravel: 30,
+      lightness: 0.6,
+      lift: 0.06,
+      edge: 0.4,
+      edgeEnd: 0.35,
+      bow: 0.08,
+    },
+    duration: 2.6,
+    advance: "manual",
+    mappings: [
+      ["targetNear", "sweepOffset", -0.25, 0.25],
+      ["envelope", "ribbon", 0.35, 0.8],
+      ["progress", "density", 4, 1],
+    ],
+  },
+].map((study) => ({
+  id: `study-${study.id}`,
+  name: study.name,
+  notes: study.notes,
+  scope: "all",
+  updatedAt: "2026-09-12T00:00:00Z",
+  setup: sanitizeSetup({
+    parameters: {
+      ...DEFAULTS,
+      ...SOUND_MODELS.find((m) => m.id === study.model)!.values,
+      music: {
+        ...DEFAULTS.music,
+        progression: study.id === "interior" ? "neighbors" : "still",
+        sustain: study.id === "interior",
+        stack: study.model === "convergence" ? "triad" : DEFAULTS.music.stack,
+      },
+    },
+    journey: {
+      ...JOURNEY_DEFAULTS,
+      probe: study.probe,
+      duration: study.duration,
+      advance: study.advance,
+      outcome: study.id === "near-pass" ? "miss" : "capture",
+      density: study.model === "glass" ? 3 : 7,
+    },
+    mappings: study.mappings.map(([source, target, low, high], i) => ({
+      id: `study-${i}`,
+      source,
+      target,
+      low,
+      high,
+      enabled: true,
+      curve: "ease",
+      smooth: 0.2,
+    })),
+  }),
+}));

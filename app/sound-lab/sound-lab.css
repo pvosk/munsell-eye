@@ -1514,3 +1514,27 @@
 .sl-harmony-state { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid rgba(170,214,204,.22); border-radius: 10px; margin-bottom: 16px; }
 .sl-harmony-state small { letter-spacing: .12em; color: #a5d8cc; }
 .sl-harmony-state span { opacity: .8; font-size: 13px; }
+.sl-transport { position: sticky; top: 0; z-index: 30; background: #182327f5; border-bottom: 1px solid #a0d9c850; backdrop-filter: blur(14px); padding: 8px 0; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.sl-transport .sl-tabs { position: static; padding: 0; margin: 0; background: transparent; }
+.sl-transport .sl-tabs button { min-width: 70px; font-size: 14px; padding: 8px 10px; }
+.sl-transport-actions { display: flex; flex: 1; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sl-transport-actions button,.sl-transport-actions select { min-height: 36px; padding: 7px 10px; font-size: 13px; width: auto; }
+.sl-transport-actions select { max-width: 170px; }
+.sl-transport > small { flex-basis: 100%; opacity: .65; }
+.sl-transport kbd { font: inherit; opacity: .65; }
+.sl-map-disclosure > summary { cursor: pointer; font-size: 18px; }
+.sl-map-disclosure .sl-shot { margin-top: 18px; }
+.sl-editable-trace { width: 100%; display: block; touch-action: none; }
+.sl-editable-trace g:focus-visible circle { stroke: white; stroke-width: 4px; }
+.sl-probe-editor { padding: 12px; }
+.sl-probe-editor p { font-size: 12px; }
+.sl-progression-tiles { display: grid; grid-template-columns: repeat(auto-fit,minmax(110px,1fr)); gap: 8px; margin-bottom: 18px; }
+.sl-progression-tiles button { aspect-ratio: 1.3; display: flex; flex-direction: column; justify-content: center; gap: 8px; border-width: 2px; background: #243237; padding: 12px; }
+.sl-progression-tiles button[aria-pressed=true] { background: #a0d9c829; box-shadow: inset 0 0 0 1px #ffffff40; }
+.sl-progression-tiles small,.sl-progression-tiles span { font-size: 11px; opacity: .8; }
+.sl-shot-view:has(.sl-probe-editor) .sl-shot-badge { position: static; margin: 0 12px 12px; }
+.sl-music-core { margin: 18px 0; }
+.sl-music-advanced { margin-top: 18px; }
+.sl-music-advanced > summary { cursor: pointer; padding: 12px 0; }
+.sl-progression-tiles { grid-template-columns: repeat(auto-fill,minmax(112px,140px)); }
+.sl-progression-tiles button { aspect-ratio: 1; }

@@ -32,10 +32,12 @@ export type Journey = {
   repeat: boolean;
   gap: number;
   probe: Probe;
+  target: { hue: number; lightness: number; edge: number } | null;
 };
 export const JOURNEY_DEFAULTS: Journey = {
   rhythm: "density",
   path: "probe",
+  target: null,
   paint: { level: 0, before: [1, 0, 0], index: 1, hold: 0.65, target: null },
   duration: 2.8,
   outcome: "capture",
@@ -161,6 +163,7 @@ export function sampleProbe(p: Probe, t: number): ColorSample {
 }
 export const INPUTS = [
   ["progress", "Shot progress"],
+  ["targetNear", "Target proximity (audition)"],
   ["speed", "Color travel speed"],
   ["hue", "Hue position (cyclic)"],
   ["hueTravel", "Accumulated hue travel"],
@@ -176,6 +179,9 @@ export const INPUTS = [
 export type Signal = (typeof INPUTS)[number][0];
 export type Signals = Record<Signal, number>;
 export const OUTPUTS = [
+  ["wander", "Cloud wandering", 0, 12],
+  ["wanderRate", "Cloud wander speed", 0.03, 2],
+  ["shotArps", "Arpeggio layer", 0, 1],
   ["saturate", "Parallel saturation", 0, 1],
   ["fold", "Wavefold blend", 0, 1],
   ["crossover", "Crossover blend", 0, 1],
@@ -253,6 +259,7 @@ export function curve(x: number, kind: Mapping["curve"]) {
 export function signalPath(
   samples: ColorSample[],
   duration: number,
+  target: Pick<ColorSample, "l" | "c" | "h"> = samples.at(-1)!,
 ): Signals[] {
   let edgeRun = 0,
     hueTravel = 0,
@@ -277,6 +284,17 @@ export function signalPath(
       );
     return {
       progress: i / Math.max(1, samples.length - 1),
+      targetNear:
+        1 -
+        clamp(
+          Math.hypot(
+            s.l - target.l,
+            s.c * Math.cos((s.h * Math.PI) / 180) -
+              target.c * Math.cos((target.h * Math.PI) / 180),
+            s.c * Math.sin((s.h * Math.PI) / 180) -
+              target.c * Math.sin((target.h * Math.PI) / 180),
+          ) / 0.4,
+        ),
       speed: clamp((dist / Math.max(0.001, dt)) * 5),
       hue: chromatic * (0.5 + 0.5 * Math.sin((s.h * Math.PI) / 180)),
       hueTravel: clamp(hueTravel / 180),
@@ -317,6 +335,14 @@ export function sanitizeJourney(value: unknown): Journey {
     p = v.probe ?? d.probe;
   const paint = v.paint ?? d.paint;
   return {
+    target:
+      v.target && typeof v.target === "object"
+        ? {
+            hue: num(v.target.hue, 0, 0, 720),
+            lightness: num(v.target.lightness, 0.6, 0.04, 0.96),
+            edge: num(v.target.edge, 0.6, 0, 1),
+          }
+        : null,
     rhythm: v.rhythm === "motif" ? "motif" : "density",
     path: v.path === "paint" ? "paint" : "probe",
     paint: {
@@ -395,5 +421,69 @@ export function arrivalShape(
         ? 0.45 + 0.35 * Math.sin((Math.PI * a) / 0.65)
         : 0.45 * (1 - (a - 0.65) / 0.35)
       : 1 - a,
+  };
+}
+
+export function journeyTarget(
+  j: Journey,
+  samples: ColorSample[],
+): Pick<ColorSample, "l" | "c" | "h"> {
+  if (j.path === "paint" && j.paint.target) {
+    const [l, a, b] = j.paint.target;
+    return { l, c: Math.hypot(a, b), h: (Math.atan2(b, a) * 180) / Math.PI };
+  }
+  if (j.path !== "probe" || j.outcome === "capture") return samples.at(-1)!;
+  const p = j.probe,
+    t = j.target ?? {
+      hue: p.hue + p.hueTravel + 25,
+      lightness: clamp(p.lightness + p.lift + 0.1, 0.04, 0.96),
+      edge: p.edgeEnd,
+    };
+  return sampleProbe(
+    {
+      ...p,
+      hue: t.hue,
+      lightness: t.lightness,
+      edge: t.edge,
+      hueTravel: 0,
+      lift: 0,
+      bow: 0,
+    },
+    0,
+  );
+}
+
+/** Move an audition handle without reversing a path when hue crosses the seam. */
+export function moveProbePoint(
+  j: Journey,
+  id: "start" | "land" | "target",
+  h: number,
+  l: number,
+): Partial<Journey> {
+  const p = j.probe,
+    wrap = (x: number) => ((x % 360) + 360) % 360,
+    delta = (from: number, to: number) =>
+      ((wrap(to) - wrap(from) + 540) % 360) - 180;
+  l = clamp(l, 0.04, 0.96);
+  if (id === "start")
+    return {
+      probe: {
+        ...p,
+        hue: wrap(h),
+        hueTravel: p.hueTravel - delta(p.hue, h),
+        lightness: l,
+        lift: p.lightness + p.lift - l,
+      },
+    };
+  if (id === "land")
+    return {
+      probe: {
+        ...p,
+        hueTravel: p.hueTravel + delta(p.hue + p.hueTravel, h),
+        lift: l - p.lightness,
+      },
+    };
+  return {
+    target: { hue: wrap(h), lightness: l, edge: j.target?.edge ?? p.edgeEnd },
   };
 }

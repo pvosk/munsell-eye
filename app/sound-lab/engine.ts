@@ -3,6 +3,7 @@ import { type Setup } from "./presets";
 import {
   sampleProbe,
   arrivalShape,
+  journeyTarget,
   signalPath,
   mapSignals,
   clamp,
@@ -60,6 +61,7 @@ export class SoundLabEngine {
   private shotStartHarmony = 0;
   private arrivalStart = 0;
   private arrivalCaptured = false;
+  private captureOverride = false;
   private arrivalFrom: number[] = [];
   private playingGroup = 100;
   motifPlaying = false;
@@ -594,11 +596,11 @@ export class SoundLabEngine {
     this.cancelGesture();
     this.announceMusic();
   }
-  nextHarmony() {
+  nextHarmony(position = this.musicStep + 1) {
     if (!this.running) return;
     this.wakeAudio();
     this.resolved = false;
-    this.musicStep++;
+    this.musicStep = Math.max(0, Math.round(position));
     this.updateField();
     this.announceMusic();
     if (this.motifPlaying) {
@@ -718,16 +720,76 @@ export class SoundLabEngine {
     this.shotPhase = "idle";
     this.shotPaused = false;
   }
-  configure(setup: Setup) {
+  configure(setup: Setup, samples?: ColorSample[]) {
+    const old = this.shotSetup;
+    const modelChanged =
+      this.parameters.instrument !== setup.parameters.instrument;
     this.update(setup.parameters);
-    if (this.shotSetup) this.shotSetup = { ...setup };
+    if (
+      setup.parameters.instrument === "convergence" &&
+      setup.parameters.shotArps === 0
+    )
+      this.stopMotif();
+    if (modelChanged && this.running) {
+      for (const note of this.activeNotes)
+        if (note.group === 100) this.sonic?.send("/n_free", note.id);
+      this.activeNotes = this.activeNotes.filter((note) => note.group !== 100);
+      this.clearEffects();
+    }
+    if (!old) return;
+    const changedPath =
+      JSON.stringify(old.journey.probe) !==
+        JSON.stringify(setup.journey.probe) ||
+      old.journey.path !== setup.journey.path ||
+      JSON.stringify(old.journey.target) !==
+        JSON.stringify(setup.journey.target) ||
+      old.journey.outcome !== setup.journey.outcome;
+    if (
+      this.shotPhase === "flight" &&
+      old.journey.duration !== setup.journey.duration
+    )
+      this.shotTime = this.progress * setup.journey.duration;
+    if (
+      this.shotPhase === "arrival" &&
+      old.journey.arrival !== setup.journey.arrival
+    )
+      this.arrivalStart =
+        this.shotTime -
+        ((this.shotTime - this.arrivalStart) * setup.journey.arrival) /
+          old.journey.arrival;
+    this.shotSetup = { ...setup };
+    if (samples) this.shotSamples = samples;
+    else if (changedPath && setup.journey.path === "probe")
+      this.shotSamples = Array.from({ length: 193 }, (_, i) =>
+        sampleProbe(setup.journey.probe, i / 192),
+      );
+    if (
+      samples ||
+      changedPath ||
+      old.journey.duration !== setup.journey.duration
+    )
+      this.shotSignals = signalPath(
+        this.shotSamples,
+        setup.journey.duration,
+        journeyTarget(setup.journey, this.shotSamples),
+      );
+    if (
+      this.running &&
+      this.shotPhase === "settled" &&
+      setup.journey.repeat &&
+      !this.shotTimer
+    ) {
+      this.shotLast = performance.now();
+      this.shotTimer = setTimeout(this.runShot, 25);
+    }
   }
-  playShot(setup: Setup, samples?: ColorSample[]) {
+  playShot(setup: Setup, samples?: ColorSample[], captureOverride = false) {
     if (!this.running || this.audioPaused) return;
     this.wakeAudio();
     this.stopMotif();
     this.cancelShot();
     this.shotSetup = setup;
+    this.captureOverride = captureOverride;
     this.update(setup.parameters);
     this.seed = setup.parameters.music.seed;
     this.shotSamples =
@@ -735,7 +797,11 @@ export class SoundLabEngine {
       Array.from({ length: 193 }, (_, i) =>
         sampleProbe(setup.journey.probe, i / 192),
       );
-    this.shotSignals = signalPath(this.shotSamples, setup.journey.duration);
+    this.shotSignals = signalPath(
+      this.shotSamples,
+      setup.journey.duration,
+      journeyTarget(setup.journey, this.shotSamples),
+    );
     this.shotTime = 0;
     this.progress = 0;
     this.emission = 0;
@@ -751,7 +817,11 @@ export class SoundLabEngine {
     if (setup.journey.advance === "shot") this.musicStep++;
     this.arrivalFrom = [];
     this.shotLast = performance.now();
-    if (setup.parameters.music.melody !== "grid") this.note(0, 0, 0.8, 0);
+    if (
+      setup.parameters.music.melody !== "grid" &&
+      setup.parameters.shotArps > 0
+    )
+      this.note(0, 0, 0.8 * setup.parameters.shotArps, 0);
     this.runShot();
   }
   private flightTimbre(progress: number): (string | number)[] {
@@ -779,9 +849,26 @@ export class SoundLabEngine {
     if (!this.sonic || !this.shotSetup) return;
     const p = this.parameters;
     const fs = this.currentFrequencies();
+    const destination =
+      p.music.source === "custom"
+        ? this.currentTones().map(midiHz)
+        : harmonicFrame(p.music, p.music.destinationStep).tones.map(midiHz);
+    const gather = Math.max(
+      arrival,
+      clamp(p.converge),
+      0.88 *
+        Math.pow(
+          clamp((this.progress - p.gatherStart) / (1 - p.gatherStart)),
+          p.gatherCurve,
+        ),
+    );
+    const cloud = cloudFrequencies(p, this.shotTime, destination, gather);
     this.sonic.send(
       "/n_set",
       103,
+      "cloud",
+      p.instrument === "convergence" ? 1 : 0,
+      ...cloud.flatMap((f, i) => [`v${i}`, f]),
       "amp",
       level * p.drive,
       ...this.flightTimbre(this.progress),
@@ -871,15 +958,16 @@ export class SoundLabEngine {
             ? pattern[k + 1].beat - n.beat
             : m.spacing / (m.melody === "grid" ? m.offspring + 1 : 1) + m.rest;
         this.nextEmission = this.shotTime + (beats * 60) / m.bpm;
-        if (!n.skip)
+        if (!n.skip && this.parameters.shotArps > 0)
           this.playHz(
             midiHz(n.midi + 12 * (this.mapped.register ?? 0)),
             this.shotIndex % 6,
-            n.strength * 0.75,
+            n.strength * 0.75 * this.parameters.shotArps,
             n.pan,
           );
       }
-      if (this.progress >= 1) this.beginArrival(j.outcome === "capture");
+      if (this.progress >= 1)
+        this.beginArrival(this.captureOverride || j.outcome === "capture");
     } else if (this.shotPhase === "arrival") {
       const a = clamp((this.shotTime - this.arrivalStart) / j.arrival);
       const shape = arrivalShape(
@@ -895,7 +983,12 @@ export class SoundLabEngine {
       }
     } else if (this.shotPhase === "settled") {
       if (j.repeat && this.shotTime > j.duration + j.arrival + j.gap) {
-        this.playShot(this.shotSetup, this.shotSamples);
+        this.playShot(
+          this.shotSetup,
+          this.shotSetup.journey.path === "paint"
+            ? this.shotSamples
+            : undefined,
+        );
         return;
       }
       if (!j.repeat) {
@@ -1045,4 +1138,30 @@ export class SoundLabEngine {
     this.sonic = null;
     this.context = null;
   }
+}
+
+/** Original 18-voice cloud: compact start, independent wandering, one harmonic destination. */
+export function cloudFrequencies(
+  p: Parameters,
+  time: number,
+  destination: number[],
+  gather: number,
+) {
+  const t = clamp(gather),
+    center =
+      (p.music.source === "custom"
+        ? 69 + 12 * Math.log2(p.root / 440)
+        : harmonicFrame(p.music, 0).root) + 12;
+  return Array.from({ length: 18 }, (_, i) => {
+    const phase = (p.music.seed % 997) * 0.031 + i * 2.39996;
+    const start = center + Math.sin(phase) * p.spread * 9;
+    const wander =
+      (Math.sin(time * p.wanderRate * 6.283 + phase) - Math.sin(phase)) *
+      p.wander;
+    const target =
+      69 +
+      12 * Math.log2(destination[i % 6] / 440) +
+      (i < 6 ? -12 : i < 12 ? 0 : 12);
+    return midiHz((start + wander) * (1 - t) + target * t);
+  });
 }
