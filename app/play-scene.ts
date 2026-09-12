@@ -39,14 +39,15 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const blobMaterial = new THREE.MeshBasicMaterial({ color: '#dbd8ca', vertexColors: true });
   const body = new THREE.Mesh(blobGeometry, blobMaterial);
   blob.add(body);
-  const tendrils = Array.from({ length: 5 }, (_, strand) => {
+  const tendrils = Array.from({ length: 11 }, (_, strand) => {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(26 * 6), 3));
     const indices: number[] = [];
     for (let i = 0; i < 25; i++) { const n = i * 2; indices.push(n,n+1,n+2,n+1,n+3,n+2); }
     geometry.setIndex(indices);
     const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: '#dbd8ca', side: THREE.DoubleSide }));
-    mesh.userData.phase = strand * Math.PI * 2 / 5;
+    mesh.userData.phase = strand * 2.399963;
+    mesh.userData.lane = (strand-5)/5;
     mesh.frustumCulled = false; blob.add(mesh); return mesh;
   });
   const outline = new THREE.Mesh(blobGeometry, new THREE.MeshBasicMaterial({ color: '#fff5d9', side: THREE.BackSide, transparent: true, opacity: .9, depthWrite: false }));
@@ -412,9 +413,13 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       const low = noise.noise(x * 1.35 + shapeTime, y * 1.35, z * 1.35 - shapeTime * .6);
       const fine = noise.noise(x * 2.6, y * 2.6 + shapeTime * .5, z * 2.6);
       const radius = .24 * (1 + low * (.08 + tension * .025) + fine * .012);
-      const bell = 1 + .12 * Math.sin(z * 2 + shapeTime * 2);
       const taper=1-tension*(.12+.34*Math.max(0,z));
-      positions.setXYZ(i, x * radius * bell*taper, y * radius * bell*taper, z * radius * (.8+tension*.22));
+      // A thin diamond membrane rather than a spherical bell. Rear ribbons
+      // overlap its broad trailing edge, making one continuous silhouette.
+      const ring=Math.sqrt(Math.max(.000001,1-z*z));
+      const wing=(1-Math.abs(z))*.37;
+      const flutter=(reduced?0:Math.sin(shapeTime*2+x*3+z*2)*.012)*(1-Math.abs(z));
+      positions.setXYZ(i, x/ring*wing*(radius/.24)*taper, y*.065*(radius/.24)+flutter, z*.31*(1+tension*.16));
     }
     positions.needsUpdate = true;
     const idleFacing = targetAnchor.clone().sub(blob.position).normalize();
@@ -430,16 +435,18 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       mesh.material.color.copy(blobMaterial.color);
       const attribute = mesh.geometry.getAttribute('position');
       const phase = mesh.userData.phase as number;
-      const length = .7 + Math.min(.8, speed * .035);
+      const lane = mesh.userData.lane as number;
+      const length = .95+.35*(.5+.5*Math.cos(phase)) + Math.min(.65, speed * .03);
       for (let j = 0; j < 26; j++) {
         const t = j / 25;
         const ripple = reduced ? 0 : Math.sin(t * (6+tension*3) - ribbonPhase + phase) * (.1+energy*.065) * t;
-        const spread = .17 + t * .12 + ripple;
-        const x = Math.cos(phase) * spread, y = Math.sin(phase) * spread;
-        const w = finWidth(t);
-        const wx=-Math.sin(phase)*w, wy=Math.cos(phase)*w;
-        attribute.setXYZ(j*2,x-wx,y-wy,-.10-t*length);
-        attribute.setXYZ(j*2+1,x+wx,y+wy,-.10-t*length);
+        const rootZ=-.09-.035*(1-Math.abs(lane));
+        const x=lane*(.245+t*.12)+ripple*.55;
+        const y=(reduced?0:Math.sin(t*7-ribbonPhase+phase)*.065*t)+lane*.008;
+        const w=finWidth(t)*(.72+.20*(1-Math.abs(lane)));
+        const fold=(reduced?0:Math.sin(t*5-ribbonPhase*.7+phase))*.28*t;
+        attribute.setXYZ(j*2,x-w,y-w*fold,rootZ-t*length);
+        attribute.setXYZ(j*2+1,x+w,y+w*fold,rootZ-t*length);
       }
       attribute.needsUpdate = true;
     });

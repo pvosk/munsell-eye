@@ -20,7 +20,8 @@ export function fieldRevealPlan(reveal:PaletteReveal,points:ColorPoint[]):Float3
     const timing=reveal.bridgeTimings[k],t=timing.reverse?1-i/(path.length-1):i/(path.length-1);
     // Inverse quintic easing makes cell arrival follow the old graph wave.
     let lo=0,hi=1;for(let n=0;n<16;n++){const mid=(lo+hi)/2;if(easeQuint(mid)<t)lo=mid;else hi=mid;}
-    return {position:point.position,time:(timing.delay+timing.duration*(lo+hi)/2)*.66};
+    // Overlapping edge fronts: retain seeded topology, compress the waits.
+    return {position:point.position,time:.045+.08*(timing.delay-.12)/.64+.30*(timing.duration/.64)*(lo+hi)/2};
   }));
   const samples=reveal.samples.map(s=>s.point.position);
   points.forEach((point,i)=>{
@@ -29,10 +30,13 @@ export function fieldRevealPlan(reveal:PaletteReveal,points:ColorPoint[]):Float3
     for(const arc of arcs){const d=distance(position,arc.position);if(d<nearest){nearest=d;arcTime=arc.time;}}
     let paletteDistance=nearest;for(const sample of samples)paletteDistance=Math.min(paletteDistance,distance(position,sample));
     const d=Math.sqrt(paletteDistance),phase=.5+.5*Math.sin(point.position[0]*.53+point.position[1]*.71+point.position[2]*.37);
-    result[i*2]=nearest<1.8**2?arcTime: d<2.4?.53+.10*phase:.66+.22*(1-Math.exp(-(d-2.4)/12))+.015*phase;
+    // Interior cells inherit their nearest arc's arrival, then a positive
+    // inward propagation delay. They cannot precede their source front.
+    const interiorTime=arcTime+.045+.12*(1-Math.exp(-Math.sqrt(nearest)/12))+.012*phase;
+    result[i*2]=nearest<1.8**2?arcTime: d<2.4?interiorTime:.64+.22*(1-Math.exp(-(d-2.4)/12))+.015*phase;
   });
   // Highlight the nearest actual cells; never add surrogate paint spheres.
-  for(const seed of reveal.seeds){let index=0,best=Infinity;points.forEach((point,i)=>{const d=distance(seed.position,point.position);if(d<best){best=d;index=i;}});result[index*2]=0;result[index*2+1]=1;}
+  reveal.seeds.forEach((seed,k)=>{let index=0,best=Infinity;points.forEach((point,i)=>{const d=distance(seed.position,point.position);if(d<best){best=d;index=i;}});result[index*2]=.024*k/Math.max(1,reveal.seeds.length-1);result[index*2+1]=1;});
   entries.set(points,result);return result;
 }
 export function paletteReveal(paints:PaintColor[]):PaletteReveal{

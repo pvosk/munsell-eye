@@ -22,6 +22,7 @@ import { HarmonyJourney } from "./harmony-journey";
 import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
 import { StudyBrowser } from "./study-browser";
+import { SoundModeNav } from "./mode-nav";
 import {
   JOURNEY_STUDIES,
   STUDY_FAMILIES,
@@ -583,7 +584,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
     <main className="sl-root sl-v2">
       <header className="sl-header">
         <a className="sl-back" href="/?mode=play">
-          ← Chroma Glider
+          ◐ Munsell Eye
         </a>
         <strong>Sound lab</strong>
         <span className="sl-status">
@@ -595,6 +596,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 : "Audio ready"
               : "Audio off"}
         </span>
+        <SoundModeNav />
       </header>
       <div className="sl-workspace">
         <div className="sl-master">
