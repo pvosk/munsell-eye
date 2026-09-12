@@ -5,7 +5,7 @@ import {
   sanitizeMusic,
   type MusicSettings,
 } from "./music";
-export type Instrument = "glass" | "piano" | "synth" | "convergence";
+export type Instrument = "glass" | "piano" | "synth" | "convergence" | "vocal";
 export type Parameters = {
   instrument: Instrument;
   filterFollow: "chord" | "manual";
@@ -17,6 +17,26 @@ export type Parameters = {
   spread: number;
   converge: number;
   drive: number;
+  saturate: number;
+  textureDrive: number;
+  fold: number;
+  crossover: number;
+  crossGap: number;
+  inside: number;
+  shred: number;
+  shredRate: number;
+  shredLength: number;
+  shredScatter: number;
+  shredReverse: number;
+  vowel: number;
+  formantShift: number;
+  breath: number;
+  vibrato: number;
+  vibratoRate: number;
+  glideTime: number;
+  glideStart: number;
+  glideCurve: number;
+
   resonance: number;
   sweepDepth: number;
   sweepOffset: number;
@@ -66,6 +86,26 @@ export const DEFAULTS: Parameters = {
   spread: 0.6,
   converge: 0,
   drive: 0.25,
+  saturate: 0,
+  textureDrive: 3,
+  fold: 0,
+  crossover: 0,
+  crossGap: 0.08,
+  inside: 0,
+  shred: 0,
+  shredRate: 8,
+  shredLength: 0.12,
+  shredScatter: 0.5,
+  shredReverse: 0.35,
+  vowel: 0.2,
+  formantShift: 0,
+  breath: 0.08,
+  vibrato: 0.12,
+  vibratoRate: 4.5,
+  glideTime: 0.6,
+  glideStart: -5,
+  glideCurve: 1,
+
   resonance: 0.075,
   sweepDepth: 0.4,
   sweepOffset: 0,
@@ -123,6 +163,179 @@ export const GROUPS: {
   subtitle: string;
   sliders: SliderSpec[];
 }[] = [
+  {
+    name: "Parallel texture",
+    subtitle:
+      "Independent branches before the ribbon and delays. All blends start at zero.",
+    sliders: [
+      {
+        key: "saturate",
+        label: "Parallel saturation",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Two serial soft-clipping stages, blended with the clean signal.",
+      },
+      {
+        key: "textureDrive",
+        label: "Texture drive",
+        min: 1,
+        max: 16,
+        step: 0.1,
+        hint: "Input gain for the distortion branches; separate from propulsion level.",
+      },
+      {
+        key: "fold",
+        label: "Wavefold blend",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Reflect peaks back into the waveform; richer upper harmonics.",
+      },
+      {
+        key: "crossover",
+        label: "Crossover blend",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Core-UGen dead-zone approximation, not the CrossoverDistortion extension.",
+      },
+      {
+        key: "crossGap",
+        label: "Crossover gap",
+        min: 0,
+        max: 0.5,
+        step: 0.01,
+        hint: "Width of the dead zone around zero.",
+      },
+      {
+        key: "inside",
+        label: "Inside-out blend",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Smoothed polarity inversion transfer; not the InsideOut extension. Does not inherently widen stereo.",
+      },
+    ],
+  },
+  {
+    name: "Buffer shredder",
+    subtitle:
+      "Clocked, reordered slices of the six-second live buffer. Clear effect memory empties it.",
+    sliders: [
+      {
+        key: "shred",
+        label: "Buffer shred blend",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Clocked slices from recent input; independent from the free granular cloud.",
+      },
+      {
+        key: "shredRate",
+        label: "Slices / second",
+        min: 1,
+        max: 32,
+        step: 0.1,
+        hint: "Regular slice clock. No hidden phrase loop.",
+      },
+      {
+        key: "shredLength",
+        label: "Slice length",
+        min: 0.02,
+        max: 0.5,
+        step: 0.01,
+        hint: "Length of each windowed fragment, in seconds.",
+      },
+      {
+        key: "shredScatter",
+        label: "Reorder depth",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        hint: "Random lookback variation in seconds; zero repeats a fixed moving lookback.",
+      },
+      {
+        key: "shredReverse",
+        label: "Reverse probability",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Chance that each slice plays backward.",
+      },
+    ],
+  },
+  {
+    name: "Vocal glide",
+    subtitle:
+      "Continuous vowel-like shot body with soft synth arpeggios. These controls affect the Vocal glide model.",
+    sliders: [
+      {
+        key: "vowel",
+        label: "Vowel \u00b7 oo \u2192 ah",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Moves three formants independently of pitch. Vocal model only.",
+      },
+      {
+        key: "formantShift",
+        label: "Formant shift",
+        min: -12,
+        max: 12,
+        step: 0.1,
+        hint: "Shifts vocal resonances in semitones without changing the sung note.",
+      },
+      {
+        key: "breath",
+        label: "Breath",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Filtered noise mixed into the vowel source.",
+      },
+      {
+        key: "vibrato",
+        label: "Vibrato depth",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Pitch vibrato in semitones; vocal model only.",
+      },
+      {
+        key: "vibratoRate",
+        label: "Vibrato rate",
+        min: 0.2,
+        max: 8,
+        step: 0.1,
+        hint: "Vibrato cycles per second.",
+      },
+      {
+        key: "glideTime",
+        label: "Note glide time",
+        min: 0.02,
+        max: 3,
+        step: 0.01,
+        hint: "Continuous smoothing between harmonic destinations in the shot body.",
+      },
+      {
+        key: "glideStart",
+        label: "Launch pitch offset",
+        min: -24,
+        max: 24,
+        step: 0.1,
+        hint: "Semitones below or above the harmonic voice at launch; returns to zero over the shot.",
+      },
+      {
+        key: "glideCurve",
+        label: "Shot glide curve",
+        min: 0.25,
+        max: 4,
+        step: 0.05,
+        hint: "One is an even semitone glide; higher values linger before approaching the destination.",
+      },
+    ],
+  },
   {
     name: "Instrument detail",
     subtitle: "Each sound model uses its own excitation",
@@ -589,7 +802,9 @@ export function sanitizeParameters(value: unknown): Parameters {
     p.intervals = data.intervals.map((v) => Math.min(3600, Math.max(-1200, v)));
   }
   if (
-    ["glass", "piano", "synth", "convergence"].includes(String(data.instrument))
+    ["glass", "piano", "synth", "convergence", "vocal"].includes(
+      String(data.instrument),
+    )
   )
     p.instrument = data.instrument as Instrument;
   p.filterFollow = data.filterFollow === "manual" ? "manual" : "chord";
@@ -694,6 +909,24 @@ export const SOUND_MODELS: {
       room: 0.35,
       drive: 0.25,
       tension: 0,
+    },
+  },
+  {
+    id: "vocal",
+    name: "Vocal glide",
+    description:
+      "Vowel-like shot body · independent pitch and formant motion · soft synth arpeggios",
+    values: {
+      instrument: "vocal",
+      drive: 0.45,
+      glideStart: -5,
+      glideTime: 0.6,
+      vowel: 0.2,
+      breath: 0.08,
+      ribbon: 0.15,
+      echo: 0.18,
+      grains: 0.08,
+      reverse: 0.05,
     },
   },
 ];

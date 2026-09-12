@@ -205,6 +205,14 @@ function flight() {
     detune: 0.1,
     width: 0.8,
     normalize: 0.4,
+    vocal: 0,
+    vowel: 0.2,
+    formantRatio: 1,
+    breath: 0.08,
+    vibrato: 0.12,
+    vibratoRate: 4.5,
+    glideTime: 0.6,
+    glideRatio: 1,
     f0: 110,
     f1: 165,
     f2: 220,
@@ -217,7 +225,7 @@ function flight() {
     right = [];
   for (let i = 0; i < 18; i++) {
     const target = g.mul(
-      g.lag(p[`f${i % 6}`], 0.3),
+      g.lag(p[`f${i % 6}`], p.glideTime),
       i < 6 ? 0.5 : i < 12 ? 1 : 2,
     );
     const deviation = (Math.sin(i * 17.31) * 0.5 + 0.5) * 1.8 - 0.7;
@@ -229,9 +237,43 @@ function flight() {
       g.node("SinOsc", 1, [0.09 + i * 0.007, i]),
       g.mul(p.detune, 0.004),
     );
-    const tone = g.add(
+    const vf = g.mul(
+      g.mul(f, p.glideRatio),
+      g.add(
+        1,
+        g.mul(
+          g.node("SinOsc", 1, [p.vibratoRate, i * 0.2]),
+          g.mul(p.vibrato, 0.05776),
+        ),
+      ),
+    );
+    const vocalInput = g.add(
+      g.node("Saw", 2, [vf]),
+      g.mul(g.node("PinkNoise", 2), p.breath),
+    );
+    const vowelTone = g.sum(
+      [
+        [350, 800, 1],
+        [800, 1200, 0.55],
+        [2200, 2600, 0.25],
+      ].map(([lo, hi, amp]) =>
+        g.mul(
+          g.node("BPF", 2, [
+            vocalInput,
+            g.mul(g.add(lo, g.mul(g.lag(p.vowel), hi - lo)), p.formantRatio),
+            0.12,
+          ]),
+          amp * 2,
+        ),
+      ),
+    );
+    const ordinary = g.add(
       g.node("SinOsc", 2, [g.mul(f, g.add(1, drift)), i * 0.27]),
       g.mul(g.node("Saw", 2, [f]), g.mul(p.harmonics, 0.28)),
+    );
+    const tone = g.add(
+      g.mul(ordinary, g.sub(1, p.vocal)),
+      g.mul(vowelTone, p.vocal),
     );
     const level = g.lag(g.node("Clip", 1, [g.sub(p.voices, i), 0, 1]), 0.18);
     const amp = g.mul(
@@ -313,6 +355,17 @@ function space() {
     dry: 1,
     grainRoute: 0,
     wet: 1,
+    saturate: 0,
+    textureDrive: 3,
+    fold: 0,
+    crossover: 0,
+    crossGap: 0.08,
+    inside: 0,
+    shred: 0,
+    shredRate: 8,
+    shredLength: 0.12,
+    shredScatter: 0.5,
+    shredReverse: 0.35,
     f0: 165,
     f1: 247.5,
     f2: 330,
@@ -353,6 +406,29 @@ function space() {
     ],
     2,
   );
+  const sliceClock = g.node("Impulse", 2, [p.shredRate, 0]);
+  const sliceOffset = g.node("TRand", 2, [0, p.shredScatter, sliceClock]);
+  const sliceReverse = g.op(
+    g.node("TRand", 2, [0, 1, sliceClock]),
+    p.shredReverse,
+    8,
+  ); // '<'
+  const slices = g.node(
+    "GrainBuf",
+    2,
+    [
+      sliceClock,
+      p.shredLength,
+      p.buf,
+      g.sub(1, g.mul(sliceReverse, 2)),
+      g.sub(position, g.div(sliceOffset, 6)),
+      4,
+      pan,
+      -1,
+      64,
+    ],
+    2,
+  );
   const cloudGain = g.div(
     0.9,
     g.add(1, g.mul(p.density, g.mul(p.grain, 0.25))),
@@ -360,11 +436,43 @@ function space() {
   const brightness = g.lag(p.brightness, 0.22);
   const bandMix = g.lag(p.ribbon, 0.2);
   const channels = input.map((sig, channel) => {
-    const fragments = g.add(
+    const fragments = g.sum([
       g.mul(grains[channel], g.mul(p.reverse, 0.75)),
       g.mul(cloud[channel], g.mul(p.grains, cloudGain)),
+      g.mul(
+        slices[channel],
+        g.div(p.shred, g.add(1, g.mul(p.shredRate, p.shredLength))),
+      ),
+    ]);
+    const x = g.mul(sig, g.lag(p.textureDrive));
+    const absolute = (a) =>
+      g.sub(g.node("Clip", 2, [a, 0, 1000]), g.node("Clip", 2, [a, -1000, 0]));
+    const soft = (a) => g.div(a, g.add(1, absolute(a)));
+    const saturated = soft(g.mul(soft(x), 2));
+    const folded = g.node("Fold", 2, [x, -0.35, 0.35]);
+    const clipped = g.node("Clip", 2, [x, -1, 1]);
+    const crossed = g.add(
+      g.node("Clip", 2, [clipped, p.crossGap, 1]),
+      g.node("Clip", 2, [clipped, -1, g.mul(p.crossGap, -1)]),
     );
-    const routed = g.add(sig, g.mul(fragments, p.grainRoute));
+    // Smooth sign approximation makes silence map to silence, unlike a raw polarity jump.
+    const inverted = g.sub(
+      g.div(clipped, g.add(0.02, absolute(clipped))),
+      clipped,
+    );
+    const weights = [p.saturate, p.fold, p.crossover, p.inside].map((w) =>
+      g.lag(w),
+    );
+    const textured = g.div(
+      g.sum([
+        sig,
+        ...[saturated, folded, crossed, inverted].map((v, i) =>
+          g.mul(v, weights[i]),
+        ),
+      ]),
+      g.add(1, g.sum(weights)),
+    );
+    const routed = g.add(textured, g.mul(fragments, p.grainRoute));
     const bands = [1.5, 2.25, 3, 4.5].map((ratio, i) => {
       const wave = g.node("SinOsc", 1, [
         g.mul(

@@ -48,6 +48,9 @@ export function applyPreset(current: Setup, preset: Preset): Setup {
         journey: p.journey,
         parameters: {
           ...current.parameters,
+          glideTime: p.parameters.glideTime,
+          glideStart: p.parameters.glideStart,
+          glideCurve: p.parameters.glideCurve,
           music: p.parameters.music,
           root: p.parameters.root,
           intervals: p.parameters.intervals,
@@ -59,6 +62,9 @@ export function applyPreset(current: Setup, preset: Preset): Setup {
         parameters: {
           ...p.parameters,
           volume: current.parameters.volume,
+          glideTime: current.parameters.glideTime,
+          glideStart: current.parameters.glideStart,
+          glideCurve: current.parameters.glideCurve,
           music: current.parameters.music,
           root: current.parameters.root,
           intervals: current.parameters.intervals,
@@ -201,3 +207,31 @@ export const STARTERS: Preset[] = SOUND_MODELS.slice(0, 3).map((model, i) => ({
         : DEFAULT_MAPPINGS,
   }),
 }));
+
+STARTERS.push({
+  id: "starter-vocal",
+  name: "Vocal glide",
+  notes:
+    "An oo-to-ah shot body, rising five semitones toward the current harmony, with soft synth arpeggios.",
+  scope: "all",
+  updatedAt: "2026-09-12T00:00:00Z",
+  setup: sanitizeSetup({
+    parameters: {
+      ...DEFAULTS,
+      ...SOUND_MODELS.find((m) => m.id === "vocal")!.values,
+    },
+    journey: { ...JOURNEY_DEFAULTS, duration: 4, density: 4 },
+    mappings: [
+      {
+        id: "vowel-open",
+        enabled: true,
+        source: "progress",
+        target: "vowel",
+        low: 0.1,
+        high: 0.85,
+        curve: "ease",
+        smooth: 0.2,
+      },
+    ],
+  }),
+});
