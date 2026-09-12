@@ -19,9 +19,15 @@ The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json)
 
 Preserve pigment strength. Separate dose timing from flight animation. Score the original mixture endpoint, not target overlap or capture geometry. The visible global field is not the palette’s exclusively reachable gamut. Free base is one unscored part, not neutral paint. Style availability is not style resistance. Stored witness routes are not globally proven optimal routes.
 
-## Two-task working agreement to adopt
+## Offline inverse-planning pilot
 
-Use separate worktrees for concurrent code work and one publisher for the integrated result. Game work owns physics, course analysis, campaign data, and game UI; sound work owns its instrument until shared event hooks are agreed. Coordinate shared dependencies, navigation, and styles. This recommendation has not automatically moved either task.
+Read the [11 September inverse-planning findings](play-inverse-planning-findings.md) and its linked reproducible results. The pilot expands acceptable recipe endpoints and works backward through finishing pours, then independently audits competing routes. It found more supported witnesses but no all-base style-resistant finalists. This is research tooling, not a live generator replacement.
+
+## Two-task working agreement
+
+The game task now uses `/Users/atg_la02_macstudio/Documents/ChatGPT/Munsell Eye` on `main`. The sound task uses `/Users/atg_la02_macstudio/.codex/worktrees/10be/Munsell Eye` on `codex/sound-design`. The original repository remains intact at its previous Documents/Codex location, detached at efc2ede, with its pending sound notes preserved. Do not continue parallel edits or publish from that old checkout. The historical `candidate-search` archive is preserved and ignored in the game workspace.
+
+Use one publisher for the integrated result. Game work owns physics, course analysis, campaign data, and game UI; sound work owns its instrument until shared event hooks are agreed. Coordinate shared dependencies, navigation, and styles. Worktrees isolate edits, not shared ports or deployment destinations. Sound notes copied during handoff remain on the sound branch pending integration.
 
 ## How to keep this current
 

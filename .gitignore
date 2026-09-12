@@ -40,3 +40,6 @@ next-env.d.ts
 /work/
 /.image-review/
 *.tsbuildinfo
+
+# Local historical search archive, retained during worktree setup.
+/candidate-search/
