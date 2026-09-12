@@ -1,6 +1,6 @@
 # Chroma Glider — current engineering and design brief
 
-Updated 11 September 2026.
+Updated 12 September 2026.
 
 Read the [full engine, gameplay, course, and sonic handoff](archive/2026-09-11-chroma-glider-engine-gameplay-sound-brief.md). It is the current reference for the game and sound-design tasks.
 
@@ -24,6 +24,8 @@ Preserve pigment strength. Separate dose timing from flight animation. Score the
 Read the [11 September inverse-planning findings](play-inverse-planning-findings.md) and its linked reproducible results. The pilot expands acceptable recipe endpoints and works backward through finishing pours, then independently audits competing routes. It found more supported witnesses but no all-base style-resistant finalists. This is research tooling, not a live generator replacement.
 
 The [12 September recipe-blind validation study](play-blind-validation-findings.md) qualifies the pilot: shortest-found counts agree for 25/27 tested bases, with two known misses in the new checker. A ride classification changes with path sampling resolution, and raw minimum additions can differ from timing-supported minimum additions. Do not treat the unchanged live classifier as having incorporated these findings. Joint palette optimization is deferred pending measurement correction.
+
+The subsequent [fresh-target selection comparison](play-selection-holdout-findings.md) implements those corrections in separate offline scripts. Across 24 targets, stable measurement alone changes no eligibility counts; supported-minimum selection adds a Zorn value-shift candidate and flags a Cobalt Ember ride. Interior/balance selections persist. The recipe-blind challenger agrees on all 15 finalist raw minima, but reproduces supported minima for only 13. Live classification remains unchanged. Next research is backward setup-region proposal expansion, not further threshold tuning.
 
 ## Two-task working agreement
 
