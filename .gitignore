@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Local historical search archive, retained during worktree setup.
 /candidate-search/
+
+# Verbose broad-search cache; portable exact-witness shards and index are archived.
+/docs/play-broad-palette-bank.jsonl.gz

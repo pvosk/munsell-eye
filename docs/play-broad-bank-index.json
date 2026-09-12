@@ -1,0 +1,618 @@
+{
+  "version": "broad-portable-bank-1",
+  "sourceHash": "29e1ad197fcfd306ec3ea347de66a60e48be99b95c1b84671e54b799dff71bbd",
+  "policy": {
+    "version": "broad-mixing-bank-1",
+    "seed": 91228001,
+    "samplesPerPalette": 12,
+    "largePerSize": 512,
+    "sizes": [
+      3,
+      4,
+      5,
+      6,
+      8
+    ],
+    "shortlistPerCell": 3,
+    "deepPerSize": 4,
+    "glideLength": 30,
+    "setupLength": 6,
+    "abTravel": 0.04,
+    "neutralMaximum": 0.03
+  },
+  "pigments": [
+    {
+      "id": "titanium-white",
+      "name": "Titanium White",
+      "pigment": "PW6",
+      "category": "White",
+      "v": 10,
+      "strength": 1.2,
+      "opacity": "opaque",
+      "rgb": [
+        249,
+        248,
+        242
+      ],
+      "notation": "N10"
+    },
+    {
+      "id": "flake-white-replacement",
+      "name": "Flake White Replacement",
+      "pigment": "PW6/PW4",
+      "category": "White",
+      "brands": "Gamblin",
+      "v": 9.5,
+      "strength": 0.86,
+      "opacity": "opaque",
+      "rgb": [
+        249,
+        248,
+        242
+      ],
+      "notation": "N9.5"
+    },
+    {
+      "id": "ivory-black",
+      "name": "Ivory Black",
+      "pigment": "PBk9",
+      "category": "Black",
+      "v": 1,
+      "strength": 1.08,
+      "opacity": "semi-transparent",
+      "rgb": [
+        24,
+        24,
+        22
+      ],
+      "notation": "N1"
+    },
+    {
+      "id": "hansa-yellow-light",
+      "name": "Hansa Yellow Light",
+      "pigment": "PY3",
+      "category": "Yellow",
+      "h": "7.5Y",
+      "v": 8.5,
+      "c": 12,
+      "strength": 0.92,
+      "opacity": "semi-transparent",
+      "rgb": [
+        253,
+        232,
+        21
+      ],
+      "notation": "7.5Y 8.5/12"
+    },
+    {
+      "id": "cadmium-lemon",
+      "name": "Cadmium Lemon",
+      "pigment": "PY35",
+      "category": "Yellow",
+      "brands": "Winsor & Newton",
+      "h": "10Y",
+      "v": 9,
+      "c": 12,
+      "strength": 0.76,
+      "opacity": "opaque",
+      "rgb": [
+        243,
+        236,
+        15
+      ],
+      "notation": "10Y 9/12"
+    },
+    {
+      "id": "cadmium-yellow-deep",
+      "name": "Cadmium Yellow Deep",
+      "pigment": "PY35",
+      "category": "Yellow",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "10YR",
+      "v": 8,
+      "c": 14,
+      "strength": 0.82,
+      "opacity": "opaque",
+      "rgb": [
+        248,
+        193,
+        105
+      ],
+      "notation": "10YR 8/14"
+    },
+    {
+      "id": "yellow-ochre",
+      "name": "Yellow Ochre",
+      "pigment": "PY43",
+      "category": "Earth",
+      "h": "10YR",
+      "v": 5,
+      "c": 10,
+      "strength": 0.62,
+      "opacity": "opaque",
+      "rgb": [
+        163,
+        113,
+        28
+      ],
+      "notation": "10YR 5/10"
+    },
+    {
+      "id": "nickel-titanate-yellow",
+      "name": "Nickel Titanate Yellow",
+      "pigment": "PY53",
+      "category": "Yellow",
+      "brands": "Gamblin",
+      "h": "7.5Y",
+      "v": 8,
+      "c": 6,
+      "strength": 0.58,
+      "opacity": "opaque",
+      "rgb": [
+        217,
+        204,
+        118
+      ],
+      "notation": "7.5Y 8/6"
+    },
+    {
+      "id": "naples-yellow",
+      "name": "Naples Yellow Hue",
+      "pigment": "PW6/PY42/PY83",
+      "category": "Yellow",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "5Y",
+      "v": 8,
+      "c": 6,
+      "strength": 0.65,
+      "opacity": "opaque",
+      "rgb": [
+        223,
+        202,
+        120
+      ],
+      "notation": "5Y 8/6"
+    },
+    {
+      "id": "cadmium-orange",
+      "name": "Cadmium Orange",
+      "pigment": "PO20",
+      "category": "Orange",
+      "h": "5YR",
+      "v": 7,
+      "c": 16,
+      "strength": 0.82,
+      "opacity": "opaque",
+      "rgb": [
+        252,
+        151,
+        53
+      ],
+      "notation": "5YR 7/16"
+    },
+    {
+      "id": "transparent-orange",
+      "name": "Transparent Orange",
+      "pigment": "PO62",
+      "category": "Orange",
+      "h": "8.75R",
+      "v": 4,
+      "c": 14,
+      "strength": 1.02,
+      "opacity": "transparent",
+      "rgb": [
+        188,
+        34,
+        33
+      ],
+      "notation": "8.75R 4/14"
+    },
+    {
+      "id": "cadmium-red-light",
+      "name": "Cadmium Red Light",
+      "pigment": "PR108",
+      "category": "Red",
+      "h": "7.5R",
+      "v": 5,
+      "c": 16,
+      "strength": 0.86,
+      "opacity": "opaque",
+      "rgb": [
+        230,
+        53,
+        42
+      ],
+      "notation": "7.5R 5/16"
+    },
+    {
+      "id": "cadmium-red-medium",
+      "name": "Cadmium Red Medium",
+      "pigment": "PR108",
+      "category": "Red",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "5R",
+      "v": 4,
+      "c": 16,
+      "strength": 0.88,
+      "opacity": "opaque",
+      "rgb": [
+        190,
+        26,
+        52
+      ],
+      "notation": "5R 4/16"
+    },
+    {
+      "id": "quinacridone-magenta",
+      "name": "Quinacridone Magenta",
+      "pigment": "PR122",
+      "category": "Red",
+      "h": "5RP",
+      "v": 3,
+      "c": 10,
+      "strength": 1.12,
+      "opacity": "transparent",
+      "rgb": [
+        131,
+        30,
+        88
+      ],
+      "notation": "5RP 3/10"
+    },
+    {
+      "id": "alizarin-crimson",
+      "name": "Alizarin Crimson",
+      "pigment": "PR83",
+      "category": "Red",
+      "brands": "Winsor & Newton",
+      "h": "10RP",
+      "v": 2,
+      "c": 8,
+      "strength": 1.04,
+      "opacity": "transparent",
+      "rgb": [
+        95,
+        16,
+        54
+      ],
+      "notation": "10RP 2/8"
+    },
+    {
+      "id": "perylene-maroon",
+      "name": "Perylene Maroon",
+      "pigment": "PR179",
+      "category": "Red",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "10RP",
+      "v": 2,
+      "c": 6,
+      "strength": 1.12,
+      "opacity": "transparent",
+      "rgb": [
+        85,
+        30,
+        52
+      ],
+      "notation": "10RP 2/6"
+    },
+    {
+      "id": "dioxazine-purple",
+      "name": "Dioxazine Purple",
+      "pigment": "PV23",
+      "category": "Violet",
+      "h": "2.5P",
+      "v": 2,
+      "c": 10,
+      "strength": 1.25,
+      "opacity": "transparent",
+      "rgb": [
+        71,
+        28,
+        100
+      ],
+      "notation": "2.5P 2/10"
+    },
+    {
+      "id": "ultramarine-violet",
+      "name": "Ultramarine Violet",
+      "pigment": "PV15",
+      "category": "Violet",
+      "h": "5P",
+      "v": 2,
+      "c": 8,
+      "strength": 0.78,
+      "opacity": "transparent",
+      "rgb": [
+        73,
+        31,
+        87
+      ],
+      "notation": "5P 2/8"
+    },
+    {
+      "id": "ultramarine-blue",
+      "name": "Ultramarine Blue",
+      "pigment": "PB29",
+      "category": "Blue",
+      "h": "7.5PB",
+      "v": 2,
+      "c": 10,
+      "strength": 0.92,
+      "opacity": "transparent",
+      "rgb": [
+        36,
+        40,
+        112
+      ],
+      "notation": "7.5PB 2/10"
+    },
+    {
+      "id": "cobalt-blue",
+      "name": "Cobalt Blue",
+      "pigment": "PB28",
+      "category": "Blue",
+      "h": "6.25PB",
+      "v": 3,
+      "c": 12,
+      "strength": 0.65,
+      "opacity": "semi-transparent",
+      "rgb": [
+        22,
+        73,
+        127
+      ],
+      "notation": "6.25PB 3/12"
+    },
+    {
+      "id": "cerulean-blue",
+      "name": "Cerulean Blue",
+      "pigment": "PB35",
+      "category": "Blue",
+      "h": "2.5PB",
+      "v": 4,
+      "c": 12,
+      "strength": 0.55,
+      "opacity": "opaque",
+      "rgb": [
+        29,
+        102,
+        151
+      ],
+      "notation": "2.5PB 4/12"
+    },
+    {
+      "id": "phthalo-blue-green",
+      "name": "Phthalo Blue (Green Shade)",
+      "pigment": "PB15:3",
+      "category": "Blue",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "10B",
+      "v": 2,
+      "c": 10,
+      "strength": 1.4,
+      "opacity": "transparent",
+      "rgb": [
+        16,
+        53,
+        74
+      ],
+      "notation": "10B 2/10"
+    },
+    {
+      "id": "indanthrone-blue",
+      "name": "Indanthrone Blue",
+      "pigment": "PB60",
+      "category": "Blue",
+      "h": "5PB",
+      "v": 2,
+      "c": 4,
+      "strength": 1.12,
+      "opacity": "transparent",
+      "rgb": [
+        34,
+        50,
+        76
+      ],
+      "notation": "5PB 2/4"
+    },
+    {
+      "id": "cobalt-teal",
+      "name": "Cobalt Teal",
+      "pigment": "PG50",
+      "category": "Green",
+      "h": "10BG",
+      "v": 5,
+      "c": 10,
+      "strength": 0.62,
+      "opacity": "opaque",
+      "rgb": [
+        27,
+        136,
+        145
+      ],
+      "notation": "10BG 5/10"
+    },
+    {
+      "id": "phthalo-green-yellow",
+      "name": "Phthalo Green (Yellow Shade)",
+      "pigment": "PG36",
+      "category": "Green",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "10G",
+      "v": 3,
+      "c": 10,
+      "strength": 1.34,
+      "opacity": "transparent",
+      "rgb": [
+        27,
+        81,
+        69
+      ],
+      "notation": "10G 3/10"
+    },
+    {
+      "id": "viridian",
+      "name": "Viridian",
+      "pigment": "PG18",
+      "category": "Green",
+      "h": "7.5BG",
+      "v": 2,
+      "c": 4,
+      "strength": 0.78,
+      "opacity": "transparent",
+      "rgb": [
+        34,
+        53,
+        54
+      ],
+      "notation": "7.5BG 2/4"
+    },
+    {
+      "id": "permanent-green-light",
+      "name": "Permanent Green Light",
+      "pigment": "PG7/PY74",
+      "category": "Green",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "5G",
+      "v": 6,
+      "c": 12,
+      "strength": 0.94,
+      "opacity": "semi-transparent",
+      "rgb": [
+        51,
+        168,
+        123
+      ],
+      "notation": "5G 6/12"
+    },
+    {
+      "id": "chromium-oxide-green",
+      "name": "Chromium Oxide Green",
+      "pigment": "PG17",
+      "category": "Green",
+      "h": "2.5G",
+      "v": 4,
+      "c": 4,
+      "strength": 0.58,
+      "opacity": "opaque",
+      "rgb": [
+        65,
+        106,
+        80
+      ],
+      "notation": "2.5G 4/4"
+    },
+    {
+      "id": "burnt-sienna",
+      "name": "Burnt Sienna",
+      "pigment": "PBr7",
+      "category": "Earth",
+      "h": "10R",
+      "v": 3,
+      "c": 4,
+      "strength": 0.68,
+      "opacity": "semi-transparent",
+      "rgb": [
+        105,
+        60,
+        52
+      ],
+      "notation": "10R 3/4"
+    },
+    {
+      "id": "raw-sienna",
+      "name": "Raw Sienna",
+      "pigment": "PBr7",
+      "category": "Earth",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "10YR",
+      "v": 5,
+      "c": 6,
+      "strength": 0.58,
+      "opacity": "semi-transparent",
+      "rgb": [
+        157,
+        115,
+        56
+      ],
+      "notation": "10YR 5/6"
+    },
+    {
+      "id": "raw-umber",
+      "name": "Raw Umber",
+      "pigment": "PBr7",
+      "category": "Earth",
+      "brands": "Gamblin · Winsor & Newton",
+      "h": "2.5Y",
+      "v": 2,
+      "c": 2,
+      "strength": 0.7,
+      "opacity": "semi-transparent",
+      "rgb": [
+        58,
+        48,
+        32
+      ],
+      "notation": "2.5Y 2/2"
+    },
+    {
+      "id": "terre-verte",
+      "name": "Terre Verte",
+      "pigment": "PG23",
+      "category": "Green",
+      "brands": "Winsor & Newton",
+      "h": "5G",
+      "v": 4,
+      "c": 2,
+      "strength": 0.46,
+      "opacity": "semi-transparent",
+      "rgb": [
+        81,
+        102,
+        91
+      ],
+      "notation": "5G 4/2"
+    }
+  ],
+  "fields": [
+    "pigmentPoolIndices",
+    "sample",
+    "order",
+    "timesSeconds",
+    "originalPigmentQuantities",
+    "fixedTargetRGB"
+  ],
+  "status": "discovery proposals, not certified holes",
+  "shards": [
+    {
+      "size": 3,
+      "path": "docs/play-broad-bank-3.jsonl.gz",
+      "count": 59520,
+      "sha256": "4f51923bd0d6c574dc80bd57730a284d1fb7b9b5ed72b79eae40d0c8a5ecda98"
+    },
+    {
+      "size": 4,
+      "path": "docs/play-broad-bank-4.jsonl.gz",
+      "count": 431520,
+      "sha256": "40dfb9ed20019e53db805250fbff5489c65635cff239ec0d6670341118f05d9e"
+    },
+    {
+      "size": 5,
+      "path": "docs/play-broad-bank-5.jsonl.gz",
+      "count": 6144,
+      "sha256": "b8c1e2b6c416ebf25b6093b50168f777122f4d3d15706be2c71b1c82a2999b15"
+    },
+    {
+      "size": 6,
+      "path": "docs/play-broad-bank-6.jsonl.gz",
+      "count": 6144,
+      "sha256": "680afcb293a4711380da14d45b7921b0a03fd791b29d3537e4b22c91b07a6c06"
+    },
+    {
+      "size": 8,
+      "path": "docs/play-broad-bank-8.jsonl.gz",
+      "count": 6144,
+      "sha256": "ab271de24b4bd281e240e0f024e37d322ea6c2714b3fb0248605452735448dba"
+    }
+  ]
+}
