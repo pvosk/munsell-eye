@@ -1354,6 +1354,25 @@
 .sl-starting-setups {
   margin: 35px 0 20px;
 }
+.sl-study-browser {
+  margin: 14px 0;
+}
+.sl-study-browser > label {
+  display: grid;
+  gap: 8px;
+  max-width: 32rem;
+  margin-top: 20px;
+}
+.sl-study-browser > .sl-button-row {
+  margin: 16px 0;
+}
+.sl-study-browser > small {
+  display: block;
+  line-height: 1.6;
+}
+.sl-study-hint {
+  color: var(--sl-muted);
+}
 .sl-starting-setups .sl-models {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }

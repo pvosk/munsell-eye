@@ -22,11 +22,19 @@ import { ProbeEditor } from "./probe-editor";
 import { HarmonyJourney } from "./harmony-journey";
 import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
+import { StudyBrowser } from "./study-browser";
+import {
+  JOURNEY_STUDIES,
+  STUDY_FAMILIES,
+  type JourneyStudy,
+} from "./journey-studies";
 import {
   MAPPING_STUDIES,
   DEFAULT_SETUP,
   STARTERS,
+  applyPreset,
   sanitizeSetup,
+  type Scope,
   type Setup,
 } from "./presets";
 import { PresetLibrary } from "./preset-library";
@@ -189,6 +197,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
     [status, setStatus] = useState<"off" | "loading" | "on" | "error">("off"),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
+    [studyId, setStudyId] = useState(JOURNEY_STUDIES[0].id),
     [snapshot, setSnapshot] = useState<ReturnType<
       SoundLabEngine["snapshot"]
     > | null>(null),
@@ -430,6 +439,16 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
       journey: { ...next.journey, repeat: setupRef.current.journey.repeat },
     });
     setNotice("Setup loaded. Active shot and loop use your current controls.");
+  };
+  const loadStudy = (study: JourneyStudy, scope: Scope) => {
+    const next = applyPreset(setupRef.current, { ...study, scope });
+    // Keep listening level and the user's loop transport across comparisons.
+    next.parameters.volume = setupRef.current.parameters.volume;
+    load(next);
+    setStudyId(study.id);
+    setNotice(
+      `${study.name} · ${scope === "all" ? "complete journey" : scope === "harmony" ? "music and progression trigger" : scope === "journey" ? "journey and music" : scope} loaded. ${study.listen}${mappingMode !== "on" ? " Mappings are currently bypassed or paused." : ""}${fxBypass ? " Effects are currently bypassed." : ""}`,
+    );
   };
   const play = async (holdTime?: number, resolveDemo = false) => {
     if (!engine.current?.running) await start();
@@ -691,15 +710,33 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
               aria-label="Complete starting setup"
               value=""
               onChange={(e) => {
+                const study = JOURNEY_STUDIES.find(
+                  (x) => x.id === e.target.value,
+                );
+                if (study) {
+                  loadStudy(study, "all");
+                  return;
+                }
                 const selected = STARTERS.find((x) => x.id === e.target.value);
                 if (selected) load(selected.setup);
               }}
             >
-              <option value="">Load starting setup…</option>
-              {STARTERS.map((preset) => (
-                <option key={preset.id} value={preset.id}>
-                  {preset.name}
-                </option>
+              <option value="">Load complete journey…</option>
+              <optgroup label="Simple starting setups">
+                {STARTERS.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.name}
+                  </option>
+                ))}
+              </optgroup>
+              {STUDY_FAMILIES.map((family) => (
+                <optgroup key={family.id} label={family.name}>
+                  {family.presets.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
@@ -709,6 +746,11 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
             Esc: silence · edits are live, including the next loop
           </small>
         </div>
+        <StudyBrowser
+          selected={studyId}
+          onSelect={setStudyId}
+          onLoad={loadStudy}
+        />
         <details className="sl-card sl-map-disclosure">
           <summary>Shape one journey · drag the shot map</summary>
           <section className="sl-shot" aria-label="Shared shot audition">
