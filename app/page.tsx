@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { HUE_ORDER, MUNSELL_SOURCE, NEUTRALS, type MunsellColor } from './munsell-data';
 import {
@@ -577,17 +576,38 @@ const APP_SECTIONS: readonly { id: AppView; label: string }[] = [
   { id: 'reference', label: 'Reference' },
 ];
 
-function MobileSectionNav({ view, open, onToggle, onChange, onProgress }: {
+function MobileSectionNav({ view, open, onToggle, onClose, onChange, onProgress }: {
   view: AppView;
   open: boolean;
   onToggle: () => void;
+  onClose: () => void;
   onChange: (view: AppView) => void;
   onProgress: () => void;
 }) {
+  const nav = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const dismissOutside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !nav.current?.contains(event.target)) onClose();
+    };
+    const dismissEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      onClose();
+      nav.current?.querySelector<HTMLButtonElement>('.mobile-section-trigger')?.focus();
+    };
+    document.addEventListener('pointerdown', dismissOutside);
+    document.addEventListener('keydown', dismissEscape);
+    return () => {
+      document.removeEventListener('pointerdown', dismissOutside);
+      document.removeEventListener('keydown', dismissEscape);
+    };
+  }, [open, onClose]);
   const current = APP_SECTIONS.find((section) => section.id === view) ?? APP_SECTIONS[0];
   return (
-    <div className={`mobile-section-nav ${open ? 'open' : ''}`} onBlur={(event) => {
-      if (open && !event.currentTarget.contains(event.relatedTarget as Node | null)) onToggle();
+    <div ref={nav} className={`mobile-section-nav ${open ? 'open' : ''}`} onBlur={(event) => {
+      // Touch browsers may blur the trigger with no next focus target before
+      // dispatching the link's click. Outside pointers are handled separately.
+      if (open && event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) onClose();
     }}>
       <button aria-controls="mobile-section-menu" aria-expanded={open} className="mobile-section-trigger" onClick={onToggle} type="button">
         <strong>{current.label}</strong><i aria-hidden="true">›</i>
@@ -596,7 +616,8 @@ function MobileSectionNav({ view, open, onToggle, onChange, onProgress }: {
         {APP_SECTIONS.map((section) => (
           <button className={section.id === view ? 'active' : ''} key={section.id} onClick={() => onChange(section.id)} tabIndex={open ? 0 : -1} type="button">{section.label}</button>
         ))}
-        <Link href="/sound-lab" tabIndex={open ? 0 : -1}>Sound Lab</Link>
+        {/* A full page navigation also releases the game's WebGL resources. */}
+        <a href="/sound-lab" tabIndex={open ? 0 : -1}>Sound Lab</a>
         <button onClick={onProgress} tabIndex={open ? 0 : -1} type="button">Progress</button>
       </nav>
     </div>
@@ -2188,10 +2209,11 @@ export default function Home() {
           <button className={view === 'play' ? 'active' : ''} onClick={() => setView('play')} type="button">Play</button>
           <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
-          <Link href="/sound-lab">Sound Lab</Link>
+          <a href="/sound-lab">Sound Lab</a>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
         <MobileSectionNav
+          onClose={() => setMobileNavOpen(false)}
           onChange={(next) => { setView(next); setMobileNavOpen(false); setPaletteOpen(false); setProgressOpen(false); }}
           onProgress={() => { setMobileNavOpen(false); setPaletteOpen(false); setProgressOpen(true); }}
           onToggle={() => setMobileNavOpen((current) => !current)}
