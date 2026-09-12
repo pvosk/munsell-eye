@@ -1,7 +1,7 @@
 'use client';
 import {memo,useMemo,useState} from 'react';
 import {PLAY_LEVELS,LANDING_TOLERANCE,withLiveLanding,designLabBank,focusedLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
-import {supportedLabEngine,LAB_GROUPS,LAB_INVERSE,LAB_DESIGN,directedForHole,analysisForHole,suggestedComparison,labReviewEntries,selectedLabEntry,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
+import {supportedLabEngine,LAB_GROUPS,LAB_HARD,LAB_INVERSE,LAB_DESIGN,directedForHole,analysisForHole,suggestedComparison,labReviewEntries,selectedLabEntry,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
 import type {usePlayLabSync} from './play-lab-sync';
 import finishProfiles from './generated/play-finish-profiles.json';
 import {CAMPAIGN_CHAPTERS,campaignForHole,campaignSourceId} from './play-campaign';
@@ -99,11 +99,11 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
 
 export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
  const {current,onChoose}=props;
- const [view,setView]=useState(()=>campaignForHole(current.hole.courseId)?'campaign':'inverse'),[selected,setSelected]=useState(()=>Math.max(0,CAMPAIGN_CHAPTERS.findIndex(c=>c.levelIndex===current.levelIndex)));
+ const [view,setView]=useState(()=>campaignForHole(current.hole.courseId)?'campaign':current.hole.courseId.startsWith('lab-10-')?'inverse':'hard'),[selected,setSelected]=useState(()=>Math.max(0,CAMPAIGN_CHAPTERS.findIndex(c=>c.levelIndex===current.levelIndex)));
  const chapter=CAMPAIGN_CHAPTERS[selected],playable=chapter.slots.filter(s=>s.specimen),at=playable.findIndex(s=>s.id===current.hole.courseId||s.alternatives?.some(a=>a.id===current.hole.courseId));
  const choose=(id:string)=>{const match=campaignForHole(id);if(match?.chapter.id===chapter.id&&match.slot.specimen)onChoose(structuredClone(match.slot.specimen));};
- return <div className="lab-campaign-picker"><label>Test collection<select value={view} onChange={e=>setView(e.target.value)}><option value="inverse">New · 30 inverse-planning holes</option><option value="campaign">Campaign · one palette at a time</option><option value="archive">All lab rounds</option></select></label>
- {view==='inverse'?<InverseLabPicker {...props}/>:view==='archive'?<LegacyLabPicker {...props}/>:<>
+ return <div className="lab-campaign-picker"><label>Test collection<select value={view} onChange={e=>setView(e.target.value)}><option value="hard">New · 8 harder setup holes</option><option value="inverse">30 inverse-planning holes</option><option value="campaign">Campaign · one palette at a time</option><option value="archive">All lab rounds</option></select></label>
+ {view==='hard'?<InverseLabPicker key="hard" {...props} bank={LAB_HARD}/>:view==='inverse'?<InverseLabPicker key="inverse" {...props} bank={LAB_INVERSE}/>:view==='archive'?<LegacyLabPicker {...props}/>:<>
   <label>Campaign palette<select value={selected} onChange={e=>{const i=Number(e.target.value);setSelected(i);const first=CAMPAIGN_CHAPTERS[i].slots.find(s=>s.specimen);if(first?.specimen)onChoose(structuredClone(first.specimen));}}>{CAMPAIGN_CHAPTERS.map((c,i)=><option key={c.id} value={i}>{i+1}. {c.name} · {c.slots.filter(s=>s.specimen).length}/{c.slots.length} candidates</option>)}</select></label>
   <label>Hole in this palette<select disabled={!playable.length} value={at<0?'':playable[at].id} onChange={e=>choose(e.target.value)}>{at<0&&<option value="">Choose a candidate…</option>}{chapter.slots.map((s,i)=><option key={s.id} value={s.id} disabled={!s.specimen}>{i+1}. {s.title}{s.specimen?` · ${s.specimen.hole.notation}`:' · Still to find'}</option>)}</select></label>
   {at>=0&&!!playable[at].alternatives?.length&&<label>Candidate version<select value={current.hole.courseId} onChange={e=>choose(e.target.value)}><option value={playable[at].id}>Primary · {playable[at].specimen!.hole.notation}</option>{playable[at].alternatives!.map((a,i)=><option key={a.id} value={a.id}>Alternative {i+1} · {a.specimen.hole.notation}</option>)}</select></label>}
@@ -115,18 +115,20 @@ export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>v
  </div>;
 }
 
-function InverseLabPicker({current,onChoose}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
- const levels=[...new Set(LAB_INVERSE.map(s=>s.levelIndex))];
+function InverseLabPicker({current,onChoose,bank}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;bank:LabSpecimen[]}) {
+ const levels=[...new Set(bank.map(s=>s.levelIndex))];
  const [browsing,setBrowsing]=useState(levels.includes(current.levelIndex)?current.levelIndex:levels[0]);
  const level=levels.includes(current.levelIndex)?current.levelIndex:browsing;
- const items=LAB_INVERSE.filter(s=>s.levelIndex===level),at=items.findIndex(s=>s.hole.courseId===current.hole.courseId);
+ const items=bank.filter(s=>s.levelIndex===level),at=items.findIndex(s=>s.hole.courseId===current.hole.courseId);
  const choose=(s:LabSpecimen)=>onChoose(structuredClone(s));
+ const hard=bank===LAB_HARD;
  const row=at>=0?directedForHole(items[at].hole.courseId):null;
  return <>
-  <label>Test palette<select value={level} onChange={e=>{const n=Number(e.target.value);setBrowsing(n);choose(LAB_INVERSE.find(s=>s.levelIndex===n)!);}}>{levels.map((n,i)=><option key={n} value={n}>{i+1}. {PLAY_LEVELS[n].name} · {LAB_INVERSE.filter(s=>s.levelIndex===n).length} holes</option>)}</select></label>
+  <label>Test palette<select value={level} onChange={e=>{const n=Number(e.target.value);setBrowsing(n);choose(bank.find(s=>s.levelIndex===n)!);}}>{levels.map((n,i)=><option key={n} value={n}>{i+1}. {PLAY_LEVELS[n].name} · {bank.filter(s=>s.levelIndex===n).length} holes</option>)}</select></label>
   <label>Hole in this palette<select value={at<0?'':items[at].hole.courseId} onChange={e=>choose(items.find(s=>s.hole.courseId===e.target.value)!)}>{at<0&&<option value="">Choose a new hole…</option>}{items.map((s,i)=><option key={s.hole.courseId} value={s.hole.courseId}>{i+1}. {directedForHole(s.hole.courseId)?.label} · {s.hole.notation}</option>)}</select></label>
   <button type="button" onClick={()=>choose(items[at<0?0:(at+1)%items.length])}>{at<0?'Start this palette':at===items.length-1?'Replay palette':'Next hole →'}</button>
-  <details><summary>Paints & hole intent{row?` · ${row.label}`:''}</summary><p>{PLAY_LEVELS[level].paints.map(p=>p.name).join(' · ')}</p><p>{row?.brief??'Thirty new test candidates across fifteen palettes. Start anywhere, skip freely, and replay as often as you like. Campaign and earlier reviews remain available.'}</p><p>Controls, pigment strengths and landing tolerance are unchanged. A useful featured route is not always the shortest route. Review includes competing examples.</p></details>
+  {hard&&<p className="lab-muted">Six harder setups, then two lighter contrasts. No one-addition solution found from any base on the six setup holes. Same controls and landing tolerance.</p>}
+  <details><summary>Paints & hole intent{row?` · ${row.label}`:''}</summary><p>{PLAY_LEVELS[level].paints.map(p=>p.name).join(' · ')}</p><p>{row?.brief??'Choose a test palette and hole. Start anywhere, skip freely, and replay as often as you like. Campaign and earlier reviews remain available.'}</p><p>Controls, pigment strengths and landing tolerance are unchanged. A useful featured route is not always the shortest route. Review includes competing examples.</p></details>
  </>;
 }
 

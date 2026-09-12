@@ -13,6 +13,7 @@ import protectedRoundBank from './generated/play-lab-round7.json';
 import journeyRoundBank from './generated/play-lab-round8.json';
 import contrastRoundBank from './generated/play-lab-round9.json';
 import inverseRoundBank from './generated/play-lab-round10.json';
+import hardRoundBank from './generated/play-lab-round11.json';
 import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
@@ -84,6 +85,7 @@ PLAY_LEVELS.push(
 PLAY_LEVELS.push(...journeyRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...contrastRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...inverseRoundBank.palettes as PlayLevel[]);
+PLAY_LEVELS.push(...hardRoundBank.palettes as PlayLevel[]);
 export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
@@ -354,6 +356,15 @@ export const protectedLabBank=protectedRoundBank as typeof directedLabBank;
 export const journeyLabBank=journeyRoundBank as unknown as typeof directedLabBank & {seed:number;palettes:PlayLevel[]};
 export const contrastLabBank=contrastRoundBank as unknown as typeof journeyLabBank;
 export const inverseLabBank=inverseRoundBank as unknown as typeof journeyLabBank;
+export const hardLabBank=hardRoundBank as unknown as typeof journeyLabBank;
+export function generateHardHole(levelIndex:number,stage:number,seed=hardRoundBank.seed):Hole {
+  if(seed!==hardRoundBank.seed||hardRoundBank.signature!==courseSignature(hardRoundBank.paletteOffset+hardRoundBank.palettes.length))throw new Error('Hard lab model changed');
+  const item=hardLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  const source=hardRoundBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
+  if(!item||!source)throw new Error('Unknown hard lab hole');
+  const r=item.record,level=PLAY_LEVELS[levelIndex],rgb=source.record.targetRGB,target=colorPoint([rgb[0],rgb[1],rgb[2]]);
+  return {seed,stage,start:neutralStart(level),target,notation:nearestNotation(target),par:r.par,recipe:[...r.recipe],tolerance:item.analysis.tolerance,timingWindow:r.timingWindow,courseId:r.id,kind:r.kind,solutionShots:r.solutionShots,routeOrder:[...r.order],routeTimes:[...r.times]};
+}
 export function generateInverseHole(levelIndex:number,stage:number,seed=inverseRoundBank.seed):Hole {
   if(seed!==inverseRoundBank.seed||inverseRoundBank.signature!==courseSignature(inverseRoundBank.paletteOffset+inverseRoundBank.palettes.length))throw new Error('Inverse lab model changed');
   const item=inverseLabBank.holes.find(h=>h.levelIndex===levelIndex&&h.stage===stage);
