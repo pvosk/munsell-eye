@@ -17,6 +17,12 @@ export type Parameters = {
   spread: number;
   converge: number;
   drive: number;
+  shotArps: number;
+  wander: number;
+  wanderRate: number;
+  gatherStart: number;
+  gatherCurve: number;
+
   saturate: number;
   textureDrive: number;
   fold: number;
@@ -86,6 +92,12 @@ export const DEFAULTS: Parameters = {
   spread: 0.6,
   converge: 0,
   drive: 0.25,
+  shotArps: 1,
+  wander: 2,
+  wanderRate: 0.25,
+  gatherStart: 0.35,
+  gatherCurve: 1.4,
+
   saturate: 0,
   textureDrive: 3,
   fold: 0,
@@ -337,6 +349,53 @@ export const GROUPS: {
     ],
   },
   {
+    name: "Shot layers & cloud",
+    subtitle:
+      "Choose the moving body and its note layer independently. Cloud wandering controls apply to Chromatic convergence.",
+    sliders: [
+      {
+        key: "shotArps",
+        label: "Arpeggio layer",
+        min: 0,
+        max: 1,
+        step: 0.01,
+        hint: "Zero makes the shot body play alone; one adds the full note sequence.",
+      },
+      {
+        key: "wander",
+        label: "Cloud wandering",
+        min: 0,
+        max: 12,
+        step: 0.1,
+        hint: "Pitch travel in semitones before the voices gather.",
+      },
+      {
+        key: "wanderRate",
+        label: "Wandering speed",
+        min: 0.03,
+        max: 2,
+        step: 0.01,
+        hint: "How quickly individual voices wander.",
+      },
+      {
+        key: "gatherStart",
+        label: "Begin gathering",
+        min: 0,
+        max: 0.9,
+        step: 0.01,
+        hint: "Fraction of the shot spent wandering before gathering begins.",
+      },
+      {
+        key: "gatherCurve",
+        label: "Gathering curve",
+        min: 0.25,
+        max: 4,
+        step: 0.05,
+        hint: "Higher values hold the cloud longer before it approaches the destination.",
+      },
+    ],
+  },
+  {
     name: "Instrument detail",
     subtitle: "Each sound model uses its own excitation",
     sliders: [
@@ -378,7 +437,7 @@ export const GROUPS: {
         min: 0,
         max: 1,
         step: 0.01,
-        hint: "How far convergence voices begin from their harmonic destinations.",
+        hint: "Width of the starting cloud around the home register.",
       },
       {
         key: "converge",
@@ -386,7 +445,7 @@ export const GROUPS: {
         min: 0,
         max: 1,
         step: 0.01,
-        hint: "Zero is spread; one gathers every voice to the current harmony.",
+        hint: "Zero leaves gathering to the shot curve; one tunes the cloud to its destination.",
       },
       {
         key: "drive",
@@ -807,6 +866,8 @@ export function sanitizeParameters(value: unknown): Parameters {
     )
   )
     p.instrument = data.instrument as Instrument;
+  if (data.shotArps === undefined && p.instrument === "convergence")
+    p.shotArps = 0;
   p.filterFollow = data.filterFollow === "manual" ? "manual" : "chord";
   p.grainRoute = data.grainRoute === "before" ? "before" : "parallel";
   p.music = sanitizeMusic(data.music);
@@ -836,6 +897,7 @@ export const SOUND_MODELS: {
     description: "Generated struck strings · overlapping tonal ripples",
     values: {
       instrument: "piano",
+      shotArps: 1,
       attack: 0.004,
       decay: 4.8,
       hardness: 0.42,
@@ -856,9 +918,10 @@ export const SOUND_MODELS: {
     description: "A growing stack of voices gathering into harmony",
     values: {
       instrument: "convergence",
+      shotArps: 0,
       attack: 0.04,
       decay: 3,
-      voices: 4,
+      voices: 18,
       spread: 0.8,
       converge: 0,
       drive: 0.55,
@@ -879,6 +942,7 @@ export const SOUND_MODELS: {
     description: "Ringing partials · moving bands · reversed halo",
     values: {
       instrument: "glass",
+      shotArps: 1,
       attack: 0.025,
       decay: 4.8,
       ribbon: 0.65,
@@ -889,7 +953,7 @@ export const SOUND_MODELS: {
       grains: 0.12,
       echo: 0.16,
       room: 0.48,
-      drive: 0.18,
+      drive: 0.06,
       tension: 0,
     },
   },
@@ -899,6 +963,7 @@ export const SOUND_MODELS: {
     description: "A rounded synthetic source for clear comparisons",
     values: {
       instrument: "synth",
+      shotArps: 1,
       attack: 0.06,
       decay: 2.5,
       harmonics: 0.25,
@@ -919,6 +984,7 @@ export const SOUND_MODELS: {
       "Vowel-like shot body · independent pitch and formant motion · soft synth arpeggios",
     values: {
       instrument: "vocal",
+      shotArps: 0.3,
       drive: 0.45,
       glideStart: -5,
       glideTime: 0.6,

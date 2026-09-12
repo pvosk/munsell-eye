@@ -18,7 +18,9 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
   });
   await page.goto(`${origin}/sound-lab`);
   const result = await page.evaluate(async () => {
-    const { SoundLabEngine } = await import("/app/sound-lab/engine.ts");
+    const { SoundLabEngine, cloudFrequencies } = await import(
+      "/app/sound-lab/engine.ts"
+    );
     const { STARTERS, sanitizeSetup, DEFAULT_SETUP } = await import(
       "/app/sound-lab/presets.ts"
     );
@@ -101,6 +103,79 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     const gridAudition = await measure(500);
     if (gridAudition.rms <= 1e-6)
       throw Error("Phrase audition stayed muted after Stop all");
+    e.stopSound();
+    await wait(80);
+    const cloudNotes = [];
+    const unCloud = e.subscribeNotes((n) => cloudNotes.push(n));
+    e.playShot(STARTERS[1].setup);
+    await wait(450);
+    unCloud();
+    if (cloudNotes.length !== 0)
+      throw Error(
+        "Convergence emitted a normal motif despite note layer being off",
+      );
+    const targetHz = harmonicFrame(
+      STARTERS[1].setup.parameters.music,
+      0,
+    ).tones.map(midiHz);
+    const gathered = cloudFrequencies(
+      STARTERS[1].setup.parameters,
+      2,
+      targetHz,
+      1,
+    );
+    if (
+      gathered.some(
+        (f, i) =>
+          Math.abs(f - targetHz[i % 6] * (i < 6 ? 0.5 : i < 12 ? 1 : 2)) > 1e-6,
+      )
+    )
+      throw Error("Cloud did not reach its harmonic targets");
+    const live = sanitizeSetup({
+      ...STARTERS[1].setup,
+      mappings: [],
+      journey: {
+        ...STARTERS[1].setup.journey,
+        duration: 1.2,
+        arrival: 0.2,
+        gap: 1,
+        repeat: true,
+      },
+    });
+    e.playShot(live);
+    await wait(230);
+    const beforeEdit = e.progress;
+    const edited = sanitizeSetup({
+      ...live,
+      parameters: { ...live.parameters, brightness: 5100, wander: 5 },
+      journey: {
+        ...live.journey,
+        duration: 0.7,
+        probe: { ...live.journey.probe, hue: 70, hueTravel: 0 },
+      },
+    });
+    e.configure(edited);
+    const afterEdit = e.progress;
+    await wait(90);
+    if (
+      Math.abs(e.snapshot().color.h - 70) > 0.01 ||
+      e.parameters.brightness !== 5100 ||
+      beforeEdit !== afterEdit
+    )
+      throw Error(
+        "Live edit failed to update path/parameters while retaining progress",
+      );
+    const generation = e.transportGeneration;
+    await wait(2100);
+    if (e.transportGeneration <= generation || e.shotSamples[0].h !== 70)
+      throw Error("Loop reused stale path");
+    e.configure({ ...edited, journey: { ...edited.journey, repeat: false } });
+    await wait(1500);
+    const stoppedGeneration = e.transportGeneration;
+    await wait(500);
+    if (e.transportGeneration !== stoppedGeneration)
+      throw Error("Loop did not stop after toggle off");
+    e.stopSound();
     const textures = [];
     for (const key of ["saturate", "fold", "crossover", "inside", "shred"]) {
       e.stopSound();
@@ -160,6 +235,14 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     e.playShot({ ...miss, journey: { ...miss.journey, outcome: "capture" } });
     await wait(1200);
     const captureResolved = e.resolved;
+    e.playShot(miss, undefined, true);
+    await wait(150);
+    e.configure(miss);
+    await wait(1000);
+    if (!e.resolved || miss.journey.outcome !== "miss")
+      throw Error(
+        "Resolve demo lost capture override or changed saved outcome",
+      );
     e.stopSound();
     await wait(100);
     const landing = sanitizeSetup({
@@ -267,6 +350,8 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     return {
       models,
       gridNotes,
+      cloudNoteCount: cloudNotes.length,
+      livePathHue: 70,
       gridAudition,
       textures,
       textureSilence,

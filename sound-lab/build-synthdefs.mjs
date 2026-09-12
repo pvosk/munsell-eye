@@ -1,4 +1,4 @@
-// Small graph writer for our three fixed instruments, not an sclang interpreter.
+// Small graph writer for our fixed lab instruments, not an sclang interpreter.
 // Format: https://doc.sccode.org/Reference/Synth-Definition-File-Format.html
 import { mkdirSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -130,7 +130,7 @@ function chime() {
   const p = g.p;
   const trig = g.node("Impulse", 2, [0, 0]);
   const hit = g.node("Decay2", 2, [trig, p.attack, g.add(p.attack, 0.025)]);
-  const excitation = g.mul(g.node("PinkNoise", 2), g.mul(hit, 0.07));
+  const excitation = g.mul(g.node("PinkNoise", 2), g.mul(hit, 0.21));
   // DynKlank's actual SC expansion: sum of independently tuned Ringz UGens.
   const rings = [1, 2, 3, 4, 6, 7].map((ratio, i) => {
     const stretched = g.add(ratio, g.mul(p.material, i * i * 0.065));
@@ -205,6 +205,8 @@ function flight() {
     detune: 0.1,
     width: 0.8,
     normalize: 0.4,
+    cloud: 0,
+    ...Object.fromEntries(Array.from({ length: 18 }, (_, i) => [`v${i}`, 220])),
     vocal: 0,
     vowel: 0.2,
     formantRatio: 1,
@@ -229,9 +231,13 @@ function flight() {
       i < 6 ? 0.5 : i < 12 ? 1 : 2,
     );
     const deviation = (Math.sin(i * 17.31) * 0.5 + 0.5) * 1.8 - 0.7;
-    const f = g.mul(
+    const legacyF = g.mul(
       target,
       g.add(1, g.mul(g.mul(p.spread, g.sub(1, p.converge)), deviation)),
+    );
+    const f = g.add(
+      g.mul(legacyF, g.sub(1, p.cloud)),
+      g.mul(g.lag(p[`v${i}`], 0.04), p.cloud),
     );
     const drift = g.mul(
       g.node("SinOsc", 1, [0.09 + i * 0.007, i]),

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import {
   sampleProbe,
+  moveProbePoint,
+  journeyTarget,
   arrivalShape,
   signalPath,
   gamutChroma,
@@ -13,6 +15,7 @@ import {
 } from "../app/sound-lab/journey.ts";
 import {
   DEFAULT_SETUP,
+  MAPPING_STUDIES,
   STARTERS,
   sanitizeSetup,
   applyPreset,
@@ -133,3 +136,16 @@ assert.equal(arrivalShape(.4,false,true).convergence,0);
 assert.equal(arrivalShape(.4,false,true).gain,.6);
 const destinationPreset={...STARTERS[1],setup:sanitizeSetup({...STARTERS[1].setup,parameters:{...STARTERS[1].setup.parameters,music:{...STARTERS[1].setup.parameters.music,destinationStep:2,motifAdvance:'manual'}}})};
 assert.deepEqual(readLibrary(JSON.parse(exportLibrary([destinationPreset])))[0].setup,destinationPreset.setup);
+
+const sketch=sanitizeSetup({...DEFAULT_SETUP,journey:{...DEFAULT_SETUP.journey,probe:{...DEFAULT_SETUP.journey.probe,hue:350,hueTravel:40}}});
+const dragged=moveProbePoint(sketch.journey,'land',35,.7);
+assert.equal(dragged.probe.hueTravel,45);
+const movedStart=moveProbePoint(sketch.journey,'start',5,.6);
+assert.equal(movedStart.probe.hueTravel,25);
+assert.equal(movedStart.probe.hue,5);
+const missSketch=sanitizeSetup({...sketch,journey:{...sketch.journey,outcome:'miss',target:{hue:90,lightness:.8,edge:.3}}});
+const missPath=path(missSketch.journey.probe);
+assert(signalPath(missPath,3,journeyTarget(missSketch.journey,missPath)).at(-1).targetNear<.99);
+assert.equal(signalPath(missPath,3,journeyTarget(sketch.journey,missPath)).at(-1).targetNear,1);
+assert.deepEqual(readLibrary(JSON.parse(exportLibrary(MAPPING_STUDIES))),MAPPING_STUDIES);
+assert.equal(MAPPING_STUDIES.length,6);

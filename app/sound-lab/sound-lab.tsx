@@ -18,10 +18,17 @@ import {
   type Parameters,
   type SliderSpec,
 } from "./parameters";
+import { ProbeEditor } from "./probe-editor";
 import { HarmonyJourney } from "./harmony-journey";
 import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
-import { DEFAULT_SETUP, STARTERS, sanitizeSetup, type Setup } from "./presets";
+import {
+  MAPPING_STUDIES,
+  DEFAULT_SETUP,
+  STARTERS,
+  sanitizeSetup,
+  type Setup,
+} from "./presets";
 import { PresetLibrary } from "./preset-library";
 import {
   PROBES,
@@ -29,6 +36,7 @@ import {
   OUTPUTS,
   sampleProbe,
   signalPath,
+  journeyTarget,
   type Mapping,
   type Journey,
   type ColorSample,
@@ -207,6 +215,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
     j = setup.journey,
     enabled = status === "on",
     busy = status === "loading";
+  const paintKey = JSON.stringify(j.paint);
   useEffect(() => {
     setupRef.current = setup;
   }, [setup]);
@@ -316,7 +325,39 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
       });
     paintTrace(j.paint)
       .then((info) => {
-        if (!cancelled) setPaintInfo(info);
+        if (!cancelled) {
+          setPaintInfo(info);
+          setSetup((current) =>
+            sanitizeSetup({
+              ...current,
+              journey: {
+                ...current.journey,
+                duration: info.duration,
+                outcome: current.journey.paint.target
+                  ? info.captured
+                    ? "capture"
+                    : "miss"
+                  : current.journey.outcome,
+              },
+            }),
+          );
+          const current = setupRef.current;
+          engine.current?.configure(
+            {
+              ...current,
+              journey: {
+                ...current.journey,
+                duration: info.duration,
+                outcome: current.journey.paint.target
+                  ? info.captured
+                    ? "capture"
+                    : "miss"
+                  : current.journey.outcome,
+              },
+            },
+            info.samples,
+          );
+        }
       })
       .catch(() => {
         if (!cancelled) setPaintError("Could not calculate this paint trace.");
@@ -324,7 +365,9 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [j.path, j.paint]);
+    // A knob edit does not require recalculating the same paint recipe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [j.path, paintKey]);
   const probeSamples = useMemo(
     () => Array.from({ length: 193 }, (_, i) => sampleProbe(j.probe, i / 192)),
     [j.probe],
@@ -332,8 +375,8 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
   const samples =
     j.path === "paint" && paintInfo ? paintInfo.samples : probeSamples;
   const pathSignals = useMemo(
-    () => signalPath(samples, j.duration),
-    [samples, j.duration],
+    () => signalPath(samples, j.duration, journeyTarget(j, samples)),
+    [samples, j],
   );
   const start = async () => {
     setStatus("loading");
@@ -381,12 +424,15 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
   const load = (next: Setup) => {
     hold.current = null;
     setHolding(false);
-    engine.current?.stopSound();
     setUndo(setup);
-    update(next);
-    setNotice("Setup loaded. Press Play shot to audition.");
+    update({
+      ...next,
+      journey: { ...next.journey, repeat: setupRef.current.journey.repeat },
+    });
+    setNotice("Setup loaded. Active shot and loop use your current controls.");
   };
-  const play = async (holdTime?: number) => {
+  const play = async (holdTime?: number, resolveDemo = false) => {
+    if (!engine.current?.running) await start();
     if (!engine.current?.running) return;
     const active = engine.current,
       revision = active.transportGeneration;
@@ -416,8 +462,49 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
         return;
       }
     }
-    engine.current?.playShot(next, trace);
+    if (resolveDemo) {
+      next.journey.outcome = "capture";
+      next.journey.repeat = false;
+    }
+    engine.current?.playShot(next, trace, resolveDemo);
   };
+  const resolveAudition = () => {
+    const state = engine.current?.snapshot();
+    if (state && (state.motif || ["flight", "arrival"].includes(state.phase))) {
+      cancelHold();
+      engine.current?.resolve();
+    } else void play(undefined, true);
+  };
+  const playAction = useRef<() => void>(() => {});
+  useEffect(() => {
+    playAction.current = () => {
+      void play();
+    };
+  });
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        e.repeat ||
+        e.altKey ||
+        e.metaKey ||
+        e.ctrlKey ||
+        target.closest(
+          'input,select,textarea,[contenteditable="true"],[role="slider"]',
+        )
+      )
+        return;
+      if (
+        e.code === "KeyP" ||
+        (e.code === "Space" && !target.closest("button,a"))
+      ) {
+        e.preventDefault();
+        playAction.current();
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
   const beginHold = () => {
     if (!enabled || snapshot?.audioPaused) return;
     engine.current?.stopJourney();
@@ -532,128 +619,230 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
             {notice}
           </p>
         )}
-        <section className="sl-shot" aria-label="Shared shot audition">
-          <div className="sl-shot-view">
-            <Trace samples={samples} progress={snapshot?.progress ?? 0} />
-            <div className="sl-shot-badge">
-              <strong>
-                {holding
-                  ? "Holding"
-                  : snapshot?.paused
-                    ? "Journey paused"
-                    : (snapshot?.phase ?? "idle")}
-              </strong>
-              <span>
-                {Math.round((snapshot?.progress ?? 0) * 100)}% ·{" "}
-                {currentModel.name}
-              </span>
-            </div>
+        <div className="sl-transport">
+          <div
+            className="sl-tabs"
+            role="tablist"
+            aria-label="Journey workbench"
+          >
+            {(["journey", "sound", "mapping"] as Tab[]).map((t) => (
+              <button
+                key={t}
+                id={`tab-${t}`}
+                role="tab"
+                aria-selected={tab === t}
+                aria-controls={`panel-${t}`}
+                onClick={() => setTab(t)}
+              >
+                {t === "journey"
+                  ? "Journey"
+                  : t === "sound"
+                    ? "Sound"
+                    : "Mapping"}
+              </button>
+            ))}
           </div>
-          <div className="sl-shot-controls">
-            <h1>Shape one journey</h1>
-            <div className="sl-button-row">
-              <button
-                className="sl-primary"
-                disabled={!enabled || snapshot?.audioPaused || !!paintError}
-                onClick={() => play()}
-              >
-                Play shot
-              </button>
-              <button
-                className="sl-hold"
-                disabled={!enabled || snapshot?.audioPaused}
-                onPointerDown={(e) => {
-                  e.currentTarget.setPointerCapture(e.pointerId);
-                  beginHold();
-                }}
-                onPointerUp={releaseHold}
-                onPointerCancel={cancelHold}
-                onLostPointerCapture={() => {
-                  if (hold.current !== null) cancelHold();
-                }}
-                onKeyDown={(e) => {
-                  if ([" ", "Enter"].includes(e.key) && !e.repeat) {
-                    e.preventDefault();
-                    beginHold();
-                  }
-                }}
-                onKeyUp={(e) => {
-                  if ([" ", "Enter"].includes(e.key)) {
-                    e.preventDefault();
-                    releaseHold();
-                  }
-                }}
-              >
-                Hold & release{holding ? ` · ${heldSeconds.toFixed(1)}s` : ""}
-              </button>
-            </div>
-            <div className="sl-button-row">
-              <button
-                disabled={
-                  !enabled ||
-                  !["flight", "arrival"].includes(snapshot?.phase ?? "")
-                }
-                onClick={() => engine.current?.pauseJourney()}
-              >
-                {snapshot?.paused ? "Resume journey" : "Pause journey"}
-              </button>
-              <button
-                disabled={!enabled}
-                onClick={() => {
-                  cancelHold();
-                  engine.current?.stopJourney();
-                }}
-              >
-                Stop journey
-              </button>
-              <label className="sl-toggle">
-                <input
-                  type="checkbox"
-                  checked={j.repeat}
-                  onChange={(e) => setJourney({ repeat: e.target.checked })}
-                />
-                Repeat shot
-              </label>
-            </div>
-            <p>
-              Pause holds the journey position; existing tails continue. Stop
-              ends its sources. Reset audio clears all buffers and keeps
-              settings.
-            </p>
-            <div className="sl-grid-2">
-              <Range
-                label="Flight seconds"
-                value={j.duration}
-                min={0.7}
-                max={12}
-                step={0.1}
-                onChange={(v) => setJourney({ duration: v })}
+          <div className="sl-transport-actions">
+            <button
+              className="sl-primary"
+              disabled={busy || !!snapshot?.audioPaused}
+              onClick={() => void play()}
+              title="Play shot · P or Space"
+            >
+              ▶ Play shot <kbd>P</kbd>
+            </button>
+            <button
+              disabled={
+                !enabled ||
+                !["flight", "arrival"].includes(snapshot?.phase ?? "")
+              }
+              onClick={() => engine.current?.pauseJourney()}
+            >
+              {snapshot?.paused ? "Resume" : "Pause"}
+            </button>
+            <button
+              disabled={!enabled}
+              onClick={() => engine.current?.stopJourney()}
+            >
+              Stop
+            </button>
+            <label className="sl-toggle">
+              <input
+                type="checkbox"
+                checked={j.repeat}
+                onChange={(e) => setJourney({ repeat: e.target.checked })}
               />
-              <label>
-                Arrival outcome
-                <select
-                  disabled={j.path === "paint" && !!j.paint.target}
-                  value={j.outcome}
-                  onChange={(e) =>
-                    setJourney({
-                      outcome: e.target.value as Journey["outcome"],
-                    })
-                  }
-                >
-                  <option value="capture">
-                    Capture · resolve to destination
-                  </option>
-                  <option value="miss">Near miss · leave open</option>
-                </select>
-              </label>
-            </div>
-            <p>
-              {j.path === "paint"
-                ? "Paint trace uses the existing dose, mass and strength calculations. Flight is a lab preview without camera or capture deformation. Saved target determines the outcome when present."
-                : "Color probe: a controlled sound experiment, not a scored game shot."}
-            </p>
+              Loop
+            </label>
+            <button
+              disabled={
+                busy ||
+                !!snapshot?.audioPaused ||
+                (snapshot?.phase === "arrival" && snapshot?.resolved)
+              }
+              onClick={resolveAudition}
+            >
+              {snapshot?.motif ||
+              ["flight", "arrival"].includes(snapshot?.phase ?? "")
+                ? "Resolve now"
+                : "Resolve demo"}
+            </button>
+            <select
+              aria-label="Complete starting setup"
+              value=""
+              onChange={(e) => {
+                const selected = STARTERS.find((x) => x.id === e.target.value);
+                if (selected) load(selected.setup);
+              }}
+            >
+              <option value="">Load starting setup…</option>
+              {STARTERS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </section>
+          <small>
+            {snapshot?.phase ?? "ready"} ·{" "}
+            {Math.round((snapshot?.progress ?? 0) * 100)}% · Space / P: play ·
+            Esc: silence · edits are live, including the next loop
+          </small>
+        </div>
+        <details className="sl-card sl-map-disclosure">
+          <summary>Shape one journey · drag the shot map</summary>
+          <section className="sl-shot" aria-label="Shared shot audition">
+            <div className="sl-shot-view">
+              {j.path === "probe" ? (
+                <ProbeEditor
+                  journey={j}
+                  onChange={setJourney}
+                  samples={samples}
+                  progress={snapshot?.progress ?? 0}
+                />
+              ) : (
+                <Trace samples={samples} progress={snapshot?.progress ?? 0} />
+              )}
+              <div className="sl-shot-badge">
+                <strong>
+                  {holding
+                    ? "Holding"
+                    : snapshot?.paused
+                      ? "Journey paused"
+                      : (snapshot?.phase ?? "idle")}
+                </strong>
+                <span>
+                  {Math.round((snapshot?.progress ?? 0) * 100)}% ·{" "}
+                  {currentModel.name}
+                </span>
+              </div>
+            </div>
+            <div className="sl-shot-controls">
+              <h1>Shape one journey</h1>
+              <div className="sl-button-row">
+                <button
+                  className="sl-primary"
+                  disabled={!enabled || snapshot?.audioPaused || !!paintError}
+                  onClick={() => play()}
+                >
+                  Play shot
+                </button>
+                <button
+                  className="sl-hold"
+                  disabled={!enabled || snapshot?.audioPaused}
+                  onPointerDown={(e) => {
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                    beginHold();
+                  }}
+                  onPointerUp={releaseHold}
+                  onPointerCancel={cancelHold}
+                  onLostPointerCapture={() => {
+                    if (hold.current !== null) cancelHold();
+                  }}
+                  onKeyDown={(e) => {
+                    if ([" ", "Enter"].includes(e.key) && !e.repeat) {
+                      e.preventDefault();
+                      beginHold();
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    if ([" ", "Enter"].includes(e.key)) {
+                      e.preventDefault();
+                      releaseHold();
+                    }
+                  }}
+                >
+                  Hold & release{holding ? ` · ${heldSeconds.toFixed(1)}s` : ""}
+                </button>
+              </div>
+              <div className="sl-button-row">
+                <button
+                  disabled={
+                    !enabled ||
+                    !["flight", "arrival"].includes(snapshot?.phase ?? "")
+                  }
+                  onClick={() => engine.current?.pauseJourney()}
+                >
+                  {snapshot?.paused ? "Resume journey" : "Pause journey"}
+                </button>
+                <button
+                  disabled={!enabled}
+                  onClick={() => {
+                    cancelHold();
+                    engine.current?.stopJourney();
+                  }}
+                >
+                  Stop journey
+                </button>
+                <label className="sl-toggle">
+                  <input
+                    type="checkbox"
+                    checked={j.repeat}
+                    onChange={(e) => setJourney({ repeat: e.target.checked })}
+                  />
+                  Repeat shot
+                </label>
+              </div>
+              <p>
+                Pause holds the journey position; existing tails continue. Stop
+                ends its sources. Reset audio clears all buffers and keeps
+                settings.
+              </p>
+              <div className="sl-grid-2">
+                <Range
+                  label="Flight seconds"
+                  value={j.duration}
+                  min={0.7}
+                  max={12}
+                  step={0.1}
+                  onChange={(v) => setJourney({ duration: v })}
+                />
+                <label>
+                  Arrival outcome
+                  <select
+                    disabled={j.path === "paint" && !!j.paint.target}
+                    value={j.outcome}
+                    onChange={(e) =>
+                      setJourney({
+                        outcome: e.target.value as Journey["outcome"],
+                      })
+                    }
+                  >
+                    <option value="capture">
+                      Capture · resolve to destination
+                    </option>
+                    <option value="miss">Near miss · leave open</option>
+                  </select>
+                </label>
+              </div>
+              <p>
+                {j.path === "paint"
+                  ? "Paint trace uses the existing dose, mass and strength calculations. Flight is a lab preview without camera or capture deformation. Saved target determines the outcome when present."
+                  : "Color probe: a controlled sound experiment, not a scored game shot."}
+              </p>
+            </div>
+          </section>
+        </details>
         <div className="sl-activity" aria-label="What is making sound">
           <span>Shot: {snapshot?.phase ?? "idle"}</span>
           <span>
@@ -691,24 +880,6 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
           </span>
           <span>Mappings: {mappingMode}</span>
         </div>
-        <div className="sl-tabs" role="tablist" aria-label="Journey workbench">
-          {(["journey", "sound", "mapping"] as Tab[]).map((t) => (
-            <button
-              key={t}
-              id={`tab-${t}`}
-              role="tab"
-              aria-selected={tab === t}
-              aria-controls={`panel-${t}`}
-              onClick={() => setTab(t)}
-            >
-              {t === "journey"
-                ? "Journey"
-                : t === "sound"
-                  ? "Sound"
-                  : "Mapping"}
-            </button>
-          ))}
-        </div>
         <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
           {tab === "journey" && (
             <>
@@ -735,22 +906,39 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                   </button>
                 </div>
               </div>
-              <HarmonyJourney
-                music={p.music}
+              <MusicPanel
+                value={p.music}
                 onChange={(music) => change("music", music)}
-                journey={j}
-                step={snapshot?.step ?? 0}
-                resolved={snapshot?.resolved ?? false}
-                phase={snapshot?.phase ?? "idle"}
-                motifPlaying={snapshot?.motif ?? false}
                 enabled={enabled && !snapshot?.audioPaused}
+                playing={!!snapshot?.motif}
+                step={snapshot?.step ?? 0}
+                onPlay={() => engine.current?.playMotif()}
+                onStop={() => engine.current?.stopMotif()}
                 onNext={() => engine.current?.nextHarmony()}
-                onResolve={() => {
-                  cancelHold();
-                  engine.current?.resolve();
-                }}
-                onExplore={() => engine.current?.explore()}
-              />
+                canNext={
+                  p.music.source !== "custom" &&
+                  p.music.progression !== "still" &&
+                  !["flight", "arrival"].includes(snapshot?.phase ?? "")
+                }
+                bodyOnly={p.instrument === "convergence" && p.shotArps === 0}
+              >
+                <HarmonyJourney
+                  music={p.music}
+                  onChange={(music) => change("music", music)}
+                  journey={j}
+                  model={p.instrument}
+                  onSelectStep={(i) => engine.current?.nextHarmony(i)}
+                  step={snapshot?.step ?? 0}
+                  resolved={snapshot?.resolved ?? false}
+                  phase={snapshot?.phase ?? "idle"}
+                  motifPlaying={snapshot?.motif ?? false}
+                  enabled={enabled && !snapshot?.audioPaused}
+                  onNext={() => engine.current?.nextHarmony()}
+                  onResolve={resolveAudition}
+                  onExplore={() => engine.current?.explore()}
+                />
+              </MusicPanel>
+
               <MelodyGrid
                 value={p.music}
                 onChange={(music) => change("music", music)}
@@ -766,31 +954,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 }}
                 enabled={enabled && !snapshot?.audioPaused}
               />
-              <details className="sl-card" open={p.instrument === "vocal"}>
-                <summary>Vocal shot glide</summary>
-                <p>
-                  The Vocal glide model slides toward the current harmonic
-                  voices. Pitch shape is separate from the vowel and breath
-                  controls in Sound.
-                </p>
-                <div className="sl-grid-3">
-                  {GROUPS.flatMap((g) => g.sliders)
-                    .filter((spec) =>
-                      ["glideTime", "glideStart", "glideCurve"].includes(
-                        spec.key,
-                      ),
-                    )
-                    .map((spec) => (
-                      <Slider
-                        key={spec.key}
-                        spec={spec}
-                        value={p[spec.key]}
-                        mapped={snapshot?.mapped[spec.key as Destination]}
-                        onChange={(v) => change(spec.key, v)}
-                      />
-                    ))}
-                </div>
-              </details>
+
               <div className="sl-grid-3 sl-card">
                 <label>
                   Advance harmony by
@@ -867,15 +1031,32 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                   onChange={(v) => change("decay", v)}
                 />
               </div>
-              <MusicPanel
-                value={p.music}
-                onChange={(music) => change("music", music)}
-                enabled={enabled && !snapshot?.audioPaused}
-                playing={!!snapshot?.motif}
-                step={snapshot?.step ?? 0}
-                onPlay={() => engine.current?.playMotif()}
-                onStop={() => engine.current?.stopMotif()}
-              />
+
+              <details className="sl-card" open={p.instrument === "vocal"}>
+                <summary>Vocal shot glide</summary>
+                <p>
+                  The Vocal glide model slides toward the current harmonic
+                  voices. Pitch shape is separate from the vowel and breath
+                  controls in Sound.
+                </p>
+                <div className="sl-grid-3">
+                  {GROUPS.flatMap((g) => g.sliders)
+                    .filter((spec) =>
+                      ["glideTime", "glideStart", "glideCurve"].includes(
+                        spec.key,
+                      ),
+                    )
+                    .map((spec) => (
+                      <Slider
+                        key={spec.key}
+                        spec={spec}
+                        value={p[spec.key]}
+                        mapped={snapshot?.mapped[spec.key as Destination]}
+                        onChange={(v) => change(spec.key, v)}
+                      />
+                    ))}
+                </div>
+              </details>
               <details className="sl-card">
                 <summary>Custom tuning · foundation and six intervals</summary>
                 <label className="sl-toggle">
@@ -1109,48 +1290,84 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 </label>
               </div>
               <div className="sl-control-groups">
-                {GROUPS.map((group) => (
-                  <details
-                    key={group.name}
-                    className="sl-card"
-                    open={
-                      group.name === "Instrument detail" ||
-                      group.name === "Ribbon workbench"
-                    }
-                  >
-                    <summary>{group.name}</summary>
-                    <p>{group.subtitle}</p>
-                    <div className="sl-grid-3">
-                      {group.sliders
-                        .filter(
-                          (spec) =>
-                            ![
-                              "root",
-                              "activity",
-                              "glideTime",
-                              "glideStart",
-                              "glideCurve",
-                            ].includes(spec.key),
-                        )
-                        .filter(
-                          (spec) =>
-                            p.instrument === "convergence" ||
-                            !["voices", "spread", "converge"].includes(
-                              spec.key,
-                            ),
-                        )
-                        .map((spec) => (
-                          <Slider
-                            key={spec.key}
-                            spec={spec}
-                            value={p[spec.key]}
-                            mapped={snapshot?.mapped[spec.key as Destination]}
-                            onChange={(v) => change(spec.key, v)}
-                          />
-                        ))}
-                    </div>
-                  </details>
-                ))}
+                {[...GROUPS]
+                  .sort(
+                    (a, b) =>
+                      [
+                        "Harmony & ribbon",
+                        "Body & excitation",
+                        "Instrument detail",
+                        "Shot layers & cloud",
+                        "Ribbon workbench",
+                        "Vocal glide",
+                        "Wake & space",
+                        "Buffer shredder",
+                        "Parallel texture",
+                      ].indexOf(a.name) -
+                      [
+                        "Harmony & ribbon",
+                        "Body & excitation",
+                        "Instrument detail",
+                        "Shot layers & cloud",
+                        "Ribbon workbench",
+                        "Vocal glide",
+                        "Wake & space",
+                        "Buffer shredder",
+                        "Parallel texture",
+                      ].indexOf(b.name),
+                  )
+                  .filter(
+                    (g) => g.name !== "Vocal glide" || p.instrument === "vocal",
+                  )
+                  .map((group) => (
+                    <details
+                      key={group.name}
+                      className="sl-card"
+                      open={[
+                        "Harmony & ribbon",
+                        "Body & excitation",
+                        "Shot layers & cloud",
+                      ].includes(group.name)}
+                    >
+                      <summary>{group.name}</summary>
+                      <p>{group.subtitle}</p>
+                      <div className="sl-grid-3">
+                        {group.sliders
+                          .filter(
+                            (spec) =>
+                              ![
+                                "root",
+                                "activity",
+                                "glideTime",
+                                "glideStart",
+                                "glideCurve",
+                              ].includes(spec.key),
+                          )
+                          .filter(
+                            (spec) =>
+                              p.instrument === "convergence" ||
+                              ![
+                                "voices",
+                                "spread",
+                                "converge",
+                                "wander",
+                                "wanderRate",
+                                "gatherStart",
+                                "gatherCurve",
+                              ].includes(spec.key),
+                          )
+                          .map((spec) => (
+                            <Slider
+                              key={spec.key}
+                              spec={spec}
+                              value={p[spec.key]}
+                              mapped={snapshot?.mapped[spec.key as Destination]}
+                              onChange={(v) => change(spec.key, v)}
+                            />
+                          ))}
+                      </div>
+                    </details>
+                  ))}
               </div>
               <details className="sl-card">
                 <summary>Earlier sound starting points</summary>
@@ -1181,6 +1398,22 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
           )}
           {tab === "mapping" && (
             <>
+              <section className="sl-card">
+                <h2>Route studies</h2>
+                <p>
+                  Load a complete sound, sketch and mapping inspired by the game
+                  debrief. These are audition proposals; they do not change game
+                  math.
+                </p>
+                <div className="sl-models">
+                  {MAPPING_STUDIES.map((study) => (
+                    <button key={study.id} onClick={() => load(study.setup)}>
+                      <strong>{study.name}</strong>
+                      <small>{study.notes}</small>
+                    </button>
+                  ))}
+                </div>
+              </section>
               <div className="sl-section-head">
                 <div>
                   <h2>What movement changes</h2>

@@ -19,6 +19,8 @@ export function HarmonyJourney({
   onNext,
   onResolve,
   onExplore,
+  model,
+  onSelectStep,
 }: {
   music: MusicSettings;
   onChange: (m: MusicSettings) => void;
@@ -31,6 +33,8 @@ export function HarmonyJourney({
   onNext: () => void;
   onResolve: () => void;
   onExplore: () => void;
+  model: string;
+  onSelectStep: (i: number) => void;
 }) {
   const frames = [
     harmonicFrame(music, step),
@@ -40,7 +44,8 @@ export function HarmonyJourney({
   const progression = PROGRESSIONS.find((p) => p.id === music.progression)!;
   const count = progression.fifths ? 12 : progression.degrees.length;
   const moving = ["flight", "arrival"].includes(phase);
-  const automatic = phase === "arrival" || (moving && journey.advance !== "manual");
+  const automatic =
+    phase === "arrival" || (moving && journey.advance !== "manual");
   const shotClock = {
     manual: "Manual harmony",
     shot: "One harmony step per launched shot",
@@ -84,15 +89,49 @@ export function HarmonyJourney({
           </button>
           <button
             className="sl-primary"
-            disabled={!enabled || resolved}
+            disabled={!enabled || (resolved && phase === "arrival")}
             onClick={onResolve}
           >
-            Resolve now
+            {moving || motifPlaying ? "Resolve now" : "Resolve demo"}
           </button>
-          <button disabled={!enabled || !resolved || phase === "arrival"} onClick={onExplore}>
+          <button
+            disabled={!enabled || !resolved || phase === "arrival"}
+            onClick={onExplore}
+          >
             Leave resolution
           </button>
         </div>
+      </div>
+      <div className="sl-progression-tiles" aria-label="Harmonic progression">
+        {Array.from({ length: count }, (_, i) => {
+          const frame = harmonicFrame(music, i);
+          return (
+            <button
+              key={i}
+              disabled={!enabled || automatic || music.source === "custom"}
+              aria-pressed={step % count === i}
+              onClick={() => onSelectStep(i)}
+              style={{
+                borderColor: `hsl(${({ piano: 42, glass: 165, convergence: 270, vocal: 18, synth: 210 } as Record<string, number>)[model] ?? 180} 45% ${step % count === i ? 70 : 35}%)`,
+              }}
+            >
+              <small>
+                {i + 1}
+                {i === music.destinationStep % count ? " · target" : ""}
+              </small>
+              <strong>
+                {frame.tones.slice(0, 3).map(noteName).join(" · ")}
+              </strong>
+              <span>
+                {model === "convergence"
+                  ? "Voice cloud destination"
+                  : model === "glass"
+                    ? "Glass phrase"
+                    : "Phrase harmony"}
+              </span>
+            </button>
+          );
+        })}
       </div>
       <div className="sl-grid-3">
         {frames.map((frame, i) => (

@@ -49,7 +49,7 @@
   },
   {
     "name": "chroma_flight",
-    "nodes": 1134,
+    "nodes": 1224,
     "ugens": [
       "Control",
       "Lag",
