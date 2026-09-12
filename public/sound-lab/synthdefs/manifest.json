@@ -16,6 +16,52 @@
     ]
   },
   {
+    "name": "chroma_piano",
+    "nodes": 140,
+    "ugens": [
+      "Control",
+      "Impulse",
+      "BinaryOpUGen",
+      "Decay2",
+      "SinOsc",
+      "PinkNoise",
+      "LPF",
+      "Pan2",
+      "Out",
+      "Line"
+    ]
+  },
+  {
+    "name": "chroma_synth",
+    "nodes": 84,
+    "ugens": [
+      "Control",
+      "Impulse",
+      "BinaryOpUGen",
+      "Decay2",
+      "SinOsc",
+      "PinkNoise",
+      "LPF",
+      "Pan2",
+      "Out",
+      "Line"
+    ]
+  },
+  {
+    "name": "chroma_flight",
+    "nodes": 522,
+    "ugens": [
+      "Control",
+      "Lag",
+      "BinaryOpUGen",
+      "SinOsc",
+      "Saw",
+      "Clip",
+      "Pan2",
+      "Out"
+    ]
+  },
+  {
     "name": "chroma_field",
     "nodes": 96,
     "ugens": [
@@ -29,7 +75,7 @@
   },
   {
     "name": "chroma_space",
-    "nodes": 151,
+    "nodes": 241,
     "ugens": [
       "Control",
       "In",
@@ -42,6 +88,7 @@
       "GrainBuf",
       "Lag",
       "SinOsc",
+      "Clip",
       "BPF",
       "CombC",
       "LPF",

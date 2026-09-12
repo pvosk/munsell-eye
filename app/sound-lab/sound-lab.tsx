@@ -1,255 +1,1576 @@
-'use client';
+"use client";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { SoundLabEngine } from "./engine";
+import {
+  GROUPS,
+  PRESETS,
+  SOUND_MODELS,
+  TUNINGS,
+  sanitizeParameters,
+  type Parameters,
+  type SliderSpec,
+} from "./parameters";
+import { MusicPanel } from "./music-panel";
+import { DEFAULT_SETUP, STARTERS, sanitizeSetup, type Setup } from "./presets";
+import { PresetLibrary } from "./preset-library";
+import {
+  PROBES,
+  INPUTS,
+  OUTPUTS,
+  sampleProbe,
+  signalPath,
+  type Mapping,
+  type Journey,
+  type ColorSample,
+  type Destination,
+} from "./journey";
+import { loadGame, paintTrace } from "./paint-trace";
+import "./sound-lab.css";
 
-import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { SoundLabEngine, type NoteEvent } from './engine';
-import { DEFAULTS, GROUPS, PRESETS, TUNINGS, frequencies, sanitizeParameters, type Parameters, type SliderSpec } from './parameters';
-import { MusicPanel } from './music-panel';
-import { noteName, type MusicSettings } from './music';
-import './sound-lab.css';
-
-type Saved = { id: string; name: string; parameters: Parameters };
-type Status = 'off' | 'loading' | 'on' | 'error' | 'resetting';
-const STORAGE = 'chroma-glider-sound-lab-v1';
-const fmt = (n: number, unit = '') => unit === 'Hz' ? `${n >= 1000 ? (n / 1000).toFixed(2) + 'k' : n.toFixed(n < 300 ? 1 : 0)} Hz` : unit === 's' ? `${n < .1 ? (n * 1000).toFixed(0) + ' ms' : n.toFixed(2) + ' s'}` : unit === 'st' ? `${n > 0 ? '+' : ''}${n.toFixed(1)} st` : n.toFixed(2);
-
-function Slider({ spec, value, onChange }: { spec: SliderSpec; value: number; onChange: (value: number) => void }) {
-  const id = `sl-${spec.key}`;
-  const position = spec.log ? Math.log(value / spec.min) / Math.log(spec.max / spec.min) * 1000 : value;
-  return <div className="sl-control">
-    <div className="sl-control-label"><label htmlFor={id}>{spec.label}</label><output htmlFor={id}>{fmt(value, spec.unit)}</output></div>
-    <input id={id} type="range" min={spec.log ? 0 : spec.min} max={spec.log ? 1000 : spec.max} step={spec.log ? 1 : spec.step}
-      value={position} aria-valuetext={fmt(value, spec.unit)} aria-describedby={`${id}-hint`}
-      onChange={e => onChange(spec.log ? Math.round(spec.min * (spec.max / spec.min) ** (Number(e.target.value) / 1000) / spec.step) * spec.step : Number(e.target.value))} />
-    <p id={`${id}-hint`} className="sl-hint">{spec.hint}</p>
-  </div>;
+type Tab = "journey" | "sound" | "mapping";
+const format = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(2));
+function Range({
+  label,
+  value,
+  min,
+  max,
+  step = 0.01,
+  onChange,
+  hint,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (n: number) => void;
+  hint?: string;
+}) {
+  return (
+    <label className="sl-range">
+      <span>
+        {label}
+        <output>{format(value)}</output>
+      </span>
+      <input
+        aria-label={label}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      {hint && <small>{hint}</small>}
+    </label>
+  );
 }
-
-function download(blob: Blob, name: string) {
-  const url = URL.createObjectURL(blob), link = document.createElement('a');
-  link.href = url; link.download = name; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-}
-
-function Field({ engine, enabled, resolved }: { engine: React.RefObject<SoundLabEngine | null>; enabled: boolean; resolved: boolean }) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const held = useRef(false);
-  const position = useRef({ x: .5, y: .5 });
-  const particles = useRef<(NoteEvent & { born: number })[]>([]);
-  const [last, setLast] = useState<number | null>(null);
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    const e = engine.current;
-    if (!e) return;
-    return e.subscribeNotes(note => {
-      particles.current.push({ ...note, born: performance.now() });
-      setLast(note.hz); setCount(n => n + 1);
-    });
-  }, [engine, enabled]);
-  useEffect(() => {
-    let frame = 0;
-    const data = new Float32Array(1024);
-    const draw = (time: number) => {
-      const c = canvas.current, ctx = c?.getContext('2d');
-      if (c && ctx) {
-        const width = c.clientWidth, height = c.clientHeight, dpr = Math.min(devicePixelRatio || 1, 2);
-        if (c.width !== Math.round(width * dpr) || c.height !== Math.round(height * dpr)) { c.width = Math.round(width * dpr); c.height = Math.round(height * dpr); }
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, width, height);
-        const guide = resolved ? '147,212,192' : '160,179,197';
-        ctx.strokeStyle = `rgba(${guide},.1)`; ctx.lineWidth = 1;
-        for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(width * i / 6, 18); ctx.lineTo(width * i / 6, height - 55); ctx.stroke(); }
-        for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(18, height * i / 4); ctx.lineTo(width - 18, height * i / 4); ctx.stroke(); }
-        particles.current = particles.current.filter(p => time - p.born < 4200);
-        for (const p of particles.current) {
-          const age = (time - p.born) / 4200, x = 24 + p.x * (width - 48), y = 25 + p.y * (height - 105);
-          ctx.strokeStyle = `rgba(${resolved ? '147,212,192' : '176,192,230'},${(1 - age) * .48})`;
-          ctx.beginPath(); ctx.ellipse(x, y, 7 + age * 66, 7 + age * 26, -.12, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillStyle = `rgba(${guide},${(1 - age) * .8})`;
-          ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
-        }
-        const analyser = engine.current?.analyser;
-        if (analyser && enabled) analyser.getFloatTimeDomainData(data); else data.fill(0);
-        ctx.strokeStyle = `rgba(${guide},.72)`; ctx.beginPath();
-        for (let i = 0; i < data.length; i++) {
-          const x = i / (data.length - 1) * width, y = height - 29 + data[i] * 115;
-          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
+function Slider({
+  spec,
+  value,
+  onChange,
+  mapped,
+}: {
+  spec: SliderSpec;
+  value: number;
+  onChange: (n: number) => void;
+  mapped?: number;
+}) {
+  return (
+    <Range
+      label={spec.label + (spec.unit ? ` (${spec.unit})` : "")}
+      value={value}
+      min={spec.min}
+      max={spec.max}
+      step={spec.step}
+      onChange={onChange}
+      hint={
+        mapped === undefined
+          ? spec.hint
+          : `Mapped live: ${format(mapped)}. Slider stores the unmapped base value.`
       }
-      frame = requestAnimationFrame(draw);
-    };
-    frame = requestAnimationFrame(draw); return () => cancelAnimationFrame(frame);
-  }, [engine, enabled, resolved]);
-  const playAt = (x: number, y: number) => {
-    position.current = { x: Math.max(0, Math.min(.999, x)), y: Math.max(0, Math.min(1, y)) };
-    engine.current?.touch(position.current.x, position.current.y);
-  };
-  const keys = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!enabled || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(event.key)) return;
-    event.preventDefault();
-    const { x, y } = position.current;
-    playAt(x + (event.key === 'ArrowRight' ? .17 : event.key === 'ArrowLeft' ? -.17 : 0), y + (event.key === 'ArrowDown' ? .2 : event.key === 'ArrowUp' ? -.2 : 0));
-  };
-  return <div className={`sl-field ${enabled ? 'enabled' : ''} ${resolved ? 'resolved' : ''}`} tabIndex={enabled ? 0 : -1} role="group"
-    aria-label="Audition field. Drag to scatter tones. Arrow keys change the position; space plays a note."
-    onKeyDown={keys}
-    onPointerDown={event => {
-      if (!enabled) return;
-      held.current = true; event.currentTarget.setPointerCapture(event.pointerId);
-      const box = event.currentTarget.getBoundingClientRect(); playAt((event.clientX - box.left) / box.width, (event.clientY - box.top) / box.height);
-    }}
-    onPointerMove={event => {
-      if (!held.current || !enabled) return;
-      const box = event.currentTarget.getBoundingClientRect(); playAt((event.clientX - box.left) / box.width, (event.clientY - box.top) / box.height);
-    }}
-    onPointerUp={() => { held.current = false; }} onPointerCancel={() => { held.current = false; }} onLostPointerCapture={() => { held.current = false; }}>
-    <canvas ref={canvas} aria-hidden="true" />
-    <div className="sl-field-caption"><span>{resolved ? 'Settling into home' : enabled ? 'Move to scatter' : 'A space to listen'}</span><small>{enabled ? 'Across: tones · Up: higher, stronger excitation' : 'Enable sound, then touch or drag through the field.'}</small></div>
-    <div className="sl-field-readout" aria-hidden="true"><span>{last ? noteName(69+12*Math.log2(last/440)) : '— Hz'}</span><span>{count} notes · live output below</span></div>
-  </div>;
+    />
+  );
+}
+const rgb = (c: ColorSample) => `rgb(${c.rgb.map(Math.round).join(" ")})`;
+const point = (c: ColorSample) =>
+  [
+    300 + Math.cos((c.h * Math.PI) / 180) * c.edge * 220,
+    125 - (c.l - 0.5) * 140 + Math.sin((c.h * Math.PI) / 180) * c.edge * 55,
+  ].map((x) => Math.round(x * 1000) / 1000);
+function Trace({
+  samples,
+  progress,
+}: {
+  samples: ColorSample[];
+  progress: number;
+}) {
+  const i = Math.min(
+      samples.length - 1,
+      Math.floor(progress * (samples.length - 1)),
+    ),
+    current = samples[i],
+    pos = point(current);
+  return (
+    <svg
+      className="sl-trace"
+      viewBox="0 0 600 240"
+      role="img"
+      aria-label="Shot trace projection. The bright marker follows the current color; the ring marks the endpoint."
+    >
+      <ellipse
+        cx="300"
+        cy="125"
+        rx="220"
+        ry="55"
+        fill="none"
+        stroke="#a4c5cc30"
+      />
+      <line x1="300" x2="300" y1="30" y2="210" stroke="#a4c5cc30" />
+      {samples.slice(1).map((c, j) => {
+        const a = point(samples[j]),
+          b = point(c);
+        return (
+          <line
+            key={j}
+            x1={a[0]}
+            y1={a[1]}
+            x2={b[0]}
+            y2={b[1]}
+            stroke={rgb(c)}
+            strokeWidth={j < i ? 4 : 2}
+            opacity={j < i ? 1 : 0.4}
+          />
+        );
+      })}
+      <circle
+        cx={point(samples.at(-1)!)[0]}
+        cy={point(samples.at(-1)!)[1]}
+        r="12"
+        fill="none"
+        stroke="#d8eee4"
+      />
+      <circle
+        cx={pos[0]}
+        cy={pos[1]}
+        r="7"
+        fill={rgb(current)}
+        stroke="white"
+        strokeWidth="2"
+      />
+      <text x="18" y="220" fill="#a9bdbb" fontSize="13">
+        Hue around · lightness up · boundary fraction outward
+      </text>
+    </svg>
+  );
 }
 
-export default function SoundLab() {
-  const [p, setP] = useState<Parameters>(() => sanitizeParameters(DEFAULTS));
-  const [status, setStatus] = useState<Status>('off');
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [ambient, setAmbient] = useState(true);
-  const [resolved, setResolved] = useState(false);
-  const [selected, setSelected] = useState('Submerged glass');
-  const [saved, setSaved] = useState<Saved[]>([]);
-  const [name, setName] = useState('');
-  const [recording, setRecording] = useState(false);
-  const [musicStep, setMusicStep] = useState(0);
-  const [motifPlaying, setMotifPlaying] = useState(false);
-  const engine = useRef<SoundLabEngine | null>(null);
-  const input = useRef<HTMLInputElement>(null);
-  const alive = useRef(true);
-  const recordingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+export default function SoundLab({ signIn }: { signIn: ReactNode }) {
+  const [setup, setSetup] = useState<Setup>(() => sanitizeSetup(DEFAULT_SETUP)),
+    [tab, setTab] = useState<Tab>("journey"),
+    [status, setStatus] = useState<"off" | "loading" | "on" | "error">("off"),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [snapshot, setSnapshot] = useState<ReturnType<
+      SoundLabEngine["snapshot"]
+    > | null>(null),
+    [heldSeconds, setHeldSeconds] = useState(0),
+    [holding, setHolding] = useState(false),
+    [mappingMode, setMappingMode] = useState<"on" | "paused" | "off">("on"),
+    [fxBypass, setFxBypass] = useState(false),
+    [recording, setRecording] = useState(false),
+    [undo, setUndo] = useState<Setup | null>(null),
+    [hydrated, setHydrated] = useState(false);
+  const [paintInfo, setPaintInfo] = useState<Awaited<
+      ReturnType<typeof paintTrace>
+    > | null>(null),
+    [palettes, setPalettes] = useState<
+      { name: string; paints: { name: string }[] }[]
+    >([]),
+    [paintError, setPaintError] = useState("");
+  const engine = useRef<SoundLabEngine | null>(null),
+    alive = useRef(false),
+    hold = useRef<number | null>(null),
+    recordTimer = useRef<ReturnType<typeof setTimeout> | null>(null),
+    setupRef = useRef(setup);
+  const p = setup.parameters,
+    j = setup.journey,
+    enabled = status === "on",
+    busy = status === "loading";
+  useEffect(() => {
+    setupRef.current = setup;
+  }, [setup]);
+  const update = useCallback(
+    (next: Setup) => setSetup(sanitizeSetup(next)),
+    [],
+  );
+  const change = (key: keyof Parameters, value: unknown) =>
+    setSetup((s) =>
+      sanitizeSetup({ ...s, parameters: { ...s.parameters, [key]: value } }),
+    );
+  const setJourney = (patch: Partial<Journey>) =>
+    setSetup((s) =>
+      sanitizeSetup({ ...s, journey: { ...s.journey, ...patch } }),
+    );
+  const updateRow = (id: string, patch: Partial<Mapping>) =>
+    setSetup((s) => ({
+      ...s,
+      mappings: s.mappings.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    }));
   useEffect(() => {
     alive.current = true;
-    const e = new SoundLabEngine(); engine.current = e;
-    e.onError = text => { if (alive.current) { setError(text); setStatus('error'); setRecording(false); } };
+    const e = new SoundLabEngine();
+    engine.current = e;
+    e.onError = (message) => {
+      if (alive.current) {
+        setError(message);
+        setStatus("error");
+      }
+    };
     queueMicrotask(() => {
-      if (!alive.current) return;
       try {
-        const raw = JSON.parse(localStorage.getItem(STORAGE) || '[]');
-        if (Array.isArray(raw)) setSaved(raw.slice(0, 30).filter(v => typeof v?.name === 'string' && typeof v?.id === 'string').map(v => ({ id: v.id, name: v.name.slice(0, 60), parameters: sanitizeParameters(v.parameters) })));
-      } catch { /* A corrupt or unavailable local store must not prevent listening. */ }
+        const draft = localStorage.getItem("chroma-sound-draft-v2");
+        if (draft) setSetup(sanitizeSetup(JSON.parse(draft)));
+      } catch {
+        /* Cloud/library files remain usable. */
+      }
+      setHydrated(true);
     });
+    const timer = setInterval(() => {
+      if (engine.current && alive.current)
+        setSnapshot(engine.current.snapshot());
+      if (hold.current !== null) {
+        const seconds = (performance.now() - hold.current) / 1000;
+        setHeldSeconds(seconds);
+        engine.current?.charge(Math.min(1, seconds / 2.2));
+      }
+    }, 60);
     const hide = () => {
-      if (document.hidden) { engine.current?.stop(); setStatus('off'); setResolved(false); setRecording(false); }
+      if (document.hidden) {
+        hold.current = null;
+        setHolding(false);
+        engine.current?.stop();
+        setStatus("off");
+        setRecording(false);
+      }
     };
-    document.addEventListener('visibilitychange', hide);
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        hold.current = null;
+        setHolding(false);
+        engine.current?.stopSound();
+        setNotice("Sources and effect memory stopped. Settings kept.");
+      }
+    };
+    const blur = () => {
+      hold.current = null;
+      setHolding(false);
+      engine.current?.charge(0);
+    };
+    window.addEventListener("blur", blur);
+    document.addEventListener("visibilitychange", hide);
+    window.addEventListener("keydown", escape);
     return () => {
-      alive.current = false; document.removeEventListener('visibilitychange', hide);
-      if (recordingTimer.current) clearTimeout(recordingTimer.current);
-      void engine.current?.dispose(); engine.current = null;
+      alive.current = false;
+      clearInterval(timer);
+      if (recordTimer.current) clearTimeout(recordTimer.current);
+      document.removeEventListener("visibilitychange", hide);
+      window.removeEventListener("keydown", escape);
+      window.removeEventListener("blur", blur);
+      void engine.current?.dispose();
+      engine.current = null;
     };
-  }, []);
-  useEffect(() => engine.current?.subscribeMusic((step,playing)=>{setMusicStep(step);setMotifPlaying(playing);}), [status]);
-  useEffect(() => { engine.current?.update(p); }, [p]);
-  useEffect(() => { engine.current?.setAmbient(ambient); }, [ambient]);
-
-  const stop = useCallback(() => {
-    engine.current?.stop(); setStatus('off'); setResolved(false); setRecording(false);
-    if (recordingTimer.current) clearTimeout(recordingTimer.current);
   }, []);
   useEffect(() => {
-    const key = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape') stop(); };
-    window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
-  }, [stop]);
-
+    engine.current?.configure(setup);
+    if (!hydrated) return;
+    try {
+      localStorage.setItem("chroma-sound-draft-v2", JSON.stringify(setup));
+    } catch {
+      /* Explicit exports are available. */
+    }
+  }, [setup, hydrated]);
+  useEffect(() => {
+    if (j.path !== "paint") return;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setPaintError("");
+    });
+    loadGame()
+      .then((game) => {
+        if (!cancelled) setPalettes(game.PLAY_LEVELS);
+      })
+      .catch(() => {
+        if (!cancelled)
+          setPaintError("Could not load the existing game engine.");
+      });
+    paintTrace(j.paint)
+      .then((info) => {
+        if (!cancelled) setPaintInfo(info);
+      })
+      .catch(() => {
+        if (!cancelled) setPaintError("Could not calculate this paint trace.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [j.path, j.paint]);
+  const probeSamples = useMemo(
+    () => Array.from({ length: 193 }, (_, i) => sampleProbe(j.probe, i / 192)),
+    [j.probe],
+  );
+  const samples =
+    j.path === "paint" && paintInfo ? paintInfo.samples : probeSamples;
+  const pathSignals = useMemo(
+    () => signalPath(samples, j.duration),
+    [samples, j.duration],
+  );
   const start = async () => {
-    const e = engine.current; if (!e) return;
-    setStatus('loading'); setError(''); setResolved(false); e.parameters = sanitizeParameters(p); e.ambient = ambient;
-    try { await e.start(); if (alive.current) setStatus(e.running ? 'on' : 'off'); }
-    catch (err) { if (alive.current) { setStatus('error'); setError(err instanceof Error ? err.message : String(err)); } }
-  };
-  const change = (key: keyof Parameters, value: number | number[]) => { setP(old => sanitizeParameters({ ...old, [key]: value, ...(['intervals','root'].includes(key)?{music:{...old.music,source:'custom'}}:{}) })); setSelected('Custom sound'); };
-  const changeMusic = (music: MusicSettings) => { setP(old=>sanitizeParameters({...old,music})); setSelected('Custom music'); };
-  const resetAudio = async () => {
-    setStatus('resetting'); setError(''); setResolved(false); setRecording(false); setMotifPlaying(false); setMusicStep(0);
-    if (recordingTimer.current) clearTimeout(recordingTimer.current);
-    const previous = engine.current; engine.current = null;
-    try { await previous?.dispose(); } finally {
+    setStatus("loading");
+    setError("");
+    try {
+      const e = engine.current!;
+      e.parameters = sanitizeParameters(setupRef.current.parameters);
+      await e.start();
+      if (alive.current) setStatus(e.running ? "on" : "off");
+    } catch (err) {
       if (alive.current) {
-        const fresh = new SoundLabEngine(); engine.current = fresh;
-        fresh.onError = text => { if (alive.current) { setError(text); setStatus('error'); setRecording(false); } };
-        setP(old=>sanitizeParameters({...old,freeze:0,music:{...old.music,sustain:false}}));
-        setStatus('off'); setMessage('Audio memory cleared. Sustained harmony and freeze are off. Your other settings are kept.');
+        setStatus("error");
+        setError(err instanceof Error ? err.message : "Could not start sound.");
       }
     }
   };
-  const load = (values: Parameters, title: string) => { engine.current?.stopMotif(); engine.current?.explore(); setResolved(false); setP(sanitizeParameters(values)); setSelected(title); setMessage(''); };
-  const persist = (next: Saved[]) => {
-    try { localStorage.setItem(STORAGE, JSON.stringify(next)); setSaved(next); return true; }
-    catch { setMessage('Browser storage is unavailable. Export the settings to keep them.'); return false; }
+  const reset = async () => {
+    hold.current = null;
+    setHolding(false);
+    setStatus("loading");
+    setRecording(false);
+    const old = engine.current;
+    engine.current = null;
+    try {
+      await old?.dispose();
+    } finally {
+      if (alive.current) {
+        const next = new SoundLabEngine();
+        next.onError = (message) => {
+          setError(message);
+          setStatus("error");
+        };
+        engine.current = next;
+        next.configure(setupRef.current);
+        next.setMappingMode(mappingMode);
+        next.effectsBypassed = fxBypass;
+        setStatus("off");
+        setSnapshot(next.snapshot());
+        setNotice(
+          "Audio engine and all tails cleared. Every preference and preset is kept.",
+        );
+      }
+    }
   };
-  const save = () => {
-    if (!name.trim()) { setMessage('Give this sound a name first.'); return; }
-    if (saved.length >= 30) { setMessage('You have 30 saved sounds. Remove one or export your settings.'); return; }
-    if (persist([...saved, { id: crypto.randomUUID(), name: name.trim().slice(0, 60), parameters: sanitizeParameters(p) }])) { setMessage('Saved in this browser.'); setName(''); }
+  const load = (next: Setup) => {
+    hold.current = null;
+    setHolding(false);
+    engine.current?.stopSound();
+    setUndo(setup);
+    update(next);
+    setNotice("Setup loaded. Press Play shot to audition.");
+  };
+  const play = async (holdTime?: number) => {
+    if (!engine.current?.running) return;
+    const active = engine.current,
+      revision = active.transportGeneration;
+    hold.current = null;
+    engine.current.charge(0);
+    const next = sanitizeSetup(setupRef.current);
+    let trace: ColorSample[] | undefined;
+    if (next.journey.path === "paint") {
+      if (holdTime !== undefined)
+        next.journey.paint.hold = Math.min(4.4, holdTime);
+      try {
+        const info = await paintTrace(next.journey.paint);
+        if (
+          engine.current !== active ||
+          revision !== active.transportGeneration ||
+          !active.running
+        )
+          return;
+        trace = info.samples;
+        next.journey.duration = info.duration;
+        if (next.journey.paint.target)
+          next.journey.outcome = info.captured ? "capture" : "miss";
+        setPaintInfo(info);
+        update(next);
+      } catch {
+        setPaintError("Could not calculate this shot.");
+        return;
+      }
+    }
+    engine.current?.playShot(next, trace);
+  };
+  const beginHold = () => {
+    if (!enabled || snapshot?.audioPaused) return;
+    engine.current?.stopJourney();
+    hold.current = performance.now();
+    setHolding(true);
+    setHeldSeconds(0);
+  };
+  const releaseHold = () => {
+    if (hold.current === null) return;
+    const t = (performance.now() - hold.current) / 1000;
+    hold.current = null;
+    setHolding(false);
+    void play(t);
+  };
+  const cancelHold = () => {
+    hold.current = null;
+    setHolding(false);
+    engine.current?.charge(0);
+    setHeldSeconds(0);
+  };
+  const stopAll = () => {
+    hold.current = null;
+    setHolding(false);
+    engine.current?.charge(0);
+    engine.current?.stopSound();
   };
   const capture = () => {
     if (recording) {
-      engine.current?.stopRecording(); setRecording(false);
-      if (recordingTimer.current) clearTimeout(recordingTimer.current);
+      engine.current?.stopRecording();
+      setRecording(false);
+      if (recordTimer.current) clearTimeout(recordTimer.current);
       return;
     }
-    const started = engine.current?.startRecording(blob => {
-      download(blob, `chroma-listening-${Date.now()}.${blob.type.includes('mp4') ? 'm4a' : 'webm'}`);
-      setRecording(false); setMessage('Listening clip downloaded.');
+    const ok = engine.current?.startRecording((blob) => {
+      const u = URL.createObjectURL(blob),
+        a = document.createElement("a");
+      a.href = u;
+      a.download = `chroma-shot-${Date.now()}.${blob.type.includes("mp4") ? "m4a" : "webm"}`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(u), 3000);
+      if (alive.current) setRecording(false);
     });
-    if (!started) { setMessage('Audio recording is not available in this browser. You can still export settings.'); return; }
-    setRecording(true); setMessage('Recording the lab output. Stops after 60 seconds.');
-    recordingTimer.current = setTimeout(() => { engine.current?.stopRecording(); if (alive.current) setRecording(false); }, 60000);
+    if (!ok) {
+      setNotice(
+        "Recording is unavailable in this browser. You can export the setup.",
+      );
+      return;
+    }
+    setRecording(true);
+    recordTimer.current = setTimeout(() => {
+      engine.current?.stopRecording();
+      setRecording(false);
+    }, 60000);
   };
-  const enabled = status === 'on';
-  return <main className="sl-root">
-    <header className="sl-header">
-      <Link className="sl-back" href="/?mode=play"><span aria-hidden="true">←</span> Munsell Eye</Link>
-      <span className="sl-status"><i className={enabled ? 'live' : ''} />{status === 'loading' ? 'Starting audio…' : enabled ? 'Sound enabled' : 'Sound off'}</span>
-    </header>
-    <div className="sl-workspace">
-      <div className="sl-title-row"><div><p className="sl-eyebrow">Chroma Glider / listening studies</p><h1>Sound lab<span>.</span></h1><p className="sl-intro">Shape a tone. Follow its wake. Find the way home.</p></div>
-        <div className="sl-power">{!enabled ? <button className="sl-primary" onClick={start} disabled={status === 'loading' || status === 'resetting'}>{status === 'resetting' ? 'Clearing audio…' : status === 'loading' ? 'Starting…' : status === 'error' ? 'Retry sound' : 'Enable sound'} <span aria-hidden="true">↗</span></button> : <button className="sl-stop" onClick={stop}>■ Stop sound <kbd>esc</kbd></button>}
-          <button className="sl-reset-audio" disabled={status==='resetting'} onClick={resetAudio}>Reset audio · clear all tails</button>
-          {status === 'loading' && <button className="sl-link-button" onClick={stop}>Cancel</button>}
-          <label className="sl-volume">Output <input aria-label="Output volume" type="range" min="0" max="0.8" step="0.01" value={p.volume} onChange={e => change('volume', Number(e.target.value))} /><output>{Math.round(p.volume * 100)}%</output></label>
+  const currentSignals = snapshot?.signals ?? pathSignals[0],
+    currentModel = SOUND_MODELS.find((x) => x.id === p.instrument)!;
+  return (
+    <main className="sl-root sl-v2">
+      <header className="sl-header">
+        <Link className="sl-back" href="/?mode=play">
+          ← Munsell Eye
+        </Link>
+        <strong>Sound lab</strong>
+        <span className="sl-status">
+          {status === "loading"
+            ? "Starting…"
+            : enabled
+              ? snapshot?.audioPaused
+                ? "Audio paused"
+                : "Audio ready"
+              : "Audio off"}
+        </span>
+      </header>
+      <div className="sl-workspace">
+        <div className="sl-master">
+          <div className="sl-button-row">
+            <button
+              className="sl-primary"
+              disabled={busy}
+              onClick={enabled ? stopAll : start}
+            >
+              {enabled ? "Stop all sources" : "Enable audio"}
+            </button>
+            <button
+              disabled={!enabled}
+              onClick={() => engine.current?.pauseSound()}
+            >
+              {snapshot?.audioPaused ? "Resume audio" : "Pause audio"}
+            </button>
+            <button disabled={busy} onClick={reset}>
+              Reset audio · clear all
+            </button>
+            <button disabled={!enabled} onClick={capture}>
+              {recording ? "Finish recording" : "Record output"}
+            </button>
+          </div>
+          <Range
+            label="Output"
+            value={p.volume}
+            min={0}
+            max={0.8}
+            onChange={(v) => change("volume", v)}
+          />
         </div>
-      </div>
-      {status === 'error' && <div className="sl-error" role="alert">The audio engine could not start. Try again or open this page in a current Chrome or Safari browser.<details><summary>Error details</summary>{error}</details></div>}
-      <MusicPanel value={p.music} onChange={changeMusic} enabled={enabled} playing={motifPlaying} step={musicStep} onPlay={()=>engine.current?.playMotif()} onStop={()=>engine.current?.stopMotif()} onNext={()=>{engine.current?.nextHarmony();setResolved(false);}} />
-      <p className="sl-sound-design-label">Sound character · keeps your musical system</p>
-      <div className="sl-preset-grid" aria-label="Starting sounds">{PRESETS.map(preset => <button key={preset.name} className={selected === preset.name ? 'active' : ''} aria-pressed={selected === preset.name} onClick={() => load({...preset.values,music:p.music,root:p.root,intervals:p.intervals}, preset.name)}><i style={{ background: preset.color }} /><span><strong>{preset.name}</strong><small>{preset.description}</small></span></button>)}</div>
-      <div className="sl-listening-grid">
-        <section className="sl-audition" aria-label="Listen and gesture">
-          <Field engine={engine} enabled={enabled} resolved={resolved} />
-          <div className="sl-actions"><button disabled={!enabled} onClick={() => engine.current?.note(0, 1, .8, 0)}>Strike a note</button><button disabled={!enabled} onClick={() => engine.current?.scatter()}>Scatter an arc <span aria-hidden="true">↝</span></button><button className={resolved ? 'sl-resolved' : 'sl-resolve'} disabled={!enabled} onClick={() => { if (resolved) engine.current?.explore(); else engine.current?.resolve(); setResolved(!resolved); }}>{resolved ? 'Return to suspension' : 'Resolve'} <span aria-hidden="true">{resolved ? '↺' : '◎'}</span></button></div>
-          <div className="sl-listen-bottom"><label className="sl-toggle"><input type="checkbox" checked={ambient} onChange={e => setAmbient(e.target.checked)} />Ambient currents</label><button disabled={!enabled} className={`sl-record ${recording ? 'recording' : ''}`} onClick={capture}><i />{recording ? 'Finish recording' : 'Record a clip'}</button></div>
+        {error && (
+          <p role="alert" className="sl-error">
+            {error}
+          </p>
+        )}
+        {notice && (
+          <p role="status" className="sl-notice">
+            {notice}
+          </p>
+        )}
+        <section className="sl-shot" aria-label="Shared shot audition">
+          <div className="sl-shot-view">
+            <Trace samples={samples} progress={snapshot?.progress ?? 0} />
+            <div className="sl-shot-badge">
+              <strong>
+                {holding
+                  ? "Holding"
+                  : snapshot?.paused
+                    ? "Journey paused"
+                    : (snapshot?.phase ?? "idle")}
+              </strong>
+              <span>
+                {Math.round((snapshot?.progress ?? 0) * 100)}% ·{" "}
+                {currentModel.name}
+              </span>
+            </div>
+          </div>
+          <div className="sl-shot-controls">
+            <h1>Shape one journey</h1>
+            <div className="sl-button-row">
+              <button
+                className="sl-primary"
+                disabled={!enabled || snapshot?.audioPaused || !!paintError}
+                onClick={() => play()}
+              >
+                Play shot
+              </button>
+              <button
+                className="sl-hold"
+                disabled={!enabled || snapshot?.audioPaused}
+                onPointerDown={(e) => {
+                  e.currentTarget.setPointerCapture(e.pointerId);
+                  beginHold();
+                }}
+                onPointerUp={releaseHold}
+                onPointerCancel={cancelHold}
+                onLostPointerCapture={() => {
+                  if (hold.current !== null) cancelHold();
+                }}
+                onKeyDown={(e) => {
+                  if ([" ", "Enter"].includes(e.key) && !e.repeat) {
+                    e.preventDefault();
+                    beginHold();
+                  }
+                }}
+                onKeyUp={(e) => {
+                  if ([" ", "Enter"].includes(e.key)) {
+                    e.preventDefault();
+                    releaseHold();
+                  }
+                }}
+              >
+                Hold & release{holding ? ` · ${heldSeconds.toFixed(1)}s` : ""}
+              </button>
+            </div>
+            <div className="sl-button-row">
+              <button
+                disabled={
+                  !enabled ||
+                  !["flight", "arrival"].includes(snapshot?.phase ?? "")
+                }
+                onClick={() => engine.current?.pauseJourney()}
+              >
+                {snapshot?.paused ? "Resume journey" : "Pause journey"}
+              </button>
+              <button
+                disabled={!enabled}
+                onClick={() => {
+                  cancelHold();
+                  engine.current?.stopJourney();
+                }}
+              >
+                Stop journey
+              </button>
+              <label className="sl-toggle">
+                <input
+                  type="checkbox"
+                  checked={j.repeat}
+                  onChange={(e) => setJourney({ repeat: e.target.checked })}
+                />
+                Repeat shot
+              </label>
+            </div>
+            <p>
+              Pause holds the journey position; existing tails continue. Stop
+              ends its sources. Reset audio clears all buffers and keeps
+              settings.
+            </p>
+            <div className="sl-grid-2">
+              <Range
+                label="Flight seconds"
+                value={j.duration}
+                min={0.7}
+                max={12}
+                step={0.1}
+                onChange={(v) => setJourney({ duration: v })}
+              />
+              <label>
+                Arrival test
+                <select
+                  disabled={j.path === "paint" && !!j.paint.target}
+                  value={j.outcome}
+                  onChange={(e) =>
+                    setJourney({
+                      outcome: e.target.value as Journey["outcome"],
+                    })
+                  }
+                >
+                  <option value="capture">Capture · complete arrival</option>
+                  <option value="miss">Near miss · leave open</option>
+                </select>
+              </label>
+            </div>
+            <p>
+              {j.path === "paint"
+                ? "Paint trace uses the existing dose, mass and strength calculations. Flight is a lab preview without camera or capture deformation. Saved target determines the outcome when present."
+                : "Color probe: a controlled sound experiment, not a scored game shot."}
+            </p>
+          </div>
         </section>
-        <aside className="sl-harmonic-card"><div className="sl-section-number">01 / destination</div><h2>A harmony to return to</h2><p>The field stays open until you choose to resolve it. Try the same arc before and after settling.</p>
-          <div className="sl-tone-stack">{frequencies(p, true).map((hz, i) => <div key={i}><span>{String(i + 1).padStart(2, '0')}</span><i style={{ width: `${24 + Math.min(1, (p.intervals[i] + 1200) / 4800) * 76}%` }} /><strong>{noteName(69+12*Math.log2(hz/440))}<small> · {hz.toFixed(0)} Hz</small></strong></div>)}</div>
-          <details className="sl-tuning"><summary>Advanced: custom cents</summary><label>Tuning<select value={TUNINGS.findIndex(t => t.intervals.every((v, i) => v === p.intervals[i]))} onChange={e => { const t = TUNINGS[Number(e.target.value)]; if (t) change('intervals', t.intervals); }}><option value="-1" disabled>Custom intervals</option>{TUNINGS.map((t, i) => <option key={t.name} value={i}>{t.name}</option>)}</select></label><p>Intervals above the foundation, in cents. 1,200 cents = one octave.</p><div className="sl-intervals">{p.intervals.map((v, i) => <label key={i}>Tone {i + 1}<input type="number" min="-1200" max="3600" step="0.01" value={v} onChange={e => { const n = Number(e.target.value); if (Number.isFinite(n)) change('intervals', p.intervals.map((x, j) => i === j ? n : x)); }} /></label>)}</div></details>
-        </aside>
+        <div className="sl-activity" aria-label="What is making sound">
+          <span>Shot: {snapshot?.phase ?? "idle"}</span>
+          <span>
+            Motif:{" "}
+            {snapshot?.motif
+              ? snapshot.motifPaused
+                ? "paused"
+                : "repeating"
+              : "off"}
+          </span>
+          <span>
+            Ambient:{" "}
+            {snapshot?.ambient
+              ? snapshot.ambientPaused
+                ? "paused"
+                : "on"
+              : "off"}
+          </span>
+          <span>
+            Sustain:{" "}
+            {snapshot?.sustain ? "on" : p.music.sustain ? "armed" : "off"}
+          </span>
+          <span>
+            Echo: {fxBypass ? "bypassed" : p.echo > 0 ? "enabled" : "off"}
+          </span>
+          <span>
+            Grains:{" "}
+            {fxBypass
+              ? "bypassed"
+              : p.freeze
+                ? "frozen memory"
+                : p.grains + p.reverse > 0
+                  ? "rolling memory"
+                  : "off"}
+          </span>
+          <span>Mappings: {mappingMode}</span>
+        </div>
+        <div className="sl-tabs" role="tablist" aria-label="Journey workbench">
+          {(["journey", "sound", "mapping"] as Tab[]).map((t) => (
+            <button
+              key={t}
+              id={`tab-${t}`}
+              role="tab"
+              aria-selected={tab === t}
+              aria-controls={`panel-${t}`}
+              onClick={() => setTab(t)}
+            >
+              {t === "journey"
+                ? "Journey"
+                : t === "sound"
+                  ? "Sound"
+                  : "Mapping"}
+            </button>
+          ))}
+        </div>
+        <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+          {tab === "journey" && (
+            <>
+              <div className="sl-section-head">
+                <div>
+                  <h2>One harmony, many moving notes</h2>
+                  <p>
+                    Progression, arpeggio density, and sound effects remain
+                    independent.
+                  </p>
+                </div>
+                <div className="sl-button-row">
+                  <button
+                    disabled={!enabled || !snapshot?.motif}
+                    onClick={() => engine.current?.pauseMotif()}
+                  >
+                    {snapshot?.motifPaused ? "Resume motif" : "Pause motif"}
+                  </button>
+                  <button
+                    disabled={!enabled}
+                    onClick={() => engine.current?.stopMotif()}
+                  >
+                    Stop motif
+                  </button>
+                </div>
+              </div>
+              <div className="sl-grid-3 sl-card">
+                <label>
+                  Advance harmony by
+                  <select
+                    value={j.advance}
+                    onChange={(e) =>
+                      setJourney({
+                        advance: e.target.value as Journey["advance"],
+                      })
+                    }
+                  >
+                    <option value="manual">Manual · Next harmony</option>
+                    <option value="shot">Once per shot</option>
+                    <option value="progress">Shot progress</option>
+                    <option value="hue">Accumulated hue travel</option>
+                  </select>
+                </label>
+                <Range
+                  label="Harmony changes per arc"
+                  min={0}
+                  max={8}
+                  step={1}
+                  value={j.changes}
+                  onChange={(v) => setJourney({ changes: v })}
+                />
+                <label>
+                  Shot rhythm
+                  <select
+                    value={j.rhythm}
+                    onChange={(e) =>
+                      setJourney({
+                        rhythm: e.target.value as Journey["rhythm"],
+                      })
+                    }
+                  >
+                    <option value="density">
+                      Notes per second / density mappings
+                    </option>
+                    <option value="motif">
+                      Motif tempo, spacing and rests
+                    </option>
+                  </select>
+                </label>
+                <Range
+                  label="Arpeggio notes / second"
+                  min={1}
+                  max={24}
+                  step={1}
+                  value={j.density}
+                  onChange={(v) => setJourney({ density: v })}
+                />
+                <Range
+                  label="Arrival seconds"
+                  min={0.2}
+                  max={6}
+                  step={0.1}
+                  value={j.arrival}
+                  onChange={(v) => setJourney({ arrival: v })}
+                />
+                <Range
+                  label="Repeat gap seconds"
+                  min={1}
+                  max={15}
+                  step={0.5}
+                  value={j.gap}
+                  onChange={(v) => setJourney({ gap: v })}
+                />
+                <Range
+                  label="Hanging note ring time"
+                  min={0.4}
+                  max={9}
+                  step={0.1}
+                  value={p.decay}
+                  onChange={(v) => change("decay", v)}
+                />
+              </div>
+              <MusicPanel
+                value={p.music}
+                onChange={(music) => change("music", music)}
+                enabled={enabled && !snapshot?.audioPaused}
+                playing={!!snapshot?.motif}
+                step={snapshot?.step ?? 0}
+                onPlay={() => engine.current?.playMotif()}
+                onStop={() => engine.current?.stopMotif()}
+                onNext={() => engine.current?.nextHarmony()}
+              />
+              <details className="sl-card">
+                <summary>Custom tuning · foundation and six intervals</summary>
+                <label className="sl-toggle">
+                  <input
+                    type="checkbox"
+                    checked={p.music.source === "custom"}
+                    onChange={(e) =>
+                      change("music", {
+                        ...p.music,
+                        source: e.target.checked ? "custom" : "system",
+                      })
+                    }
+                  />
+                  Use custom cents instead of named scale
+                </label>
+                <Range
+                  label="Custom foundation Hz"
+                  min={45}
+                  max={220}
+                  step={0.1}
+                  value={p.root}
+                  onChange={(v) => change("root", v)}
+                />
+                <label>
+                  Tuning starting point
+                  <select
+                    defaultValue=""
+                    onChange={(e) => {
+                      const tuning = TUNINGS[Number(e.target.value)];
+                      if (tuning) change("intervals", tuning.intervals);
+                    }}
+                  >
+                    <option value="" disabled>
+                      Choose intervals…
+                    </option>
+                    {TUNINGS.map((t, i) => (
+                      <option key={t.name} value={i}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="sl-grid-3">
+                  {p.intervals.map((v, i) => (
+                    <label key={i}>
+                      Voice {i + 1} · cents
+                      <input
+                        type="number"
+                        min={-1200}
+                        max={3600}
+                        step={0.01}
+                        value={v}
+                        onChange={(e) =>
+                          change(
+                            "intervals",
+                            p.intervals.map((x, k) =>
+                              k === i ? Number(e.target.value) : x,
+                            ),
+                          )
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+              </details>
+              <section className="sl-card">
+                <h3>Optional ambient layer</h3>
+                <div className="sl-button-row">
+                  <button
+                    disabled={!enabled}
+                    onClick={() => {
+                      engine.current?.setAmbient(true);
+                      if (engine.current) engine.current.ambientPaused = false;
+                    }}
+                  >
+                    Start ambient
+                  </button>
+                  <button
+                    disabled={!enabled || !snapshot?.ambient}
+                    onClick={() => {
+                      if (engine.current)
+                        engine.current.ambientPaused =
+                          !engine.current.ambientPaused;
+                    }}
+                  >
+                    {snapshot?.ambientPaused
+                      ? "Resume ambient"
+                      : "Pause ambient"}
+                  </button>
+                  <button
+                    disabled={!enabled}
+                    onClick={() => engine.current?.stopAmbient()}
+                  >
+                    Stop ambient
+                  </button>
+                </div>
+                <Range
+                  label="Ambient activity"
+                  value={p.activity}
+                  min={0}
+                  max={1}
+                  onChange={(v) => change("activity", v)}
+                />
+                <p>
+                  Independent of the shot and motif. Pausing stops new notes;
+                  stopping also ends its sounding sources. Shared effects can
+                  still ring.
+                </p>
+              </section>
+            </>
+          )}
+          {tab === "sound" && (
+            <>
+              <div className="sl-section-head">
+                <div>
+                  <h2>Instrument & ribbon</h2>
+                  <p>
+                    Sound models change the source and its controls. Your
+                    harmony and mappings stay in place.
+                  </p>
+                </div>
+                <div className="sl-button-row">
+                  <button
+                    disabled={!enabled}
+                    onClick={() => engine.current?.pauseSound()}
+                  >
+                    {snapshot?.audioPaused ? "Resume sound" : "Pause sound"}
+                  </button>
+                  <button disabled={!enabled} onClick={stopAll}>
+                    Stop sound
+                  </button>
+                </div>
+              </div>
+              <div className="sl-models">
+                {SOUND_MODELS.map((model) => (
+                  <button
+                    key={model.id}
+                    aria-pressed={p.instrument === model.id}
+                    onClick={() => {
+                      engine.current?.stopJourney();
+                      setSetup((s) =>
+                        sanitizeSetup({
+                          ...s,
+                          parameters: { ...s.parameters, ...model.values },
+                        }),
+                      );
+                    }}
+                  >
+                    <strong>{model.name}</strong>
+                    <small>{model.description}</small>
+                  </button>
+                ))}
+              </div>
+              <p className="sl-notice">
+                Piano is generated synthesis, not an acoustic sample.
+                Convergence is an original voice-gathering instrument. Glass
+                ribbon is an experiment, not a verified recording
+                reconstruction.
+              </p>
+              <div className="sl-routing">
+                <strong>
+                  Source →{" "}
+                  {p.grainRoute === "before"
+                    ? "grains → resonant bands"
+                    : "resonant bands + parallel grains"}{" "}
+                  → echoes → room
+                </strong>
+                <div className="sl-button-row">
+                  <button
+                    disabled={!enabled || snapshot?.audioPaused}
+                    onClick={() => engine.current?.note(0, 1, 0.8)}
+                  >
+                    Strike input
+                  </button>
+                  <button
+                    disabled={!enabled || snapshot?.audioPaused}
+                    onClick={() => engine.current?.scatter()}
+                  >
+                    Play input phrase once
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFxBypass(!fxBypass);
+                      engine.current?.setEffectsBypass(!fxBypass);
+                    }}
+                  >
+                    {fxBypass ? "Enable effects" : "Bypass effects"}
+                  </button>
+                  <button
+                    disabled={!enabled}
+                    onClick={() => engine.current?.clearEffects()}
+                  >
+                    Clear effect memory
+                  </button>
+                </div>
+              </div>
+              <div className="sl-grid-3 sl-card">
+                <label>
+                  Filter tuning
+                  <select
+                    value={p.filterFollow}
+                    onChange={(e) => change("filterFollow", e.target.value)}
+                  >
+                    <option value="chord">Follow current chord voices</option>
+                    <option value="manual">Independent manual anchor</option>
+                  </select>
+                </label>
+                <label>
+                  Granular routing
+                  <select
+                    value={p.grainRoute}
+                    onChange={(e) => change("grainRoute", e.target.value)}
+                  >
+                    <option value="parallel">Alongside the ribbon</option>
+                    <option value="before">Through the ribbon</option>
+                  </select>
+                </label>
+                <label>
+                  Sweep clock
+                  <select
+                    value={p.modulation}
+                    onChange={(e) =>
+                      change("modulation", Number(e.target.value))
+                    }
+                  >
+                    <option value={1}>Free oscillator</option>
+                    <option value={0}>
+                      Paused oscillator · use shot mapping
+                    </option>
+                  </select>
+                </label>
+              </div>
+              <div className="sl-control-groups">
+                {GROUPS.map((group) => (
+                  <details
+                    key={group.name}
+                    className="sl-card"
+                    open={
+                      group.name === "Instrument detail" ||
+                      group.name === "Ribbon workbench"
+                    }
+                  >
+                    <summary>{group.name}</summary>
+                    <p>{group.subtitle}</p>
+                    <div className="sl-grid-3">
+                      {group.sliders
+                        .filter(
+                          (spec) => !["root", "activity"].includes(spec.key),
+                        )
+                        .filter(
+                          (spec) =>
+                            p.instrument === "convergence" ||
+                            !["voices", "spread", "converge"].includes(
+                              spec.key,
+                            ),
+                        )
+                        .map((spec) => (
+                          <Slider
+                            key={spec.key}
+                            spec={spec}
+                            value={p[spec.key]}
+                            mapped={snapshot?.mapped[spec.key as Destination]}
+                            onChange={(v) => change(spec.key, v)}
+                          />
+                        ))}
+                    </div>
+                  </details>
+                ))}
+              </div>
+              <details className="sl-card">
+                <summary>Earlier sound starting points</summary>
+                <div className="sl-button-row">
+                  {PRESETS.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() =>
+                        setSetup((s) =>
+                          sanitizeSetup({
+                            ...s,
+                            parameters: {
+                              ...preset.values,
+                              music: s.parameters.music,
+                              root: s.parameters.root,
+                              intervals: s.parameters.intervals,
+                            },
+                          }),
+                        )
+                      }
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              </details>
+            </>
+          )}
+          {tab === "mapping" && (
+            <>
+              <div className="sl-section-head">
+                <div>
+                  <h2>What movement changes</h2>
+                  <p>
+                    One connection per destination. Base sliders remain intact;
+                    the live value appears alongside them.
+                  </p>
+                </div>
+                <div className="sl-button-row">
+                  <button
+                    onClick={() => {
+                      const next = mappingMode === "paused" ? "on" : "paused";
+                      setMappingMode(next);
+                      engine.current?.setMappingMode(next);
+                    }}
+                  >
+                    {mappingMode === "paused"
+                      ? "Resume mappings"
+                      : "Pause mappings"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMappingMode("off");
+                      engine.current?.setMappingMode("off");
+                    }}
+                  >
+                    Stop mappings
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMappingMode("on");
+                      engine.current?.setMappingMode("on");
+                    }}
+                  >
+                    Enable mappings
+                  </button>
+                </div>
+              </div>
+              <p className="sl-notice">
+                Pause holds the last mapped values. Stop returns to the base
+                controls. Neither deletes your connections.
+              </p>
+              <section className="sl-card">
+                <label>
+                  Trajectory source
+                  <select
+                    value={j.path}
+                    onChange={(e) =>
+                      setJourney({ path: e.target.value as Journey["path"] })
+                    }
+                  >
+                    <option value="probe">Editable color probe</option>
+                    <option value="paint">Existing game paint mixing</option>
+                  </select>
+                </label>
+                {j.path === "probe" ? (
+                  <>
+                    <div className="sl-button-row">
+                      {PROBES.map((pr) => (
+                        <button
+                          key={pr.name}
+                          onClick={() =>
+                            setJourney({
+                              probe: pr.probe,
+                              duration: pr.duration,
+                            })
+                          }
+                        >
+                          {pr.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="sl-grid-3">
+                      {(
+                        [
+                          ["hue", "Starting hue", 0, 360, 1],
+                          ["hueTravel", "Hue travel degrees", -360, 360, 1],
+                          ["lightness", "Starting lightness", 0.05, 0.95, 0.01],
+                          ["lift", "Lightness development", -0.8, 0.8, 0.01],
+                          ["edge", "Starting boundary fraction", 0, 1, 0.01],
+                          ["edgeEnd", "Ending boundary fraction", 0, 1, 0.01],
+                          ["bow", "Interior / outward bow", -1, 1, 0.01],
+                        ] as const
+                      ).map(([key, label, min, max, step]) => (
+                        <Range
+                          key={key}
+                          label={label}
+                          value={j.probe[key]}
+                          min={min}
+                          max={max}
+                          step={step}
+                          onChange={(v) =>
+                            setJourney({ probe: { ...j.probe, [key]: v } })
+                          }
+                        />
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <label>
+                      Palette
+                      <select
+                        value={j.paint.level}
+                        onChange={(e) => {
+                          const level = Number(e.target.value);
+                          setJourney({
+                            paint: {
+                              ...j.paint,
+                              level,
+                              before: palettes[level].paints.map((_, i) =>
+                                i === 0 ? 1 : 0,
+                              ),
+                              index: 1,
+                            },
+                          });
+                        }}
+                      >
+                        {palettes.map((pl, i) => (
+                          <option key={i} value={i}>
+                            {pl.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="sl-grid-3">
+                      {palettes[j.paint.level]?.paints.map((paint, i) => (
+                        <label key={i}>
+                          {paint.name} · starting parts
+                          <input
+                            type="number"
+                            min={0}
+                            max={10000}
+                            step={0.1}
+                            value={j.paint.before[i] ?? 0}
+                            onChange={(e) =>
+                              setJourney({
+                                paint: {
+                                  ...j.paint,
+                                  before: palettes[j.paint.level].paints.map(
+                                    (_, k) =>
+                                      k === i
+                                        ? Number(e.target.value)
+                                        : (j.paint.before[k] ?? 0),
+                                  ),
+                                },
+                              })
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <div className="sl-grid-2">
+                      <label>
+                        Paint to add
+                        <select
+                          value={j.paint.index}
+                          onChange={(e) =>
+                            setJourney({
+                              paint: {
+                                ...j.paint,
+                                index: Number(e.target.value),
+                              },
+                            })
+                          }
+                        >
+                          {palettes[j.paint.level]?.paints.map((paint, i) => (
+                            <option value={i} key={i}>
+                              {paint.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <Range
+                        label="Saved hold seconds"
+                        min={0}
+                        max={4.4}
+                        step={0.01}
+                        value={j.paint.hold}
+                        onChange={(v) =>
+                          setJourney({ paint: { ...j.paint, hold: v } })
+                        }
+                      />
+                    </div>
+                    <div className="sl-button-row">
+                      <button
+                        disabled={!paintInfo}
+                        onClick={() =>
+                          setJourney({
+                            paint: { ...j.paint, target: paintInfo!.endpoint },
+                          })
+                        }
+                      >
+                        Use this endpoint as target
+                      </button>
+                      <button
+                        disabled={!j.paint.target}
+                        onClick={() =>
+                          setJourney({ paint: { ...j.paint, target: null } })
+                        }
+                      >
+                        Clear target
+                      </button>
+                      <button
+                        disabled={!paintInfo}
+                        onClick={() =>
+                          setJourney({
+                            paint: { ...j.paint, before: paintInfo!.after },
+                          })
+                        }
+                      >
+                        Continue from this mixture
+                      </button>
+                    </div>
+                    <p>
+                      {paintError ||
+                        (!paintInfo
+                          ? "Calculating trace…"
+                          : `${paintInfo.freeBase ? "Free base · " : ""}${paintInfo.amount.toFixed(3)} parts added · ${paintInfo.duration.toFixed(2)}s flight${paintInfo.distance === null ? " · no target: audition outcome above" : ` · endpoint Δ ${paintInfo.distance.toFixed(4)} · ${paintInfo.captured ? "capture" : "miss"}`}`)}
+                    </p>
+                  </>
+                )}
+                <p>
+                  Boundary reference: sRGB at the current OKLab lightness and
+                  hue. This is distinct from the palette’s reachable hull and
+                  the game’s displayed Munsell field.
+                </p>
+              </section>
+              <div className="sl-signal-grid">
+                {INPUTS.map(([key, label]) => (
+                  <div key={key}>
+                    <span>{label}</span>
+                    <meter min={0} max={1} value={currentSignals[key]} />
+                    <output>{currentSignals[key].toFixed(2)}</output>
+                  </div>
+                ))}
+              </div>
+              <p>
+                Edge travel accumulates chromatic hue movement while staying
+                near the boundary. Neutral ascent accumulates upward travel at
+                low absolute chroma. Hue fades near neutral; signed developments
+                use 0.5 as no change.
+              </p>
+              <div className="sl-mappings">
+                {setup.mappings.map((row) => {
+                  const dest = OUTPUTS.find((o) => o[0] === row.target)!;
+                  return (
+                    <section className="sl-card" key={row.id}>
+                      <div className="sl-map-row">
+                        <label className="sl-toggle">
+                          <input
+                            type="checkbox"
+                            checked={row.enabled}
+                            onChange={(e) =>
+                              updateRow(row.id, { enabled: e.target.checked })
+                            }
+                          />
+                          On
+                        </label>
+                        <label>
+                          Movement
+                          <select
+                            value={row.source}
+                            onChange={(e) =>
+                              updateRow(row.id, {
+                                source: e.target.value as Mapping["source"],
+                              })
+                            }
+                          >
+                            {INPUTS.map(([id, name]) => (
+                              <option key={id} value={id}>
+                                {name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <span aria-hidden="true">→</span>
+                        <label>
+                          Sound / music
+                          <select
+                            value={row.target}
+                            onChange={(e) => {
+                              const out = OUTPUTS.find(
+                                (o) => o[0] === e.target.value,
+                              )!;
+                              updateRow(row.id, {
+                                target: out[0],
+                                low: out[2],
+                                high: out[3],
+                              });
+                            }}
+                          >
+                            {OUTPUTS.map(([id, name]) => (
+                              <option
+                                key={id}
+                                value={id}
+                                disabled={setup.mappings.some(
+                                  (r) => r.id !== row.id && r.target === id,
+                                )}
+                              >
+                                {name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <button
+                          onClick={() =>
+                            setSetup((s) => ({
+                              ...s,
+                              mappings: s.mappings.filter(
+                                (r) => r.id !== row.id,
+                              ),
+                            }))
+                          }
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <div className="sl-grid-4">
+                        <Range
+                          label="From"
+                          value={row.low}
+                          min={dest[2]}
+                          max={dest[3]}
+                          step={dest[3] > 30 ? 1 : 0.01}
+                          onChange={(v) => updateRow(row.id, { low: v })}
+                        />
+                        <Range
+                          label="To"
+                          value={row.high}
+                          min={dest[2]}
+                          max={dest[3]}
+                          step={dest[3] > 30 ? 1 : 0.01}
+                          onChange={(v) => updateRow(row.id, { high: v })}
+                        />
+                        <label>
+                          Response shape
+                          <select
+                            value={row.curve}
+                            onChange={(e) =>
+                              updateRow(row.id, {
+                                curve: e.target.value as Mapping["curve"],
+                              })
+                            }
+                          >
+                            <option value="linear">Linear</option>
+                            <option value="ease">Ease in / out</option>
+                            <option value="grow">Build gradually</option>
+                            <option value="arch">Rise then fall</option>
+                          </select>
+                        </label>
+                        <Range
+                          label="Smoothing seconds"
+                          value={row.smooth}
+                          min={0}
+                          max={2}
+                          step={0.05}
+                          onChange={(v) => updateRow(row.id, { smooth: v })}
+                        />
+                      </div>
+                      <p>
+                        {row.enabled
+                          ? `Live output: ${format(snapshot?.mapped[row.target] ?? row.low)}`
+                          : "Bypassed"}
+                        {["voices", "spread", "converge"].includes(row.target)
+                          ? " · used by Chromatic convergence sound model"
+                          : ""}
+                      </p>
+                    </section>
+                  );
+                })}
+              </div>
+              <button
+                disabled={setup.mappings.length >= 12}
+                onClick={() => {
+                  const out = OUTPUTS.find(
+                    (o) => !setup.mappings.some((r) => r.target === o[0]),
+                  );
+                  if (out)
+                    setSetup((s) => ({
+                      ...s,
+                      mappings: [
+                        ...s.mappings,
+                        {
+                          id: crypto.randomUUID(),
+                          enabled: true,
+                          source: "progress",
+                          target: out[0],
+                          low: out[2],
+                          high: out[3],
+                          curve: "ease",
+                          smooth: 0.2,
+                        },
+                      ],
+                    }));
+                }}
+              >
+                Add connection
+              </button>
+            </>
+          )}
+        </div>
+        <section className="sl-starting-setups">
+          <h2>Complete starting setups</h2>
+          <p>
+            Loads Journey, Sound and Mapping together. Each is an original
+            starting point to tune.
+          </p>
+          <div className="sl-models">
+            {STARTERS.map((s) => (
+              <button key={s.id} onClick={() => load(s.setup)}>
+                <strong>{s.name}</strong>
+                <small>{s.notes}</small>
+              </button>
+            ))}
+          </div>
+        </section>
+        <PresetLibrary setup={setup} onLoad={load} signIn={signIn} />
+        <details className="sl-card">
+          <summary>Restore controls</summary>
+          <p>
+            This restores the current workbench to defaults. Saved presets
+            remain. Reset audio above only clears sound.
+          </p>
+          <div className="sl-button-row">
+            <button
+              onClick={() => {
+                setUndo(setup);
+                engine.current?.stopSound();
+                update(DEFAULT_SETUP);
+                setNotice(
+                  "Default controls restored. You can undo this change.",
+                );
+              }}
+            >
+              Restore all defaults
+            </button>
+            {undo && (
+              <button
+                onClick={() => {
+                  engine.current?.stopSound();
+                  update(undo);
+                  setUndo(null);
+                }}
+              >
+                Undo settings change
+              </button>
+            )}
+          </div>
+        </details>
+        <footer className="sl-footer">
+          <span>Browser SuperCollider · generated sources</span>
+          <span>Shared journey · isolated game lab</span>
+          <a href="/sound-lab/runtime/LICENSE">Engine license</a>
+        </footer>
       </div>
-      <div className="sl-control-heading"><h2>Make it yours</h2><p>New notes follow your system. Older echoes keep their pitches; Reset audio clears them.</p></div>
-      <div className="sl-controls-grid">{GROUPS.map((group, i) => <section className="sl-control-group" key={group.name}><div className="sl-section-number">0{i + 2} / shaping</div><h3>{group.name}</h3><p className="sl-group-subtitle">{group.subtitle}</p>{group.sliders.map(spec => <Slider key={spec.key} spec={spec} value={p[spec.key]} onChange={v => change(spec.key, v)} />)}</section>)}</div>
-      <section className="sl-save"><div><div className="sl-section-number">05 / keep a discovery</div><h2>{selected}</h2><p>Saved sounds stay in this browser. Export settings to share or keep a copy.</p></div><div className="sl-save-controls"><div className="sl-name-row"><input aria-label="Name this sound" maxLength={60} placeholder="Name this sound" value={name} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') save(); }} /><button onClick={save}>Save sound</button></div><div className="sl-file-actions"><button onClick={() => download(new Blob([JSON.stringify({ version: 1, name: name.trim() || selected, parameters: p }, null, 2)], { type: 'application/json' }), 'chroma-sound.json')}>Export settings ↗</button><button onClick={() => input.current?.click()}>Import settings</button><button onClick={() => load(DEFAULTS, PRESETS[0].name)}>Reset controls</button></div><input ref={input} type="file" accept="application/json,.json" hidden onChange={async event => {
-          const file = event.target.files?.[0]; event.target.value = ''; if (!file) return;
-          try {
-            if (file.size > 64000) throw new Error('Settings file is too large.');
-            const data = JSON.parse(await file.text());
-            if (data.version !== 1 || !data.parameters || typeof data.parameters !== 'object') throw new Error('Choose an exported Chroma sound settings file.');
-            load(sanitizeParameters(data.parameters), typeof data.name === 'string' ? data.name.slice(0, 60) : 'Imported sound'); setMessage('Settings imported.');
-          } catch (err) { setMessage(err instanceof Error ? err.message : 'Could not read those settings.'); }
-        }} /></div>
-        <p className="sl-message" role="status">{message}</p>
-        {!!saved.length && <div className="sl-saved-list">{saved.map(sound => <div key={sound.id}><button onClick={() => load(sound.parameters, sound.name)}>{sound.name}</button><button aria-label={`Remove saved sound ${sound.name}`} onClick={() => persist(saved.filter(s => s.id !== sound.id))}>×</button></div>)}</div>}
-      </section>
-      <footer className="sl-footer"><span>Browser SuperCollider · SuperSonic 0.80.0</span><span>Independent listening lab · game integration comes later</span><a href="/sound-lab/runtime/LICENSE" target="_blank" rel="noreferrer">Engine license</a></footer>
-    </div>
-  </main>;
+    </main>
+  );
 }

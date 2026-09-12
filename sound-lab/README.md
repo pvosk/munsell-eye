@@ -1,77 +1,74 @@
 # Chroma Glider sound lab
 
-A separate `/sound-lab` route in the existing Munsell Eye application. Includes a procedural music workbench. GitHub source and website deployment are separate steps. Game source, mixing math, campaign and live site are unchanged.
+Updated 12 September 2026. The existing `/sound-lab` route now uses a shared shot audition with Journey, Sound, and Mapping views. It is still separate from live gameplay. No existing pigment definitions, mixing/scoring math, campaign data, or gameplay hooks were changed.
 
-## Listening
+## Audition flow
 
-Start the existing app with `npm run dev` and open `/sound-lab`. Press Enable sound. Pick a starting sound, drag through the audition field, compare Scatter an arc before and after Resolve, and adjust the sliders. The field is a sound audition surface, not simulated game physics.
+Enable audio, choose a complete starting setup, and Play shot or Hold & release. Repeat shot is explicit and initially off. The three tabs retain the same setup. Record output captures generated stereo audio only, up to 60 seconds; no microphone or reference recording is used.
 
-Four starting sounds: Submerged glass, Ribbon memory, Open water, Chromatic bloom. Body controls affect new notes; effects and the sustained harmonic field respond live. Six destination intervals are editable in cents, including non-twelve-tone choices. The destination foundation stays anchored during exploration; the other sustained voices lean away from their destination intervals. Resolve moves them home. No proximity-driven cadence or game landing hook exists yet.
+- **Journey:** all earlier modes/scales, interval stacks, arpeggios, progressions, fifths controls, custom cents, voicing, pedal, seed, and variation remain. Choose manual, per-shot, shot-progress, or accumulated-hue harmonic advancement. Shot rhythm can use independent note density or the motif's tempo, spacing, and rests. Motif playback is a separate repeating audition.
+- **Sound:** generated piano-like struck strings, soft synth, glass resonators, and an original growing/converging voice bank. Model buttons load sound settings while retaining music and mappings; complete starting setups load all three sections. No acoustic piano sample, THX transcription, or verified Glass Eyes production chain is claimed.
+- **Mapping:** editable source/destination connections with range, response curve, smoothing, enable, and live readout. At most one connection owns a destination, up to 12 connections. Base parameter values are never overwritten by transient mapping outputs.
 
-Saved presets use browser localStorage. Export/import JSON keeps a portable copy. Record a clip captures only the generated stereo output, never the microphone; recordings download after stopping, with a 60-second limit. Stop, Escape, hiding the tab, or leaving the route stops audio. Ambient currents can be switched off for isolated note comparisons.
+A visible activity strip distinguishes shot, motif, ambient, sustain, echo, grains, and mappings. Old recorded echoes keep their original pitches; they are not automatically reharmonized.
 
-## Musical systems
+## Transport semantics
 
-The main controls now expose 16 named modes/scales (including seven equal divisions), 12 scale-derived interval stacks, 11 arpeggio patterns, 8 progression choices, key/register, voicing, pedal, note pool, tempo, spacing, phrase rests, octave range, seeded variation and phrases per harmony. Circle-of-fifths controls transpose the musical center. Six original musical presets are starting points, not transcriptions of the reference recordings.
+- Pause journey freezes its timeline and new emissions; existing notes/effect tails continue. Resume continues from that position.
+- Stop journey cancels its schedulers and ends its sources. Ambient sources and shared effect tails can remain. Sustained harmony is re-armed for the next shot.
+- Motif and ambient have separate pause/stop controls. A paused motif retains scheduled-note timing; ambient pause stops new stochastic emissions. Ambient stop also frees its sources.
+- Pause audio / Pause sound suspends the AudioContext and all musical clocks. Resume retains buffer contents and positions.
+- Stop all sources / Stop sound ends source activity, clears effect memory, and mutes the output. A subsequent explicit audition wakes it. Escape does the same.
+- Effects can be bypassed and their memory cleared without changing the musical settings. Free sweep oscillators can be paused independently in Sound.
+- Pause mappings holds the last mapped outputs. Stop mappings returns to base parameters without deleting connections.
+- Reset audio destroys the engine, context, scheduled activity, and buffers. All parameter preferences and preset records remain; audio stays off until enabled again.
+- Restore all defaults resets the current controls, not saved presets. An Undo settings change action retains the prior setup.
 
-Play motif repeats a phrase; Scatter an arc auditions it once. Resolve returns to the initial harmonic frame and holds progression there. Pattern changes enter at the next phrase. Sustained harmony is a separate, initially disabled layer. The original Hz/cents editor remains available under Advanced and old saved settings migrate to that custom system. Sound-character presets keep the current musical settings.
+Leaving the route or hiding the document stops audio. Voices use the audio clock for lifetime accounting so a long pause cannot defeat the voice budget. Discrete voices are capped at 36; the oldest is replaced when dense patterns need a new voice. The convergence bank has at most 18 oscillator voices with normalized gain. Browser audio limits output; actual listening and mobile performance still need review.
 
-Pitch bending now defaults to zero and the base chime partial ratios are harmonic. Optional microtonal lean, inharmonic material, fixed pedals across changing keys and pitch-shifted grains can intentionally produce tension. Existing echoes retain their pitches when the current key changes.
+## Movement measurements
 
-Reset audio destroys the audio engine and its AudioContext, clears voices, delay/reverb state and the grain buffer, stops the motif, disables sustain/freeze and leaves sound off. Other settings are kept. Reset controls instead restores default parameters.
+Sources include shot progress, color speed, cyclic hue, accumulated hue travel, absolute chroma, signed chroma development, lightness, signed lightness development, boundary proximity, accumulated boundary travel, neutral ascent, and arc envelope. Signed developments use 0.5 for no change. Hue influence fades near neutral.
 
-Forward granular clouds now have amount, density, lookback, scatter and freeze controls, alongside backward grains and shared fragment length/transposition. No user recording is needed to feed them.
+Boundary proximity is **sRGB boundary chroma at the current OKLab lightness and hue**. A binary search uses the public-domain inverse OKLab conversion from https://bottosson.github.io/posts/oklab/. This is not the current palette's reachable mixture hull and not the game's Munsell display boundary. Edge travel accumulates tangential hue or lightness motion while chromatic and near that boundary. Merely standing at the boundary, or approaching it radially, does not count as a run. Neutral ascent instead accumulates upward motion at low absolute chroma.
 
-Run `node --experimental-strip-types sound-lab/test-music.mjs` to check scale membership, all arpeggio types, deterministic phrases, circle closure, voice-leading pitch classes and input limits. Browser checks confirmed motif playback, full reset, restart, movement around fifths and return-home resolution through the actual controls. These supplement the earlier audio measurements.
+The convergence starter maps accumulated edge travel to increasing voice count and shot progress to gathering those voices. The mappings, ranges, and curves are editable. These are experimental defaults, not a universal hue-to-harmony law.
 
-## Audio architecture
+Two trajectory sources are available:
 
-Real SuperCollider scsynth runs in a browser AudioWorklet through SuperSonic 0.80.0, in postMessage mode. No desktop SC installation, remote audio service or CDN is required. Assets are loaded only after Enable sound. This is the SC synthesis server, not an sclang interpreter; arbitrary SC scripts cannot be pasted into this lab.
+1. Controlled color probes: gentle correction, chromatic edge travel, neutral ascent, interior crossing, and editable endpoints/curve.
+2. Existing game paint mixing: lazy imports from `play-engine.ts` reuse the real palette pigments, original quantities, strength, chargeAmount, addPaint, mixtureColor, and pourPath. Zero mass uses the free one-part base and existing baseLaunchPath presentation. Save an endpoint as a target, change the starting recipe, and compare approaches; scoring uses the existing OKLab tolerance. Continue from the endpoint accumulates the original quantities.
 
-- `app/sound-lab/engine.ts`: runtime lifetime, JS scheduling, bounded voice count, control updates and recording.
-- `app/sound-lab/music.ts`: harmonic systems, pattern generation, progression and voice leading.
-- `app/sound-lab/music-panel.tsx`: musical controls and current-note names.
-- `app/sound-lab/parameters.ts`: ranges, presets, destination intervals and defensive import normalization.
-- `sound-lab/build-synthdefs.mjs`: small binary SynthDef graph writer for three fixed original instruments. Writes standard SC SynthDef v2 files; not a general compiler.
-- `chroma_chime`: noise-excited Ringz resonators, the building blocks into which DynKlank expands, with independently weighted partials and decay times.
-- `chroma_field`: six gently breathing sustained voices, a fixed foundation and movable upper intervals.
-- `chroma_space`: moving resonant filter bands, stereo delays, explicit backward GrainBuf playback of recent pre-effects audio, reverb, DC filtering and limiting.
+The lab projection and timeline do not reproduce the game's camera, distance easing, decorative capture deformation, or reduced-motion presentation. Flight duration uses the existing expression on the sampled path. A probe's capture/miss selector is an explicit audition override. Paint traces with a saved target derive their outcome from endpoint scoring. Do not treat this as installed live-game audio integration.
 
-The ribbon and reverse combination is an original experiment toward the described sound, not a verified Glass Eyes reconstruction. mi-UGens is not included or claimed to work in this build. Stereo placement is implemented; game-camera-relative 3D audio is future work.
+## Presets and cross-browser use
 
-Run `npm run sound-lab:prepare` after changing the graph writer or reinstalling/upgrading the audio packages. This regenerates SynthDefs and copies the pinned runtime files to `public/sound-lab`. Runtime assets are checked into this working change to keep normal app builds independent of a new preparation step.
+Version 2 JSON libraries preserve parameters, harmonies, shot/probe/paint configuration, mappings, random seed, scope, name, and listening notes. Export current, one saved preset, or the whole library. Importing never starts audio. Legacy version 1 settings and browser saves migrate, including custom cents. Files contain settings, not an audio recording, and can be attached to the sound chat for analysis/storage in project presets if requested.
 
-## Musical direction and next work
+Scopes are complete setup, Journey + music, Sound, and Mapping. Sound-only recall keeps musical tuning and output volume. Section recall applies only its section even though the export contains the full contextual snapshot.
 
-Overlapping ambient waves remain open through misses, cancellation and resets. Palettes and holes can establish instrumental character; paints may steer harmonic relationships, register and arpeggio gestures. Later, shot arcs should leave a delayed wake and only the actual landing event should complete resolution. Preserve pigment strength and accumulated-mixture behavior.
+`/api/sound-presets` stores up to 100 presets per account in D1 using the dispatcher-provided `oai-authenticated-user-id`. The API never accepts identity from JSON. Same-origin writes, bounded request sizes, validation, and prepared owner-scoped SQL are required. Missing sign-in returns 401; database unavailability returns 503. Status messages distinguish cloud success from local drafts.
 
-Current irregular note scheduling uses original coupled evolving values and bounded note clusters. Yota Morimoto’s ambient processes are references, not copied source. Further listening should shape this behavior and tune the present patches before integrating shots or adding more complex synthesis.
+The server-rendered Sign in with ChatGPT link uses the platform-owned top-level sign-in route. Load account library pulls presets in another browser. Save preset uploads that preset when authenticated. Upload local drafts explicitly saves local copies to the currently signed-in account. Local drafts and JSON exports remain usable during logout. There is no automatic background upload of every draft after an account change.
 
-Future game integration must reuse `app/play.tsx`, `app/play-scene.ts` and `app/play-engine.ts` through narrow observation hooks. No duplicate app or Sites project. The lab route itself is not access control; publication still requires separate user authorization.
+Local-copy removal and account-copy deletion are separate, labeled actions. The generated migration `drizzle/0001_sound_presets.sql` and matching metadata must deploy with the endpoint. Existing `lab_events` is unchanged. No hosted database has been migrated by this sound task.
 
-## Verification (2026-09-11)
+## Synthesis and code
 
-- TypeScript check, targeted ESLint and full app production build passed.
-- Headless Chrome ran the actual local WASM engine and measured finite, nonzero dry, wet and resolution output.
-- Isolated backward grains produced audio after the source group was freed, confirming the reverse path independently of the dry chime.
-- Stop and stop-after-resolution measured digital silence. Cancelled startup did not leave the engine running.
-- Dense maximum-effect test stayed below the output ceiling; note count stayed at the 24-voice cap.
-- MediaRecorder output decoded to a nonempty stereo audio clip.
-- The local runtime makes optional HEAD metadata requests which Chromium reports as aborted. Required GET asset loads and audio execution succeeded; those HEAD-only events were tracked separately from failures.
+Real scsynth runs through pinned SuperSonic 0.80.0 in a browser AudioWorklet. JavaScript handles bounded note scheduling and mappings. There is no sclang interpreter, desktop SC requirement, or mi-UGens dependency.
 
-These are runtime checks, not subjective listening or mobile/Safari performance validation. The combined 3D game and audio workload has not yet been tested. Browser controls still need the user's listening feedback.
+The graph writer in `sound-lab/build-synthdefs.mjs` creates chime, piano, synth, field, flight, and space SynthDefs. The piano uses decaying partials with modest string stretch and a short hammer excitation. The flight bank reveals more voices and moves them toward shared harmonic destinations. Ribbon filtering exposes band tuning, spacing, bandwidth, sweep depth/offset/rate/direction/phase. Bands can follow chord voices or a separate manual anchor. Forward/reverse buffer grains can enter before the filter or run alongside it. Delay/reverb and the final limiter remain bounded.
 
-## Third-party runtime
+Regenerate with `node sound-lab/build-synthdefs.mjs`; runtime binaries do not change. `npm run sound-lab:prepare` also recopies the pinned runtime if needed. All instrument implementations are original experiments. Existing upstream licenses remain in `public/sound-lab/runtime`.
 
-Pinned npm packages: `supersonic-scsynth@0.80.0`, `supersonic-scsynth-core@0.80.0`. Source: https://github.com/samaaron/supersonic . The distributed package license is retained at `public/sound-lab/runtime/LICENSE`; core license is retained alongside it. Upstream SuperCollider: https://github.com/supercollider/supercollider . New lab graphs and scheduling are original; no Yota or mi-UGens code is incorporated.
+## Verification
 
-## References
+- TypeScript, targeted ESLint, and production build.
+- `node --experimental-strip-types sound-lab/test-music.mjs`: original 1,728 harmonic combinations and arpeggio/voice-leading checks.
+- Bundle `test-journey.mjs` with esbuild for Node and run it: gamut boundary, edge versus neutral motion, mapping bounds/bypass, scoped presets, migrations, and JSON round-trips.
+- Bundle `test-paint-trace.mjs` as Node ESM and run it: actual mixing/dose reuse, capture, free base, finite traces, duration bounds.
+- `node sound-lab/test-preset-isolation.mjs`: actual API handlers with generated SQLite schema, two-owner isolation and scoped delete. Requires Node with `node:sqlite`.
+- Bundle `test-presets-api.mjs` as Node ESM and run against the local dev server after local Drizzle migrations: save/load/update, anonymous rejection, input validation, and origin checks. Uses only the documented local sign-in cookie and cleans up its records.
+- `test-audio-runtime.mjs`: headless Chrome runtime measurements, finite/nonzero output for three starters, journey/audio pause, master-stop silence, capture versus miss, and maximum-effects output. Set `PLAYWRIGHT_MODULE` to an available Playwright module and optionally `CHROME_PATH` / `SOUND_TEST_ORIGIN`. No DOM interaction or subjective listening assertion.
 
-- https://github.com/yotamorimoto/asg
-- https://github.com/yotamorimoto/sclab
-- https://github.com/yotamorimoto/sc_grd
-- https://github.com/v7b1/mi-UGens
-- https://doc.sccode.org/Classes/DynKlank.html
-- https://doc.sccode.org/Reference/Synth-Definition-File-Format.html
-- https://github.com/samaaron/supersonic
-- https://github.com/supercollider/supercollider/blob/develop/README_WASM.md
+The final browser test measured silence after master Stop and no browser/engine errors. This is not certification of musical taste, visual/touch behavior, or the combined 3D game and audio workload on iPad/Safari.

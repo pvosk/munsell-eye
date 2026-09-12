@@ -13,7 +13,7 @@ The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json)
 - Current journey policy: journeys-2-value-led; finish profile: finish-profile-1.
 - Mixture scoring: Euclidean OKLab; current live tolerance 0.0294.
 - Sound lab: separate /sound-lab instrument, not integrated with gameplay.
-- These public version references are the archived baseline, not a fresh deployment verification. See the sound checkpoint for pending navigation changes; the lab redesign remains a proposal.
+- These public version references are the archived baseline, not a fresh deployment verification. See the sound checkpoint for the shared-journey implementation and integration status; these changes have not been independently published by the sound task.
 
 ## Non-negotiable distinctions
 
@@ -23,9 +23,9 @@ Preserve pigment strength. Separate dose timing from flight animation. Score the
 
 Music originates in discrete shots: hold, release and propulsion, travel with arpeggiated wakes, settle, and confirmed capture. Ambient sound connects those gestures. Palette-specific tuning, instruments, density, motifs, and resolution can vary widely while that structure stays consistent. Paints need not each be an instrument.
 
-Global color context, palette reachability, individual pigment additions, and musical memory are distinct possible inputs; their mapping is still being designed. Near passes do not authorize full resolution. The glass ribbon effect remains an audible reference to investigate, not an established production recipe. The addendum records current filter/granular limitations and proposed comparisons. Lab redesign is the next discussion; no gameplay audio integration or publication accompanies this update.
+Global color context, palette reachability, individual pigment additions, and musical memory are distinct possible inputs; their mapping is still being designed. Near passes do not authorize full resolution. The glass ribbon effect remains an audible reference to investigate, not an established production recipe. The addendum records current filter/granular limitations and proposed comparisons. The shared Journey / Sound / Mapping lab is implemented on the sound branch; no live gameplay audio hooks or independent sound publication accompany it.
 
-Read the [shot-led lab design proposal](sound/shot-lab-design.md) for multiple approaches to resolution, shared harmonic control of dense arpeggios, and the proposed Shot Studio, Color & Motion, and Instrument & Ribbon surfaces. The [sound checkpoint](sound/checkpoint.md) records implementation and handoff status.
+The [shot-led lab design proposal](sound/shot-lab-design.md) records the design discussion about multiple approaches to resolution, shared harmonic control of dense arpeggios, and the proposed Shot Studio, Color & Motion, and Instrument & Ribbon surfaces. The [sound checkpoint](sound/checkpoint.md) and [current sound-lab README](../sound-lab/README.md) record implemented behavior, validation, and handoff status.
 
 ## Two-task working agreement
 
