@@ -95,3 +95,28 @@ assert.throws(() => readLibrary({ format: "bad", version: 2, presets: [] }));
 console.log(
   "Passed gamut boundary, edge-travel vs neutral ascent, stationary edge, mapping curves/bypass/bounds, preset scope, legacy migration and library round-trips.",
 );
+
+const vocal = STARTERS.find((p) => p.setup.parameters.instrument === "vocal");
+assert(vocal);
+const glideEdit = sanitizeSetup({
+  ...DEFAULT_SETUP,
+  parameters: {
+    ...DEFAULT_SETUP.parameters,
+    glideStart: 12,
+    shred: 0.7,
+    inside: 0.3,
+  },
+});
+assert.equal(
+  applyPreset(glideEdit, { ...vocal, scope: "sound" }).parameters.glideStart,
+  12,
+);
+assert.equal(
+  applyPreset(glideEdit, { ...vocal, scope: "journey" }).parameters.glideStart,
+  vocal.setup.parameters.glideStart,
+);
+assert.deepEqual(
+  readLibrary(JSON.parse(exportLibrary([{ ...vocal, setup: glideEdit }])))[0]
+    .setup,
+  glideEdit,
+);

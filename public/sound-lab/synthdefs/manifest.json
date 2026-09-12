@@ -49,13 +49,15 @@
   },
   {
     "name": "chroma_flight",
-    "nodes": 522,
+    "nodes": 1134,
     "ugens": [
       "Control",
       "Lag",
       "BinaryOpUGen",
       "SinOsc",
       "Saw",
+      "PinkNoise",
+      "BPF",
       "Clip",
       "Pan2",
       "Out"
@@ -75,7 +77,7 @@
   },
   {
     "name": "chroma_space",
-    "nodes": 241,
+    "nodes": 344,
     "ugens": [
       "Control",
       "In",
@@ -86,9 +88,12 @@
       "LFNoise1",
       "Dust",
       "GrainBuf",
+      "Impulse",
+      "TRand",
       "Lag",
-      "SinOsc",
       "Clip",
+      "Fold",
+      "SinOsc",
       "BPF",
       "CombC",
       "LPF",

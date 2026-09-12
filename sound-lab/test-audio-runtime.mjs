@@ -52,6 +52,31 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
       e.playShot(s.setup);
       models.push({ name: s.name, ...(await measure(1100)) });
     }
+    const textures = [];
+    for (const key of ["saturate", "fold", "crossover", "inside", "shred"]) {
+      e.stopSound();
+      await wait(80);
+      e.playShot(
+        sanitizeSetup({
+          ...DEFAULT_SETUP,
+          mappings: [],
+          parameters: {
+            ...DEFAULT_SETUP.parameters,
+            [key]: 1,
+            textureDrive: 12,
+            ribbon: 0,
+            echo: 0,
+            reverse: 0,
+            grains: 0,
+            room: 0,
+          },
+        }),
+      );
+      textures.push({ key, ...(await measure(700)) });
+    }
+    e.stopSound();
+    await wait(250);
+    const textureSilence = await measure(120);
     e.stopSound();
     await wait(100);
     e.playShot(STARTERS[0].setup);
@@ -93,6 +118,14 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
         instrument: "convergence",
         voices: 18,
         drive: 1,
+        saturate: 1,
+        fold: 1,
+        crossover: 1,
+        inside: 1,
+        shred: 1,
+        shredRate: 32,
+        shredLength: 0.5,
+        textureDrive: 16,
         volume: 0.8,
         decay: 9,
         ribbon: 1,
@@ -112,6 +145,8 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     await e.dispose();
     return {
       models,
+      textures,
+      textureSilence,
       paused,
       held,
       resumed,
@@ -127,6 +162,9 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
   console.log(JSON.stringify({ result, errors }, null, 2));
   await browser.close();
   if (
+    result.textures.some((x) => x.rms <= 1e-6 || x.peak > 0.71) ||
+    result.textureSilence.peak > 1e-4 ||
+    result.max.peak > 0.71 ||
     result.models.some((x) => x.rms <= 1e-6) ||
     result.paused !== result.held ||
     result.resumed <= result.held ||

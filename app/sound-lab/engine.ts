@@ -313,6 +313,28 @@ export class SoundLabEngine {
       v.dry,
       "grainRoute",
       v.grainRoute === "before" ? 1 : 0,
+      "saturate",
+      v.saturate,
+      "textureDrive",
+      v.textureDrive,
+      "fold",
+      v.fold,
+      "crossover",
+      v.crossover,
+      "crossGap",
+      v.crossGap,
+      "inside",
+      v.inside,
+      "shred",
+      v.shred,
+      "shredRate",
+      v.shredRate,
+      "shredLength",
+      v.shredLength,
+      "shredScatter",
+      v.shredScatter,
+      "shredReverse",
+      v.shredReverse,
       "wet",
       this.effectsBypassed ? 0 : 1,
     );
@@ -626,6 +648,7 @@ export class SoundLabEngine {
       103,
       "amp",
       power * this.parameters.drive * 0.2,
+      ...this.flightTimbre(0),
       "voices",
       3,
       "normalize",
@@ -679,6 +702,27 @@ export class SoundLabEngine {
     this.note(0, 0, 0.8, 0);
     this.runShot();
   }
+  private flightTimbre(progress: number): (string | number)[] {
+    const p = this.parameters;
+    return [
+      "vocal",
+      p.instrument === "vocal" ? 1 : 0,
+      "vowel",
+      p.vowel,
+      "formantRatio",
+      2 ** (p.formantShift / 12),
+      "breath",
+      p.breath,
+      "vibrato",
+      p.vibrato,
+      "vibratoRate",
+      p.vibratoRate,
+      "glideTime",
+      p.instrument === "vocal" ? p.glideTime : 0.3,
+      "glideRatio",
+      2 ** ((p.glideStart * (1 - progress ** p.glideCurve)) / 12),
+    ];
+  }
   private updateFlight(level: number, arrival = 0) {
     if (!this.sonic || !this.shotSetup) return;
     const p = this.parameters;
@@ -688,6 +732,7 @@ export class SoundLabEngine {
       103,
       "amp",
       level * p.drive,
+      ...this.flightTimbre(this.progress),
       "voices",
       p.instrument === "convergence" ? p.voices : 3,
       "normalize",

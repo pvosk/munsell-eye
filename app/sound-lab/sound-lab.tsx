@@ -731,6 +731,31 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                   </button>
                 </div>
               </div>
+              <details className="sl-card" open={p.instrument === "vocal"}>
+                <summary>Vocal shot glide</summary>
+                <p>
+                  The Vocal glide model slides toward the current harmonic
+                  voices. Pitch shape is separate from the vowel and breath
+                  controls in Sound.
+                </p>
+                <div className="sl-grid-3">
+                  {GROUPS.flatMap((g) => g.sliders)
+                    .filter((spec) =>
+                      ["glideTime", "glideStart", "glideCurve"].includes(
+                        spec.key,
+                      ),
+                    )
+                    .map((spec) => (
+                      <Slider
+                        key={spec.key}
+                        spec={spec}
+                        value={p[spec.key]}
+                        mapped={snapshot?.mapped[spec.key as Destination]}
+                        onChange={(v) => change(spec.key, v)}
+                      />
+                    ))}
+                </div>
+              </details>
               <div className="sl-grid-3 sl-card">
                 <label>
                   Advance harmony by
@@ -1064,7 +1089,14 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                     <div className="sl-grid-3">
                       {group.sliders
                         .filter(
-                          (spec) => !["root", "activity"].includes(spec.key),
+                          (spec) =>
+                            ![
+                              "root",
+                              "activity",
+                              "glideTime",
+                              "glideStart",
+                              "glideCurve",
+                            ].includes(spec.key),
                         )
                         .filter(
                           (spec) =>

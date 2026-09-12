@@ -25,3 +25,9 @@ The edge reference is explicitly the sRGB boundary in OKLab, not the palette's r
 Transport, math, preset/API, and browser synthesis checks are recorded in the sound README. Physical iPad/touch interaction, final visual QA, subjective listening, deployed sign-in, cross-browser cloud sync on the hosted site, and combined 3D/audio performance remain unverified. Main should run its integrated build and apply the generated migration as part of an authorized release.
 
 Source/settings changes are reviewable independently from private audio reference files. No supplied recording has been added to the repository.
+
+## Audio-only follow-up
+
+After b8c4af7, user authorized adding parallel distortion, wavefolding, buffer shredding and vocal glides while main research continued, and pushing this sound branch to GitHub. GitHub permissions confirmed push access. This follow-up adds 19 saved parameters, 15 mapping destinations, a Vocal glide model and complete starter, and separate Journey glide controls. Details and validation are in the sound README. No additional schema/migration or game math changes.
+
+Main reports offline research now archived as 83d2aa5 with a clean main checkout. Main remains the integration/publication owner. GitHub branch availability is not evidence of a public Sites release.

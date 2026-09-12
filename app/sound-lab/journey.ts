@@ -176,6 +176,21 @@ export const INPUTS = [
 export type Signal = (typeof INPUTS)[number][0];
 export type Signals = Record<Signal, number>;
 export const OUTPUTS = [
+  ["saturate", "Parallel saturation", 0, 1],
+  ["fold", "Wavefold blend", 0, 1],
+  ["crossover", "Crossover blend", 0, 1],
+  ["inside", "Inside-out blend", 0, 1],
+  ["shred", "Buffer shred blend", 0, 1],
+  ["shredRate", "Slices / second", 1, 32],
+  ["shredScatter", "Reorder depth", 0, 2],
+  ["shredReverse", "Reverse probability", 0, 1],
+  ["vowel", "Vowel · oo → ah", 0, 1],
+  ["formantShift", "Formant shift", -12, 12],
+  ["breath", "Breath", 0, 1],
+  ["vibrato", "Vibrato depth", 0, 1],
+  ["glideTime", "Note glide time", 0.02, 3],
+  ["glideStart", "Launch pitch offset", -24, 24],
+
   ["density", "Arpeggio density", 0, 24],
   ["voices", "Convergence voices", 1, 18],
   ["spread", "Convergence spread", 0, 1],
