@@ -1503,3 +1503,11 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.sl-melody-scroll { overflow-x: auto; margin: 16px 0; padding-bottom: 8px; }
+.sl-melody-grid { display: grid; gap: 3px; align-items: center; font-size: 12px; }
+.sl-melody-heading { text-align: center; padding: 6px 0; font-variant-numeric: tabular-nums; }
+.sl-melody-label { white-space: nowrap; opacity: .8; }
+.sl-melody-grid .sl-melody-cell { min-width: 34px; min-height: 28px; padding: 2px; border-radius: 4px; background: rgba(255,255,255,.035); border: 1px solid rgba(170,214,204,.16); }
+.sl-melody-grid .sl-melody-cell[aria-pressed="true"] { background: #a5d8cc; color: #182628; border-color: #a5d8cc; }
+.sl-melody-grid .sl-melody-cell:focus-visible { outline: 2px solid #f0ca8d; outline-offset: 1px; }

@@ -120,3 +120,7 @@ assert.deepEqual(
     .setup,
   glideEdit,
 );
+const gridPreset={...STARTERS[0],setup:sanitizeSetup({...STARTERS[0].setup,parameters:{...STARTERS[0].setup.parameters,music:{...STARTERS[0].setup.parameters.music,melody:'grid',melodySteps:[4,null,1,2,null,0,7,5],offspring:3,melodyFollow:true}}})};
+assert.deepEqual(readLibrary(JSON.parse(exportLibrary([gridPreset])))[0].setup,gridPreset.setup);
+assert.equal(applyPreset(DEFAULT_SETUP,{...gridPreset,scope:'journey'}).parameters.music.melody,'grid');
+assert.equal(applyPreset(DEFAULT_SETUP,{...gridPreset,scope:'sound'}).parameters.music.melody,'procedural');

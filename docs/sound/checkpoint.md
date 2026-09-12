@@ -31,3 +31,7 @@ Source/settings changes are reviewable independently from private audio referenc
 After b8c4af7, user authorized adding parallel distortion, wavefolding, buffer shredding and vocal glides while main research continued, and pushing this sound branch to GitHub. GitHub permissions confirmed push access. This follow-up adds 19 saved parameters, 15 mapping destinations, a Vocal glide model and complete starter, and separate Journey glide controls. Details and validation are in the sound README. No additional schema/migration or game math changes.
 
 Main reports offline research now archived as 83d2aa5 with a clean main checkout. Main remains the integration/publication owner. GitHub branch availability is not evidence of a public Sites release.
+
+## Custom melody grid follow-up
+
+User requested an optional editable main melody in Journey while retaining procedural systems. Added saved 8/16-step scale-relative grid, rests, optional progression-degree following, zero-to-three arpeggio offspring per main note, explicit grid-timing selection, phrase-once audition, and shared shot/motif generation. Fields live in MusicSettings and existing presets. No schema, game, or SynthDef changes. Base is sound 008644c; main reports that build was integrated and public as v64 (06c5c5c). Main still owns integration and release of this subsequent grid checkpoint.

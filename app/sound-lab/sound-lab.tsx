@@ -18,6 +18,7 @@ import {
   type Parameters,
   type SliderSpec,
 } from "./parameters";
+import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
 import { DEFAULT_SETUP, STARTERS, sanitizeSetup, type Setup } from "./presets";
 import { PresetLibrary } from "./preset-library";
@@ -731,6 +732,21 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                   </button>
                 </div>
               </div>
+              <MelodyGrid
+                value={p.music}
+                onChange={(music) => change("music", music)}
+                step={snapshot?.step ?? 0}
+                customScale={p.intervals.map(
+                  (cents) => 69 + 12 * Math.log2(p.root / 440) + cents / 100,
+                )}
+                timing={j.rhythm}
+                onUseTiming={() => setJourney({ rhythm: "motif" })}
+                onAudition={() => {
+                  engine.current?.stopJourney();
+                  engine.current?.scatter();
+                }}
+                enabled={enabled && !snapshot?.audioPaused}
+              />
               <details className="sl-card" open={p.instrument === "vocal"}>
                 <summary>Vocal shot glide</summary>
                 <p>

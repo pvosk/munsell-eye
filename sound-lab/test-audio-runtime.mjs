@@ -52,6 +52,55 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
       e.playShot(s.setup);
       models.push({ name: s.name, ...(await measure(1100)) });
     }
+    e.stopSound();
+    await wait(80);
+    const gridSetup = sanitizeSetup({
+      ...DEFAULT_SETUP,
+      mappings: [],
+      parameters: {
+        ...DEFAULT_SETUP.parameters,
+        tension: 0,
+        drive: 0,
+        music: {
+          ...DEFAULT_SETUP.parameters.music,
+          melody: "grid",
+          melodySteps: [0, null, 4, null, 2, null, 1, null],
+          offspring: 0,
+          variation: 0,
+          bpm: 120,
+          spacing: 0.25,
+          progression: "still",
+        },
+      },
+      journey: {
+        ...DEFAULT_SETUP.journey,
+        rhythm: "motif",
+        duration: 2.8,
+        advance: "manual",
+      },
+    });
+    const gridNotes = [];
+    const unsub = e.subscribeNotes((n) => gridNotes.push(n.hz));
+    e.playShot(gridSetup);
+    await wait(950);
+    e.stopSound();
+    unsub();
+    const { harmonicFrame, midiHz } = await import("/app/sound-lab/music.ts");
+    const gridScale = harmonicFrame(gridSetup.parameters.music).scale;
+    const gridExpected = [0, 4, 2, 1].map((d) => midiHz(gridScale[d]));
+    if (
+      gridNotes.length !== 4 ||
+      gridNotes.some((n, i) => Math.abs(n - gridExpected[i]) > 0.01)
+    )
+      throw Error(
+        "Grid shot notes/rests differ from drawn melody: " +
+          JSON.stringify(gridNotes),
+      );
+    e.configure(gridSetup);
+    e.scatter();
+    const gridAudition = await measure(500);
+    if (gridAudition.rms <= 1e-6)
+      throw Error("Phrase audition stayed muted after Stop all");
     const textures = [];
     for (const key of ["saturate", "fold", "crossover", "inside", "shred"]) {
       e.stopSound();
@@ -145,6 +194,8 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     await e.dispose();
     return {
       models,
+      gridNotes,
+      gridAudition,
       textures,
       textureSilence,
       paused,

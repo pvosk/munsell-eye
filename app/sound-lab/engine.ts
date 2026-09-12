@@ -510,6 +510,7 @@ export class SoundLabEngine {
       tones,
       m.source === "custom" ? tones : frame.scale,
       phrase,
+      frame.degree,
     );
     for (const [i, n] of notes.entries())
       if (!n.skip)
@@ -527,15 +528,23 @@ export class SoundLabEngine {
           },
           (n.beat * 60000) / m.bpm,
         );
-    return (((notes.at(-1)?.beat ?? 0) + m.spacing + m.rest) * 60000) / m.bpm;
+    return (
+      ((m.melody === "grid"
+        ? m.melodyLength * m.spacing + m.rest
+        : (notes.at(-1)?.beat ?? 0) + m.spacing + m.rest) *
+        60000) /
+      m.bpm
+    );
   }
   scatter() {
     if (!this.running) return;
+    this.wakeAudio();
     this.stopMotif();
     this.schedulePhrase(0);
   }
   playMotif() {
     if (!this.running || this.motifPlaying) return;
+    this.wakeAudio();
     this.cancelShot();
     this.motifPaused = false;
     this.sustainRunning = this.parameters.music.sustain;
@@ -699,7 +708,7 @@ export class SoundLabEngine {
     if (setup.journey.advance === "shot") this.musicStep++;
     this.arrivalFrom = [];
     this.shotLast = performance.now();
-    this.note(0, 0, 0.8, 0);
+    if (setup.parameters.music.melody !== "grid") this.note(0, 0, 0.8, 0);
     this.runShot();
   }
   private flightTimbre(progress: number): (string | number)[] {
@@ -803,6 +812,7 @@ export class SoundLabEngine {
           tones,
           m.source === "custom" ? tones : frame.scale,
           Math.floor(this.shotIndex / 12),
+          frame.degree,
         );
       this.emission += dt * (this.mapped.density ?? j.density);
       if (
@@ -816,7 +826,7 @@ export class SoundLabEngine {
         const beats =
           k + 1 < pattern.length
             ? pattern[k + 1].beat - n.beat
-            : m.spacing + m.rest;
+            : m.spacing / (m.melody === "grid" ? m.offspring + 1 : 1) + m.rest;
         this.nextEmission = this.shotTime + (beats * 60) / m.bpm;
         if (!n.skip)
           this.playHz(
