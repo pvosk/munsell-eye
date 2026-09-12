@@ -23,6 +23,8 @@ Preserve pigment strength. Separate dose timing from flight animation. Score the
 
 Read the [11 September inverse-planning findings](play-inverse-planning-findings.md) and its linked reproducible results. The pilot expands acceptable recipe endpoints and works backward through finishing pours, then independently audits competing routes. It found more supported witnesses but no all-base style-resistant finalists. This is research tooling, not a live generator replacement.
 
+The [12 September recipe-blind validation study](play-blind-validation-findings.md) qualifies the pilot: shortest-found counts agree for 25/27 tested bases, with two known misses in the new checker. A ride classification changes with path sampling resolution, and raw minimum additions can differ from timing-supported minimum additions. Do not treat the unchanged live classifier as having incorporated these findings. Joint palette optimization is deferred pending measurement correction.
+
 ## Two-task working agreement
 
 The game task now uses `/Users/atg_la02_macstudio/Documents/ChatGPT/Munsell Eye` on `main`. The sound task uses `/Users/atg_la02_macstudio/.codex/worktrees/10be/Munsell Eye` on `codex/sound-design`. The original repository remains intact at its previous Documents/Codex location, detached at efc2ede, with its pending sound notes preserved. Do not continue parallel edits or publish from that old checkout. The historical `candidate-search` archive is preserved and ignored in the game workspace.
