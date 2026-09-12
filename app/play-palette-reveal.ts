@@ -8,6 +8,33 @@ export const PALETTE_INTRO_SECONDS=11.2;
 export type RevealSample={point:ColorPoint;origin:ColorPoint;phase:number;branch:number};
 export type PaletteReveal={seeds:ColorPoint[];bridges:ColorPoint[][];bridgeTimings:{delay:number;duration:number;reverse:boolean}[];samples:RevealSample[];center:Vector3;radius:number;axis:Vector3;turn:number;lobes:number;signature:string};
 const cache=new Map<string,PaletteReveal>();
+const fieldCache=new WeakMap<PaletteReveal,WeakMap<ColorPoint[],Float32Array>>();
+// Visual proximity to sampled pigment mixtures, not an exact reachable-gamut hull.
+// Each existing field cell gets an arrival time and a pure-paint emphasis.
+export function fieldRevealPlan(reveal:PaletteReveal,points:ColorPoint[]):Float32Array {
+  let entries=fieldCache.get(reveal);if(!entries){entries=new WeakMap();fieldCache.set(reveal,entries);}
+  const cached=entries.get(points);if(cached)return cached;
+  const result=new Float32Array(points.length*2);
+  const distance=(a:ColorPoint['position'],b:ColorPoint['position'])=>{const x=a[0]-b[0],y=a[1]-b[1],z=a[2]-b[2];return x*x+y*y+z*z;};
+  const arcs=reveal.bridges.flatMap((path,k)=>path.map((point,i)=>{
+    const timing=reveal.bridgeTimings[k],t=timing.reverse?1-i/(path.length-1):i/(path.length-1);
+    // Inverse quintic easing makes cell arrival follow the old graph wave.
+    let lo=0,hi=1;for(let n=0;n<16;n++){const mid=(lo+hi)/2;if(easeQuint(mid)<t)lo=mid;else hi=mid;}
+    return {position:point.position,time:(timing.delay+timing.duration*(lo+hi)/2)*.66};
+  }));
+  const samples=reveal.samples.map(s=>s.point.position);
+  points.forEach((point,i)=>{
+    const position=point.position;
+    let nearest=Infinity,arcTime=0;
+    for(const arc of arcs){const d=distance(position,arc.position);if(d<nearest){nearest=d;arcTime=arc.time;}}
+    let paletteDistance=nearest;for(const sample of samples)paletteDistance=Math.min(paletteDistance,distance(position,sample));
+    const d=Math.sqrt(paletteDistance),phase=.5+.5*Math.sin(point.position[0]*.53+point.position[1]*.71+point.position[2]*.37);
+    result[i*2]=nearest<1.8**2?arcTime: d<2.4?.53+.10*phase:.66+.22*(1-Math.exp(-(d-2.4)/12))+.015*phase;
+  });
+  // Highlight the nearest actual cells; never add surrogate paint spheres.
+  for(const seed of reveal.seeds){let index=0,best=Infinity;points.forEach((point,i)=>{const d=distance(seed.position,point.position);if(d<best){best=d;index=i;}});result[index*2]=0;result[index*2+1]=1;}
+  entries.set(points,result);return result;
+}
 export function paletteReveal(paints:PaintColor[]):PaletteReveal{
   const signature=JSON.stringify(paints.map(p=>[p.id,p.rgb,p.strength]));
   const cached=cache.get(signature);if(cached)return cached;

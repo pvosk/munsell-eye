@@ -51,7 +51,8 @@ test('palette structures are deterministic, distinct, and settle onto modeled mi
       for(const p of [.1,.3,.5,.7])assert.ok(revealPosition(r,sample,p).toArray().every(Number.isFinite));
     }
   }
-  assert.equal(signatures.size,PLAY_LEVELS.length);
+  // Lab variants deliberately reuse paint sets with different hole criteria.
+  assert.equal(signatures.size,new Set(PLAY_LEVELS.map(level=>JSON.stringify(level.paints.map(p=>[p.id,p.rgb,p.strength])))).size);
   assert.notEqual(paletteReveal(PLAY_LEVELS[19].paints).turn,paletteReveal(PLAY_LEVELS[20].paints).turn);
 });
 

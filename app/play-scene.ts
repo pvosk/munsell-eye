@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { flightProgress, ribbonEdges, planArrival, wrapAngle, closestHeading, stableCameraYaw, chargeEnergy, ribbonChargeSpeed, targetFlightPath, splitTargetResponse, captureProgress, finWidth, easeQuint, WAKE_SECONDS, wakeEnvelope } from './play-motion';
 import { FIELD_POINTS, totalMass, baseLaunchPath, colorDistance, targetDisplayRadius, type ColorPoint, type Hole, type RGB } from './play-engine';
-import {paletteReveal,revealPosition,planPaletteReveal,bridgeRevealRange,PALETTE_REVEAL_SECONDS,PALETTE_INTRO_SECONDS} from './play-palette-reveal';
+import {paletteReveal,fieldRevealPlan,planPaletteReveal,PALETTE_REVEAL_SECONDS,PALETTE_INTRO_SECONDS} from './play-palette-reveal';
 import type {PaintColor} from './paint-mixing';
 
 type Flight = { path: ColorPoint[]; recoil: THREE.Vector3[]; endpoint: ColorPoint; qualifies: boolean; distances: number[]; length: number; elapsed: number; duration: number; fromMass: number; toMass: number; done: () => void; ribbon: THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial> };
@@ -26,29 +26,6 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const blob = new THREE.Group();
   const noise = new ImprovedNoise();
   const reveal=options?.revealPalette?paletteReveal(options.paints):null;
-  const paletteGroup=new THREE.Group();scene.add(paletteGroup);
-  const paletteSeeds=(reveal?.seeds??[]).map(point=>{
-    const mesh=new THREE.Mesh(new THREE.SphereGeometry(3.3,28,20),new THREE.MeshBasicMaterial({color:color(point.rgb),transparent:true}));
-    mesh.position.copy(v3(point));paletteGroup.add(mesh);return mesh;
-  });
-  const paletteBridges=(reveal?.bridges??[]).map(path=>{
-    const vertices:number[]=[],colors:number[]=[],indices:number[]=[];
-    for(let i=0;i<path.length;i++){
-      const center=v3(path[i]),tangent=v3(path[Math.min(i+1,path.length-1)]).sub(v3(path[Math.max(0,i-1)]));
-      const side=tangent.cross(new THREE.Vector3(0,1,0));
-      if(side.lengthSq()<1e-8)side.set(1,0,0);
-      side.normalize().multiplyScalar(.55);
-      vertices.push(...center.clone().sub(side).toArray(),...center.clone().add(side).toArray());
-      const c=color(path[i].rgb);colors.push(c.r,c.g,c.b,c.r,c.g,c.b);
-      if(i<path.length-1){const n=i*2;indices.push(n,n+1,n+2,n+1,n+3,n+2);}
-    }
-    const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setIndex(indices);
-    const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide,transparent:true,opacity:.8,depthWrite:false}));
-    paletteGroup.add(mesh);return mesh;
-  });
-  const paletteCloud=reveal?new THREE.InstancedMesh(new THREE.SphereGeometry(.65,7,5),new THREE.MeshBasicMaterial({transparent:true,opacity:.85}),reveal.samples.length):null;
-  if(paletteCloud&&reveal){reveal.samples.forEach((s,i)=>paletteCloud.setColorAt(i,color(s.point.rgb)));paletteCloud.frustumCulled=false;paletteGroup.add(paletteCloud);}
-  const revealTransform=new THREE.Matrix4();
   const blobGeometry = new THREE.SphereGeometry(.24, 28, 20);
   const positions = blobGeometry.getAttribute('position');
   const directions = new Float32Array(positions.array);
@@ -102,6 +79,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   // One instanced draw: crisp matte cells throughout the color volume. No
   // ring scaffolding, point-sprite blur, lighting glare, or empty neutral grid.
   const nodesGeometry = new THREE.BoxGeometry(.64, .64, .64);
+  nodesGeometry.setAttribute('aReveal',new THREE.InstancedBufferAttribute(reveal?fieldRevealPlan(reveal,FIELD_POINTS):new Float32Array(FIELD_POINTS.length*2),2));
   const wakeSamples=Array.from({length:24},()=>new THREE.Vector4(0,0,0,-100));
   const wakeGains=new Float32Array(24);
   let wakeCursor=0, lastWake=-10;
@@ -109,7 +87,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const nodeMaterial = new THREE.MeshBasicMaterial({ depthWrite: true });
   nodeMaterial.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, nodeUniforms);
-    shader.vertexShader = `uniform float uReveal; uniform float uTime; uniform float uMotion; uniform vec4 uWakes[24]; uniform float uWakeGain[24]; uniform float uFlight; uniform float uSpeed; uniform vec3 uPlayer; uniform vec3 uTarget; varying float vFieldAlpha;
+    shader.vertexShader = `attribute vec2 aReveal; uniform float uReveal; uniform float uTime; uniform float uMotion; uniform vec4 uWakes[24]; uniform float uWakeGain[24]; uniform float uFlight; uniform float uSpeed; uniform vec3 uPlayer; uniform vec3 uTarget; varying float vFieldAlpha;
       vec3 corridor(vec3 p, vec3 endPoint) {
         vec3 axis=endPoint-cameraPosition;
         float t=clamp(dot(p-cameraPosition,axis)/max(.01,dot(axis,axis)),0.0,1.0);
@@ -155,12 +133,17 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       float playerGap=length(movedClip.xy/max(.01,movedClip.w)-playerClip.xy/max(.01,playerClip.w));
       float foreground=smoothstep(1.8,3.2,-eyeCell.z);
       float playerClear=mix(smoothstep(.10,.24,playerGap),1.0,step(playerClip.w+1.0,movedClip.w));
-      vec3 transformed=position*size*foreground*playerClear*uReveal+displacement;
+      float revealAge=uReveal-aReveal.x;
+      float shown=smoothstep(0.0,.065,revealAge);
+      float seedScale=1.0+5.0*aReveal.y*(1.0-smoothstep(.16,.59,uReveal));
+      float revealPulse=sin(clamp(revealAge/.13,0.0,1.0)*3.141593)*(1.0-smoothstep(.92,1.0,uReveal));
+      displacement+=breath*revealPulse*.22*uMotion;
+      vec3 transformed=position*size*seedScale*(1.0+.22*revealPulse)*foreground*playerClear*shown+displacement;
       vec4 cell=projectionMatrix*modelViewMatrix*vec4(base+displacement,1.0);
       vec4 goal=projectionMatrix*modelViewMatrix*vec4(uTarget,1.0);
       float clearGoal=smoothstep(.05,.18,length(cell.xy/max(.01,cell.w)-goal.xy/max(.01,goal.w)));
       float depth=-(modelViewMatrix*vec4(base,1.0)).z;
-      vFieldAlpha=uReveal*foreground*playerClear*smoothstep(.8,1.8,d)*mix(clearGoal,1.0,step(goal.w+1.0,cell.w));
+      vFieldAlpha=shown*foreground*playerClear*smoothstep(.8,1.8,d)*mix(clearGoal,1.0,step(goal.w+1.0,cell.w));
     `);
     shader.fragmentShader = 'varying float vFieldAlpha;\n' + shader.fragmentShader;
     shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', 'if(vFieldAlpha < .15) discard;\n#include <opaque_fragment>');
@@ -210,7 +193,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   const introSeconds=4.8;
   let palettePose:ReturnType<typeof planPaletteReveal>|null=null;
   const background=new THREE.Color('#353e44');
-  const darkBackground=new THREE.Color('#202b2e'), lightBackground=new THREE.Color('#b5b9b3');
+  const darkBackground=new THREE.Color('#141e21'), lightBackground=new THREE.Color('#c9ccc6');
   let introPose: ReturnType<typeof planArrival>;
   const introFinishLook = new THREE.Vector3();
   let won = false; let disposed = false;
@@ -366,21 +349,8 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const introProgress=reduced?1:Math.min(1,introElapsed/(palettePose?PALETTE_INTRO_SECONDS:introSeconds));
     const paletteProgress=paletteSeconds?Math.min(1,introElapsed/paletteSeconds):1;
     const inPaletteReveal=introducing&&paletteProgress<1;
-    paletteGroup.visible=inPaletteReveal;
-    nodeUniforms.uReveal.value=inPaletteReveal?easeQuint((paletteProgress-.48)/.42):1;
+    nodeUniforms.uReveal.value=reveal&&introducing&&!reduced?introProgress:1;
     target.visible=!inPaletteReveal||paletteProgress>.45;
-    if(inPaletteReveal&&reveal){
-      const fade=1-easeQuint((paletteProgress-.78)/.22),bloom=.3+.7*easeQuint(paletteProgress/.14);
-      paletteSeeds.forEach((mesh,i)=>{mesh.scale.setScalar(bloom*(1+.045*Math.sin(time*1.5+i)));mesh.material.opacity=fade;});
-      paletteBridges.forEach((mesh,i)=>{const range=bridgeRevealRange(reveal.bridgeTimings[i],paletteProgress);mesh.geometry.setDrawRange(range.start,range.count);mesh.material.opacity=fade*.8;});
-      if(paletteCloud){
-        reveal.samples.forEach((sample,i)=>{
-          const position=revealPosition(reveal,sample,paletteProgress),scale=easeQuint((paletteProgress-.17)/.24)*(1+.18*Math.sin(sample.phase+paletteProgress*4));
-          revealTransform.makeScale(scale,scale,scale).setPosition(position);paletteCloud.setMatrixAt(i,revealTransform);
-        });
-        paletteCloud.instanceMatrix.needsUpdate=true;paletteCloud.material.opacity=fade*.88;
-      }
-    }
     let speed = 0;
     let movingPoint = current;
     if (flight) {

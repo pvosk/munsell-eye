@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -583,9 +582,9 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
   return (
     <main className="sl-root sl-v2">
       <header className="sl-header">
-        <Link className="sl-back" href="/?mode=play">
-          ← Munsell Eye
-        </Link>
+        <a className="sl-back" href="/?mode=play">
+          ← Chroma Glider
+        </a>
         <strong>Sound lab</strong>
         <span className="sl-status">
           {status === "loading"
