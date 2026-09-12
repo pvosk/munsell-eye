@@ -22,6 +22,20 @@ test('color derivatives are stable across finite-difference step sizes',()=>{
  const a=gradient(f,[.4,.7],1e-4),b=gradient(f,[.4,.7],5e-5);
  assert(a.every((v,i)=>Math.abs(v-b[i])<1e-5));
 });
+test('bounded derivatives never probe illegal negative doses',()=>{
+ const f=(x:number[])=>{assert(x[0]>=0&&x[0]<=2.2);return x[0];};
+ assert(Math.abs(gradient(f,[0],1e-4,[[0,2.2]])[0]-1)<1e-8);
+ assert(Math.abs(gradient(f,[2.2],1e-4,[[0,2.2]])[0]-1)<1e-8);
+});
+test('forward color derivatives remain consistent across contrasting palettes',()=>{
+ for(const level of [0,1,4,5,6,10,16,39,42]){
+  const paints=PLAY_LEVELS[level].paints,start=paints.map(()=>1/paints.length);
+  for(const times of [[.2,.4],[.5,.8],[1.1,.9]])for(let channel=0;channel<3;channel++){
+   const f=(x:number[])=>mixtureColor(paints,premixReplay(start,[0,paints.length-1],x,'normalized')).lab[channel];
+   const a=gradient(f,times,1e-4),b=gradient(f,times,5e-5);assert(a.every((v,i)=>Number.isFinite(v)&&Math.abs(v-b[i])<2e-4));
+  }
+ }
+});
 test('both challengers find exact one-shot counterexamples with supplied paints',()=>{
  const q={...p,control:{order:[3],times:[.6],error:0},targetRecipe:premixReplay(p.start,[3],[.6],'normalized')};
  const g=gradientChallenger(q,1,64,881,32),independent=searchPremix(0,q.start,targetOf(q),'normalized',1,7799,256,12,q.paints);

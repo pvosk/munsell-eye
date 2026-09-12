@@ -4,7 +4,7 @@ import type {PaintColor} from '../app/paint-mixing';
 import {halton} from './recipe-blind-search';
 import type {PremixControl} from './premix-search';
 
-export const HYBRID_VERSION='premix-hybrid-1';
+export const HYBRID_VERSION='premix-hybrid-2';
 export const POLICY={almostOne:1.5,shorterMargin:1.3,cleanupMove:1.5,finishMs:55,setupCoverage:.04};
 export type Puzzle={id:string;palette:string;paints:PaintColor[];start:Mixture;targetRecipe:Mixture;control:PremixControl};
 export const targetOf=(p:Puzzle)=>mixtureColor(p.paints,p.targetRecipe);
@@ -55,10 +55,11 @@ export function designScore(p:Puzzle,rivals:PremixControl[]){
  const byDepth=(d:number)=>Math.min(...rivals.filter(r=>r.order.length===d).map(r=>colorDistance(endpoint(p.paints,p.start,r.order,r.times),target)/T));
  const one=byDepth(1),two=p.control.order.length>=3?byDepth(2):one;
  let q=p.start;const moves:number[]=[];for(let i=0;i<p.control.order.length;i++){const next=premixStep(q,p.control.order[i],p.control.times[i],'normalized').after;moves.push(colorDistance(mixtureColor(p.paints,q),mixtureColor(p.paints,next))/T);q=next;}
+ const finishJitter=Math.max(...[-.0275,.0275].map(offset=>{const times=[...p.control.times];times[times.length-1]=clamp(times.at(-1)!+offset,0,CHARGE_SECONDS);return colorDistance(endpoint(p.paints,p.start,p.control.order,times),target)/T;}));
  // Prioritize resistance over travel, without rewarding arbitrarily far targets
  // or infinitesimal winning windows. These are search objectives, not labels.
  return Math.min(one,6)+1.6*Math.min(two,4)+.15*Math.min(12,colorDistance(mixtureColor(p.paints,p.start),target)/T)
-  -35*Math.max(0,error-.65)**2-2*moves.reduce((sum,x)=>sum+Math.max(0,1.5-x)**2,0);
+  -35*Math.max(0,error-.65)**2-2*moves.reduce((sum,x)=>sum+Math.max(0,1.5-x)**2,0)-3*Math.max(0,finishJitter-1)**2;
 }
 
 export function refinePuzzle(initial:Puzzle,seed:number,rounds=8){
@@ -79,7 +80,8 @@ export function refinePuzzle(initial:Puzzle,seed:number,rounds=8){
   }
  }
  p={...p,control:{...p.control,error:colorDistance(endpoint(p.paints,p.start,p.control.order,p.control.times),targetOf(p))}};
- return{p,before,after:{score,bestT:c.best.map(e=>e/T)},history,evaluations};
+ const bestT=Array.from({length:Math.min(2,p.control.order.length-1)},(_,i)=>Math.min(...c.routes.filter(r=>r.order.length===i+1).map(r=>colorDistance(endpoint(p.paints,p.start,r.order,r.times),targetOf(p))/T)));
+ return{p,initial,before,after:{score,bestT},history,evaluations};
 }
 
 // An explicit cleanup attack: search any first pour plus a correction whose

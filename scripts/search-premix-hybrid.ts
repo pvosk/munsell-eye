@@ -38,7 +38,7 @@ for(const [pi,palette] of palettes.entries()){
    const p={id:`hybrid-${seed}-${pi}-${s}-${j}`,palette:palette.name,paints:palette.paints,start:initial,targetRecipe,control:{order,times,error:0},screen:Math.min(8,one)+.12*Math.min(15,dist)+(depth===3?.4:0),source:palette.source};local.push(p);
   }
  }
- local.sort((a,b)=>b.screen-a.screen);candidates.push(...local.slice(0,3));stats.palettes++;
+ local.sort((a,b)=>b.screen-a.screen);for(const depth of [2,3])candidates.push(...local.filter(p=>p.control.order.length===depth).slice(0,2));stats.palettes++;
  if(pi%64===0)console.log(JSON.stringify({phase:'broad',seconds:(Date.now()-begin)/1000,...stats}));
 }
 writeFileSync(output+'/screen-bank.json',JSON.stringify(candidates));
@@ -48,7 +48,7 @@ writeFileSync(output+'/screen-bank.json',JSON.stringify(candidates));
 const cells=new Map<string,number>(),counts=new Map<string,number>(),elites:typeof candidates=[];
 for(const p of candidates.sort((a,b)=>b.screen-a.screen)){
  const t=targetOf(p),cell=[p.paints.length,p.control.order.length,Math.floor(t.lab[0]*4),Math.floor(Math.hypot(...t.lab.slice(1))/.06)].join(':'),key=fingerprint(p.paints);
- if((cells.get(cell)??0)>=6||(counts.get(key)??0)>=2)continue;
+ if((cells.get(cell)??0)>=6||(counts.get(key)??0)>=2||elites.filter(x=>x.control.order.length===p.control.order.length).length>=Math.ceil(config.refine/2))continue;
  cells.set(cell,(cells.get(cell)??0)+1);counts.set(key,(counts.get(key)??0)+1);elites.push(p);if(elites.length>=config.refine)break;
 }
 const refined:ReturnType<typeof refinePuzzle>[]=[];
@@ -64,7 +64,7 @@ for(const [i,p] of elites.entries()){
  if(i%8===0)console.log(JSON.stringify({phase:'refine',seconds:(Date.now()-begin)/1000,...stats}));
 }
 
-const audits:any[]=[],regressions:any[]=[],inputs=refined.sort((a,b)=>b.after.score-a.after.score).slice(0,config.validate).map(r=>({p:r.p,optimization:r}));
+const audits:any[]=[],regressions:any[]=[],inputs=[2,3].flatMap(depth=>refined.filter(r=>r.p.control.order.length===depth).sort((a,b)=>b.after.score-a.after.score).slice(0,Math.ceil(config.validate/2))).map(r=>({p:r.p,optimization:r}));
 // All historical tests are inspected, not just examples we expect to pass.
 for(const h of regression.holes){inputs.push({p:{id:h.id,palette:PLAY_LEVELS[h.level].name,paints:PLAY_LEVELS[h.level].paints,start:h.initial,targetRecipe:h.initial,control:h.modes.normalized} as Puzzle,optimization:null as any});}
 for(const [i,input] of inputs.entries()){
@@ -77,9 +77,14 @@ for(const [i,input] of inputs.entries()){
  const cleanup=cleanupAttack(p,871913+i,128,28,actualTarget);stats.validationEndpoints+=cleanup.evaluations;
  const selected=[...accepted,...cleanup.routes].filter((r,i,a)=>a.slice(0,i).filter(s=>s.order.join()===r.order.join()).length<2);
  const alternate=selected.map(r=>measureRegion(0,p.start,actualTarget,r,p.paints));
- const verdict=structuralVerdict(p.control.order.length,raw.best,cleanup.best),passes=verdict.pass&&witness.supported&&witness.allMeaningful;
+ const verdict=structuralVerdict(p.control.order.length,raw.best,cleanup.best);
+ if(!witness.supported)verdict.reasons.push('witness-insufficient-timing-or-setup-support');
+ if(!witness.allMeaningful)verdict.reasons.push('witness-split-deletable-or-small-action');
+ verdict.pass=verdict.reasons.length===0;const passes=verdict.pass;
  const rawMinimum=Math.min(p.control.order.length,...accepted.map(r=>r.order.length)),supported=alternate.filter(r=>r.supported),timingMinimum=Math.min(...[...(witness.supported?[p.control.order.length]:[]),...supported.map(r=>r.order.length)]);
- const row={p,target:actualTarget,optimization:input.optimization?{before:input.optimization.before,after:input.optimization.after,history:input.optimization.history}:null,rawMinimum,timingMinimum:Number.isFinite(timingMinimum)?timingMinimum:null,bestT:raw.best.map(e=>e/T),cleanup,witness,verdict,passes,styles:Object.fromEntries(FAMILIES.map(f=>[f,classifyAlternatives(f,alternate,witness)])),independent:{seed:raw.seed,samples:raw.samples,restarts:raw.restarts,evaluations:raw.evaluations,unmeasuredAccepted:accepted.length+cleanup.routes.length-selected.length},routes:alternate};
+ let baseline=null;
+ if(input.optimization){const original=input.optimization.initial,b=searchPremix(0,original.start,targetOf(original),'normalized',Math.min(2,p.control.order.length-1),961921+i,192,10,p.paints);stats.validationEndpoints+=b.evaluations;baseline={bestT:b.best.map(e=>e/T),seed:b.seed,evaluations:b.evaluations};}
+ const row={p,target:actualTarget,optimization:input.optimization?{initial:input.optimization.initial,before:input.optimization.before,after:input.optimization.after,history:input.optimization.history,baseline}:null,rawMinimum,timingMinimum:Number.isFinite(timingMinimum)?timingMinimum:null,bestT:raw.best.map(e=>e/T),cleanup,witness,verdict,passes,styles:Object.fromEntries(FAMILIES.map(f=>[f,classifyAlternatives(f,alternate,witness)])),independent:{seed:raw.seed,samples:raw.samples,restarts:raw.restarts,evaluations:raw.evaluations,unmeasuredAccepted:accepted.length+cleanup.routes.length-selected.length},routes:alternate};
  (h?regressions:audits).push(row);writeFileSync(output+'/audits.json',JSON.stringify(audits));writeFileSync(output+'/regressions.json',JSON.stringify(regressions));
  console.log(JSON.stringify({phase:'validation',i,id:p.id,passes,bestT:row.bestT,reasons:verdict.reasons,seconds:(Date.now()-begin)/1000}));
 }

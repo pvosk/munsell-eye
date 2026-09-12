@@ -88,3 +88,18 @@ adaptive recovery tree. Finishing support is local, not a player success rate.
 The score cannot certify enjoyment. In particular, the old chromatic-ride label
 can still include tinting paths: raw style tags are descriptive only until refined
 and re-tested with humans.
+
+## Second-pass changes (hybrid-2)
+
+The first calibration run's combined ranking admitted mostly two-addition tests.
+Version 2 retains and validates separate two-/three-addition cohorts. This is a
+depth comparison, not a requirement to fill style quotas or force each palette
+into the same course. A two-stage setup is not advertised as a deep puzzle merely
+because it passes geometric gates.
+
+The objective now includes a soft finishing-jitter cost (both ±27.5 ms), while the
+final connected accepted-window measurement remains the admission test. Exact
+pre-optimization puzzles are stored, and finalist baselines are re-challenged
+with the same independent solver settings as refined puzzles. Failed support
+and meaningless-action checks have explicit failure reasons. First-pass archives
+and the implementation checkpoint remain unchanged.
