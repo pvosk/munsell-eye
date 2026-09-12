@@ -1,0 +1,2982 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-11",
+  "sourceCommit": "2beedca736d53450f195d75ef040a6a20ffa5329",
+  "liveVersion": "v63",
+  "chapters": [
+    {
+      "name": "UltraOx Dual",
+      "levelIndex": 0,
+      "paints": [
+        {
+          "id": "transparent-earth-red",
+          "name": "Transparent Oxide Red",
+          "pigment": "PR101",
+          "strength": 0.82,
+          "rgb": [
+            78,
+            38,
+            34
+          ]
+        },
+        {
+          "id": "ultramarine-blue",
+          "name": "Ultramarine Blue",
+          "pigment": "PB29",
+          "strength": 0.92,
+          "rgb": [
+            36,
+            40,
+            112
+          ]
+        },
+        {
+          "id": "titanium-white",
+          "name": "Titanium White",
+          "pigment": "PW6",
+          "strength": 1.2,
+          "rgb": [
+            249,
+            248,
+            242
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-0-0",
+          "title": "Warm / cool introduction",
+          "sourceId": "courses-3-0-1254228653",
+          "levelIndex": 0,
+          "hole": {
+            "courseId": "campaign-draft-1-0-0",
+            "seed": 5,
+            "stage": 0,
+            "notation": "10RP 4/2",
+            "target": {
+              "rgb": [
+                121.1202342593077,
+                93.90247500900094,
+                97.48148420559183
+              ],
+              "lab": [
+                0.5101773576056723,
+                0.03536744902557709,
+                0.005969793184877947
+              ],
+              "position": [
+                5.934486361959531,
+                -3.497027553136526,
+                0.21740618097801973
+              ]
+            },
+            "recipe": [
+              2.8943222807078985,
+              1.7198945196256399,
+              1
+            ],
+            "par": 4,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              2,
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.8625976562500001,
+              0.47480468750000004
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-0-1",
+          "title": "Setup into a lift",
+          "sourceId": "courses-3-0-2047564836",
+          "levelIndex": 0,
+          "hole": {
+            "courseId": "campaign-draft-1-0-1",
+            "seed": 6,
+            "stage": 1,
+            "notation": "10PB 7/4",
+            "target": {
+              "rgb": [
+                179.51832562724184,
+                186.13932482873128,
+                217.1690171941206
+              ],
+              "lab": [
+                0.7942956232916148,
+                0.004531659746565553,
+                -0.044299021140645434
+              ],
+              "position": [
+                -0.022271301864779852,
+                9.827441296874404,
+                -9.363712400162754
+              ]
+            },
+            "recipe": [
+              1,
+              7.998969890120752,
+              8.615228450009177
+            ],
+            "par": 3,
+            "kind": "value-finish",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              0,
+              1,
+              2
+            ],
+            "routeTimes": [
+              2.1300000000000154,
+              0.6585131022135418
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-0-2",
+          "title": "Blue finish",
+          "sourceId": "lab-7-0-0-33f2ab72f2c7",
+          "levelIndex": 0,
+          "hole": {
+            "courseId": "campaign-draft-1-0-2",
+            "seed": 20261108,
+            "stage": 2,
+            "notation": "7.5PB 5/8",
+            "target": {
+              "rgb": [
+                98.56886635376291,
+                107.02008057471247,
+                159.1410494511063
+              ],
+              "lab": [
+                0.542689406123336,
+                0.008952808169624904,
+                -0.08160861633867206
+              ],
+              "position": [
+                0.12579758496310534,
+                -1.969984390194245,
+                -17.966447561360148
+              ]
+            },
+            "recipe": [
+              1,
+              3.67949947614114,
+              1.3874495700895921
+            ],
+            "par": 5,
+            "kind": "drop",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              2,
+              1
+            ],
+            "routeTimes": [
+              0.6420247395833332,
+              0.7136393229166667
+            ]
+          },
+          "alternatives": []
+        }
+      ]
+    },
+    {
+      "name": "Zorny",
+      "levelIndex": 1,
+      "paints": [
+        {
+          "id": "yellow-ochre",
+          "name": "Yellow Ochre",
+          "pigment": "PY43",
+          "strength": 0.62,
+          "rgb": [
+            163,
+            113,
+            28
+          ]
+        },
+        {
+          "id": "cadmium-red-light",
+          "name": "Cadmium Red Light",
+          "pigment": "PR108",
+          "strength": 0.86,
+          "rgb": [
+            230,
+            53,
+            42
+          ]
+        },
+        {
+          "id": "ivory-black",
+          "name": "Ivory Black",
+          "pigment": "PBk9",
+          "strength": 1.08,
+          "rgb": [
+            24,
+            24,
+            22
+          ]
+        },
+        {
+          "id": "titanium-white",
+          "name": "Titanium White",
+          "pigment": "PW6",
+          "strength": 1.2,
+          "rgb": [
+            249,
+            248,
+            242
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-2-0",
+          "title": "Warm nuance",
+          "sourceId": "lab-2-1-250769685",
+          "levelIndex": 1,
+          "hole": {
+            "courseId": "campaign-draft-1-2-0",
+            "seed": 20260911,
+            "stage": 0,
+            "notation": "10YR 6/4",
+            "target": {
+              "rgb": [
+                169.8973949661657,
+                136.8055107307295,
+                101.96391928926592
+              ],
+              "lab": [
+                0.651847570925047,
+                0.023854796697060865,
+                0.058446685789978636
+              ],
+              "position": [
+                5.888156021089018,
+                3.0827652903132154,
+                10.034842925747283
+              ]
+            },
+            "recipe": [
+              1.1872250247542513,
+              0.7426156389529314,
+              1.1461468319302575,
+              1
+            ],
+            "par": 5,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              3,
+              2,
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.5990678075729544,
+              0.4916949490351538,
+              0.3780332869020764
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-2-1",
+          "title": "Cool direction using black",
+          "sourceId": "zorn-cool-1045",
+          "levelIndex": 1,
+          "hole": {
+            "courseId": "campaign-draft-1-2-1",
+            "seed": 2026091110,
+            "stage": 1,
+            "notation": "10Y 4/4",
+            "target": {
+              "rgb": [
+                97.74925490064749,
+                90.87679114169137,
+                49.69430219472234
+              ],
+              "lab": [
+                0.4670589121263118,
+                -0.010450792555621202,
+                0.059271535249662666
+              ],
+              "position": [
+                0.01968947795125814,
+                -5.193910151560804,
+                10.924445185954019
+              ]
+            },
+            "recipe": [
+              0.47341973600319665,
+              0,
+              0.41962085209818156,
+              0.1069594118986218
+            ],
+            "par": 3,
+            "kind": "cooling",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              1,
+              0,
+              2
+            ],
+            "routeTimes": [
+              2.148079427083355,
+              0.5242187500000001
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-2-1-alt-zorn-cooling-404",
+              "sourceId": "zorn-cooling-404",
+              "levelIndex": 1,
+              "hole": {
+                "courseId": "campaign-draft-1-2-1-alt-zorn-cooling-404",
+                "seed": 2026091111,
+                "stage": 1,
+                "notation": "7.5R 3/4",
+                "target": {
+                  "rgb": [
+                    110.30410485635892,
+                    75.20872120028113,
+                    67.96973985235978
+                  ],
+                  "lab": [
+                    0.45025349618031335,
+                    0.04211073078208738,
+                    0.026348490865241714
+                  ],
+                  "position": [
+                    7.698840495739068,
+                    -6.23903034169183,
+                    4.004470906781512
+                  ]
+                },
+                "recipe": [
+                  0.07706609924423875,
+                  0.32281271972651726,
+                  0.45751566743298394,
+                  0.1426055135962601
+                ],
+                "par": 4,
+                "kind": "cooling",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  0,
+                  1,
+                  3,
+                  2
+                ],
+                "routeTimes": [
+                  1.5236421703756784,
+                  0.48829708955949164,
+                  0.6643702759523873
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-2-2",
+          "title": "Setup and value",
+          "sourceId": "lab-4-1-1024-test",
+          "levelIndex": 1,
+          "hole": {
+            "courseId": "campaign-draft-1-2-2",
+            "seed": 20260913,
+            "stage": 2,
+            "notation": "7.5R 7/4",
+            "target": {
+              "rgb": [
+                203.27650537167332,
+                158.93146118173746,
+                151.41263831895995
+              ],
+              "lab": [
+                0.7411199276923327,
+                0.04719788920079726,
+                0.026675798230653913
+              ],
+              "position": [
+                8.988264877522838,
+                7.121203889775949,
+                3.344098083559865
+              ]
+            },
+            "recipe": [
+              0,
+              1,
+              1.0779804220335114,
+              1.5819729963827989
+            ],
+            "par": 4,
+            "kind": "setup-lift",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              1,
+              2,
+              3
+            ],
+            "routeTimes": [
+              0.5861653645833335,
+              0.546419270833333
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-2-3",
+          "title": "Demanding cool finish",
+          "sourceId": "zorn-finish-1484",
+          "levelIndex": 1,
+          "hole": {
+            "courseId": "campaign-draft-1-2-3",
+            "seed": 2026091120,
+            "stage": 3,
+            "notation": "5YR 7/4",
+            "target": {
+              "rgb": [
+                217.8127916369474,
+                168.46537269208403,
+                135.62635078720416
+              ],
+              "lab": [
+                0.7704659968583722,
+                0.042177304187790865,
+                0.060225482160534916
+              ],
+              "position": [
+                9.411589242225178,
+                8.512928484472937,
+                9.515942136845588
+              ]
+            },
+            "recipe": [
+              0.261383408320321,
+              0.2097788655147771,
+              0.16350026490214825,
+              0.36533746126275374
+            ],
+            "par": 5,
+            "kind": "cooling",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              0,
+              3,
+              2,
+              1
+            ],
+            "routeTimes": [
+              0.6437709694414337,
+              0.3890302233361763,
+              0.39688045150164314
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-2-3-alt-zorn-finish-176",
+              "sourceId": "zorn-finish-176",
+              "levelIndex": 1,
+              "hole": {
+                "courseId": "campaign-draft-1-2-3-alt-zorn-finish-176",
+                "seed": 2026091121,
+                "stage": 3,
+                "notation": "7.5R 6/6",
+                "target": {
+                  "rgb": [
+                    191.20390515952622,
+                    120.24998419968617,
+                    109.80576919899976
+                  ],
+                  "lab": [
+                    0.6460089702534414,
+                    0.07982534318362111,
+                    0.04403970540944946
+                  ],
+                  "position": [
+                    15.58008207384782,
+                    2.501599832356427,
+                    5.205749904990725
+                  ]
+                },
+                "recipe": [
+                  0.06743693937846826,
+                  0.36490001176335685,
+                  0.2724844084864584,
+                  0.2951786403717164
+                ],
+                "par": 4,
+                "kind": "cooling",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  0,
+                  1,
+                  3,
+                  2
+                ],
+                "routeTimes": [
+                  1.2025605781644544,
+                  0.5689016109247435,
+                  0.48092599940915776
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Maroon Drift",
+      "levelIndex": 25,
+      "paints": [
+        {
+          "id": "perylene-maroon",
+          "name": "Perylene Maroon",
+          "pigment": "PR179",
+          "strength": 1.12,
+          "rgb": [
+            85,
+            30,
+            52
+          ]
+        },
+        {
+          "id": "ultramarine-blue",
+          "name": "Ultramarine Blue",
+          "pigment": "PB29",
+          "strength": 0.92,
+          "rgb": [
+            36,
+            40,
+            112
+          ]
+        },
+        {
+          "id": "raw-sienna",
+          "name": "Raw Sienna",
+          "pigment": "PBr7",
+          "strength": 0.58,
+          "rgb": [
+            157,
+            115,
+            56
+          ]
+        },
+        {
+          "id": "winsor-yellow-deep",
+          "name": "Winsor Yellow Deep",
+          "pigment": "PY65",
+          "strength": 0.94,
+          "rgb": [
+            248,
+            193,
+            105
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-1-0",
+          "title": "Gentle mixing",
+          "sourceId": "lab-8-25-0-08478f9bff37",
+          "levelIndex": 25,
+          "hole": {
+            "courseId": "campaign-draft-1-1-0",
+            "seed": 20261201,
+            "stage": 0,
+            "notation": "5RP 4/2",
+            "target": {
+              "rgb": [
+                114.36975266334287,
+                95.40488858771079,
+                99.74081443682871
+              ],
+              "lab": [
+                0.5068543609012761,
+                0.025287403742802056,
+                0.001160229064283702
+              ],
+              "position": [
+                4.114460676269291,
+                -3.59628198679784,
+                -0.4098503113708854
+              ]
+            },
+            "recipe": [
+              3.6946069501693835,
+              7.576926073302914,
+              1,
+              5.088376620962517
+            ],
+            "par": 5,
+            "kind": "balance",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              2,
+              3,
+              1,
+              0
+            ],
+            "routeTimes": [
+              1.1554384957323778,
+              0.706292699838523,
+              0.4392887301906013
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-1-1",
+          "title": "Simple chromatic contrast",
+          "sourceId": "maroon-simple-303",
+          "levelIndex": 25,
+          "hole": {
+            "courseId": "campaign-draft-1-1-1",
+            "seed": 2026091100,
+            "stage": 1,
+            "notation": "10RP 4/6",
+            "target": {
+              "rgb": [
+                139.10688453787498,
+                64.9465307058982,
+                82.59491861336099
+              ],
+              "lab": [
+                0.47553398814847286,
+                0.10159966643821974,
+                0.012059615469542095
+              ],
+              "position": [
+                17.692635372022146,
+                -5.4276403094306485,
+                -1.4312736582515282
+              ]
+            },
+            "recipe": [
+              0.6732691388783636,
+              0,
+              0,
+              0.3267308611216363
+            ],
+            "par": 3,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              3,
+              0
+            ],
+            "routeTimes": [
+              0.7472910745227518
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-1-1-alt-maroon-simple-2",
+              "sourceId": "maroon-simple-2",
+              "levelIndex": 25,
+              "hole": {
+                "courseId": "campaign-draft-1-1-1-alt-maroon-simple-2",
+                "seed": 2026091101,
+                "stage": 1,
+                "notation": "5Y 6/4",
+                "target": {
+                  "rgb": [
+                    169.7416208904687,
+                    159.59188382137708,
+                    103.49157395271111
+                  ],
+                  "lab": [
+                    0.6997835606929091,
+                    -0.012202064433111337,
+                    0.07514238231947479
+                  ],
+                  "position": [
+                    0.09651780653403796,
+                    5.5069339018185675,
+                    13.637204970190234
+                  ]
+                },
+                "recipe": [
+                  0.0032423618159501326,
+                  0.25297042030120304,
+                  0.3234689456871102,
+                  0.4203182721957367
+                ],
+                "par": 3,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  1,
+                  3
+                ],
+                "routeTimes": [
+                  0.667828369140625
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RYB",
+      "levelIndex": 2,
+      "paints": [
+        {
+          "id": "play-flake-white",
+          "name": "Flake White",
+          "pigment": "PW1",
+          "strength": 0.65,
+          "rgb": [
+            246,
+            243,
+            233
+          ]
+        },
+        {
+          "id": "cadmium-lemon",
+          "name": "Cadmium Lemon",
+          "pigment": "PY35",
+          "strength": 0.76,
+          "rgb": [
+            243,
+            236,
+            15
+          ]
+        },
+        {
+          "id": "cadmium-red-medium",
+          "name": "Cadmium Red Medium",
+          "pigment": "PR108",
+          "strength": 0.88,
+          "rgb": [
+            190,
+            26,
+            52
+          ]
+        },
+        {
+          "id": "phthalo-blue-green",
+          "name": "Phthalo Blue (Green Shade)",
+          "pigment": "PB15:3",
+          "strength": 1.4,
+          "rgb": [
+            16,
+            53,
+            74
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-3-0",
+          "title": "Chromatic approach",
+          "sourceId": "lab-6-2-1-8d07d75b36d8",
+          "levelIndex": 2,
+          "hole": {
+            "courseId": "campaign-draft-1-3-0",
+            "seed": 20260929,
+            "stage": 0,
+            "notation": "5R 6/10",
+            "target": {
+              "rgb": [
+                242.40371225389944,
+                126.73542579990766,
+                130.25432979788957
+              ],
+              "lab": [
+                0.726371551332808,
+                0.13393356724225608,
+                0.04692489001206934
+              ],
+              "position": [
+                26.641215998515506,
+                5.928533589455524,
+                1.9520661039521918
+              ]
+            },
+            "recipe": [
+              29.6608556017806,
+              6.665638090513567,
+              14.729273866775795,
+              1
+            ],
+            "par": 4,
+            "kind": "opposing-colors",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              3,
+              1,
+              2,
+              0
+            ],
+            "routeTimes": [
+              1.4196692169585066,
+              0.8617075745328747,
+              0.8047045115347284
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-3-1",
+          "title": "Cool-color contrast",
+          "sourceId": "ryb-cool-849",
+          "levelIndex": 2,
+          "hole": {
+            "courseId": "campaign-draft-1-3-1",
+            "seed": 2026091130,
+            "stage": 1,
+            "notation": "7.5B 6/6",
+            "target": {
+              "rgb": [
+                104.5699239618374,
+                168.96417742645286,
+                188.77902654930102
+              ],
+              "lab": [
+                0.6987109478061498,
+                -0.05547987708647867,
+                -0.04577521090923431
+              ],
+              "position": [
+                -9.125237619594312,
+                5.661209488033707,
+                -8.299749573376502
+              ]
+            },
+            "recipe": [
+              0.6768870576062896,
+              0,
+              0,
+              0.32311294239371036
+            ],
+            "par": 3,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              3,
+              0
+            ],
+            "routeTimes": [
+              0.75227099322957
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-3-1-alt-ryb-cool-1151",
+              "sourceId": "ryb-cool-1151",
+              "levelIndex": 2,
+              "hole": {
+                "courseId": "campaign-draft-1-3-1-alt-ryb-cool-1151",
+                "seed": 2026091131,
+                "stage": 1,
+                "notation": "7.5B 6/4",
+                "target": {
+                  "rgb": [
+                    106.82781368138133,
+                    148.28182106705322,
+                    172.03874660723378
+                  ],
+                  "lab": [
+                    0.6459351271725984,
+                    -0.033932741928595966,
+                    -0.04665317855499285
+                  ],
+                  "position": [
+                    -5.932562430804175,
+                    3.08186968051115,
+                    -8.902207493147174
+                  ]
+                },
+                "recipe": [
+                  0.5618707805719099,
+                  0.02937975737404377,
+                  0.11427273919567246,
+                  0.294476722858374
+                ],
+                "par": 3,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  2,
+                  3,
+                  0
+                ],
+                "routeTimes": [
+                  0.9857747395833335,
+                  0.7268880208333333
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-3-2",
+          "title": "Darker mixture",
+          "sourceId": "ryb-dark-827",
+          "levelIndex": 2,
+          "hole": {
+            "courseId": "campaign-draft-1-3-2",
+            "seed": 2026091140,
+            "stage": 2,
+            "notation": "7.5YR 4/2",
+            "target": {
+              "rgb": [
+                106.6053363103799,
+                85.56743452128495,
+                66.27527994942992
+              ],
+              "lab": [
+                0.4675982875315879,
+                0.0177697253264672,
+                0.03658674218953806
+              ],
+              "position": [
+                3.9517273909210293,
+                -5.3228175823349,
+                6.525107334740342
+              ]
+            },
+            "recipe": [
+              0.18690423267711767,
+              0.2671440608804404,
+              0.3146338064038209,
+              0.231317900038621
+            ],
+            "par": 4,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              3,
+              1,
+              2
+            ],
+            "routeTimes": [
+              0.640234375,
+              0.5066731770833333
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-3-2-alt-ryb-dark-958",
+              "sourceId": "ryb-dark-958",
+              "levelIndex": 2,
+              "hole": {
+                "courseId": "campaign-draft-1-3-2-alt-ryb-dark-958",
+                "seed": 2026091141,
+                "stage": 2,
+                "notation": "2.5G 4/6",
+                "target": {
+                  "rgb": [
+                    38.05513900242196,
+                    109.1658941172617,
+                    65.06672238400516
+                  ],
+                  "lab": [
+                    0.4786943786485891,
+                    -0.08940174929576966,
+                    0.04558332299233486
+                  ],
+                  "position": [
+                    -12.655732418102078,
+                    -4.242237419860481,
+                    8.396563745092577
+                  ]
+                },
+                "recipe": [
+                  0.007653149560609954,
+                  0.41934918622700407,
+                  0,
+                  0.5729976642123861
+                ],
+                "par": 3,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  1,
+                  3
+                ],
+                "routeTimes": [
+                  0.6384216308593751
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-3-3",
+          "title": "Broad mixing finish",
+          "sourceId": "lab-7-2-0-9622ba700144",
+          "levelIndex": 2,
+          "hole": {
+            "courseId": "campaign-draft-1-3-3",
+            "seed": 20261108,
+            "stage": 3,
+            "notation": "5YR 7/6",
+            "target": {
+              "rgb": [
+                215.2230689325857,
+                154.74090294271667,
+                114.47610250386255
+              ],
+              "lab": [
+                0.7376831385521778,
+                0.052763441045903636,
+                0.07390457157963015
+              ],
+              "position": [
+                11.993507344947309,
+                6.90710680890331,
+                11.421213630941276
+              ]
+            },
+            "recipe": [
+              8.272986850096375,
+              3.2049317733309994,
+              3.0045892376322887,
+              1
+            ],
+            "par": 6,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              3,
+              2,
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.87723099732082,
+              0.8401407694090295,
+              0.4314069392818601
+            ]
+          },
+          "alternatives": []
+        }
+      ]
+    },
+    {
+      "name": "Orange Echo",
+      "levelIndex": 17,
+      "paints": [
+        {
+          "id": "cadmium-orange",
+          "name": "Cadmium Orange",
+          "pigment": "PO20",
+          "strength": 0.82,
+          "rgb": [
+            252,
+            151,
+            53
+          ]
+        },
+        {
+          "id": "transparent-orange",
+          "name": "Transparent Orange",
+          "pigment": "PO62",
+          "strength": 1.02,
+          "rgb": [
+            188,
+            34,
+            33
+          ]
+        },
+        {
+          "id": "ultramarine-blue",
+          "name": "Ultramarine Blue",
+          "pigment": "PB29",
+          "strength": 0.92,
+          "rgb": [
+            36,
+            40,
+            112
+          ]
+        },
+        {
+          "id": "permanent-green-light",
+          "name": "Permanent Green Light",
+          "pigment": "PG7/PY74",
+          "strength": 0.94,
+          "rgb": [
+            51,
+            168,
+            123
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-4-0",
+          "title": "Warm mixing",
+          "sourceId": "lab-5-17-0-f0cef0969c87",
+          "levelIndex": 17,
+          "hole": {
+            "courseId": "campaign-draft-1-4-0",
+            "seed": 20260926,
+            "stage": 0,
+            "notation": "10R 4/6",
+            "target": {
+              "rgb": [
+                142.9641791341995,
+                78.97434073819575,
+                57.188193062121684
+              ],
+              "lab": [
+                0.49868904554036814,
+                0.07144107600370606,
+                0.05877486630519463
+              ],
+              "position": [
+                14.392551738458396,
+                -4.213395976975244,
+                8.668101471795682
+              ]
+            },
+            "recipe": [
+              1,
+              1.0724818016423954,
+              0,
+              0.5944064276183811
+            ],
+            "par": 5,
+            "kind": "opposing-colors",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              3,
+              1
+            ],
+            "routeTimes": [
+              0.4787434895833332,
+              0.5145507812500001
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-4-1",
+          "title": "Dark contrast",
+          "sourceId": "lab-5-17-1-b46b6def6b93",
+          "levelIndex": 17,
+          "hole": {
+            "courseId": "campaign-draft-1-4-1",
+            "seed": 20260926,
+            "stage": 1,
+            "notation": "10P 3/2",
+            "target": {
+              "rgb": [
+                75.5167588405026,
+                65.40499725082809,
+                74.2635222489746
+              ],
+              "lab": [
+                0.39037756355697667,
+                0.017248606482968887,
+                -0.009972423176250633
+              ],
+              "position": [
+                2.4427248313718755,
+                -8.807869489192358,
+                -2.3305533939463667
+              ]
+            },
+            "recipe": [
+              1,
+              0.7191091601029831,
+              2.273039213839904,
+              0
+            ],
+            "par": 4,
+            "kind": "opposing-colors",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              2,
+              1
+            ],
+            "routeTimes": [
+              0.7777343750000001,
+              0.37597656250000006
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-4-2",
+          "title": "Best balancing finish",
+          "sourceId": "orange-gap-1253",
+          "levelIndex": 17,
+          "hole": {
+            "courseId": "campaign-draft-1-4-2",
+            "seed": 2026091150,
+            "stage": 2,
+            "notation": "7.5YR 4/4",
+            "target": {
+              "rgb": [
+                140.4851524620586,
+                98.45286049965907,
+                63.29051794432623
+              ],
+              "lab": [
+                0.5337333585175692,
+                0.036778449452846335,
+                0.06414506877845377
+              ],
+              "position": [
+                8.368532000025603,
+                -2.4283392894304363,
+                10.752814318567955
+              ]
+            },
+            "recipe": [
+              0.41023415562583915,
+              0.27844159565926874,
+              0.08031558999561132,
+              0.23100865871928078
+            ],
+            "par": 5,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              1,
+              0,
+              3
+            ],
+            "routeTimes": [
+              0.6416666666666668,
+              0.4583333333333332
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-4-2-alt-orange-gap-284",
+              "sourceId": "orange-gap-284",
+              "levelIndex": 17,
+              "hole": {
+                "courseId": "campaign-draft-1-4-2-alt-orange-gap-284",
+                "seed": 2026091151,
+                "stage": 2,
+                "notation": "7.5YR 4/4",
+                "target": {
+                  "rgb": [
+                    128.55780876927727,
+                    94.90504090757734,
+                    65.05327551505441
+                  ],
+                  "lab": [
+                    0.5125780487100773,
+                    0.02870214447169589,
+                    0.05476493166292923
+                  ],
+                  "position": [
+                    6.528604006361823,
+                    -3.344578133553336,
+                    9.414495715923358
+                  ]
+                },
+                "recipe": [
+                  0.3561086940687405,
+                  0.2387051091080693,
+                  0.20666250415124926,
+                  0.19852369267194098
+                ],
+                "par": 5,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  1,
+                  0,
+                  3
+                ],
+                "routeTimes": [
+                  0.5958333333333332,
+                  0.41250000000000003
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CMY",
+      "levelIndex": 4,
+      "paints": [
+        {
+          "id": "phthalo-blue-green",
+          "name": "Phthalo Blue (Green Shade)",
+          "pigment": "PB15:3",
+          "strength": 1.4,
+          "rgb": [
+            16,
+            53,
+            74
+          ]
+        },
+        {
+          "id": "quinacridone-magenta",
+          "name": "Quinacridone Magenta",
+          "pigment": "PR122",
+          "strength": 1.12,
+          "rgb": [
+            131,
+            30,
+            88
+          ]
+        },
+        {
+          "id": "hansa-yellow-light",
+          "name": "Hansa Yellow Light",
+          "pigment": "PY3",
+          "strength": 0.92,
+          "rgb": [
+            253,
+            232,
+            21
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-5-0",
+          "title": "Chromatic ride",
+          "sourceId": "lab-3-4-946301308",
+          "levelIndex": 4,
+          "hole": {
+            "courseId": "campaign-draft-1-5-0",
+            "seed": 20260912,
+            "stage": 0,
+            "notation": "5YR 6/10",
+            "target": {
+              "rgb": [
+                209.86984914857044,
+                121.935178281033,
+                63.14098071126652
+              ],
+              "lab": [
+                0.6647455132882961,
+                0.08087840654348813,
+                0.1041586833916594
+              ],
+              "position": [
+                19.003450800782886,
+                3.3177915010754004,
+                15.125267937315066
+              ]
+            },
+            "recipe": [
+              0,
+              1.6165040678524614,
+              1.9873580800634085
+            ],
+            "par": 3,
+            "kind": "chromatic-ride",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              1,
+              2,
+              1
+            ],
+            "routeTimes": [
+              0.7365559895833335,
+              0.3666666666666667
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-5-1",
+          "title": "Contrasting precise ride",
+          "sourceId": "cmy-ride-2106",
+          "levelIndex": 4,
+          "hole": {
+            "courseId": "campaign-draft-1-5-1",
+            "seed": 2026091160,
+            "stage": 1,
+            "notation": "7.5R 5/10",
+            "target": {
+              "rgb": [
+                192.2095231073282,
+                87.80732353446592,
+                65.82544548020829
+              ],
+              "lab": [
+                0.5858576883149121,
+                0.11628356531320214,
+                0.0766431890356224
+              ],
+              "position": [
+                24.27115882155713,
+                -0.49845690365743145,
+                9.106643695614004
+              ]
+            },
+            "recipe": [
+              0,
+              0.571668083901522,
+              0.4283319160984781
+            ],
+            "par": 3,
+            "kind": "ride",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              2,
+              1
+            ],
+            "routeTimes": [
+              0.6329404612794041
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-5-1-alt-cmy-contrast-423",
+              "sourceId": "cmy-contrast-423",
+              "levelIndex": 4,
+              "hole": {
+                "courseId": "campaign-draft-1-5-1-alt-cmy-contrast-423",
+                "seed": 2026091161,
+                "stage": 1,
+                "notation": "10GY 5/8",
+                "target": {
+                  "rgb": [
+                    76.64322774658618,
+                    150.03511505362664,
+                    64.86955383157223
+                  ],
+                  "lab": [
+                    0.60584751551472,
+                    -0.10973852283975025,
+                    0.0889164214120729
+                  ],
+                  "position": [
+                    -15.34297770685022,
+                    1.6811336828715544,
+                    15.235082182632345
+                  ]
+                },
+                "recipe": [
+                  0.45282342609114173,
+                  0.03294429236700727,
+                  0.514232281541851
+                ],
+                "par": 4,
+                "kind": "ride",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  1,
+                  2,
+                  0
+                ],
+                "routeTimes": [
+                  2.1300000000000154,
+                  0.5859806774608078
+                ]
+              }
+            },
+            {
+              "id": "campaign-draft-1-5-1-alt-cmy-ride-1482",
+              "sourceId": "cmy-ride-1482",
+              "levelIndex": 4,
+              "hole": {
+                "courseId": "campaign-draft-1-5-1-alt-cmy-ride-1482",
+                "seed": 2026091162,
+                "stage": 1,
+                "notation": "7.5YR 7/10",
+                "target": {
+                  "rgb": [
+                    234.31356457105005,
+                    162.04517569201158,
+                    56.36313336994393
+                  ],
+                  "lab": [
+                    0.7653973264242727,
+                    0.044070783250681145,
+                    0.13681928568351814
+                  ],
+                  "position": [
+                    13.64378890562059,
+                    8.173823447002516,
+                    21.077535126257214
+                  ]
+                },
+                "recipe": [
+                  0,
+                  0.30614816971529063,
+                  0.6938518302847094
+                ],
+                "par": 3,
+                "kind": "ride",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  1,
+                  2
+                ],
+                "routeTimes": [
+                  0.7767957344380237
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Secondaries",
+      "levelIndex": 5,
+      "paints": [
+        {
+          "id": "cadmium-orange",
+          "name": "Cadmium Orange",
+          "pigment": "PO20",
+          "strength": 0.82,
+          "rgb": [
+            252,
+            151,
+            53
+          ]
+        },
+        {
+          "id": "dioxazine-purple",
+          "name": "Dioxazine Purple",
+          "pigment": "PV23",
+          "strength": 1.25,
+          "rgb": [
+            71,
+            28,
+            100
+          ]
+        },
+        {
+          "id": "phthalo-green-yellow",
+          "name": "Phthalo Green (Yellow Shade)",
+          "pigment": "PG36",
+          "strength": 1.34,
+          "rgb": [
+            27,
+            81,
+            69
+          ]
+        },
+        {
+          "id": "titanium-white",
+          "name": "Titanium White",
+          "pigment": "PW6",
+          "strength": 1.2,
+          "rgb": [
+            249,
+            248,
+            242
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-6-0",
+          "title": "Multi-approach setup",
+          "sourceId": "courses-2-5-3268230473",
+          "levelIndex": 5,
+          "hole": {
+            "courseId": "campaign-draft-1-6-0",
+            "seed": 190926,
+            "stage": 0,
+            "notation": "2.5RP 5/6",
+            "target": {
+              "rgb": [
+                158.78546234501033,
+                104.65122369669851,
+                140.061436578129
+              ],
+              "lab": [
+                0.5883781087857196,
+                0.07935587840086467,
+                -0.028017012494407634
+              ],
+              "position": [
+                12.539869414093342,
+                -0.17667652709986703,
+                -8.94790834631979
+              ]
+            },
+            "recipe": [
+              0.8380675889130738,
+              1.7520738241556326,
+              0,
+              1
+            ],
+            "par": 4,
+            "kind": "precision",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              3,
+              1,
+              0
+            ],
+            "routeTimes": [
+              0.701062276428472,
+              0.4119695451619413
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-6-1",
+          "title": "Green setup",
+          "sourceId": "courses-2-5-3500426429",
+          "levelIndex": 5,
+          "hole": {
+            "courseId": "campaign-draft-1-6-1",
+            "seed": 190926,
+            "stage": 1,
+            "notation": "10GY 6/6",
+            "target": {
+              "rgb": [
+                121.2293320890527,
+                170.98805962876818,
+                111.73454968949606
+              ],
+              "lab": [
+                0.6905504528436989,
+                -0.07696628408933837,
+                0.06341352251664545
+              ],
+              "position": [
+                -11.066247214217004,
+                5.444624332068552,
+                12.156023605446839
+              ]
+            },
+            "recipe": [
+              1.2961508702244442,
+              0,
+              1,
+              1.0520533121919904
+            ],
+            "par": 4,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              2,
+              3,
+              0
+            ],
+            "routeTimes": [
+              0.5811523437500001,
+              0.51240234375
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-6-2",
+          "title": "Coupled balance",
+          "sourceId": "lab-4-5-11-test",
+          "levelIndex": 5,
+          "hole": {
+            "courseId": "campaign-draft-1-6-2",
+            "seed": 20260913,
+            "stage": 2,
+            "notation": "5P 4/4",
+            "target": {
+              "rgb": [
+                111.5091869410396,
+                94.59314241881282,
+                122.91844322486996
+              ],
+              "lab": [
+                0.5108255451761258,
+                0.03210358221716331,
+                -0.0362378169016509
+              ],
+              "position": [
+                4.292976601468122,
+                -3.483832930495961,
+                -8.4063554913813
+              ]
+            },
+            "recipe": [
+              1.1258892630652328,
+              2.382514386471927,
+              1,
+              1.1239752402413905
+            ],
+            "par": 6,
+            "kind": "coupled-balance",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              2,
+              3,
+              1,
+              0
+            ],
+            "routeTimes": [
+              0.5949135880691496,
+              0.6276152858118635,
+              0.39927435112094334
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-6-3",
+          "title": "Demanding multi-pour finish",
+          "sourceId": "lab-3-5-2417069514",
+          "levelIndex": 5,
+          "hole": {
+            "courseId": "campaign-draft-1-6-3",
+            "seed": 20260912,
+            "stage": 3,
+            "notation": "5YR 6/2",
+            "target": {
+              "rgb": [
+                178.80346578170986,
+                155.09223931950282,
+                146.03606516389704
+              ],
+              "lab": [
+                0.7082252266514837,
+                0.023118868762580014,
+                0.020857605812009572
+              ],
+              "position": [
+                4.474187381299203,
+                5.7182411780126445,
+                3.271459398976914
+              ]
+            },
+            "recipe": [
+              2.636203403794551,
+              2.7515561942542504,
+              1,
+              3.3580478521016013
+            ],
+            "par": 5,
+            "kind": "chromatic-correction",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              2,
+              0,
+              3,
+              1
+            ],
+            "routeTimes": [
+              0.8279269370390699,
+              0.6081867108735663,
+              0.4750303122467834
+            ]
+          },
+          "alternatives": []
+        }
+      ]
+    },
+    {
+      "name": "Sienna Field",
+      "levelIndex": 29,
+      "paints": [
+        {
+          "id": "burnt-sienna",
+          "name": "Burnt Sienna",
+          "pigment": "PBr7",
+          "strength": 0.68,
+          "rgb": [
+            105,
+            60,
+            52
+          ]
+        },
+        {
+          "id": "nickel-titanate-yellow",
+          "name": "Nickel Titanate Yellow",
+          "pigment": "PY53",
+          "strength": 0.58,
+          "rgb": [
+            217,
+            204,
+            118
+          ]
+        },
+        {
+          "id": "cobalt-green",
+          "name": "Cobalt Green",
+          "pigment": "PG19",
+          "strength": 0.58,
+          "rgb": [
+            48,
+            137,
+            116
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-7-0",
+          "title": "Restricted mixing",
+          "sourceId": "lab-9-29-0-b83acde81b54",
+          "levelIndex": 29,
+          "hole": {
+            "courseId": "campaign-draft-1-7-0",
+            "seed": 20261221,
+            "stage": 0,
+            "notation": "5GY 6/4",
+            "target": {
+              "rgb": [
+                141.42307491659895,
+                149.75722631654057,
+                107.44546442638652
+              ],
+              "lab": [
+                0.6544311829037127,
+                -0.02758392003362109,
+                0.05376982129864821
+              ],
+              "position": [
+                -3.184096790779534,
+                3.4918750316995792,
+                10.338899037172812
+              ]
+            },
+            "recipe": [
+              1.3214150633567545,
+              1.861741029489972,
+              1
+            ],
+            "par": 5,
+            "kind": "value-shift",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              2,
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.6306404485506937,
+              0.5606048162269871
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-7-1",
+          "title": "Precise contrasting finish",
+          "sourceId": "sienna-contrast-369",
+          "levelIndex": 29,
+          "hole": {
+            "courseId": "campaign-draft-1-7-1",
+            "seed": 2026091170,
+            "stage": 1,
+            "notation": "5GY 5/2",
+            "target": {
+              "rgb": [
+                123.71942480787882,
+                136.37028467272503,
+                102.43980826680543
+              ],
+              "lab": [
+                0.608286288115386,
+                -0.029195318639294365,
+                0.04244948342888494
+              ],
+              "position": [
+                -3.7053580891439757,
+                1.3646757977627413,
+                8.371765469976138
+              ]
+            },
+            "recipe": [
+              0.3444933852856039,
+              0.3771749387740738,
+              0.27833167594032215
+            ],
+            "par": 4,
+            "kind": "balance",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              1,
+              2
+            ],
+            "routeTimes": [
+              0.5894834863836877,
+              0.436236074272456
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-7-1-alt-sienna-warm-2363",
+              "sourceId": "sienna-warm-2363",
+              "levelIndex": 29,
+              "hole": {
+                "courseId": "campaign-draft-1-7-1-alt-sienna-warm-2363",
+                "seed": 2026091171,
+                "stage": 1,
+                "notation": "2.5Y 4/2",
+                "target": {
+                  "rgb": [
+                    101.60516835711273,
+                    89.10039092177061,
+                    74.27243826857645
+                  ],
+                  "lab": [
+                    0.4721463250910993,
+                    0.008812529525792895,
+                    0.026801145234143786
+                  ],
+                  "position": [
+                    2.144912509218804,
+                    -5.07071228240322,
+                    4.931444057351339
+                  ]
+                },
+                "recipe": [
+                  0.5361941019705505,
+                  0.21002324895361213,
+                  0.2537826490758374
+                ],
+                "par": 4,
+                "kind": "balance",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  1,
+                  0,
+                  2
+                ],
+                "routeTimes": [
+                  0.8479166666666669,
+                  0.48125000000000007
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Maroon Arc",
+      "levelIndex": 30,
+      "paints": [
+        {
+          "id": "perylene-maroon",
+          "name": "Perylene Maroon",
+          "pigment": "PR179",
+          "strength": 1.12,
+          "rgb": [
+            85,
+            30,
+            52
+          ]
+        },
+        {
+          "id": "hansa-yellow-light",
+          "name": "Hansa Yellow Light",
+          "pigment": "PY3",
+          "strength": 0.92,
+          "rgb": [
+            253,
+            232,
+            21
+          ]
+        },
+        {
+          "id": "raw-sienna",
+          "name": "Raw Sienna",
+          "pigment": "PBr7",
+          "strength": 0.58,
+          "rgb": [
+            157,
+            115,
+            56
+          ]
+        },
+        {
+          "id": "cobalt-blue",
+          "name": "Cobalt Blue",
+          "pigment": "PB28",
+          "strength": 0.65,
+          "rgb": [
+            22,
+            73,
+            127
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-8-0",
+          "title": "Expansive green ride",
+          "sourceId": "lab-9-30-0-3baaea8d7013",
+          "levelIndex": 30,
+          "hole": {
+            "courseId": "campaign-draft-1-8-0",
+            "seed": 20261221,
+            "stage": 0,
+            "notation": "5G 4/6",
+            "target": {
+              "rgb": [
+                29.403816738273623,
+                116.56818447184067,
+                78.66218768830323
+              ],
+              "lab": [
+                0.5002066989909486,
+                -0.09523517675605542,
+                0.034922200058474795
+              ],
+              "position": [
+                -13.72846585649888,
+                -3.236904832531362,
+                6.570824725208824
+              ]
+            },
+            "recipe": [
+              1,
+              8,
+              0,
+              34.366730186573974
+            ],
+            "par": 4,
+            "kind": "ride",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              0,
+              1,
+              3
+            ],
+            "routeTimes": [
+              2.2,
+              1.2833333333333337
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-8-1",
+          "title": "Warm or dark counterpart",
+          "sourceId": "maroon-arc-warm-1163",
+          "levelIndex": 30,
+          "hole": {
+            "courseId": "campaign-draft-1-8-1",
+            "seed": 2026091180,
+            "stage": 1,
+            "notation": "5GY 3/2",
+            "target": {
+              "rgb": [
+                76.39307588910619,
+                77.92485909425324,
+                64.90684403896681
+              ],
+              "lab": [
+                0.4181115502573721,
+                -0.008128903110120822,
+                0.01937652086313585
+              ],
+              "position": [
+                -0.7860387915613232,
+                -7.414266651489373,
+                3.833410501302172
+              ]
+            },
+            "recipe": [
+              0.2786994631259069,
+              0.12518874665691726,
+              0.24091902433418652,
+              0.3551927658829893
+            ],
+            "par": 5,
+            "kind": "balance",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              1,
+              0,
+              3
+            ],
+            "routeTimes": [
+              0.7333333333333333,
+              0.6645833333333334
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-8-1-alt-maroon-arc-warm-1514",
+              "sourceId": "maroon-arc-warm-1514",
+              "levelIndex": 30,
+              "hole": {
+                "courseId": "campaign-draft-1-8-1-alt-maroon-arc-warm-1514",
+                "seed": 2026091181,
+                "stage": 1,
+                "notation": "N3",
+                "target": {
+                  "rgb": [
+                    68.63091180832804,
+                    63.24518326135123,
+                    64.11841728526211
+                  ],
+                  "lab": [
+                    0.3743249955325278,
+                    0.007476997933338947,
+                    0.0008219190136136145
+                  ],
+                  "position": [
+                    1.1804695530797795,
+                    -9.460831859377958,
+                    0.03732096782981464
+                  ]
+                },
+                "recipe": [
+                  0.40411721665795297,
+                  0.13864444610693666,
+                  0.025310592119343132,
+                  0.4319277451157672
+                ],
+                "par": 4,
+                "kind": "balance",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  1,
+                  0,
+                  3
+                ],
+                "routeTimes": [
+                  0.8720833333333333,
+                  0.67244482421875
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-8-2",
+          "title": "Precise ending",
+          "sourceId": "maroon-arc-finish-1612",
+          "levelIndex": 30,
+          "hole": {
+            "courseId": "campaign-draft-1-8-2",
+            "seed": 2026091190,
+            "stage": 2,
+            "notation": "5Y 4/2",
+            "target": {
+              "rgb": [
+                97.34713712217007,
+                85.41372147042625,
+                62.537933660806274
+              ],
+              "lab": [
+                0.4563450762474808,
+                0.004374399116705757,
+                0.03801389282916379
+              ],
+              "position": [
+                1.768129264822919,
+                -5.757728691894631,
+                7.051901476678614
+              ]
+            },
+            "recipe": [
+              0.21422569771323857,
+              0,
+              0.5370371747748657,
+              0.2487371275118958
+            ],
+            "par": 4,
+            "kind": "balance",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              1,
+              0,
+              3
+            ],
+            "routeTimes": [
+              0.6986002604166667,
+              0.5116861979166666
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-8-2-alt-maroon-arc-finish-1394",
+              "sourceId": "maroon-arc-finish-1394",
+              "levelIndex": 30,
+              "hole": {
+                "courseId": "campaign-draft-1-8-2-alt-maroon-arc-finish-1394",
+                "seed": 2026091191,
+                "stage": 2,
+                "notation": "N3",
+                "target": {
+                  "rgb": [
+                    72.11924275726805,
+                    63.98991503113318,
+                    64.38776259857734
+                  ],
+                  "lab": [
+                    0.3798552944351377,
+                    0.010871639874384997,
+                    0.002765413883571932
+                  ],
+                  "position": [
+                    1.7648251730646376,
+                    -9.23175187891875,
+                    0.3540989684446676
+                  ]
+                },
+                "recipe": [
+                  0.2924116934957098,
+                  0.042705443847935766,
+                  0.3460876825958464,
+                  0.31879518006050805
+                ],
+                "par": 3,
+                "kind": "balance",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  1,
+                  0,
+                  3
+                ],
+                "routeTimes": [
+                  0.8548763708793558,
+                  0.5644765193324693
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Teal Ember",
+      "levelIndex": 24,
+      "paints": [
+        {
+          "id": "quinacridone-magenta",
+          "name": "Quinacridone Magenta",
+          "pigment": "PR122",
+          "strength": 1.12,
+          "rgb": [
+            131,
+            30,
+            88
+          ]
+        },
+        {
+          "id": "cobalt-teal",
+          "name": "Cobalt Teal",
+          "pigment": "PG50",
+          "strength": 0.62,
+          "rgb": [
+            27,
+            136,
+            145
+          ]
+        },
+        {
+          "id": "permanent-orange",
+          "name": "Permanent Orange",
+          "pigment": "PO62",
+          "strength": 1,
+          "rgb": [
+            246,
+            105,
+            48
+          ]
+        },
+        {
+          "id": "kings-blue",
+          "name": "King’s Blue",
+          "pigment": "PW6/PB29",
+          "strength": 0.58,
+          "rgb": [
+            112,
+            151,
+            204
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-9-0",
+          "title": "Off-center introduction",
+          "sourceId": "teal-intro-59",
+          "levelIndex": 24,
+          "hole": {
+            "courseId": "campaign-draft-1-9-0",
+            "seed": 2026091200,
+            "stage": 0,
+            "notation": "10R 5/8",
+            "target": {
+              "rgb": [
+                166.61409170988347,
+                89.41669982653576,
+                61.259559430629785
+              ],
+              "lab": [
+                0.5507143942665111,
+                0.08330984690612217,
+                0.0710887440023959
+              ],
+              "position": [
+                17.371602492935658,
+                -1.9170667745904892,
+                10.084739801260353
+              ]
+            },
+            "recipe": [
+              0.27639072390985286,
+              0.14687411100604134,
+              0.4564832190329774,
+              0.12025194605112828
+            ],
+            "par": 4,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              2,
+              3
+            ],
+            "routeTimes": [
+              0.6416666666666668,
+              0.527083333333333
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-9-0-alt-teal-intro-1108",
+              "sourceId": "teal-intro-1108",
+              "levelIndex": 24,
+              "hole": {
+                "courseId": "campaign-draft-1-9-0-alt-teal-intro-1108",
+                "seed": 2026091201,
+                "stage": 0,
+                "notation": "10YR 5/6",
+                "target": {
+                  "rgb": [
+                    152.68450866132963,
+                    113.2669101491087,
+                    57.40522217175499
+                  ],
+                  "lab": [
+                    0.57740721811811,
+                    0.02433070683047056,
+                    0.08494316623226555
+                  ],
+                  "position": [
+                    7.065688917063223,
+                    -0.37121005700747006,
+                    14.42487395652725
+                  ]
+                },
+                "recipe": [
+                  0,
+                  0.31043423782948354,
+                  0.6592365241652732,
+                  0.03032923800524329
+                ],
+                "par": 2,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  1,
+                  2
+                ],
+                "routeTimes": [
+                  0.7562487621590276
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-9-1",
+          "title": "Inward setup",
+          "sourceId": "lab-9-24-0-5e2d38157f76",
+          "levelIndex": 24,
+          "hole": {
+            "courseId": "campaign-draft-1-9-1",
+            "seed": 20261221,
+            "stage": 1,
+            "notation": "7.5RP 4/2",
+            "target": {
+              "rgb": [
+                108.40168741034218,
+                90.27433537228045,
+                94.58929417813917
+              ],
+              "lab": [
+                0.4878669429680321,
+                0.024477425532790448,
+                0.0008639311456751786
+              ],
+              "position": [
+                3.9578859646042197,
+                -4.454852564540142,
+                -0.42571843248854957
+              ]
+            },
+            "recipe": [
+              1,
+              1.0200209959380435,
+              0.8863172099000965,
+              1.7250387075000668
+            ],
+            "par": 6,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "routeTimes": [
+              0.5748725967272184,
+              0.4539542613294908,
+              0.5136794834840113
+            ]
+          },
+          "alternatives": []
+        }
+      ]
+    },
+    {
+      "name": "French Light",
+      "levelIndex": 6,
+      "paints": [
+        {
+          "id": "play-flake-white",
+          "name": "Flake White",
+          "pigment": "PW1",
+          "strength": 0.65,
+          "rgb": [
+            246,
+            243,
+            233
+          ]
+        },
+        {
+          "id": "cadmium-yellow-light",
+          "name": "Cadmium Yellow Light",
+          "pigment": "PY35",
+          "strength": 0.78,
+          "rgb": [
+            223,
+            205,
+            51
+          ]
+        },
+        {
+          "id": "yellow-ochre",
+          "name": "Yellow Ochre",
+          "pigment": "PY43",
+          "strength": 0.62,
+          "rgb": [
+            163,
+            113,
+            28
+          ]
+        },
+        {
+          "id": "cadmium-red-light",
+          "name": "Cadmium Red Light",
+          "pigment": "PR108",
+          "strength": 0.86,
+          "rgb": [
+            230,
+            53,
+            42
+          ]
+        },
+        {
+          "id": "alizarin-crimson",
+          "name": "Alizarin Crimson",
+          "pigment": "PR83",
+          "strength": 1.04,
+          "rgb": [
+            95,
+            16,
+            54
+          ]
+        },
+        {
+          "id": "cobalt-blue",
+          "name": "Cobalt Blue",
+          "pigment": "PB28",
+          "strength": 0.65,
+          "rgb": [
+            22,
+            73,
+            127
+          ]
+        },
+        {
+          "id": "ultramarine-blue",
+          "name": "Ultramarine Blue",
+          "pigment": "PB29",
+          "strength": 0.92,
+          "rgb": [
+            36,
+            40,
+            112
+          ]
+        },
+        {
+          "id": "viridian",
+          "name": "Viridian",
+          "pigment": "PG18",
+          "strength": 0.78,
+          "rgb": [
+            34,
+            53,
+            54
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-10-0",
+          "title": "Broad-choice studio puzzle",
+          "sourceId": "french-studio-1721",
+          "levelIndex": 6,
+          "hole": {
+            "courseId": "campaign-draft-1-10-0",
+            "seed": 2026091210,
+            "stage": 0,
+            "notation": "5G 6/6",
+            "target": {
+              "rgb": [
+                94.07378683307442,
+                169.90998958159923,
+                132.2900847876282
+              ],
+              "lab": [
+                0.677910812099856,
+                -0.08970773853603153,
+                0.03124540875797832
+              ],
+              "position": [
+                -13.538433666209512,
+                4.927746847944686,
+                6.670131070018723
+              ]
+            },
+            "recipe": [
+              0.3636818559455639,
+              0.1809716775801474,
+              0,
+              0,
+              0.02919027688892325,
+              0.4261561895853653,
+              0,
+              0
+            ],
+            "par": 4,
+            "kind": "choice",
+            "tolerance": 0.0294,
+            "solutionShots": 2,
+            "routeOrder": [
+              0,
+              5,
+              2
+            ],
+            "routeTimes": [
+              0.5729166666666669,
+              0.39817708333333346
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-10-0-alt-french-studio-158",
+              "sourceId": "french-studio-158",
+              "levelIndex": 6,
+              "hole": {
+                "courseId": "campaign-draft-1-10-0-alt-french-studio-158",
+                "seed": 2026091211,
+                "stage": 0,
+                "notation": "10RP 4/4",
+                "target": {
+                  "rgb": [
+                    129.10277671315555,
+                    95.65916423248231,
+                    98.13014694525458
+                  ],
+                  "lab": [
+                    0.5228960326976619,
+                    0.04253618635259737,
+                    0.010405914406120209
+                  ],
+                  "position": [
+                    7.305295300665803,
+                    -2.954523035268797,
+                    0.8176581562964979
+                  ]
+                },
+                "recipe": [
+                  0.2898186337652854,
+                  0,
+                  0,
+                  0.26777840455296575,
+                  0.1366311781534558,
+                  0.30577178352829293,
+                  0,
+                  0
+                ],
+                "par": 4,
+                "kind": "choice",
+                "tolerance": 0.0294,
+                "solutionShots": 2,
+                "routeOrder": [
+                  0,
+                  6,
+                  3
+                ],
+                "routeTimes": [
+                  0.600069898192305,
+                  0.4475185257531128
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cobalt Ember",
+      "levelIndex": 10,
+      "paints": [
+        {
+          "id": "cobalt-blue",
+          "name": "Cobalt Blue",
+          "pigment": "PB28",
+          "strength": 0.65,
+          "rgb": [
+            22,
+            73,
+            127
+          ]
+        },
+        {
+          "id": "cadmium-orange",
+          "name": "Cadmium Orange",
+          "pigment": "PO20",
+          "strength": 0.82,
+          "rgb": [
+            252,
+            151,
+            53
+          ]
+        },
+        {
+          "id": "quinacridone-magenta",
+          "name": "Quinacridone Magenta",
+          "pigment": "PR122",
+          "strength": 1.12,
+          "rgb": [
+            131,
+            30,
+            88
+          ]
+        },
+        {
+          "id": "play-flake-white",
+          "name": "Flake White",
+          "pigment": "PW1",
+          "strength": 0.65,
+          "rgb": [
+            246,
+            243,
+            233
+          ]
+        }
+      ],
+      "slots": [
+        {
+          "id": "campaign-draft-1-11-0",
+          "title": "Readable introduction",
+          "sourceId": "cobalt-intro-1198",
+          "levelIndex": 10,
+          "hole": {
+            "courseId": "campaign-draft-1-11-0",
+            "seed": 2026091220,
+            "stage": 0,
+            "notation": "2.5RP 6/12",
+            "target": {
+              "rgb": [
+                213.41290720497133,
+                107.84631257025687,
+                176.4399639256544
+              ],
+              "lab": [
+                0.6747123163050625,
+                0.14760256093145163,
+                -0.046739870062651456
+              ],
+              "position": [
+                24.590288990226092,
+                3.4293166504916104,
+                -18.36006132275326
+              ]
+            },
+            "recipe": [
+              0,
+              0.01905964876704419,
+              0.38931787635474896,
+              0.5916224748782068
+            ],
+            "par": 3,
+            "kind": "ride",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              2,
+              3
+            ],
+            "routeTimes": [
+              0.6641357421875
+            ]
+          },
+          "alternatives": [
+            {
+              "id": "campaign-draft-1-11-0-alt-cobalt-intro-1024",
+              "sourceId": "cobalt-intro-1024",
+              "levelIndex": 10,
+              "hole": {
+                "courseId": "campaign-draft-1-11-0-alt-cobalt-intro-1024",
+                "seed": 2026091221,
+                "stage": 0,
+                "notation": "10B 6/8",
+                "target": {
+                  "rgb": [
+                    87.43222556056087,
+                    158.84699456162252,
+                    200.37336920838612
+                  ],
+                  "lab": [
+                    0.6721061965529262,
+                    -0.05287883115394493,
+                    -0.07852010628875217
+                  ],
+                  "position": [
+                    -8.693125050432993,
+                    4.355377286643578,
+                    -15.688809759368114
+                  ]
+                },
+                "recipe": [
+                  0.5384791854861041,
+                  0,
+                  0.02138068431964981,
+                  0.4401401301942461
+                ],
+                "par": 3,
+                "kind": "ride",
+                "tolerance": 0.0294,
+                "solutionShots": 1,
+                "routeOrder": [
+                  3,
+                  0
+                ],
+                "routeTimes": [
+                  0.615057373046875
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "campaign-draft-1-11-1",
+          "title": "Accurate ride",
+          "sourceId": "lab-7-10-1-835415fde974",
+          "levelIndex": 10,
+          "hole": {
+            "courseId": "campaign-draft-1-11-1",
+            "seed": 20261108,
+            "stage": 1,
+            "notation": "10GY 5/6",
+            "target": {
+              "rgb": [
+                78.51866819393948,
+                127.72607222758259,
+                75.48371164327469
+              ],
+              "lab": [
+                0.5499134002167434,
+                -0.07603330569678152,
+                0.05754845763054689
+              ],
+              "position": [
+                -10.643034275993175,
+                -1.066840002154921,
+                10.786507280816352
+              ]
+            },
+            "recipe": [
+              1,
+              0.8981110617518425,
+              0,
+              0
+            ],
+            "par": 4,
+            "kind": "ride",
+            "tolerance": 0.0294,
+            "solutionShots": 1,
+            "routeOrder": [
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.55
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-11-2",
+          "title": "Rose-gray setup",
+          "sourceId": "lab-3-10-3771051873",
+          "levelIndex": 10,
+          "hole": {
+            "courseId": "campaign-draft-1-11-2",
+            "seed": 20260912,
+            "stage": 2,
+            "notation": "5RP 6/2",
+            "target": {
+              "rgb": [
+                162.5143741758293,
+                137.72021072354173,
+                151.0434592594126
+              ],
+              "lab": [
+                0.6592119847824359,
+                0.03394931379318378,
+                -0.00939762824391055
+              ],
+              "position": [
+                5.422968768648304,
+                3.364410290594975,
+                -3.019548267563306
+              ]
+            },
+            "recipe": [
+              1.2075412021583036,
+              0.7893662751780449,
+              1,
+              2.1911762447984424
+            ],
+            "par": 5,
+            "kind": "interior-weave",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              2,
+              3,
+              0,
+              1
+            ],
+            "routeTimes": [
+              0.7661147755009018,
+              0.4457352058998007,
+              0.35966993483303866
+            ]
+          },
+          "alternatives": []
+        },
+        {
+          "id": "campaign-draft-1-11-3",
+          "title": "Demanding interior finale",
+          "sourceId": "lab-7-10-0-17677c256f07",
+          "levelIndex": 10,
+          "hole": {
+            "courseId": "campaign-draft-1-11-3",
+            "seed": 20261108,
+            "stage": 3,
+            "notation": "5GY 6/2",
+            "target": {
+              "rgb": [
+                144.35200874311744,
+                142.52255666420072,
+                118.89034677018155
+              ],
+              "lab": [
+                0.6434161850271377,
+                -0.008034699288913594,
+                0.033056264517093925
+              ],
+              "position": [
+                -0.4932139237022549,
+                2.8745290461971322,
+                6.410758676576777
+              ]
+            },
+            "recipe": [
+              1.8660750125544914,
+              1.5820166301561833,
+              1,
+              2.3879930536746468
+            ],
+            "par": 6,
+            "kind": "interior",
+            "tolerance": 0.0294,
+            "solutionShots": 3,
+            "routeOrder": [
+              2,
+              0,
+              3,
+              1
+            ],
+            "routeTimes": [
+              0.7184675596817743,
+              0.5765438102056144,
+              0.4277072333906659
+            ]
+          },
+          "alternatives": []
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,10 @@ A minimal color-identification trainer for painters, built around discrete Munse
 
 [Open the live app](https://munsell-eye-color-training.pet-ty.chatgpt.site/)
 
+## Chroma Glider and sound design
+
+The [current engineering and design brief](docs/chroma-glider-current.md) links the versioned gameplay, mixing, course-design, and sonic handoff, plus an exact campaign snapshot. Start there before changing the game or integrating sound. The standalone `/sound-lab` instrument is not yet connected to gameplay.
+
 ## Practice modes
 
 - **Value** — identify N1–N9 through colored targets, with an optional monochrome view.
@@ -15,7 +19,7 @@ A minimal color-identification trainer for painters, built around discrete Munse
 
 The Reference view contains the 40-step hue wheel and constant-hue chip pages. Practice is intentionally limited to C2–C12, while the reference preserves valid higher-chroma chips where the source data and display gamut support them.
 
-Progress and adaptive weighting are stored only in the current browser with IndexedDB. There are no accounts.
+Practice progress and adaptive weighting are stored only in the current browser with IndexedDB; practice does not require an account. The separate Chroma Glider lab uses authenticated, server-backed attempt and review synchronization. Sound-lab presets remain device-local with export/import backup.
 
 ## Paint recipes
 
