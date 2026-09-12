@@ -2,7 +2,7 @@
 
 Updated 12 September 2026.
 
-Read the [full engine, gameplay, course, and sonic handoff](archive/2026-09-11-chroma-glider-engine-gameplay-sound-brief.md). It is the current reference for the game and sound-design tasks.
+Read the [full engine, gameplay, course, and sonic handoff](archive/2026-09-11-chroma-glider-engine-gameplay-sound-brief.md). It remains the engine and course reference. Read the [updated sonic design addendum](archive/2026-09-11-chroma-glider-sonic-design-addendum.md) alongside it for the current sound direction; the addendum supersedes earlier sonic priorities without rewriting the archival snapshot.
 
 The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json) preserves exact paint definitions and 34 primary / 14 alternate specimens across 12 chapters. Stored labels and calibrations are historical configuration, not blanket certification under the latest evaluator.
 
@@ -13,7 +13,7 @@ The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json)
 - Current journey policy: journeys-2-value-led; finish profile: finish-profile-1.
 - Mixture scoring: Euclidean OKLab; current live tolerance 0.0294.
 - Sound lab: separate /sound-lab instrument, not integrated with gameplay.
-- This update changes documentation only, not the public game.
+- These public version references are the archived baseline, not a fresh deployment verification. See the sound checkpoint for pending navigation changes; the lab redesign remains a proposal.
 
 ## Non-negotiable distinctions
 
@@ -36,6 +36,14 @@ The subsequent [broad discovery bank](play-broad-palette-findings.md) samples al
 The game task now uses `/Users/atg_la02_macstudio/Documents/ChatGPT/Munsell Eye` on `main`. The sound task uses `/Users/atg_la02_macstudio/.codex/worktrees/10be/Munsell Eye` on `codex/sound-design`. The original repository remains intact at its previous Documents/Codex location, detached at efc2ede, with its pending sound notes preserved. Do not continue parallel edits or publish from that old checkout. The historical `candidate-search` archive is preserved and ignored in the game workspace.
 
 Use one publisher for the integrated result. Game work owns physics, course analysis, campaign data, and game UI; sound work owns its instrument until shared event hooks are agreed. Coordinate shared dependencies, navigation, and styles. Worktrees isolate edits, not shared ports or deployment destinations. Sound notes copied during handoff remain on the sound branch pending integration.
+## Current sonic direction
+
+Music originates in discrete shots: hold, release and propulsion, travel with arpeggiated wakes, settle, and confirmed capture. Ambient sound connects those gestures. Palette-specific tuning, instruments, density, motifs, and resolution can vary widely while that structure stays consistent. Paints need not each be an instrument.
+
+Global color context, palette reachability, individual pigment additions, and musical memory are distinct possible inputs; their mapping is still being designed. Near passes do not authorize full resolution. The glass ribbon effect remains an audible reference to investigate, not an established production recipe. The addendum records current filter/granular limitations and proposed comparisons. Lab redesign is the next discussion; no gameplay audio integration or publication accompanies this update.
+
+Read the [shot-led lab design proposal](sound/shot-lab-design.md) for multiple approaches to resolution, shared harmonic control of dense arpeggios, and the proposed Shot Studio, Color & Motion, and Instrument & Ribbon surfaces. The [sound checkpoint](sound/checkpoint.md) records implementation and handoff status.
+
 
 ## How to keep this current
 
