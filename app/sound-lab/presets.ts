@@ -157,6 +157,7 @@ export const STARTERS: Preset[] = SOUND_MODELS.slice(0, 3).map((model, i) => ({
       ...model.values,
       music: {
         ...DEFAULTS.music,
+        stack: i === 1 ? "triad" : DEFAULTS.music.stack,
         arp: i === 0 ? "weave" : "ripple",
         spacing: i === 0 ? 0.25 : 0.5,
         rest: 0,

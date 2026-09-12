@@ -18,6 +18,7 @@ import {
   type Parameters,
   type SliderSpec,
 } from "./parameters";
+import { HarmonyJourney } from "./harmony-journey";
 import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
 import { DEFAULT_SETUP, STARTERS, sanitizeSetup, type Setup } from "./presets";
@@ -629,7 +630,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 onChange={(v) => setJourney({ duration: v })}
               />
               <label>
-                Arrival test
+                Arrival outcome
                 <select
                   disabled={j.path === "paint" && !!j.paint.target}
                   value={j.outcome}
@@ -639,7 +640,9 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                     })
                   }
                 >
-                  <option value="capture">Capture · complete arrival</option>
+                  <option value="capture">
+                    Capture · resolve to destination
+                  </option>
                   <option value="miss">Near miss · leave open</option>
                 </select>
               </label>
@@ -732,6 +735,22 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                   </button>
                 </div>
               </div>
+              <HarmonyJourney
+                music={p.music}
+                onChange={(music) => change("music", music)}
+                journey={j}
+                step={snapshot?.step ?? 0}
+                resolved={snapshot?.resolved ?? false}
+                phase={snapshot?.phase ?? "idle"}
+                motifPlaying={snapshot?.motif ?? false}
+                enabled={enabled && !snapshot?.audioPaused}
+                onNext={() => engine.current?.nextHarmony()}
+                onResolve={() => {
+                  cancelHold();
+                  engine.current?.resolve();
+                }}
+                onExplore={() => engine.current?.explore()}
+              />
               <MelodyGrid
                 value={p.music}
                 onChange={(music) => change("music", music)}
@@ -856,7 +875,6 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 step={snapshot?.step ?? 0}
                 onPlay={() => engine.current?.playMotif()}
                 onStop={() => engine.current?.stopMotif()}
-                onNext={() => engine.current?.nextHarmony()}
               />
               <details className="sl-card">
                 <summary>Custom tuning · foundation and six intervals</summary>

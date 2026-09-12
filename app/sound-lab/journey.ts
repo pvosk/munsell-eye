@@ -379,3 +379,21 @@ export function sanitizeMappings(value: unknown): Mapping[] {
     ];
   });
 }
+
+/** Gather before fading: a resolved chord must remain audible. */
+export function arrivalShape(
+  progress: number,
+  captured: boolean,
+  convergenceModel: boolean,
+) {
+  const a = clamp(progress);
+  if (!captured) return { gain: 1 - a, convergence: 0 };
+  return {
+    convergence: clamp(a / 0.3),
+    gain: convergenceModel
+      ? a <= 0.65
+        ? 0.45 + 0.35 * Math.sin((Math.PI * a) / 0.65)
+        : 0.45 * (1 - (a - 0.65) / 0.35)
+      : 1 - a,
+  };
+}

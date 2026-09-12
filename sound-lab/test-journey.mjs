@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   sampleProbe,
+  arrivalShape,
   signalPath,
   gamutChroma,
   linearRGB,
@@ -124,3 +125,11 @@ const gridPreset={...STARTERS[0],setup:sanitizeSetup({...STARTERS[0].setup,param
 assert.deepEqual(readLibrary(JSON.parse(exportLibrary([gridPreset])))[0].setup,gridPreset.setup);
 assert.equal(applyPreset(DEFAULT_SETUP,{...gridPreset,scope:'journey'}).parameters.music.melody,'grid');
 assert.equal(applyPreset(DEFAULT_SETUP,{...gridPreset,scope:'sound'}).parameters.music.melody,'procedural');
+
+assert.equal(arrivalShape(.4,true,true).convergence,1);
+assert(arrivalShape(.4,true,true).gain>.3);
+assert.equal(arrivalShape(1,true,true).gain,0);
+assert.equal(arrivalShape(.4,false,true).convergence,0);
+assert.equal(arrivalShape(.4,false,true).gain,.6);
+const destinationPreset={...STARTERS[1],setup:sanitizeSetup({...STARTERS[1].setup,parameters:{...STARTERS[1].setup.parameters,music:{...STARTERS[1].setup.parameters.music,destinationStep:2,motifAdvance:'manual'}}})};
+assert.deepEqual(readLibrary(JSON.parse(exportLibrary([destinationPreset])))[0].setup,destinationPreset.setup);

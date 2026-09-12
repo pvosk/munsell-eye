@@ -254,6 +254,8 @@ export type MusicSettings = {
   melodyLength: number;
   offspring: number;
   melodyFollow: boolean;
+  destinationStep: number;
+  motifAdvance: "auto" | "manual";
 };
 export const MUSIC_DEFAULTS: MusicSettings = {
   tonic: 8,
@@ -279,6 +281,8 @@ export const MUSIC_DEFAULTS: MusicSettings = {
   melodyLength: 8,
   offspring: 0,
   melodyFollow: false,
+  destinationStep: 0,
+  motifAdvance: "auto",
 };
 export const MUSIC_PRESETS = [
   {
@@ -398,7 +402,12 @@ export function sanitizeMusic(value: unknown): MusicSettings {
     typeof v.offspring === "number" && Number.isFinite(v.offspring)
       ? Math.round(Math.max(0, Math.min(3, v.offspring)))
       : 0;
+  m.motifAdvance = v.motifAdvance === "manual" ? "manual" : "auto";
   m.melodyFollow = v.melodyFollow === true;
+  m.destinationStep =
+    typeof v.destinationStep === "number" && Number.isFinite(v.destinationStep)
+      ? Math.round(Math.max(0, Math.min(11, v.destinationStep)))
+      : 0;
   m.melodySteps = Array.from({ length: 16 }, (_, i) => {
     if (!Array.isArray(v.melodySteps)) return MUSIC_DEFAULTS.melodySteps[i];
     const n = v.melodySteps[i];

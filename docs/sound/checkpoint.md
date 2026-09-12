@@ -40,3 +40,7 @@ Combined production build, TypeScript, targeted ESLint, Journey/mapping/preset r
 ## Custom melody grid follow-up
 
 User requested an optional editable main melody in Journey while retaining procedural systems. Added saved 8/16-step scale-relative grid, rests, optional progression-degree following, zero-to-three arpeggio offspring per main note, explicit grid-timing selection, phrase-once audition, and shared shot/motif generation. Fields live in MusicSettings and existing presets. No schema, game, or SynthDef changes. Base is sound 008644c; main reports that build was integrated and public as v64 (06c5c5c). Main still owns integration and release of this subsequent grid checkpoint.
+
+## Resolution redesign and convergence fix
+
+User requested prominent resolution, visible current/next/destination, clearer playback clocks, and a tonal convergence finish. Added Harmony & resolution panel, selectable destination progression position, saved motif auto/manual clock, manual shot-capture resolution without changing the saved outcome, and audible idle Next harmony. Convergence gathers before the fade, zeros residual detune on capture, and the fresh complete starter uses triad/lower echo/no grains. Existing saved presets remain intact. README records validation and limitations. No schema, gameplay, or SynthDef changes. Base is d23943d; main owns release integration alongside its independent premix-start branch.

@@ -19,7 +19,6 @@ export function MusicPanel({
   step,
   onPlay,
   onStop,
-  onNext,
 }: {
   value: MusicSettings;
   onChange: (m: MusicSettings) => void;
@@ -28,7 +27,6 @@ export function MusicPanel({
   step: number;
   onPlay: () => void;
   onStop: () => void;
-  onNext: () => void;
 }) {
   const set = (key: keyof MusicSettings, v: unknown) =>
     onChange(sanitizeMusic({ ...value, [key]: v, source: "system" }));
@@ -84,7 +82,10 @@ export function MusicPanel({
       <div className="sl-music-title">
         <div>
           <h2>Shape the music</h2>
-          <p>A harmonic world, a motif, and room between the notes.</p>
+          <p>
+            Choose the progression here; the Harmony & resolution panel above
+            shows its live position.
+          </p>
         </div>
         <div className="sl-music-transport">
           <button
@@ -93,12 +94,6 @@ export function MusicPanel({
             onClick={playing ? onStop : onPlay}
           >
             {playing ? "Stop motif" : "Play motif"}
-          </button>
-          <button
-            disabled={!enabled || value.progression === "still"}
-            onClick={onNext}
-          >
-            Next harmony
           </button>
         </div>
       </div>
@@ -233,7 +228,8 @@ export function MusicPanel({
           <p className="sl-music-help">
             Sustained harmony makes a continuous tone. A fixed pedal can create
             tension as keys change; turn it off for clean circle movement.
-            Resolve returns to the starting harmony and holds progression there.
+            Resolve now uses the destination shown above and holds progression
+            there.
           </p>
         </div>
       </div>
