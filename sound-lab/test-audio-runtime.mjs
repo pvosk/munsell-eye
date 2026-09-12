@@ -160,6 +160,78 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
     e.playShot({ ...miss, journey: { ...miss.journey, outcome: "capture" } });
     await wait(1200);
     const captureResolved = e.resolved;
+    e.stopSound();
+    await wait(100);
+    const landing = sanitizeSetup({
+      ...STARTERS[1].setup,
+      parameters: {
+        ...STARTERS[1].setup.parameters,
+        music: {
+          ...STARTERS[1].setup.parameters.music,
+          progression: "modal",
+          destinationStep: 2,
+          motifAdvance: "manual",
+        },
+      },
+      journey: {
+        ...STARTERS[1].setup.journey,
+        outcome: "miss",
+        duration: 3,
+        arrival: 1.8,
+        advance: "hue",
+      },
+    });
+    const commands = [];
+    const originalSend = e.sonic.send.bind(e.sonic);
+    e.sonic.send = (address, ...args) => {
+      if (address === "/n_set" && args[0] === 103)
+        commands.push(
+          Object.fromEntries(
+            Array.from({ length: (args.length - 1) / 2 }, (_, i) => [
+              args[i * 2 + 1],
+              args[i * 2 + 2],
+            ]),
+          ),
+        );
+      return originalSend(address, ...args);
+    };
+    e.playShot(landing);
+    await wait(400);
+    e.resolve();
+    await wait(620);
+    const resolvedBody = await measure(220);
+    const arrivalReadout = e.snapshot();
+    if (
+      !arrivalReadout.resolved ||
+      arrivalReadout.step !== 2 ||
+      arrivalReadout.phase !== "arrival"
+    )
+      throw Error(
+        "Manual resolve did not enter the selected destination arrival",
+      );
+    if (
+      !commands.some(
+        (c) => c.converge === 1 && c.amp > 0.1 && c.detune === 0,
+      ) ||
+      resolvedBody.rms <= 1e-5
+    )
+      throw Error("Convergence must sound after pitches fully gather");
+    await wait(1100);
+    if (e.snapshot().phase !== "settled" || e.snapshot().step !== 2)
+      throw Error("Destination was overwritten by hue advancement");
+    e.sonic.send = originalSend;
+    e.stopSound();
+    e.configure(landing);
+    e.explore();
+    e.playMotif();
+    await wait(150);
+    e.resolve();
+    await wait(100);
+    if (!e.resolved || e.musicStep !== 2)
+      throw Error("Motif resolve lost destination");
+    e.explore();
+    if (e.resolved) throw Error("Leave resolution failed");
+    e.stopSound();
     const stress = sanitizeSetup({
       ...DEFAULT_SETUP,
       parameters: {
@@ -206,6 +278,8 @@ const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
       silence,
       missResolved,
       captureResolved,
+      resolvedBody,
+      arrivalReadout,
       max,
       engineError,
     };

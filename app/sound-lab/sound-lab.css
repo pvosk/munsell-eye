@@ -1511,3 +1511,6 @@
 .sl-melody-grid .sl-melody-cell { min-width: 34px; min-height: 28px; padding: 2px; border-radius: 4px; background: rgba(255,255,255,.035); border: 1px solid rgba(170,214,204,.16); }
 .sl-melody-grid .sl-melody-cell[aria-pressed="true"] { background: #a5d8cc; color: #182628; border-color: #a5d8cc; }
 .sl-melody-grid .sl-melody-cell:focus-visible { outline: 2px solid #f0ca8d; outline-offset: 1px; }
+.sl-harmony-state { display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid rgba(170,214,204,.22); border-radius: 10px; margin-bottom: 16px; }
+.sl-harmony-state small { letter-spacing: .12em; color: #a5d8cc; }
+.sl-harmony-state span { opacity: .8; font-size: 13px; }

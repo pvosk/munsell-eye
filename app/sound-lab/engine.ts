@@ -2,6 +2,7 @@ import { harmonicFrame, leadVoices, midiHz, motif } from "./music";
 import { type Setup } from "./presets";
 import {
   sampleProbe,
+  arrivalShape,
   signalPath,
   mapSignals,
   clamp,
@@ -58,6 +59,7 @@ export class SoundLabEngine {
   private shotIndex = 0;
   private shotStartHarmony = 0;
   private arrivalStart = 0;
+  private arrivalCaptured = false;
   private arrivalFrom: number[] = [];
   private playingGroup = 100;
   motifPlaying = false;
@@ -84,7 +86,7 @@ export class SoundLabEngine {
       );
     const next = harmonicFrame(
       p.music,
-      this.resolved ? 0 : this.musicStep,
+      this.resolved ? p.music.destinationStep : this.musicStep,
     ).tones;
     const result =
       p.music.voicing === "smooth" || this.resolved
@@ -251,6 +253,7 @@ export class SoundLabEngine {
       this.phrase = 0;
       this.announceMusic();
     }
+    if (this.resolved) this.musicStep = after.destinationStep;
     if (!this.running || !this.sonic || !this.context || !this.output) return;
     const v = this.parameters;
     this.output.gain.setTargetAtTime(
@@ -504,7 +507,10 @@ export class SoundLabEngine {
   private schedulePhrase(phrase: number) {
     const m = this.parameters.music,
       tones = this.currentTones();
-    const frame = harmonicFrame(m, this.resolved ? 0 : this.musicStep);
+    const frame = harmonicFrame(
+      m,
+      this.resolved ? m.destinationStep : this.musicStep,
+    );
     const notes = motif(
       m,
       tones,
@@ -545,7 +551,7 @@ export class SoundLabEngine {
   playMotif() {
     if (!this.running || this.motifPlaying) return;
     this.wakeAudio();
-    this.cancelShot();
+    this.stopJourney();
     this.motifPaused = false;
     this.sustainRunning = this.parameters.music.sustain;
     this.cancelGesture();
@@ -556,6 +562,7 @@ export class SoundLabEngine {
   private runPhrase = () => {
     if (!this.running || !this.motifPlaying) return;
     if (
+      this.parameters.music.motifAdvance === "auto" &&
       this.phrase > 0 &&
       this.phrase % this.parameters.music.repeats === 0 &&
       !this.resolved
@@ -589,17 +596,52 @@ export class SoundLabEngine {
   }
   nextHarmony() {
     if (!this.running) return;
+    this.wakeAudio();
     this.resolved = false;
     this.musicStep++;
     this.updateField();
     this.announceMusic();
+    if (this.motifPlaying) {
+      this.cancelGesture();
+      if (this.motifTimer) clearTimeout(this.motifTimer);
+      this.phrase = 0;
+      this.runPhrase();
+    } else if (!["flight", "arrival"].includes(this.shotPhase)) {
+      this.cancelGesture();
+      [0, 2, 4].forEach((d, i) =>
+        this.later(() => this.note(d, 0, 0.5, 0), i * 90),
+      );
+    }
   }
 
+  private beginArrival(captured: boolean) {
+    if (!this.shotSetup) return;
+    this.arrivalCaptured = captured;
+    this.arrivalFrom = this.currentTones();
+    this.shotPhase = "arrival";
+    this.arrivalStart = this.shotTime;
+    if (captured) {
+      this.resolved = true;
+      this.musicStep = this.parameters.music.destinationStep;
+      this.previousTones = this.arrivalFrom;
+    }
+    this.updateField();
+    this.announceMusic();
+  }
   resolve() {
     if (!this.running || this.resolved) return;
+    this.wakeAudio();
     this.cancelGesture();
+    if (this.shotSetup && ["flight", "arrival"].includes(this.shotPhase)) {
+      this.stopMotif();
+      this.shotPaused = false;
+      this.shotTime = this.shotSetup.journey.duration;
+      this.progress = 1;
+      this.beginArrival(true);
+      return;
+    }
     this.resolved = true;
-    this.musicStep = 0;
+    this.musicStep = this.parameters.music.destinationStep;
     this.updateField();
     this.announceMusic();
     [0, 2, 4, 1, 3, 5].forEach((degree, i) =>
@@ -703,6 +745,7 @@ export class SoundLabEngine {
     this.mapped = {};
     this.resolved = false;
     this.shotPhase = "flight";
+    this.arrivalCaptured = false;
     if (["progress", "hue"].includes(setup.journey.advance)) this.musicStep = 0;
     this.shotStartHarmony = this.musicStep;
     if (setup.journey.advance === "shot") this.musicStep++;
@@ -727,7 +770,7 @@ export class SoundLabEngine {
       "vibratoRate",
       p.vibratoRate,
       "glideTime",
-      p.instrument === "vocal" ? p.glideTime : 0.3,
+      p.instrument === "vocal" ? p.glideTime : this.resolved ? 0.08 : 0.3,
       "glideRatio",
       2 ** ((p.glideStart * (1 - progress ** p.glideCurve)) / 12),
     ];
@@ -753,7 +796,7 @@ export class SoundLabEngine {
       "harmonics",
       p.harmonics,
       "detune",
-      p.detune,
+      p.detune * (1 - arrival),
       "width",
       p.width,
       ...fs.flatMap((f, i) => [`f${i}`, f]),
@@ -836,25 +879,19 @@ export class SoundLabEngine {
             n.pan,
           );
       }
-      if (this.progress >= 1) {
-        this.shotPhase = "arrival";
-        this.arrivalStart = this.shotTime;
-        this.arrivalFrom = this.currentTones();
-        if (j.outcome === "capture") {
-          this.resolved = true;
-          this.musicStep = 0;
-          this.previousTones = this.arrivalFrom;
-        }
-        this.updateField();
-        this.announceMusic();
-      }
+      if (this.progress >= 1) this.beginArrival(j.outcome === "capture");
     } else if (this.shotPhase === "arrival") {
       const a = clamp((this.shotTime - this.arrivalStart) / j.arrival);
-      this.updateFlight(1 - a, j.outcome === "capture" ? a : 0);
+      const shape = arrivalShape(
+        a,
+        this.arrivalCaptured,
+        this.parameters.instrument === "convergence",
+      );
+      this.updateFlight(shape.gain, shape.convergence);
       if (a >= 1) {
         this.shotPhase = "settled";
         this.applyParameters(this.baseParameters);
-        this.updateFlight(0);
+        this.updateFlight(0, this.arrivalCaptured ? 1 : 0);
       }
     } else if (this.shotPhase === "settled") {
       if (j.repeat && this.shotTime > j.duration + j.arrival + j.gap) {
@@ -937,6 +974,8 @@ export class SoundLabEngine {
   snapshot() {
     return {
       phase: this.shotPhase,
+      resolved: this.resolved,
+      destinationStep: this.parameters.music.destinationStep,
       paused: this.shotPaused,
       audioPaused: this.audioPaused,
       progress: this.progress,
