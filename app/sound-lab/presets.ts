@@ -17,7 +17,7 @@ export type Setup = {
   journey: Journey;
   mappings: Mapping[];
 };
-export type Scope = "all" | "journey" | "sound" | "mapping";
+export type Scope = "all" | "journey" | "harmony" | "sound" | "mapping";
 export type Preset = {
   id: string;
   name: string;
@@ -42,6 +42,23 @@ export function sanitizeSetup(value: unknown): Setup {
 export function applyPreset(current: Setup, preset: Preset): Setup {
   const p = preset.setup;
   switch (preset.scope) {
+    case "harmony":
+      return sanitizeSetup({
+        ...current,
+        parameters: {
+          ...current.parameters,
+          music: p.parameters.music,
+          root: p.parameters.root,
+          intervals: p.parameters.intervals,
+        },
+        journey: {
+          ...current.journey,
+          rhythm: p.journey.rhythm,
+          advance: p.journey.advance,
+          changes: p.journey.changes,
+          density: p.journey.density,
+        },
+      });
     case "journey":
       return sanitizeSetup({
         ...current,
@@ -87,7 +104,7 @@ export function validPreset(v: unknown): v is Preset {
     p.name.length <= 80 &&
     typeof p.notes === "string" &&
     p.notes.length <= 2000 &&
-    ["all", "journey", "sound", "mapping"].includes(p.scope) &&
+    ["all", "journey", "harmony", "sound", "mapping"].includes(p.scope) &&
     typeof p.updatedAt === "string" &&
     Number.isFinite(Date.parse(p.updatedAt)) &&
     !!p.setup &&

@@ -120,3 +120,37 @@ The structural reference was reviewed at [THX's official Deep Note score](https:
 Mapping includes six complete Route studies: Close putt / glass breath, Boundary run / growing cloud, Value lift / opening space, Value descent / closing space, Interior setup / hanging voices, and Near pass / ribbon suspension. These are musical hypotheses informed by sections 8 and 15 of the engine handoff and the sonic addendum. They are not palette assignments or certified multi-pour/ride specimens. They load Sound, Journey and Mapping together, including instrument and geometry, and use existing portable/account preset formats.
 
 Validation includes build/TypeScript/lint, existing 1728 harmonic tests, handle seam/target/preset tests, and real browser SC checks: convergence emits zero foreground note events with its layer off, all 18 cloud voices reach the expected harmonic targets, live geometry and brightness edits preserve progress, the next loop uses the updated path, loop-off stops repeats, idle resolve demo retains capture during edits without mutating saved miss, and previous grid/resolution/transport/stress checks pass. Browser rendering produced no hydration/runtime errors. No visual interaction or physical touch/listening QA is claimed. Reset audio once after updating an already-running session to load the new SynthDefs; settings remain intact.
+
+
+## Composed studies and modular recall — 12 September
+
+The Preset workshop below the sticky transport contains ten families with three original, complete journeys each. Six featured buttons load a complete example immediately; the family/variation selectors only browse until a Load/Use button is pressed. The sticky complete-journey selector also contains all 30, grouped by family. The four simpler starters and six earlier mapping studies remain available.
+
+| Family | Three studies | Main comparison |
+| --- | --- | --- |
+| Piano rivers | Sunlit current; Braided interior; Downstream bells | Sustained tonal density, grid offspring, descending value |
+| Hanging cells | Held light; Minor lantern; Small answer | Modal cells with rests, shot-to-shot changes, close putt |
+| Glass ribbons | Glass thread; String reflection; Passing prism | Glass, piano and synth excitations through moving bands |
+| Converging skies | Wide horizon; Suspended vault; Dark to gold | Body-only major, suspended and Dorian destinations |
+| Breathing voices | Breath rising; Low exhale; Call across | Up/down glides and coupled vowel/phrase movement |
+| Grain memory | Remembered steps; Reverse estuary; Frayed orbit | Forward memory, reverse swells, clocked reordering |
+| Interior dialogues | One pour later; Counterweight; Returning path | Setup miss, coupled adjustment, abstract detour |
+| Value spaces | Clear column; Velvet depth; Colored lift | Neutral ascent/descent versus a colorful lift |
+| Other tunings | Ratio water; Sevenfold garden; Weightless steps | Approximate simple ratios, seven equal divisions, whole tone |
+| Luminous pressure | Fifths in mist; Fourths under current; Fractured halo | Key movement, denser stacks and moderate parallel textures |
+
+These studies prioritize tonal/modal material with a small experimental corner. Each includes sound settings, MusicSettings, an explicit probe/landing outcome, timing, seeded phrase choices, and three or four active mappings. No fresh randomness generates presets at page load. Built-ins use zero frozen memory and start with repeat off, but loading retains the user's current Loop setting and listening volume. Full convergence studies use no foreground arpeggios. They choose gentler gathering and longer arrival times; **they do not fix the known final convergence handoff compression**. Capture/scoring and synthesis/engine behavior are unchanged.
+
+Routes are audition hypotheses derived from section 8 of the engine brief and the sonic addendum. The boundary remains sRGB, not a palette hull. Interior/setup/detour names do not claim certified multi-pour geometry; each probe is one shot. A miss preserves an open musical state; it does not simulate a full evolving mixture across replays. The musical reference directions informed original settings and cells, not copied recordings, scores, patches or claims of matching an artist.
+
+### Mix and match
+
+- **Load complete journey:** replaces the complete setup. Current listening volume and Loop transport remain.
+- **Use music / saved `harmony` scope:** loads MusicSettings, root/cents, and the rhythm, advance, changes and density fields. Retains sound design, mappings, path, paint recipe, target, outcome, duration, arrival time, gap and repeat. Bringing the phrase clock with the music makes drawn-grid rhythms usable when borrowing them.
+- **Use sound:** existing sound scope, retains all MusicSettings, root/cents, journey, mappings, volume and glide timing/launch/curve. Glide belongs to the existing journey scope; use Journey + music or a complete setup for that part of a vocal study.
+- **Use mappings:** replaces the mapping rows; does not silently change the current instrument or rhythm. Density targets require density timing; voice-cloud and vocal controls need their respective models. The workshop explains these limits.
+- **Use journey + music:** existing journey scope, including path, target/outcome, timing, MusicSettings, root/cents and glide parameters. Preserves other sound settings and mappings. Loop remains the user's transport choice.
+
+Music scope is supported by the existing library validator, import/export and payload API; no schema/migration changes are required. Older clients that do not recognize `harmony` will need a refresh to import such a preset. Built-in studies are available without sign-in or browser storage. Download all 30 or the current family as portable version-2 JSON; imports retain complete settings and listening notes. Built-ins are never inserted automatically into the user's account library. Save refinements with Complete setup to capture a mixed combination, or one of the individual scopes for a reusable ingredient.
+
+Validation: `test-journey-studies.mjs` checks the 30 unique studies, all 93 varying mapping connections, harmonic phrases, JSON round trips and 90 cross-family partial recalls. The existing music suite checks 1,728 harmonic combinations; the journey suite and local preset API (including `harmony` scope) remain applicable. `test-studies-audio.mjs` runs each full study through the real browser engine, measuring finite/nonzero audio, peak bounds, capture/miss state, cloud note-layer isolation and silence after Stop. These checks do not establish subjective quality, perceived loudness matching, physical touch behavior or hosted account sync.

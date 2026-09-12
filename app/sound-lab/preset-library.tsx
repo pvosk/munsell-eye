@@ -193,6 +193,7 @@ export function PresetLibrary({
             onChange={(e) => setScope(e.target.value as Scope)}
           >
             <option value="all">Complete setup</option>
+            <option value="harmony">Music + progression trigger</option>
             <option value="journey">Journey + music only</option>
             <option value="sound">Sound only</option>
             <option value="mapping">Mapping only</option>
@@ -291,7 +292,7 @@ export function PresetLibrary({
                 onClick={() => {
                   onLoad(applyPreset(setup, p));
                   setMessage(
-                    `Loaded ${p.scope === "all" ? "complete setup" : p.scope + " only"}: ${p.name}. Audio stopped; settings retained.`,
+                    `Loaded ${p.scope === "all" ? "complete setup" : p.scope}: ${p.name}. Active shot and loop use the loaded controls.`,
                   );
                 }}
               >

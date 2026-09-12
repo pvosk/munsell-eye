@@ -33,12 +33,17 @@ try {
     data.presets.some((x) => x.id === id),
     "Other owner deleted preset",
   );
-  r = await call("sound-test-a", "POST", { ...preset, name: "Updated" });
+  r = await call("sound-test-a", "POST", {
+    ...preset,
+    name: "Updated",
+    scope: "harmony",
+  });
   assert.equal(r.status, 200);
   r = await call("sound-test-a");
   data = await r.json();
   assert.equal(data.presets.filter((x) => x.id === id).length, 1);
   assert.equal(data.presets.find((x) => x.id === id).name, "Updated");
+  assert.equal(data.presets.find((x) => x.id === id).scope, "harmony");
   r = await call("sound-test-a", "POST", preset, {
     Origin: "https://elsewhere.invalid",
   });
