@@ -31,3 +31,9 @@ Source/settings changes are reviewable independently from private audio referenc
 After b8c4af7, user authorized adding parallel distortion, wavefolding, buffer shredding and vocal glides while main research continued, and pushing this sound branch to GitHub. GitHub permissions confirmed push access. This follow-up adds 19 saved parameters, 15 mapping destinations, a Vocal glide model and complete starter, and separate Journey glide controls. Details and validation are in the sound README. No additional schema/migration or game math changes.
 
 Main reports offline research now archived as 83d2aa5 with a clean main checkout. Main remains the integration/publication owner. GitHub branch availability is not evidence of a public Sites release.
+
+## Main integration and public release — 12 September 2026
+
+Main integrated documentation 6b8fe7a and sound checkpoints b8c4af7 / 008644c as d243747 / cb98065 / 6f61a8d. Public v64 uses 06c5c5c10738e48c2f9b72374c15f9561cff2809. Sites deployment appgdep_6aa4f2e8cf24819194885cec18aae24c succeeded with the generated 0001_sound_presets migration included in the validated package.
+
+Combined production build, TypeScript, targeted ESLint, Journey/mapping/preset round trips, paint trace, 1,728 music cases, owner isolation, and local D1 save/load/update/delete and origin checks passed. Public /sound-lab returns 200 and anonymous /api/sound-presets returns 401. The platform access-bypass credential did not establish a signed-in preset owner, so hosted authenticated sync remains unverified rather than claimed tested. Previous sound-branch real-audio tests remain documented; this integration did not repeat physical iPad/listening or the combined audio/game workload. Audio remains a separate audition lab, not game-playback hooks.

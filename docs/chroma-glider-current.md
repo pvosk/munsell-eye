@@ -8,13 +8,13 @@ The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json)
 
 ## Baseline
 
-- Public application: v63; source 433eec7fd79a54ee09d96b3cf9f61909caa4dc54.
-- Reconciled GitHub application tree: 2beedca736d53450f195d75ef040a6a20ffa5329, identical to the public source tree.
+- Public application: v64; source 06c5c5c10738e48c2f9b72374c15f9561cff2809. Sound integration published successfully 12 September 2026.
+- Historical pre-integration baseline: v63 source 433eec7fd79a54ee09d96b3cf9f61909caa4dc54; reconciled application tree 2beedca736d53450f195d75ef040a6a20ffa5329.
 - Current journey policy: journeys-2-value-led; finish profile: finish-profile-1.
 - Mixture scoring: Euclidean OKLab; current live tolerance 0.0294.
 - Sound lab: separate /sound-lab instrument, not integrated with gameplay.
 - Integrated sound release candidate: main 6f61a8d incorporates sound checkpoints 6b8fe7a, b8c4af7, and 008644c, preserving the offline research. Combined build, type/lint checks, 1,728 harmonic cases, Journey/mapping/paint-trace tests, owner isolation, and local D1 preset save/load checks pass. Includes the append-only sound_presets migration. Public release status is recorded separately after deployment; physical iPad/listening and hosted cross-device sign-in remain unverified.
-- These public version references are the archived baseline, not a fresh deployment verification. See the sound checkpoint for the shared-journey implementation and integration status; these changes have not been independently published by the sound task.
+- Deployment appgdep_6aa4f2e8cf24819194885cec18aae24c succeeded. Published sound page returns HTTP 200; anonymous preset API returns 401 as required. Hosted account sync is not yet verified through a real signed-in browser. See the sound checkpoint for exact limits; main, not the sound task, published this release.
 
 ## Non-negotiable distinctions
 
@@ -31,6 +31,8 @@ The subsequent [fresh-target selection comparison](play-selection-holdout-findin
 That next step has now run: [backward setup-region and palette findings](play-backward-palette-findings.md). Fixed destination colors were inverse-fitted across 12 novel palettes and six controls, then a successful white/lemon/violet/blue family received six pigment variants. Parent and ultramarine variants support cream and lavender goals; lavender has value-shift availability from all four bases and three additions found from each. Alternatives remain, and rides are less robust. Read the deeper verification and substitution archives before promoting candidates. This is still offline research, with no live palette, controls, or bank change.
 
 The subsequent [broad discovery bank](play-broad-palette-findings.md) samples all 40,920 three/four-paint combinations in the same 32-pigment pool plus 1,536 larger sets. All 509,472 proposals are retained in portable shards, including failures and unlabeled examples. Numerical audits cover 152 targets, with 30 deeper checks; twelve are general-flag-free, but none passes majority glide/ride/value availability plus the general checks. This is broad shallow reconnaissance, not half a million verified holes or a replacement for the stronger inverse-designed family. A provisional close-indirect result was overturned and retained as a counterexample. Live gameplay and public lab are unchanged. See the bank index and reader script before running another whole-space proposal sweep.
+
+[Deeper banked setup-region refinement](play-banked-backward-findings.md) now preserves six fixed bank targets and tests two explicitly new warm/Cobalt Teal neighbors. It finds repeatable warm setup → teal finish opportunities from Lemon and Naples, but does not eliminate simpler alternative bases. This research remains offline and is not part of the v64 lab content.
 
 ## Two-task working agreement
 
