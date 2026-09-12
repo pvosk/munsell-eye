@@ -13,6 +13,7 @@ The [campaign snapshot](archive/2026-09-11-chroma-glider-campaign-snapshot.json)
 - Current journey policy: journeys-2-value-led; finish profile: finish-profile-1.
 - Mixture scoring: Euclidean OKLab; current live tolerance 0.0294.
 - Sound lab: separate /sound-lab instrument, not integrated with gameplay.
+- Integrated sound release candidate: main 6f61a8d incorporates sound checkpoints 6b8fe7a, b8c4af7, and 008644c, preserving the offline research. Combined build, type/lint checks, 1,728 harmonic cases, Journey/mapping/paint-trace tests, owner isolation, and local D1 preset save/load checks pass. Includes the append-only sound_presets migration. Public release status is recorded separately after deployment; physical iPad/listening and hosted cross-device sign-in remain unverified.
 - These public version references are the archived baseline, not a fresh deployment verification. See the sound checkpoint for the shared-journey implementation and integration status; these changes have not been independently published by the sound task.
 
 ## Non-negotiable distinctions
