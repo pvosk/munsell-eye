@@ -1,10 +1,11 @@
 import {PLAY_LEVELS,mixtureColor,colorDistance,CHARGE_SECONDS,LIVE_LANDING_TOLERANCE as T,type ColorPoint,type Mixture} from '../app/play-engine';
 import {premixReplay,premixRoute,type MassMode} from '../app/play-premix';
 import {halton} from './recipe-blind-search';
+import type {PaintColor} from '../app/paint-mixing';
 export type PremixControl={order:number[];times:number[];error:number};
 // Recipe-blind challenger: receives only the fixed start, target and mechanics.
-export function searchPremix(level:number,start:Mixture,target:ColorPoint,mode:MassMode,max=2,seed=680013,samples=128,restarts=8){
- const paints=PLAY_LEVELS[level].paints,routes:PremixControl[]=[];let evaluations=0;
+export function searchPremix(level:number,start:Mixture,target:ColorPoint,mode:MassMode,max=2,seed=680013,samples=128,restarts=8,paints:PaintColor[]=PLAY_LEVELS[level].paints){
+ const routes:PremixControl[]=[];let evaluations=0;
  const score=(order:number[],times:number[])=>{evaluations++;return colorDistance(mixtureColor(paints,premixReplay(start,order,times,mode)),target);};
  const best:number[]=Array(max).fill(Infinity);
  function walk(order:number[],depth:number){

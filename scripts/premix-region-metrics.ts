@@ -1,6 +1,7 @@
 import {PLAY_LEVELS,mixtureColor,colorDistance,CHARGE_SECONDS,LIVE_LANDING_TOLERANCE as T,type Mixture,type ColorPoint} from '../app/play-engine';
 import {premixReplay,premixRoute,holdForShare,premixStep} from '../app/play-premix';
 import type {PremixControl} from './premix-search';
+import type {PaintColor} from '../app/paint-mixing';
 
 export const FAMILIES=['rise','drop','chromatic-ride','setup-glide','coupled-balance','interior-assembly'] as const;
 export type Family=typeof FAMILIES[number];
@@ -9,8 +10,8 @@ const norm=(a:number[])=>Math.hypot(...a);
 const delta=(a:number[],b:number[])=>a.map((x,i)=>x-b[i]);
 
 // Geometry in scoring space, never projected world length or animation distance.
-export function geometry(level:number,start:Mixture,target:ColorPoint,r:PremixControl){
- const paints=PLAY_LEVELS[level].paints,path=premixRoute(paints,start,r.order,r.times,'normalized');
+export function geometry(level:number,start:Mixture,target:ColorPoint,r:PremixControl,paints:PaintColor[]=PLAY_LEVELS[level].paints){
+ const path=premixRoute(paints,start,r.order,r.times,'normalized');
  const changes=path.stops.slice(1).map((p,i)=>delta(p.lab,path.stops[i].lab));
  const lengths=path.strokes.map(s=>s.slice(1).reduce((sum,p,i)=>sum+colorDistance(p,s[i]),0));
  const finish=lengths.at(-1)??0,setup=lengths.slice(0,-1).reduce((a,b)=>a+b,0),d=changes.at(-1)??[0,0,0];
@@ -60,8 +61,8 @@ export function acceptedIntervals(success:(t:number)=>boolean,steps=512){
  for(let i=1;i<=steps;i++){const t=i*dt,current=success(t);if(current&&!previous)open=edge(t-dt,t);if(!current&&previous){intervals.push({lo:open!,hi:edge(t-dt,t)});open=null;}previous=current;}
  if(open!==null)intervals.push({lo:open,hi:CHARGE_SECONDS});return intervals;
 }
-export function measureRegion(level:number,start:Mixture,target:ColorPoint,r:PremixControl){
- const paints=PLAY_LEVELS[level].paints,g=geometry(level,start,target,r);
+export function measureRegion(level:number,start:Mixture,target:ColorPoint,r:PremixControl,paints:PaintColor[]=PLAY_LEVELS[level].paints){
+ const g=geometry(level,start,target,r,paints);
  const success=(times:number[])=>colorDistance(mixtureColor(paints,premixReplay(start,r.order,times,'normalized')),target)<=T;
  const intervals=acceptedIntervals(t=>success([...r.times.slice(0,-1),t]));
  const local=intervals.find(w=>r.times.at(-1)!>=w.lo-1e-6&&r.times.at(-1)!<=w.hi+1e-6);
