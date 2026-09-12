@@ -33,7 +33,12 @@ export function fieldRevealPlan(reveal:PaletteReveal,points:ColorPoint[]):Float3
     // Interior cells inherit their nearest arc's arrival, then a positive
     // inward propagation delay. They cannot precede their source front.
     const interiorTime=arcTime+.045+.12*(1-Math.exp(-Math.sqrt(nearest)/12))+.012*phase;
-    result[i*2]=nearest<1.8**2?arcTime: d<2.4?interiorTime:.64+.22*(1-Math.exp(-(d-2.4)/12))+.015*phase;
+    const outside=Math.max(0,d-2.4),blend=Math.min(1,outside/6);
+    const transition=blend*blend*(3-2*blend);
+    // The surrounding wave overlaps late interior growth. A soft transition
+    // avoids delaying holes between interior samples to a separate phase.
+    const surroundingTime=Math.max(.35,arcTime+.065)+.24*(1-Math.exp(-outside/14))+.01*phase;
+    result[i*2]=nearest<1.8**2?arcTime:interiorTime+(surroundingTime-interiorTime)*transition;
   });
   // Highlight the nearest actual cells; never add surrogate paint spheres.
   reveal.seeds.forEach((seed,k)=>{let index=0,best=Infinity;points.forEach((point,i)=>{const d=distance(seed.position,point.position);if(d<best){best=d;index=i;}});result[index*2]=.024*k/Math.max(1,reveal.seeds.length-1);result[index*2+1]=1;});
@@ -64,10 +69,15 @@ export function paletteReveal(paints:PaintColor[]):PaletteReveal{
   const center=seeds.reduce((v,p)=>v.add(new Vector3(...p.position)),new Vector3()).divideScalar(seeds.length);
   const radius=Math.max(12,...seeds.map(p=>new Vector3(...p.position).distanceTo(center)));
   const samples:RevealSample[]=[];
-  for(let i=0;i<800;i++){
-    const q=paints.map(()=>Math.exp((rand()-.5)*5)),dominant=q.indexOf(Math.max(...q));
+  let structureState=state;
+  for(let i=0;i<2400;i++){
+    // Preserve edge-biased samples, add uniform-simplex coverage in the
+    // interior. These samples schedule existing cubes; no overlay geometry.
+    const q=paints.map(()=>i<800?Math.exp((rand()-.5)*5):-Math.log(Math.max(1e-8,rand()))),dominant=q.indexOf(Math.max(...q));
     samples.push({point:mixtureColor(paints,q),origin:seeds[dominant],phase:rand()*Math.PI*2,branch:dominant});
+    if(i===799)structureState=state;
   }
+  state=structureState; // Extra fill samples must not change the camera plan.
   const axis=new Vector3(rand()-.5,.25+rand(),rand()-.5).normalize();
   const result={seeds,bridges,bridgeTimings,samples,center,radius,axis,turn:(hash&1?1:-1)*(.7+rand()*.65),lobes:2+((hash>>>3)%4),signature};
   cache.set(signature,result);return result;

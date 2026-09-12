@@ -11,7 +11,7 @@ for(const level of PLAY_LEVELS.filter(p=>!p.retired)){
   for(let i=0;i<plan.length;i+=2){
     assert(Number.isFinite(plan[i])&&plan[i]>=0&&plan[i]<.935,'every cell completes before intro ends');
     assert(plan[i+1]===0||plan[i+1]===1);
-    seeds+=plan[i+1];early+=+(plan[i]<.53);late+=+(plan[i]>.66);
+    seeds+=plan[i+1];early+=+(plan[i]<.35);late+=+(plan[i]>.45);
   }
   assert(seeds>0&&seeds<=level.paints.length);
   const seedTimes=Array.from({length:FIELD_POINTS.length},(_,i)=>i).filter(i=>plan[i*2+1]===1).map(i=>plan[i*2]);
@@ -31,3 +31,8 @@ assert(schedule[4]>schedule[8]&&schedule[6]>schedule[10],'fill never precedes it
 assert(schedule[4]<schedule[10],'early interior grows before later arcs finish');
 assert(schedule[6]>schedule[4]+.2,'local edge order controls local interior order');
 console.log('Local arc-to-interior propagation and seed stagger pass');
+const seam=[a,b,point(0,5.39),point(0,5.41),point(0,13)];
+const seamSchedule=fieldRevealPlan(synthetic,seam);
+assert(Math.abs(seamSchedule[4]-seamSchedule[6])<.01,'no hard timing jump at sampled gamut cutoff');
+assert(seamSchedule[8]<schedule[6]+.065,'surroundings begin before late interior finishes growing');
+console.log('Continuous boundary timing and overlapping extended reveal pass');
