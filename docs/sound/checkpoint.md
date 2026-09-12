@@ -1,35 +1,27 @@
 # Sound task checkpoint
 
-Updated 12 September 2026.
+Updated 12 September 2026, shared-journey implementation.
 
 ## Ownership
 
-- Sound worktree: `/Users/atg_la02_macstudio/.codex/worktrees/10be/Munsell Eye`, branch `codex/sound-design`.
-- Game worktree: `/Users/atg_la02_macstudio/Documents/ChatGPT/Munsell Eye`, branch `main`.
-- Main game chat owns integration and publication. Sound task does not deploy independently or modify the main checkout.
-- Shared hooks, dependencies, navigation, and global styles require a concrete handoff. Main confirmed no concurrent navigation edits and approved sound ownership of this repair.
+Sound worktree is `/Users/atg_la02_macstudio/.codex/worktrees/10be/Munsell Eye`, branch `codex/sound-design`. Main game worktree is `/Users/atg_la02_macstudio/Documents/ChatGPT/Munsell Eye`, branch `main`. Main owns integration and publication. No independent sound deployment or edits in the other checkout.
 
-## Ready navigation change
+The prior navigation repair `062b756` was integrated by main as `003cea1`; sound documentation `6b8fe7a` was handed off separately. Do not infer a public release from integration alone.
 
-Commit `062b756` changes only `app/page.tsx`:
+## This implementation
 
-- Use ordinary page links for Sound Lab in both navigation locations.
-- Do not dismiss the mobile menu on a blur with no next focus target; this can precede touch click dispatch.
-- Dismiss on outside pointer, keyboard focus moving outside, or Escape. Use explicit close rather than toggling so overlapping dismissal events cannot reopen it.
-- Return focus to the trigger on Escape.
+User approved the shared Journey / Sound / Mapping build, diverse tunable sound models, preset sharing/cross-browser persistence, and separate section transports versus audio/preferences resets.
 
-Validation: production build, TypeScript check, and targeted ESLint passed. The built home and Sound Lab routes both returned HTTP 200. Build reports optional SuperSonic MIDI/gamepad WASM URL warnings and large chunks; these did not prevent the build. Live navigation and physical touch-device behavior were not verified. The final source edit after the build removed only unused lint-suppression comments; lint and whitespace checks were rerun.
+The existing `/sound-lab` now implements that surface. It retains the original musical system and adds generated piano, synth, glass ribbon, and convergence voices; editable smoothed mappings including boundary travel and neutral ascent; repeatable probes plus existing-engine paint traces; and owner-scoped D1 presets with portable JSON libraries and legacy migration. See [sound-lab README](../../sound-lab/README.md) for precise behavior and known limits.
 
-Exact commit and evidence sent to the main game chat for integration/publication review. No deployment performed by the sound task. Do not describe the public menu as fixed until the publisher confirms it.
+New schema is isolated to `sound_presets`. Main confirmed no concurrent schema/migration edits. Keep the endpoint, schema addition, `0001_sound_presets.sql`, and generated journal/snapshot together. Existing tables and hosting bindings remain unchanged. Local test migrations were applied only to this worktree's test database. No hosted migration or publication by sound.
 
-## Design and documentation
+## Boundaries and remaining review
 
-The [sonic addendum](../archive/2026-09-11-chroma-glider-sonic-design-addendum.md) preserves the shot-centered direction from 11 September. The [shot-led lab proposal](shot-lab-design.md) records the 12 September discussion: dense arpeggios under one harmonic plan; multiple approaches to arrival; and proposed Shot Studio, Color & Motion, and Instrument & Ribbon surfaces. These are proposals, not shipped controls.
+Mixing, charge, pigment strength, mass and endpoint scoring are imported from the existing game. Game source files are unchanged. The lab is an audition projection, not the full game camera/capture presentation, and no gameplay audio hooks have been added.
 
-The current engine independently schedules ambient clusters and motifs and separately runs held harmony, echo, and granular playback. Custom foundation changes also switch the music source to custom, and the filter uses that frequency anchor. The proposed redesign separates these behaviors explicitly.
+The edge reference is explicitly the sRGB boundary in OKLab, not the palette's reachable hull or Munsell field boundary. Palette-relative boundary estimation and live gameplay observation remain future coordinated work. Generated piano is not an acoustic sample. The three reference-inspired sound models are original candidates for user listening, not claimed reproductions.
 
-The supplied Glass Eyes excerpt was analyzed as a private local reference. The audio file is not copied into this repository. Analysis did not identify a definitive production chain. Ringing glass, moving resonators, and reversed halos remain candidate comparisons.
+Transport, math, preset/API, and browser synthesis checks are recorded in the sound README. Physical iPad/touch interaction, final visual QA, subjective listening, deployed sign-in, cross-browser cloud sync on the hosted site, and combined 3D/audio performance remain unverified. Main should run its integrated build and apply the generated migration as part of an authorized release.
 
-## Next work
-
-Discuss the proposed lab organization and musical mapping before implementing the broader redesign. Prioritize the shot and its harmonic journey, then the ambient bed. Use existing pigment/mixing/flight calculations unchanged when adding real trajectory auditions. No game audio observer contract is implemented yet.
+Source/settings changes are reviewable independently from private audio reference files. No supplied recording has been added to the repository.
