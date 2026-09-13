@@ -15,6 +15,7 @@ import contrastRoundBank from './generated/play-lab-round9.json';
 import inverseRoundBank from './generated/play-lab-round10.json';
 import hardRoundBank from './generated/play-lab-round11.json';
 import freshRoundBank from './generated/play-lab-round12.json';
+import legLabBank from './generated/play-pigment-leg-lab.json';
 import type {AuditRoute,AuditStyle,StyleAudit} from './play-route-audit';
 import type {HoleAnalysis} from './play-route-analysis';
 import type {DesignAnalysis} from './play-route-design';
@@ -88,6 +89,8 @@ PLAY_LEVELS.push(...contrastRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...inverseRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...hardRoundBank.palettes as PlayLevel[]);
 PLAY_LEVELS.push(...freshRoundBank.palettes as PlayLevel[]);
+// Append-only identities keep every archived specimen and synced review valid.
+PLAY_LEVELS.push(...legLabBank.palettes as PlayLevel[]);
 export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.retired?[i]:[]);
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
