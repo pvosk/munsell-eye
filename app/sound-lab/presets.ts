@@ -12,10 +12,12 @@ import {
   type Journey,
   type Mapping,
 } from "./journey";
+import { sanitizeSolo, type SoloGesture } from "./solo-settings";
 export type Setup = {
   parameters: Parameters;
   journey: Journey;
   mappings: Mapping[];
+  solo?: SoloGesture;
 };
 export type Scope = "all" | "journey" | "harmony" | "sound" | "mapping";
 export type Preset = {
@@ -37,6 +39,7 @@ export function sanitizeSetup(value: unknown): Setup {
     parameters: sanitizeParameters(v.parameters),
     journey: sanitizeJourney(v.journey),
     mappings: sanitizeMappings(v.mappings),
+    ...(v.solo ? { solo: sanitizeSolo(v.solo) } : {}),
   };
 }
 export function applyPreset(current: Setup, preset: Preset): Setup {

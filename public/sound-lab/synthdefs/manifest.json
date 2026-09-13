@@ -48,6 +48,38 @@
     ]
   },
   {
+    "name": "chroma_harp",
+    "nodes": 19,
+    "ugens": [
+      "Control",
+      "Impulse",
+      "PinkNoise",
+      "BinaryOpUGen",
+      "Decay2",
+      "Pluck",
+      "Pan2",
+      "Out",
+      "Line"
+    ]
+  },
+  {
+    "name": "chroma_pop",
+    "nodes": 24,
+    "ugens": [
+      "Control",
+      "Impulse",
+      "BinaryOpUGen",
+      "XLine",
+      "SinOsc",
+      "Decay2",
+      "PinkNoise",
+      "BPF",
+      "Pan2",
+      "Out",
+      "Line"
+    ]
+  },
+  {
     "name": "chroma_flight",
     "nodes": 1224,
     "ugens": [
