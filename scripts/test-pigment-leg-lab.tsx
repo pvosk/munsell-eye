@@ -13,7 +13,7 @@ import {PremixRouteReview} from '../app/play-premix-ui';
 Object.assign(globalThis,{React});
 test('variety bank preserves append-only palettes, old indices and distinct specimens',()=>{
  assert.equal(LEG_SPECIMENS.length,10);assert.equal(new Set(legLabBank.holes.map(h=>h.id)).size,10);
- assert.equal(PLAY_LEVELS.length,data.paletteOffset+data.palettes.length);
+ assert.deepEqual(PLAY_LEVELS.slice(data.paletteOffset,data.paletteOffset+data.palettes.length),data.palettes);
  assert.equal(legLabBank.holes.filter(h=>h.lab?.method==='route-first').length,3);
  assert.equal(legLabBank.holes.filter(h=>h.lab?.exploratory).length,2);
  assert(new Set(legLabBank.holes.map(h=>h.level)).size>=8);
