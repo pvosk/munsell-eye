@@ -1,8 +1,8 @@
 # Chroma planning workstream
 
-Requested 13 September 2026. Status: **all three implementations and validation complete; publication/handoff gate remains**. The release result in the thread is authoritative for publication. Once that succeeds, pause the heartbeat; do not launch more search batches for these bounded deliverables.
+Requested 13 September 2026. Status: **all three bounded deliverables complete and published**. Do not launch more search batches for this completed request. Overnight continuation is paused.
 
-The user authorized three substantial deliverables and unattended continuation while asleep. A same-thread heartbeat named `chroma-planning-atlas-and-branching-research` is active every 30 minutes. Continue useful work from this checkpoint; do not restart completed research. Pause the heartbeat when all three deliverables below are complete, or when a material new decision blocks further useful work. The user has a standing request to push validated work to both GitHub and Sites; preserve current gameplay/lab and add the explorer separately.
+The user authorized three substantial deliverables and unattended continuation while asleep. The same-thread heartbeat named `chroma-planning-atlas-and-branching-research` has been paused after completion. Do not restart completed research. The user has a standing request to push validated work to both GitHub and Sites; preserve current gameplay/lab and add the explorer separately.
 
 ## Constraints
 
@@ -88,3 +88,11 @@ At the end of each working segment, record changed files, tests/results, numeric
 - `npx tsc --noEmit`, focused ESLint and `npm run build` pass. Existing sound WASM/runtime and chunk-size build warnings remain; no sound implementation changes.
 - Existing user-owned localhost:3020 server preserved. Local `/chroma-atlas` HTTP 200; preview handoff queued. No visual browser or physical touch QA in this pass.
 - Final action: push validated source to GitHub and Sites, package successful build, publish under existing public access, verify public Atlas/index response, show Atlas, and pause the heartbeat. Do not rerun completed searches or replace the playable lab.
+
+### Delivery receipt
+
+- Implementation/source `99daef66c9e04d72890544cc64415f3d87340f94` pushed successfully to GitHub and Sites.
+- Sites version 81; deployment `appgdep_6aa6626cea008191a3f4adbb0238547f` succeeded on 13 September 2026.
+- Public explorer: https://munsell-eye-color-training.pet-ty.chatgpt.site/chroma-atlas
+- HTTP 200 verified for the explorer, index and first case. Index contains ten cases; first case contains 1,041 nodes. Browser handoff queued. Visual browser/touch QA remains unperformed.
+- No research process left running; existing localhost:3020 server preserved. Heartbeat paused after completion. This receipt is documentation-only; it does not change the deployed application.
