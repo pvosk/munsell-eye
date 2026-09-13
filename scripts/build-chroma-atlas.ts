@@ -6,7 +6,7 @@ import {legStep} from '../app/play-pigment-legs';
 import {mixtureColor,LIVE_LANDING_TOLERANCE as T} from '../app/play-engine';
 import type {AtlasCase,AtlasData} from '../app/chroma-atlas/types';
 const dir='docs/chroma-atlas-1';mkdirSync(dir,{recursive:true});
-const physics=createHash('sha256').update(['app/play-engine.ts','app/play-pigment-legs.ts','node_modules/spectral.js/spectral.js','scripts/setup-region-atlas.ts'].map(p=>readFileSync(p)).join('\n')).digest('hex');
+const physics=createHash('sha256').update(['app/play-engine.ts','app/pigment-color.ts','app/play-pigment-legs.ts','node_modules/spectral.js/spectral.js','scripts/setup-region-atlas.ts'].map(p=>readFileSync(p)).join('\n')).digest('hex');
 const selected=[];
 for(const run of [1,2]){
  const folder=`docs/conditioned-branch-search-${run}`,assessment=readBankJson(folder+'/assessment.json'),audits=readBankJson(folder+'/audits.json'),refs=readBankJson(folder+'/refinements.json');

@@ -1,4 +1,5 @@
 import { Color, mix } from 'spectral.js';
+import {rgbToOklab,mixPigmentRGB} from './pigment-color';
 import { PAINTS, type PaintColor } from './paint-mixing';
 import { HUE_ORDER, NEUTRALS, type MunsellColor } from './munsell-data';
 import { PRACTICAL_MUNSELL_COLORS } from './munsell-gamut';
@@ -97,11 +98,7 @@ export const COURSE_PALETTE_INDICES=PLAY_LEVELS.flatMap((p,i)=>!p.labOnly&&!p.re
 export const nextCoursePalette=(index:number)=>COURSE_PALETTE_INDICES[(COURSE_PALETTE_INDICES.indexOf(index)+1)%COURSE_PALETTE_INDICES.length];
 
 export function rgbToLab(rgb: readonly number[]): XYZ {
-  const [r, g, b] = rgb.map((n) => { const v = n / 255; return v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });
-  const l = Math.cbrt(.4122214708 * r + .5363325363 * g + .0514459929 * b);
-  const m = Math.cbrt(.2119034982 * r + .6806995451 * g + .1073969566 * b);
-  const s = Math.cbrt(.0883024619 * r + .2817188376 * g + .6299787005 * b);
-  return [.2104542553 * l + .793617785 * m - .0040720468 * s, 1.9779984951 * l - 2.428592205 * m + .4505937099 * s, .0259040371 * l + .7827717662 * m - .808675766 * s];
+  return rgbToOklab(rgb);
 }
 
 export function colorPoint(rgb: RGB): ColorPoint {
@@ -192,27 +189,15 @@ export function baseLaunchPath(start: ColorPoint, pure: ColorPoint, samples = 96
   }));
 }
 
-const spectralCache = new Map<string, Color>();
-function pigmentColor(p: PaintColor) {
-  const key = `${p.id}:${p.rgb}:${p.strength}`;
-  let c = spectralCache.get(key);
-  if (!c) { c = new Color(p.rgb); c.tintingStrength = p.strength; spectralCache.set(key, c); }
-  return c;
-}
 export function mixtureColor(paints: PaintColor[], quantities: Mixture): ColorPoint {
   const mass = totalMass(quantities);
   if (!Number.isFinite(mass) || quantities.some((q) => !Number.isFinite(q) || q < 0)) throw new Error('Invalid paint quantities');
   if (!mass) return SEED_POINT;
   // Always remix the ORIGINAL pigments. Recycling the previous RGB would lose
   // composition and introduce order-dependent drift after successive pours.
-  const active = paints.map((p, i) => [pigmentColor(p), (quantities[i] ?? 0) / mass] as [Color, number]).filter(([, q]) => q > 0);
-  const result = active.length === 1 ? active[0][0] : mix(...active);
   // spectral.sRGB rounds to integers. Preserve linear RGB precision for smooth
   // physical paths, only rounding the CSS label at the presentation boundary.
-  return colorPoint(result.lRGB.map((v) => {
-    const linear = Math.max(0, Math.min(1, v));
-    return 255 * (linear <= .0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - .055);
-  }) as RGB);
+  return colorPoint(mixPigmentRGB(paints,quantities));
 }
 
 export function chargePower(seconds: number) {

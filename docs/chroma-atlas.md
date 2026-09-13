@@ -1,5 +1,7 @@
 # Chroma Atlas
 
+**Live update:** [Continuous controls, worker search and exact query caching](chroma-atlas-live.md) now extend this initial explorer. Starts, destinations and leg fractions can be edited live; the description below records the original precomputed bank and its evidence. In particular, banked-only destination selection below is superseded by the live controls.
+
 13 September 2026. Separate research section at `/chroma-atlas`, linked from Play and Sound Lab. Existing playable lab and sound behavior are preserved.
 
 ## What is delivered
