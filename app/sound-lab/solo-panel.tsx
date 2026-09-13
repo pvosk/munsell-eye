@@ -187,6 +187,7 @@ export function SoloPanel({
     step: number,
     change: (v: number) => void,
     hint?: string,
+    disabled = false,
   ) => (
     <label className="sl-range" key={label}>
       <span>
@@ -195,6 +196,7 @@ export function SoloPanel({
       </span>
       <input
         type="range"
+        disabled={disabled}
         aria-label={label}
         value={value}
         min={min}
@@ -228,7 +230,8 @@ export function SoloPanel({
           spec.max,
           spec.step,
           (v) => change(key, v),
-          `${kind !== "convergence" && SOURCE_KEYS.includes(key as (typeof SOURCE_KEYS)[number]) ? "New onset / retrigger. " : "Live. "}${spec.hint}`,
+          `${key === "motion" && !p.modulation ? "Enable Animate bands to use this control. " : kind !== "convergence" && SOURCE_KEYS.includes(key as (typeof SOURCE_KEYS)[number]) ? "New onset / retrigger. " : "Live. "}${spec.hint}`,
+          key === "motion" && p.modulation === 0,
         );
       })}
     </div>
@@ -375,44 +378,50 @@ export function SoloPanel({
               ))}
             </select>
           </label>
-          <label>
-            Mode / scale
-            <select
-              value={p.music.mode}
-              onChange={(e) =>
-                change("music", {
-                  ...p.music,
-                  source: "system",
-                  mode: e.target.value,
-                })
-              }
-            >
-              {MODES.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Fixed chord
-            <select
-              value={p.music.stack}
-              onChange={(e) =>
-                change("music", {
-                  ...p.music,
-                  source: "system",
-                  stack: e.target.value,
-                })
-              }
-            >
-              {STACKS.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          {kind !== "pop" && (
+            <>
+              <label>
+                Mode / scale
+                <select
+                  value={p.music.mode}
+                  onChange={(e) =>
+                    change("music", {
+                      ...p.music,
+                      source: "system",
+                      mode: e.target.value,
+                    })
+                  }
+                >
+                  {MODES.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {kind === "harp"
+                  ? "Resonator chord · effects only"
+                  : "Fixed chord"}
+                <select
+                  value={p.music.stack}
+                  onChange={(e) =>
+                    change("music", {
+                      ...p.music,
+                      source: "system",
+                      stack: e.target.value,
+                    })
+                  }
+                >
+                  {STACKS.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )}
           {range("Reference octave", p.music.octave, 1, 4, 1, (v) =>
             change("music", { ...p.music, octave: v }),
           )}
