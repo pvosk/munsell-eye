@@ -1,0 +1,699 @@
+{
+  "seed": 817913,
+  "config": {
+    "palettes": 384,
+    "targets": 8,
+    "starts": 4,
+    "auditsPerArm": 24
+  },
+  "seconds": 62.332,
+  "proposals": 24576,
+  "screened": 642,
+  "groups": [
+    {
+      "arm": "center",
+      "audited": 24,
+      "threeLeg": 3,
+      "multipleFirstPaints": 22,
+      "cases": [
+        {
+          "id": "branch-817913-338-0-1-center",
+          "palette": "Branch candidate 338",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 14.649659294442468,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-3-6-1-center",
+          "palette": "RYB",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            0,
+            1,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 6.142003630296083,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-181-3-3-center",
+          "palette": "Branch candidate 181",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.81653443220148,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-2-7-2-center",
+          "palette": "Cobalt Ember",
+          "rawMinimum": 2,
+          "regionMinimum": 3,
+          "firstPaints": [
+            0,
+            1,
+            3
+          ],
+          "shorterRawEscape": true,
+          "maxSeparationT": 12.067607401157233,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-266-6-2-center",
+          "palette": "Branch candidate 266",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 0,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-45-2-1-center",
+          "palette": "Branch candidate 45",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 5.587154334488594,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-265-7-2-center",
+          "palette": "Branch candidate 265",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 12.492778779697627,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-202-7-1-center",
+          "palette": "Branch candidate 202",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 4.813760441347786,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-163-0-3-center",
+          "palette": "Branch candidate 163",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            4,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.323581416238243,
+          "unmeasured": 58
+        },
+        {
+          "id": "branch-817913-317-4-3-center",
+          "palette": "Branch candidate 317",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 3.2298113579494325,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-162-2-1-center",
+          "palette": "Branch candidate 162",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.49701756774495,
+          "unmeasured": 8
+        },
+        {
+          "id": "branch-817913-1-2-1-center",
+          "palette": "Secondaries",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 14.22292928358633,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-233-7-0-center",
+          "palette": "Branch candidate 233",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 5.613664460608837,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-326-0-1-center",
+          "palette": "Branch candidate 326",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 7.039006744092418,
+          "unmeasured": 4
+        },
+        {
+          "id": "branch-817913-373-7-1-center",
+          "palette": "Branch candidate 373",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 10.007577411280797,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-298-7-3-center",
+          "palette": "Branch candidate 298",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 6.2155634433551326,
+          "unmeasured": 68
+        },
+        {
+          "id": "branch-817913-62-6-2-center",
+          "palette": "Branch candidate 62",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 19.001448138024713,
+          "unmeasured": 30
+        },
+        {
+          "id": "branch-817913-278-2-3-center",
+          "palette": "Branch candidate 278",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 9.292908871522334,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-85-0-2-center",
+          "palette": "Branch candidate 85",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 21.908892770171285,
+          "unmeasured": 13
+        },
+        {
+          "id": "branch-817913-106-7-1-center",
+          "palette": "Branch candidate 106",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 17.59436684564413,
+          "unmeasured": 32
+        },
+        {
+          "id": "branch-817913-263-1-2-center",
+          "palette": "Branch candidate 263",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 19.186008874453872,
+          "unmeasured": 164
+        },
+        {
+          "id": "branch-817913-287-4-0-center",
+          "palette": "Branch candidate 287",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            2,
+            3,
+            4,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 5.661838149386435,
+          "unmeasured": 108
+        },
+        {
+          "id": "branch-817913-286-0-1-center",
+          "palette": "Branch candidate 286",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            2,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 12.048953660410252,
+          "unmeasured": 50
+        },
+        {
+          "id": "branch-817913-16-0-2-center",
+          "palette": "Branch candidate 16",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            2
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 9.24558715933196,
+          "unmeasured": 0
+        }
+      ]
+    },
+    {
+      "arm": "region",
+      "audited": 24,
+      "threeLeg": 4,
+      "multipleFirstPaints": 23,
+      "cases": [
+        {
+          "id": "branch-817913-338-0-0-region",
+          "palette": "Branch candidate 338",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            1,
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 12.957617772802001,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-326-0-1-region",
+          "palette": "Branch candidate 326",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 22.29810796340036,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-233-3-1-region",
+          "palette": "Branch candidate 233",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            0,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 5.6391009414654585,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-181-3-3-region",
+          "palette": "Branch candidate 181",
+          "rawMinimum": 3,
+          "regionMinimum": 3,
+          "firstPaints": [
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 9.072881213288781,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-266-6-3-region",
+          "palette": "Branch candidate 266",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 0,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-45-2-1-region",
+          "palette": "Branch candidate 45",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 4.484026333148496,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-278-2-0-region",
+          "palette": "Branch candidate 278",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 7.305244633748631,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-202-7-1-region",
+          "palette": "Branch candidate 202",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 4.936779921789954,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-265-7-2-region",
+          "palette": "Branch candidate 265",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 12.4936109508902,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-163-0-3-region",
+          "palette": "Branch candidate 163",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            4,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.541799864120314,
+          "unmeasured": 58
+        },
+        {
+          "id": "branch-817913-162-2-1-region",
+          "palette": "Branch candidate 162",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.948879490606515,
+          "unmeasured": 11
+        },
+        {
+          "id": "branch-817913-51-1-1-region",
+          "palette": "Branch candidate 51",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.661078549659385,
+          "unmeasured": 14
+        },
+        {
+          "id": "branch-817913-1-2-1-region",
+          "palette": "Secondaries",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 14.097789752037142,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-2-5-3-region",
+          "palette": "Cobalt Ember",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            2
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.62486908368445,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-87-0-0-region",
+          "palette": "Branch candidate 87",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            2,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 9.209088454796674,
+          "unmeasured": 101
+        },
+        {
+          "id": "branch-817913-6-4-2-region",
+          "palette": "Branch candidate 6",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 11.074334107012433,
+          "unmeasured": 8
+        },
+        {
+          "id": "branch-817913-62-6-2-region",
+          "palette": "Branch candidate 62",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            3,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 19.92464528707143,
+          "unmeasured": 30
+        },
+        {
+          "id": "branch-817913-106-7-1-region",
+          "palette": "Branch candidate 106",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 17.597819379264372,
+          "unmeasured": 30
+        },
+        {
+          "id": "branch-817913-85-0-2-region",
+          "palette": "Branch candidate 85",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 21.91288766406216,
+          "unmeasured": 13
+        },
+        {
+          "id": "branch-817913-3-7-3-region",
+          "palette": "RYB",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 21.944028248018213,
+          "unmeasured": 0
+        },
+        {
+          "id": "branch-817913-171-2-1-region",
+          "palette": "Branch candidate 171",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            1,
+            4,
+            5
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 8.971503381011537,
+          "unmeasured": 102
+        },
+        {
+          "id": "branch-817913-21-7-0-region",
+          "palette": "Branch candidate 21",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            0,
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 18.41686941087867,
+          "unmeasured": 6
+        },
+        {
+          "id": "branch-817913-38-0-2-region",
+          "palette": "Branch candidate 38",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            1,
+            2,
+            4
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 13.619574667415804,
+          "unmeasured": 32
+        },
+        {
+          "id": "branch-817913-286-3-1-region",
+          "palette": "Branch candidate 286",
+          "rawMinimum": 2,
+          "regionMinimum": 2,
+          "firstPaints": [
+            2,
+            3
+          ],
+          "shorterRawEscape": false,
+          "maxSeparationT": 4.8272226938906515,
+          "unmeasured": 13
+        }
+      ]
+    }
+  ],
+  "sourceHash": "31e4e92064290ec0e93d5480cbf5274cff3eff8844143f1374e32424aa67f497",
+  "limitations": [
+    "Finite sampling of landing inverse image, not full-region optimization",
+    "Selection is not a randomized player experiment",
+    "Branches are supported alternative pigment routes, not mandatory checkpoints",
+    "Same-order contribution permutations may yield branches without distinct perceived decisions",
+    "Local region coverage is not player success probability",
+    "New palette samples do not exhaust pigment combinations",
+    "No par, pigment strength, timing or live lab changes"
+  ]
+}
