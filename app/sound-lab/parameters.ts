@@ -5,7 +5,14 @@ import {
   sanitizeMusic,
   type MusicSettings,
 } from "./music";
-export type Instrument = "glass" | "piano" | "synth" | "convergence" | "vocal";
+export type Instrument =
+  | "glass"
+  | "piano"
+  | "synth"
+  | "convergence"
+  | "vocal"
+  | "harp"
+  | "pop";
 export type Parameters = {
   instrument: Instrument;
   filterFollow: "chord" | "manual";
@@ -861,7 +868,7 @@ export function sanitizeParameters(value: unknown): Parameters {
     p.intervals = data.intervals.map((v) => Math.min(3600, Math.max(-1200, v)));
   }
   if (
-    ["glass", "piano", "synth", "convergence", "vocal"].includes(
+    ["glass", "piano", "synth", "convergence", "vocal", "harp", "pop"].includes(
       String(data.instrument),
     )
   )
@@ -994,6 +1001,54 @@ export const SOUND_MODELS: {
       echo: 0.18,
       grains: 0.08,
       reverse: 0.05,
+    },
+  },
+  {
+    id: "harp",
+    name: "Harp flourish",
+    description: "Generated plucked partials · clear scale sweeps",
+    values: {
+      instrument: "harp",
+      attack: 0.003,
+      decay: 2.8,
+      harmonics: 0.38,
+      hardness: 0.2,
+      detune: 0,
+      drive: 0,
+      shotArps: 1,
+      ribbon: 0.1,
+      grains: 0.03,
+      reverse: 0.02,
+      echo: 0.14,
+      delay: 0.24,
+      tail: 2,
+      room: 0.4,
+      tension: 0,
+    },
+  },
+  {
+    id: "pop",
+    name: "Release pop",
+    description: "Pitched pulse · airy noise transient",
+    values: {
+      instrument: "pop",
+      attack: 0.008,
+      decay: 0.5,
+      hardness: 0.3,
+      harmonics: 0.25,
+      glideStart: 12,
+      glideTime: 0.12,
+      glideCurve: 1,
+      drive: 0,
+      shotArps: 1,
+      ribbon: 0.18,
+      grains: 0.12,
+      reverse: 0.08,
+      echo: 0.08,
+      delay: 0.3,
+      tail: 1.4,
+      room: 0.42,
+      tension: 0,
     },
   },
 ];

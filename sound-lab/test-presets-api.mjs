@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { STARTERS } from "../app/sound-lab/presets.ts";
+import { soloDefault } from "../app/sound-lab/solo-settings.ts";
 const origin = process.env.SOUND_TEST_ORIGIN ?? "http://localhost:3018";
 const id = `test-sound-${Date.now()}`,
   preset = { ...STARTERS[0], id, name: "Local test preset" };
@@ -23,6 +24,15 @@ try {
   r = await call("sound-test-a");
   let data = await r.json();
   assert(data.presets.some((x) => x.id === id));
+  r = await call("sound-test-a", "POST", {
+    ...preset,
+    setup: soloDefault("harp"),
+  });
+  assert.equal(r.status, 200, await r.text());
+  r = await call("sound-test-a");
+  data = await r.json();
+  assert.equal(data.presets.find((x) => x.id === id).setup.solo.kind, "harp");
+  assert.equal(data.presets.find((x) => x.id === id).setup.solo.count, 22);
   r = await call("sound-test-b");
   assert.equal(r.status, 401, "Anonymous client must not read account presets");
   r = await call("sound-test-b", "DELETE");

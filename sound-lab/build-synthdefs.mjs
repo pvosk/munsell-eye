@@ -194,6 +194,93 @@ function struck(name, piano) {
   g.node("Line", 1, [0, 0, g.add(p.decay, 2), 2]);
   return g;
 }
+function harp() {
+  const g = new Graph("chroma_harp", {
+    freq: 330,
+    amp: 0.15,
+    attack: 0.003,
+    decay: 3,
+    hardness: 0.2,
+    harmonics: 0.4,
+    pan: 0,
+    out: 4,
+  });
+  const p = g.p,
+    trigger = g.node("Impulse", 2, [0, 0]);
+  const excitation = g.mul(
+    g.node("PinkNoise", 2),
+    g.node("Decay2", 2, [trigger, p.attack, g.add(p.attack, 0.014)]),
+  );
+  const string = g.node("Pluck", 2, [
+    excitation,
+    trigger,
+    0.04,
+    g.div(1, p.freq),
+    p.decay,
+    g.sub(0.85, g.mul(p.harmonics, 0.7)),
+  ]);
+  const transient = g.mul(excitation, g.mul(p.hardness, 0.12));
+  g.node(
+    "Out",
+    2,
+    [
+      p.out,
+      ...g.pan(g.mul(g.add(g.mul(string, 1.8), transient), p.amp), p.pan),
+    ],
+    0,
+  );
+  g.node("Line", 1, [0, 0, g.add(p.decay, 2), 2]);
+  return g;
+}
+function pop() {
+  const g = new Graph("chroma_pop", {
+    freq: 220,
+    amp: 0.15,
+    attack: 0.008,
+    decay: 0.5,
+    hardness: 0.3,
+    harmonics: 0.25,
+    glideRatio: 2,
+    glideTime: 0.12,
+    pan: 0,
+    out: 4,
+  });
+  const p = g.p,
+    trigger = g.node("Impulse", 2, [0, 0]);
+  const f = g.node("XLine", 1, [
+    g.mul(p.freq, p.glideRatio),
+    p.freq,
+    p.glideTime,
+    0,
+  ]);
+  const body = g.mul(
+    g.node("SinOsc", 2, [f, 0]),
+    g.node("Decay2", 2, [trigger, p.attack, p.decay]),
+  );
+  const air = g.mul(
+    g.node("BPF", 2, [
+      g.node("PinkNoise", 2),
+      g.add(1100, g.mul(p.harmonics, 5000)),
+      0.6,
+    ]),
+    g.mul(
+      g.node("Decay2", 2, [
+        trigger,
+        p.attack,
+        g.add(0.04, g.mul(p.decay, 0.35)),
+      ]),
+      g.mul(p.hardness, 0.8),
+    ),
+  );
+  g.node(
+    "Out",
+    2,
+    [p.out, ...g.pan(g.mul(g.add(g.mul(body, 0.8), air), p.amp), p.pan)],
+    0,
+  );
+  g.node("Line", 1, [0, 0, g.add(p.decay, 2), 2]);
+  return g;
+}
 function flight() {
   const g = new Graph("chroma_flight", {
     out: 4,
@@ -552,6 +639,8 @@ const manifest = [
   chime(),
   struck("chroma_piano", true),
   struck("chroma_synth", false),
+  harp(),
+  pop(),
   flight(),
   field(),
   space(),

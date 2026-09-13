@@ -184,6 +184,8 @@ export class SoundLabEngine {
             "chroma_chime",
             "chroma_piano",
             "chroma_synth",
+            "chroma_harp",
+            "chroma_pop",
             "chroma_flight",
             "chroma_field",
             "chroma_space",
@@ -463,9 +465,13 @@ export class SoundLabEngine {
     const instrument =
       p.instrument === "piano"
         ? "chroma_piano"
-        : p.instrument === "glass"
-          ? "chroma_chime"
-          : "chroma_synth";
+        : p.instrument === "harp"
+          ? "chroma_harp"
+          : p.instrument === "pop"
+            ? "chroma_pop"
+            : p.instrument === "glass"
+              ? "chroma_chime"
+              : "chroma_synth";
     this.sonic.send(
       "/s_new",
       instrument,
@@ -488,6 +494,12 @@ export class SoundLabEngine {
       p.harmonics,
       "detune",
       p.detune,
+      "glideStart",
+      p.glideStart,
+      "glideTime",
+      p.glideTime,
+      "glideRatio",
+      2 ** (p.glideStart / 12),
       "pan",
       Math.max(-1, Math.min(1, pan * p.width)),
     );
@@ -503,6 +515,67 @@ export class SoundLabEngine {
       y < 0.35 ? 1 : 0,
       0.3 + (1 - y) * 0.65,
       x * 2 - 1,
+    );
+  }
+
+  /** Isolated source audition; no shot/progression scheduler is started. */
+  beginSolo(p: Parameters, clearMemory = true) {
+    if (clearMemory) this.stopSound();
+    else this.stopJourney();
+    this.stopAmbient();
+    this.setMappingMode("off");
+    this.resolved = false;
+    this.musicStep = 0;
+    this.update({
+      ...p,
+      music: {
+        ...p.music,
+        sustain: false,
+        progression: "still",
+        destinationStep: 0,
+      },
+    });
+    this.wakeAudio();
+  }
+  soloNote(hz: number, strength = 0.7, pan = 0) {
+    if (this.audioPaused) return;
+    this.wakeAudio();
+    this.playHz(hz, 0, strength, pan);
+  }
+  soloCloud(time: number, progress: number, level: number) {
+    if (!this.running || !this.sonic) return;
+    const p = this.parameters;
+    const gather = Math.max(
+      p.converge,
+      Math.pow(
+        clamp((progress - p.gatherStart) / (1 - p.gatherStart)),
+        p.gatherCurve,
+      ),
+    );
+    const destination = this.currentFrequencies();
+    const cloud = cloudFrequencies(p, time, destination, gather);
+    this.sonic.send(
+      "/n_set",
+      103,
+      "cloud",
+      1,
+      "vocal",
+      0,
+      ...cloud.flatMap((f, i) => [`v${i}`, f]),
+      "amp",
+      level * p.drive,
+      "voices",
+      p.voices,
+      "normalize",
+      1 / Math.sqrt(p.voices),
+      "harmonics",
+      p.harmonics,
+      "detune",
+      p.detune * (1 - gather),
+      "width",
+      p.width,
+      "converge",
+      gather,
     );
   }
 
