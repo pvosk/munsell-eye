@@ -46,3 +46,13 @@ next-env.d.ts
 
 # Verbose broad-search cache; portable exact-witness shards and index are archived.
 /docs/play-broad-palette-bank.jsonl.gz
+
+# Exact research-bank caches; verified compressed parts are versioned instead.
+/docs/pigment-leg-audit-1/audits.json
+/docs/pigment-leg-holdout-1/checks.json
+/docs/pigment-leg-search-1/audits.json
+/docs/pigment-leg-search-1/proposal-bank.json
+/docs/pigment-leg-search-1/screened-bank.json
+/docs/pigment-leg-search-2/audits.json
+/docs/pigment-leg-search-2/proposal-bank.json
+/docs/pigment-leg-search-2/screened-bank.json

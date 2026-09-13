@@ -37,3 +37,9 @@ test('normalizing quantity preserves color without disabling tinting strength',(
  const changed=paints.map((p,i)=>({...p,strength:i===0?p.strength*3:p.strength}));
  assert.ok(colorDistance(mixtureColor(paints,normalized),mixtureColor(changed,normalized))>.001);
 });
+test('coordinate search can move DOWN from its only seed',()=>{
+ const target=mixtureColor(PLAY_LEVELS[0].paints,blindReplay(0,[0,1],[.4]));
+ // seed 1 gives a single .55 s initial sample, above the .4 s solution.
+ const result=blindSearch(0,target,1,1,{...BLIND_POLICY,samples:1,restarts:1});
+ assert(result.best[0][0]<1e-5); // legacy 20 microsecond stopping resolution
+});

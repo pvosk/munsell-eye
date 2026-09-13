@@ -1,6 +1,10 @@
 # Chroma Glider — current engineering and design brief
 
-Updated 12 September 2026.
+Updated 13 September 2026.
+
+## Latest research checkpoint
+
+Read [the pigment-leg overhaul and palette-first/route-first comparison](play-pigment-leg-findings.md) before interpreting older pour-count or style-resistance claims. It separates pigment legs, proportion-region support and current-control execution; banks 40,960 proposals and 264 new audited cases; and adds successful-control style challenges. Those challenges found supported bypasses for 42 of 82 provisional unopposed claims. All 88 three-leg survivors passed denser endpoint counterexample checks, without a global proof. The final bank preserves these distinctions and does not change the playable lab or its historical labels. The previous source checkpoint is `6b9cebe27fbbc9e686a2d0cf910385ece938799c` (v77); this research is its successor, with publication recorded in the task's deployment result. The baseline section below is historical, not a statement that v64 is the latest release.
 
 Read the [full engine, gameplay, course, and sonic handoff](archive/2026-09-11-chroma-glider-engine-gameplay-sound-brief.md). It remains the engine and course reference. Read the [updated sonic design addendum](archive/2026-09-11-chroma-glider-sonic-design-addendum.md) alongside it for the current sound direction; the addendum supersedes earlier sonic priorities without rewriting the archival snapshot.
 

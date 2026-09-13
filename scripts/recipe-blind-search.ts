@@ -1,7 +1,7 @@
 // Offline cross-check. Intentionally imports no route proposer, atlas, refinement,
 // recipe witness, style classifier, or target recipe.
 import {PLAY_LEVELS,CHARGE_SECONDS,LIVE_LANDING_TOLERANCE,mixtureColor,colorDistance,chargeAmount,type ColorPoint} from '../app/play-engine';
-export const BLIND_POLICY={version:'blind-halton-pattern-1',samples:72,restarts:5,iterations:80,minimumStep:.00002,timeExponent:1};
+export const BLIND_POLICY={version:'blind-halton-pattern-2',samples:72,restarts:5,iterations:80,minimumStep:.00002,timeExponent:1};
 export function halton(index:number,base:number){let f=1,value=0;while(index>0){f/=base;value+=f*(index%base);index=Math.floor(index/base);}return value;}
 export function blindReplay(palette:number,order:number[],times:number[]){
  const q=PLAY_LEVELS[palette].paints.map((_,i)=>+(i===order[0]));
@@ -23,7 +23,7 @@ export function blindSearch(palette:number,target:ColorPoint,maxPours=3,seed=120
      let next=times,nextError=error;
      // Evaluate a full coordinate neighborhood before committing a step.
      for(let axis=0;axis<depth;axis++)for(const direction of [-1,1]){
-      const t=[...times];t[axis]=Math.max(0,Math.min(CHARGE_SECONDS,t[axis]+step));
+      const t=[...times];t[axis]=Math.max(0,Math.min(CHARGE_SECONDS,t[axis]+direction*step));
       const e=score(order,t);if(e<nextError){next=t;nextError=e;}
      }
      if(next===times)step*=.5;else {times=next;error=nextError;}
