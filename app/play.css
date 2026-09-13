@@ -217,6 +217,11 @@
 .lab-campaign-picker > p { flex-basis:100%; margin:0; font-size:12px; line-height:1.5; }
 .lab-campaign-picker > details { flex-basis:100%; color:var(--play-muted); font-size:12px; line-height:1.6; }
 .lab-campaign-picker summary { cursor:pointer; }
+.lab-course-board[open] { max-height:50svh; overflow:auto; overscroll-behavior:contain; padding:12px; border:1px solid var(--play-line); border-radius:12px; }
+.lab-course-board p { font-size:14px; line-height:1.5; }
+.lab-course-board article { padding:12px 0; border-top:1px solid var(--play-line); }
+.lab-course-board h3 { margin:0 0 6px; color:var(--play-ivory); font-size:16px; }
+.lab-course-board article button { margin:4px 6px 0 0; }
 .lab-campaign-picker li { margin:8px 0; }
 .play-lab-panel { max-width:1100px; margin:30px auto 0; padding:24px; border:1px solid var(--play-line); border-radius:18px; background:#ffffff04; }
 .play-lab-panel header { display:flex; gap:20px; align-items:center; justify-content:space-between; }

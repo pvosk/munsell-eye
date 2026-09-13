@@ -13,13 +13,22 @@ export function premixStep(before:Mixture,paint:number,seconds:number,mode:MassM
   const amount=chargeAmount(totalMass(q),seconds),added=addPaint(q,paint,amount);
   return{before:q,amount,after:mode==='normalized'?normalizeRecipe(added):added};
 }
-export function premixReplay(start:Mixture,order:number[],times:number[],mode:MassMode){
-  if(order.length!==times.length)throw Error('Each premix action needs a hold');
-  return order.reduce((q,p,i)=>premixStep(q,p,times[i],mode).after,[...start]);
+// Versioned lab opt-in: empty base selection is free, later shots normalize.
+// The old premix and accumulated free-base transitions remain unchanged.
+export function labMixtureStep(before:Mixture,paint:number,seconds:number,mode:MassMode,freeBase=false){
+ if(freeBase){
+  if(mode!=='normalized'||!Number.isFinite(seconds)||seconds<0)throw Error('Invalid normalized free-base action');
+  if(before.every(q=>q===0))return{before:[...before],amount:1,after:addPaint(before,paint,1)};
+ }
+ return premixStep(before,paint,seconds,mode);
 }
-export function premixRoute(paints:PaintColor[],start:Mixture,order:number[],times:number[],mode:MassMode){
+export function premixReplay(start:Mixture,order:number[],times:number[],mode:MassMode,freeBase=false){
+  if(order.length!==times.length)throw Error('Each premix action needs a hold');
+  return order.reduce((q,p,i)=>labMixtureStep(q,p,times[i],mode,freeBase).after,[...start]);
+}
+export function premixRoute(paints:PaintColor[],start:Mixture,order:number[],times:number[],mode:MassMode,freeBase=false){
   let q=[...start];const path:ColorPoint[]=[mixtureColor(paints,q)],stops=[path[0]],strokes:ColorPoint[][]=[];
-  order.forEach((p,i)=>{const s=premixStep(q,p,times[i],mode),stroke=pourPath(paints,s.before,p,s.amount,64);strokes.push(stroke);path.push(...stroke);q=s.after;stops.push(mixtureColor(paints,q));});
+  order.forEach((p,i)=>{const s=labMixtureStep(q,p,times[i],mode,freeBase),stroke=pourPath(paints,s.before,p,s.amount,64);strokes.push(stroke);path.push(...stroke);q=s.after;stops.push(mixtureColor(paints,q));});
   return{path,stops,strokes,after:q};
 }
 // Invert a finishing share in COMPOSITION space, never displayed RGB space.
