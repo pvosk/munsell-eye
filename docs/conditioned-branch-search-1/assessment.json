@@ -1,0 +1,4880 @@
+{
+  "summary": {
+    "seed": 929831,
+    "config": {
+      "palettes": 1024,
+      "starts": 8,
+      "auditsPerGroup": 5,
+      "refine": 12
+    },
+    "seconds": 243.588,
+    "proposals": 34472,
+    "unavailable": 2859,
+    "screened": 225,
+    "audited": 50,
+    "refinements": 19,
+    "groups": [
+      {
+        "n": 4,
+        "spec": "light-rise",
+        "audited": 5,
+        "minNMinusOne": 5,
+        "regionNMinusOne": 5,
+        "styleEfficient": 5
+      },
+      {
+        "n": 4,
+        "spec": "dark-drop",
+        "audited": 5,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 2
+      },
+      {
+        "n": 4,
+        "spec": "mid-balance",
+        "audited": 5,
+        "minNMinusOne": 4,
+        "regionNMinusOne": 4,
+        "styleEfficient": 5
+      },
+      {
+        "n": 4,
+        "spec": "vivid-ride",
+        "audited": 5,
+        "minNMinusOne": 1,
+        "regionNMinusOne": 1,
+        "styleEfficient": 4
+      },
+      {
+        "n": 4,
+        "spec": "fixed-hansa",
+        "audited": 5,
+        "minNMinusOne": 5,
+        "regionNMinusOne": 5,
+        "styleEfficient": 4
+      },
+      {
+        "n": 4,
+        "spec": "fixed-earth",
+        "audited": 2,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 2
+      },
+      {
+        "n": 4,
+        "spec": "fixed-ryb",
+        "audited": 5,
+        "minNMinusOne": 3,
+        "regionNMinusOne": 3,
+        "styleEfficient": 2
+      },
+      {
+        "n": 5,
+        "spec": "light-rise",
+        "audited": 4,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 1
+      },
+      {
+        "n": 5,
+        "spec": "dark-drop",
+        "audited": 0,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 0
+      },
+      {
+        "n": 5,
+        "spec": "mid-balance",
+        "audited": 5,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 3
+      },
+      {
+        "n": 5,
+        "spec": "vivid-ride",
+        "audited": 1,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 1
+      },
+      {
+        "n": 5,
+        "spec": "fixed-hansa",
+        "audited": 5,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 3
+      },
+      {
+        "n": 5,
+        "spec": "fixed-earth",
+        "audited": 0,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 0
+      },
+      {
+        "n": 5,
+        "spec": "fixed-ryb",
+        "audited": 3,
+        "minNMinusOne": 0,
+        "regionNMinusOne": 0,
+        "styleEfficient": 0
+      }
+    ],
+    "sourceHash": "c9ea145bbcae86dd8ad019e10f76206b3a4bec457742e34b5fd4c2a9c66558fd",
+    "limitations": [
+      "Finite candidate and region sampling; not exhaustive",
+      "n−1 is proposal depth, not automatic minimum",
+      "Recipe-level four-leg witnesses may have color-equivalent three-leg shortcuts",
+      "Recovery depth capped at three; missing recovery is not a dead end proof",
+      "Recovery is measured, not optimized or player-calibrated",
+      "No control, tolerance, pigment strength or live lab changes"
+    ]
+  },
+  "bank": [
+    {
+      "id": "condition-929831-820-0-1",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Radiant Violet",
+        "Cadmium Yellow Medium",
+        "Chromium Oxide Green",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.3939619627458948,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 4,
+          "total": 13
+        },
+        "drop": {
+          "matches": 5,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 9,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8100000072288395,
+        -0.050192176646262465,
+        0.06547516892448202
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-830-0-4",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Cobalt Teal",
+        "Chrome Titanate Yellow",
+        "Radiant White",
+        "Phthalo Green"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.3074818131963284,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 2,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 5,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8099999968685189,
+        -0.07685297531408458,
+        0.02999784509932335
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-636-0-6",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Naphthol Scarlet",
+        "Radiant White",
+        "Terre Verte",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1059162455961167,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 13
+        },
+        "drop": {
+          "matches": 0,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.810000009332128,
+        0.012087497935218683,
+        0.08160974087267381
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-226-0-5",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Ivory Black",
+        "Titanium White",
+        "Cadmium Red Medium",
+        "Cadmium Lemon"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1014328379008733,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 11,
+      "styles": {
+        "rise": {
+          "matches": 4,
+          "total": 11
+        },
+        "drop": {
+          "matches": 0,
+          "total": 11
+        },
+        "chromatic-ride": {
+          "matches": 3,
+          "total": 11
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 11
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 11
+        },
+        "interior-assembly": {
+          "matches": 11,
+          "total": 11
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 11,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8100000006338924,
+        0.07257850403486299,
+        0.03922505503365614
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-2-0-3",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Flake White",
+        "Cadmium Lemon",
+        "Cadmium Red Medium",
+        "Phthalo Blue (Green Shade)"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1006218678020363,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 7,
+      "styles": {
+        "rise": {
+          "matches": 3,
+          "total": 7
+        },
+        "drop": {
+          "matches": 0,
+          "total": 7
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 7
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 7
+        },
+        "coupled-balance": {
+          "matches": 2,
+          "total": 7
+        },
+        "interior-assembly": {
+          "matches": 7,
+          "total": 7
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 7,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8100000031966214,
+        -0.024964795928849537,
+        0.0786320953723556
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-156-1-3",
+      "source": "baseline",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Alizarin Crimson",
+        "Cobalt Turquoise Light",
+        "Transparent Earth Yellow",
+        "Cadmium Lemon"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.8812447740363665,
+      "requestedStyle": "drop",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 1,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.36007009434356013,
+        0.061905266290358085,
+        0.008601636067717133
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-884-1-7",
+      "source": "baseline",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Quinacridone Red",
+        "Phthalo Green (Yellow Shade)",
+        "Pyrrole Orange",
+        "Transparent Earth Red"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.9449367884071649,
+      "requestedStyle": "drop",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 3,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 6,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        1
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.3549999946873072,
+        0.05598523984334655,
+        -0.02778314391574771
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-354-1-1",
+      "source": "baseline",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Cadmium Red Medium",
+        "Indigo",
+        "Cobalt Green",
+        "Cadmium Orange"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.1774817729110603,
+      "requestedStyle": "drop",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        1
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.35500000578716917,
+        0.058831239931826235,
+        -0.021098212251929316
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-318-1-4",
+      "source": "baseline",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Phthalo Green",
+        "Titanium White",
+        "Radiant Violet",
+        "Alizarin Crimson"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.449448879674445,
+      "requestedStyle": "drop",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.35500000351892663,
+        0.050028498952268574,
+        -0.03746197392683198
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-218-1-0",
+      "source": "baseline",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Cadmium Red Deep",
+        "Indian Yellow Deep",
+        "Quinacridone Rose",
+        "Cobalt Blue"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 3.7678731541706547,
+      "requestedStyle": "drop",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.35500001195595837,
+        0.062335224695882124,
+        0.004535415520101838
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-546-2-0",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Phthalo Blue",
+        "Cadmium Red Deep",
+        "Cadmium Yellow Deep",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.4010362675194707,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 17,
+      "efficientMeasured": 18,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 18
+        },
+        "drop": {
+          "matches": 0,
+          "total": 18
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 18
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 18
+        },
+        "coupled-balance": {
+          "matches": 17,
+          "total": 18
+        },
+        "interior-assembly": {
+          "matches": 18,
+          "total": 18
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 18,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5700000012248535,
+        0.02190887468741501,
+        0.08471273967349352
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-326-2-4",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Manganese Blue Hue",
+        "Titanium White",
+        "Cobalt Violet"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.184754969309244,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 13,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 19
+        },
+        "drop": {
+          "matches": 7,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 7,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.569999999734065,
+        0.03858530306418406,
+        0.0785329419471244
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-40-2-7",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Quinacridone Rose",
+        "Viridian",
+        "Flake White",
+        "Winsor Red"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1120015750389407,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 13,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 13
+        },
+        "drop": {
+          "matches": 3,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5700000007471335,
+        0.08421456664745852,
+        -0.023752022458532807
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-196-2-4",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Transparent Earth Yellow",
+        "Zinc White",
+        "Quinacridone Magenta",
+        "Radiant Turquoise"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.0893543891094035,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 7,
+      "efficientMeasured": 7,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 7
+        },
+        "drop": {
+          "matches": 5,
+          "total": 7
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 7
+        },
+        "setup-glide": {
+          "matches": 5,
+          "total": 7
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 7
+        },
+        "interior-assembly": {
+          "matches": 7,
+          "total": 7
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 7,
+      "firstPaints": [
+        0,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.56999998195365,
+        0.0709380275258168,
+        -0.05122544523070105
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-352-2-5",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Transparent Orange",
+        "Terre Verte",
+        "Titanium White",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.0405610951725404,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 3,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 3,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5699999613274938,
+        0.05020546655406641,
+        0.07166353602409942
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-410-3-3",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Radiant Lemon",
+        "Yellow Ochre",
+        "Alizarin Crimson",
+        "Cobalt Teal"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.6032787236780275,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 15,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6600000008525202,
+        -0.1092823486060755,
+        0.08646816146526054
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-304-3-2",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Quinacridone Rose",
+        "Radiant Turquoise",
+        "Cobalt Blue",
+        "Cadmium Yellow Light"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.2893371710456112,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 15,
+      "efficientMeasured": 15,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 15
+        },
+        "drop": {
+          "matches": 6,
+          "total": 15
+        },
+        "chromatic-ride": {
+          "matches": 15,
+          "total": 15
+        },
+        "setup-glide": {
+          "matches": 9,
+          "total": 15
+        },
+        "coupled-balance": {
+          "matches": 6,
+          "total": 15
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 15
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 15,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.6600000065776842,
+        -0.11837557843721558,
+        0.08681268256453428
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-2-3-5",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Flake White",
+        "Cadmium Lemon",
+        "Cadmium Red Medium",
+        "Phthalo Blue (Green Shade)"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.6664044021344586,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 12,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 12
+        },
+        "drop": {
+          "matches": 6,
+          "total": 12
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 12
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 12
+        },
+        "coupled-balance": {
+          "matches": 6,
+          "total": 12
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 12
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 12,
+      "firstPaints": [
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6599999988618948,
+        0.14771539726322294,
+        0.10285993855053571
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-508-3-5",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Mars Yellow",
+        "Cadmium Red Medium",
+        "Permanent Red",
+        "Flake White"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.233300404711446,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 2,
+      "efficientMeasured": 7,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 7
+        },
+        "drop": {
+          "matches": 5,
+          "total": 7
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 7
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 7
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 7
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 7
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 7,
+      "firstPaints": [
+        1,
+        3
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.6600000231169081,
+        0.17316051891129836,
+        0.049147090353793
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-442-3-1",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Terre Verte",
+        "Radiant Green",
+        "Hansa Yellow Medium",
+        "Radiant Violet"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.2546242342682916,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        1
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6600000051638316,
+        -0.09067415996861489,
+        0.10079591340127658
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-300-4-3",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Perylene Maroon",
+        "Cadmium Lemon",
+        "Titanium White",
+        "Permanent Green Light"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.26103855333951,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 6,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-988-4-2",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Mars Orange",
+        "Cadmium Red Light",
+        "Phthalo Emerald",
+        "Titanium White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.7823947412417607,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 4,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 18,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-302-4-7",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Burnt Sienna",
+        "Mars Orange",
+        "Prussian Blue",
+        "Titanium White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.6640096686960697,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 4,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-436-4-6",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Cobalt Blue",
+        "Alizarin Permanent",
+        "Cadmium Lemon",
+        "Zinc White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.3556208312747233,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 7,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 7,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 7,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 12,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-1002-4-2",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Radiant White",
+        "Pyrrole Orange",
+        "Phthalo Blue"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.2856856555942338,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 7,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 7
+        },
+        "drop": {
+          "matches": 0,
+          "total": 7
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 7
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 7
+        },
+        "coupled-balance": {
+          "matches": 5,
+          "total": 7
+        },
+        "interior-assembly": {
+          "matches": 7,
+          "total": 7
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 7,
+      "firstPaints": [
+        0,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-14-5-1",
+      "source": "baseline",
+      "requested": "fixed-earth",
+      "n": 4,
+      "palette": [
+        "Indigo",
+        "Transparent Earth Orange",
+        "Cobalt Teal",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.5136800567277597,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 4,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 4,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        1
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.30024462000611096,
+        0.004521860915639164,
+        0.0023386230282682885
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-852-5-4",
+      "source": "baseline",
+      "requested": "fixed-earth",
+      "n": 4,
+      "palette": [
+        "Indigo",
+        "Chromium Oxide Green",
+        "Phthalo Blue (Green Shade)",
+        "Ivory Black"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.5087765789066208,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 5,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 3,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 5,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.30024462000611096,
+        0.004521860915639164,
+        0.0023386230282682885
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-374-6-6",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Perylene Red",
+        "Cadmium Yellow Deep",
+        "Phthalo Blue",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.4298756624523445,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 11,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 11
+        },
+        "drop": {
+          "matches": 0,
+          "total": 11
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 11
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 11
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 11
+        },
+        "interior-assembly": {
+          "matches": 11,
+          "total": 11
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 11,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-326-6-2",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Manganese Blue Hue",
+        "Titanium White",
+        "Cobalt Violet"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.3388476773711269,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 9,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-956-6-7",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Cadmium Yellow Medium",
+        "Cadmium Yellow Deep",
+        "Flake White Replacement",
+        "Phthalo Emerald"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.0369002976521307,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 13
+        },
+        "drop": {
+          "matches": 0,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 9,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-300-6-5",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Perylene Maroon",
+        "Cadmium Lemon",
+        "Titanium White",
+        "Permanent Green Light"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.9820212461673101,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        0,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-1-6-1",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Cadmium Orange",
+        "Dioxazine Purple",
+        "Phthalo Green (Yellow Shade)",
+        "Titanium White"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.3387864923917008,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 0,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 0
+        },
+        "drop": {
+          "matches": 0,
+          "total": 0
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 0
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 0
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 0
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 0
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 0,
+      "firstPaints": [],
+      "ingredientSets": 0,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-129-0-6",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Burnt Umber",
+        "Ultramarine Violet",
+        "Flake White Replacement",
+        "Bismuth Yellow",
+        "Chartreuse"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.608397318219606,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 4,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 4,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 4,
+      "target": [
+        0.8100000045519185,
+        -0.0029061176286037105,
+        0.08244880404151633
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-23-0-6",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Cadmium Orange",
+        "Warm White",
+        "Manganese Violet",
+        "Raw Umber",
+        "Radiant Green"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.3124138643368048,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 2,
+      "efficientMeasured": 5,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 5
+        },
+        "drop": {
+          "matches": 0,
+          "total": 5
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 5
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 5
+        },
+        "coupled-balance": {
+          "matches": 2,
+          "total": 5
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 5
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 5,
+      "firstPaints": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 3,
+      "target": [
+        0.8100000034938338,
+        -0.026090124379579582,
+        0.07826591752459522
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-263-0-5",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Indian Yellow Deep",
+        "Ultramarine Violet",
+        "Flake White Replacement",
+        "Terre Verte",
+        "Radiant White"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.8158962742453704,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        0,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8099999912093585,
+        -0.01317989618401938,
+        0.08144041781025779
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-805-0-5",
+      "source": "baseline",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Alizarin Permanent",
+        "Cadmium Red Medium",
+        "Cadmium Yellow Medium",
+        "Perylene Red",
+        "Warm White"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.3889141058539782,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 3,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 3,
+      "target": [
+        0.8099999986224753,
+        0.04878279791438195,
+        0.06653187207744993
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-993-2-7",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Flake White Replacement",
+        "Phthalo Emerald",
+        "Hansa Yellow Light",
+        "Ultramarine Blue",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.811048305690016,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 4,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 4
+        },
+        "drop": {
+          "matches": 2,
+          "total": 4
+        },
+        "chromatic-ride": {
+          "matches": 1,
+          "total": 4
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 4
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 4
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 4
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 4,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.5699999920994181,
+        -0.04889468409705475,
+        0.0725641885429546
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-591-2-5",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Phthalo Green",
+        "Bismuth Yellow",
+        "Radiant Green",
+        "Indanthrone Blue",
+        "Perylene Maroon"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.3664577771915671,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        1,
+        4
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.570000003301261,
+        -0.03438449365714383,
+        0.08046090435230407
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-505-2-0",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Hansa Yellow Light",
+        "Permanent Orange",
+        "Cadmium Lemon",
+        "Alizarin Crimson",
+        "Olive Green"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.646011887659659,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 2,
+      "efficientMeasured": 4,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 4
+        },
+        "drop": {
+          "matches": 2,
+          "total": 4
+        },
+        "chromatic-ride": {
+          "matches": 1,
+          "total": 4
+        },
+        "setup-glide": {
+          "matches": 1,
+          "total": 4
+        },
+        "coupled-balance": {
+          "matches": 2,
+          "total": 4
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 4
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 4,
+      "firstPaints": [
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.569999999895828,
+        -0.018903391220541688,
+        0.08543366502675664
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-95-2-5",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Cobalt Blue",
+        "Radiant Green",
+        "Naphthol Scarlet",
+        "Burnt Umber",
+        "Radiant Lemon"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.3157275549838503,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 5,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 5
+        },
+        "drop": {
+          "matches": 1,
+          "total": 5
+        },
+        "chromatic-ride": {
+          "matches": 1,
+          "total": 5
+        },
+        "setup-glide": {
+          "matches": 1,
+          "total": 5
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 5
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 5
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 5,
+      "firstPaints": [
+        0,
+        2,
+        3
+      ],
+      "ingredientSets": 3,
+      "target": [
+        0.5700000282438059,
+        0.07091041584681845,
+        0.05126364774425407
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-863-2-4",
+      "source": "baseline",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Transparent Earth Yellow",
+        "Cerulean Blue Hue",
+        "Cadmium Red Medium",
+        "Phthalo Blue",
+        "Chartreuse"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.4646178992936205,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 4,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 4
+        },
+        "drop": {
+          "matches": 1,
+          "total": 4
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 4
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 4
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 4
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 4
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 4,
+      "firstPaints": [
+        0,
+        2,
+        4
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.5700000001099658,
+        -0.03512700981013436,
+        0.08013952366635063
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-997-3-4",
+      "source": "baseline",
+      "requested": "vivid-ride",
+      "n": 5,
+      "palette": [
+        "Quinacridone Red",
+        "Radiant White",
+        "Manganese Blue Hue",
+        "Mars Orange",
+        "Flake White Replacement"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1540199168281724,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 10,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 10
+        },
+        "drop": {
+          "matches": 4,
+          "total": 10
+        },
+        "chromatic-ride": {
+          "matches": 4,
+          "total": 10
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 10
+        },
+        "coupled-balance": {
+          "matches": 8,
+          "total": 10
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 10
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 10,
+      "firstPaints": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.6599999971167007,
+        0.17954609439364544,
+        0.012774953303129388
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-373-4-1",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Winsor Red",
+        "Hansa Yellow Medium",
+        "Hansa Yellow Light",
+        "Indanthrone Blue"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.69195173697245,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 3,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 2,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "ingredientSets": 3,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-41-4-6",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Cadmium Yellow Light",
+        "Permanent Red",
+        "Radiant Turquoise",
+        "Transparent White",
+        "Ultramarine Violet"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 3.0118982652905446,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        0,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-963-4-2",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Viridian",
+        "Cadmium Lemon",
+        "Phthalo Blue (Green Shade)",
+        "Alizarin Crimson",
+        "Mars Red"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.732783877473007,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 4,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "ingredientSets": 4,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-583-4-3",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Cobalt Teal",
+        "Titanium White",
+        "Indian Red",
+        "Cadmium Lemon",
+        "Manganese Violet"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.771162762190106,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 4,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 4
+        },
+        "drop": {
+          "matches": 2,
+          "total": 4
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 4
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 4
+        },
+        "coupled-balance": {
+          "matches": 2,
+          "total": 4
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 4
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 4,
+      "firstPaints": [
+        0,
+        2,
+        4
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-551-4-7",
+      "source": "baseline",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Quinacridone Rose",
+        "Chartreuse",
+        "Olive Green",
+        "Pyrrole Orange",
+        "Phthalo Blue"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.242119321987565,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 2,
+      "efficientMeasured": 4,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 4
+        },
+        "drop": {
+          "matches": 0,
+          "total": 4
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 4
+        },
+        "setup-glide": {
+          "matches": 1,
+          "total": 4
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 4
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 4
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 4,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-643-6-7",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 5,
+      "palette": [
+        "Cerulean Blue",
+        "Chartreuse",
+        "Naphthol Scarlet",
+        "Transparent White",
+        "Phthalo Emerald"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.901759305176886,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-993-6-0",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 5,
+      "palette": [
+        "Flake White Replacement",
+        "Phthalo Emerald",
+        "Hansa Yellow Light",
+        "Ultramarine Blue",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.4518623881739035,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 1,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-565-6-5",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 5,
+      "palette": [
+        "Quinacridone Red",
+        "Cobalt Teal",
+        "Phthalo Green (Yellow Shade)",
+        "Flake White Replacement",
+        "Hansa Yellow Light"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.336372648127806,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 2
+        },
+        "drop": {
+          "matches": 0,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        1,
+        2
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-129-0-6/fixed-target",
+      "source": "fixed-target",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Burnt Umber",
+        "Ultramarine Violet",
+        "Flake White Replacement",
+        "Bismuth Yellow",
+        "Chartreuse"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.0456870811359904,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 4,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 4,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 4,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 4,
+      "target": [
+        0.8100000045519185,
+        -0.0029061176286037105,
+        0.08244880404151633
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 2,
+        "extraLegCases": 10,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-129-0-6/joint",
+      "source": "joint",
+      "requested": "light-rise",
+      "n": 5,
+      "palette": [
+        "Burnt Umber",
+        "Ultramarine Violet",
+        "Flake White Replacement",
+        "Bismuth Yellow",
+        "Chartreuse"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.9136190724960391,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 8,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 8
+        },
+        "drop": {
+          "matches": 4,
+          "total": 8
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 8
+        },
+        "setup-glide": {
+          "matches": 4,
+          "total": 8
+        },
+        "coupled-balance": {
+          "matches": 8,
+          "total": 8
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 8
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 8,
+      "firstPaints": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 4,
+      "target": [
+        0.8196404059252713,
+        -0.008112664449569207,
+        0.09060062203059971
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 2,
+        "extraLegCases": 10,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-820-0-1/fixed-target",
+      "source": "fixed-target",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Radiant Violet",
+        "Cadmium Yellow Medium",
+        "Chromium Oxide Green",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.6892126495094806,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 6,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 14,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8100000072288395,
+        -0.050192176646262465,
+        0.06547516892448202
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 4,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-820-0-1/joint",
+      "source": "joint",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Radiant Violet",
+        "Cadmium Yellow Medium",
+        "Chromium Oxide Green",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.1433612542384473,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 4,
+          "total": 13
+        },
+        "drop": {
+          "matches": 5,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.7940618201292705,
+        -0.05877620910742465,
+        0.07895719614119268
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 4,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-156-1-3/fixed-target",
+      "source": "fixed-target",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Alizarin Crimson",
+        "Cobalt Turquoise Light",
+        "Transparent Earth Yellow",
+        "Cadmium Lemon"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.881586348830868,
+      "requestedStyle": "drop",
+      "styleMatched": true,
+      "styleMatches": 1,
+      "efficientMeasured": 7,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 7
+        },
+        "drop": {
+          "matches": 1,
+          "total": 7
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 7
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 7
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 7
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 7
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 7,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.36007009434356013,
+        0.061905266290358085,
+        0.008601636067717133
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 4,
+        "extraLegCases": 6,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-156-1-3/joint",
+      "source": "joint",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Alizarin Crimson",
+        "Cobalt Turquoise Light",
+        "Transparent Earth Yellow",
+        "Cadmium Lemon"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.0333786039644475,
+      "requestedStyle": "drop",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.3707671931484005,
+        0.05155241938583294,
+        0.00917643202369689
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-993-2-7/fixed-target",
+      "source": "fixed-target",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Flake White Replacement",
+        "Phthalo Emerald",
+        "Hansa Yellow Light",
+        "Ultramarine Blue",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.03471752515364,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 1,
+          "total": 2
+        },
+        "drop": {
+          "matches": 1,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 1,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 1,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5699999920994181,
+        -0.04889468409705475,
+        0.0725641885429546
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 1,
+        "extraLegCases": 11,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-993-2-7/joint",
+      "source": "joint",
+      "requested": "mid-balance",
+      "n": 5,
+      "palette": [
+        "Flake White Replacement",
+        "Phthalo Emerald",
+        "Hansa Yellow Light",
+        "Ultramarine Blue",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.111219300377946,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 24,
+      "styles": {
+        "rise": {
+          "matches": 8,
+          "total": 24
+        },
+        "drop": {
+          "matches": 10,
+          "total": 24
+        },
+        "chromatic-ride": {
+          "matches": 2,
+          "total": 24
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 24
+        },
+        "coupled-balance": {
+          "matches": 3,
+          "total": 24
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 24
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 24,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.5912377206989304,
+        -0.0504528969153033,
+        0.08039103358463212
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 6,
+        "extraLegCases": 6,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-546-2-0/fixed-target",
+      "source": "fixed-target",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Phthalo Blue",
+        "Cadmium Red Deep",
+        "Cadmium Yellow Deep",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.4010362675156913,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 13,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 13
+        },
+        "drop": {
+          "matches": 0,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 1,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5700000012248535,
+        0.02190887468741501,
+        0.08471273967349352
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-546-2-0/joint",
+      "source": "joint",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Phthalo Blue",
+        "Cadmium Red Deep",
+        "Cadmium Yellow Deep",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.1204474321287745,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 19,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 19,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5084588793988457,
+        0.014689433633286703,
+        0.07020015543417879
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-997-3-4/fixed-target",
+      "source": "fixed-target",
+      "requested": "vivid-ride",
+      "n": 5,
+      "palette": [
+        "Quinacridone Red",
+        "Radiant White",
+        "Manganese Blue Hue",
+        "Mars Orange",
+        "Flake White Replacement"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.1351453095414425,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 17,
+      "styles": {
+        "rise": {
+          "matches": 2,
+          "total": 17
+        },
+        "drop": {
+          "matches": 4,
+          "total": 17
+        },
+        "chromatic-ride": {
+          "matches": 4,
+          "total": 17
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 17
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 17
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 17
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 17,
+      "firstPaints": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "ingredientSets": 2,
+      "target": [
+        0.6599999971167007,
+        0.17954609439364544,
+        0.012774953303129388
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-997-3-4/joint",
+      "source": "joint",
+      "requested": "vivid-ride",
+      "n": 5,
+      "palette": [
+        "Quinacridone Red",
+        "Radiant White",
+        "Manganese Blue Hue",
+        "Mars Orange",
+        "Flake White Replacement"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.3018829175786508,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 2,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 2
+        },
+        "drop": {
+          "matches": 2,
+          "total": 2
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 2
+        },
+        "setup-glide": {
+          "matches": 2,
+          "total": 2
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 2
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 2
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 2,
+      "firstPaints": [
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.633300531391124,
+        0.18823301371844464,
+        0.013754425070769627
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 0,
+        "extraLegCases": 12,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-410-3-3/fixed-target",
+      "source": "fixed-target",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Radiant Lemon",
+        "Yellow Ochre",
+        "Alizarin Crimson",
+        "Cobalt Teal"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.6034413947319788,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 15,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6600000008525202,
+        -0.1092823486060755,
+        0.08646816146526054
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-410-3-3/joint",
+      "source": "joint",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Radiant Lemon",
+        "Yellow Ochre",
+        "Alizarin Crimson",
+        "Cobalt Teal"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.39665118489327,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 7,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 7,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 19,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6076230306543863,
+        -0.09814458991309094,
+        0.08769571770809631
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-373-4-1/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-hansa",
+      "n": 5,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Winsor Red",
+        "Hansa Yellow Medium",
+        "Hansa Yellow Light",
+        "Indanthrone Blue"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 2.1717149320599063,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 3,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "ingredientSets": 3,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 4,
+        "extraLegCases": 8,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-300-4-3/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Perylene Maroon",
+        "Cadmium Lemon",
+        "Titanium White",
+        "Permanent Green Light"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.4055297475480475,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 6,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 3,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-14-5-1/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-earth",
+      "n": 4,
+      "palette": [
+        "Indigo",
+        "Transparent Earth Orange",
+        "Cobalt Teal",
+        "Cadmium Red Deep"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.5096702398191337,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 3,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 3,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 3,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        0,
+        1
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.30024462000611096,
+        0.004521860915639164,
+        0.0023386230282682885
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 4,
+        "extraLegCases": 6,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-643-6-7/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-ryb",
+      "n": 5,
+      "palette": [
+        "Cerulean Blue",
+        "Chartreuse",
+        "Naphthol Scarlet",
+        "Transparent White",
+        "Phthalo Emerald"
+      ],
+      "minimum": 2,
+      "regionMinimum": 2,
+      "shorterMarginT": 1.5594910171141896,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 6,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 6
+        },
+        "drop": {
+          "matches": 0,
+          "total": 6
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 6
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 6
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 6
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 6
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 6,
+      "firstPaints": [
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 12,
+        "regionSupported": 12,
+        "oneOrLess": 0,
+        "extraLegCases": 12,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-374-6-6/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Perylene Red",
+        "Cadmium Yellow Deep",
+        "Phthalo Blue",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.425095457959853,
+      "requestedStyle": "rise",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 13
+        },
+        "drop": {
+          "matches": 0,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 9,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    }
+  ],
+  "selected": [
+    {
+      "id": "condition-929831-820-0-1/joint",
+      "source": "joint",
+      "requested": "light-rise",
+      "n": 4,
+      "palette": [
+        "Radiant Violet",
+        "Cadmium Yellow Medium",
+        "Chromium Oxide Green",
+        "Warm White"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.1433612542384473,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 4,
+      "efficientMeasured": 13,
+      "styles": {
+        "rise": {
+          "matches": 4,
+          "total": 13
+        },
+        "drop": {
+          "matches": 5,
+          "total": 13
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 13
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 13
+        },
+        "coupled-balance": {
+          "matches": 13,
+          "total": 13
+        },
+        "interior-assembly": {
+          "matches": 13,
+          "total": 13
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 13,
+      "firstPaints": [
+        1,
+        2,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.7940618201292705,
+        -0.05877620910742465,
+        0.07895719614119268
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 4,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-156-1-3/joint",
+      "source": "joint",
+      "requested": "dark-drop",
+      "n": 4,
+      "palette": [
+        "Alizarin Crimson",
+        "Cobalt Turquoise Light",
+        "Transparent Earth Yellow",
+        "Cadmium Lemon"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.0333786039644475,
+      "requestedStyle": "drop",
+      "styleMatched": false,
+      "styleMatches": 0,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 0,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.3707671931484005,
+        0.05155241938583294,
+        0.00917643202369689
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-546-2-0/joint",
+      "source": "joint",
+      "requested": "mid-balance",
+      "n": 4,
+      "palette": [
+        "Phthalo Blue",
+        "Cadmium Red Deep",
+        "Cadmium Yellow Deep",
+        "Indian Yellow Deep"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.1204474321287745,
+      "requestedStyle": "coupled-balance",
+      "styleMatched": true,
+      "styleMatches": 19,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 0,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 19,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5084588793988457,
+        0.014689433633286703,
+        0.07020015543417879
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-410-3-3/joint",
+      "source": "joint",
+      "requested": "vivid-ride",
+      "n": 4,
+      "palette": [
+        "Radiant Lemon",
+        "Yellow Ochre",
+        "Alizarin Crimson",
+        "Cobalt Teal"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.39665118489327,
+      "requestedStyle": "chromatic-ride",
+      "styleMatched": true,
+      "styleMatches": 7,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 7,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 19,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 0,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.6076230306543863,
+        -0.09814458991309094,
+        0.08769571770809631
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 2,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-300-4-3/fixed-target",
+      "source": "fixed-target",
+      "requested": "fixed-hansa",
+      "n": 4,
+      "palette": [
+        "Perylene Maroon",
+        "Cadmium Lemon",
+        "Titanium White",
+        "Permanent Green Light"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 2.4055297475480475,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 6,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 6,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 3,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 7,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        3
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "changed": true,
+      "recovery": {
+        "cases": 10,
+        "regionSupported": 10,
+        "oneOrLess": 0,
+        "extraLegCases": 3,
+        "notFound": 0
+      },
+      "witnessResolutionFlips": 0
+    },
+    {
+      "id": "condition-929831-326-6-2",
+      "source": "baseline",
+      "requested": "fixed-ryb",
+      "n": 4,
+      "palette": [
+        "Hansa Yellow Deep",
+        "Manganese Blue Hue",
+        "Titanium White",
+        "Cobalt Violet"
+      ],
+      "minimum": 3,
+      "regionMinimum": 3,
+      "shorterMarginT": 1.3388476773711269,
+      "requestedStyle": "rise",
+      "styleMatched": true,
+      "styleMatches": 6,
+      "efficientMeasured": 19,
+      "styles": {
+        "rise": {
+          "matches": 6,
+          "total": 19
+        },
+        "drop": {
+          "matches": 0,
+          "total": 19
+        },
+        "chromatic-ride": {
+          "matches": 0,
+          "total": 19
+        },
+        "setup-glide": {
+          "matches": 0,
+          "total": 19
+        },
+        "coupled-balance": {
+          "matches": 9,
+          "total": 19
+        },
+        "interior-assembly": {
+          "matches": 19,
+          "total": 19
+        }
+      },
+      "resolutionFlips": 0,
+      "executable": 19,
+      "firstPaints": [
+        0,
+        1,
+        2
+      ],
+      "ingredientSets": 1,
+      "target": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "changed": false,
+      "recovery": null,
+      "witnessResolutionFlips": 0
+    }
+  ],
+  "minimumFour": [],
+  "notes": [
+    "Player quality is not inferred from leg count",
+    "Same exact target across new palettes is deliberate in fixed-target experiments",
+    "Range and fixed targets are different objectives; feasibility rejection is retained",
+    "Fine geometry is rechecked at 192 samples",
+    "No lab or campaign data changed"
+  ]
+}

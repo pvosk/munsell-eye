@@ -1,0 +1,923 @@
+{
+  "sourceStudyHash": "395800a16f0bc404bade9f47d45d0410840877eff1d1e45affbbe050ccb7cd22",
+  "note": "Same controls and scoring. Only measurement sampling density changes. Convergence check, not proof of exact arc integration or live classifier change.",
+  "results": [
+    {
+      "id": "ip-30-1109261-0",
+      "palette": 30,
+      "order": [
+        0,
+        1,
+        3
+      ],
+      "variants": [
+        {
+          "side": "yes",
+          "times": [
+            0.7868429659460745,
+            0.7754934649239292
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 37.14321105790761,
+                  "colored": 37.14321105790761,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.767192944860682,
+                  "colored": 29.767192944860682,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.14321105790761,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 37.14401837857577,
+                  "colored": 37.14401837857577,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.768181763474544,
+                  "colored": 29.768181763474544,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.14401837857577,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 37.1447972818114,
+                  "colored": 37.1447972818114,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.769135435238216,
+                  "colored": 29.769135435238216,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.1447972818114,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 37.14499207139308,
+                  "colored": 37.14499207139308,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.769373878970352,
+                  "colored": 29.769373878970352,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.14499207139308,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 37.145052948370626,
+                  "colored": 37.145052948370626,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.769448394752427,
+                  "colored": 29.769448394752427,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.145052948370626,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 37.14505599228485,
+                  "colored": 37.14505599228485,
+                  "fraction": 1
+                },
+                {
+                  "length": 29.769452120567987,
+                  "colored": 29.769452120567987,
+                  "fraction": 1
+                }
+              ],
+              "longest": 37.14505599228485,
+              "fraction": 1,
+              "ride": true
+            }
+          ]
+        },
+        {
+          "side": "no",
+          "times": [
+            0.7575,
+            0.7996318766276044
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 35.925822442851356,
+                  "colored": 35.925822442851356,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.982756617587448,
+                  "colored": 30.982756617587448,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.925822442851356,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 35.926556933899434,
+                  "colored": 35.926556933899434,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.983834830994084,
+                  "colored": 30.983834830994084,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.926556933899434,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 35.9272655369279,
+                  "colored": 35.9272655369279,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.984874743337127,
+                  "colored": 30.984874743337127,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.9272655369279,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 35.927442740457,
+                  "colored": 35.927442740457,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.98513475311589,
+                  "colored": 30.98513475311589,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.927442740457,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 35.92749812089019,
+                  "colored": 35.92749812089019,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.985216008771726,
+                  "colored": 30.985216008771726,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.92749812089019,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 35.927500889966026,
+                  "colored": 35.927500889966026,
+                  "fraction": 1
+                },
+                {
+                  "length": 30.98522007158707,
+                  "colored": 30.98522007158707,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.927500889966026,
+              "fraction": 1,
+              "ride": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ip-30-1109261-0",
+      "palette": 30,
+      "order": [
+        1,
+        3
+      ],
+      "variants": [
+        {
+          "side": "yes",
+          "times": [
+            0.8941446338829497
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 36.36629756824312,
+                  "colored": 36.36629756824312,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36629756824312,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 36.36775589698884,
+                  "colored": 36.36775589698884,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36775589698884,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 36.36916262055335,
+                  "colored": 36.36916262055335,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36916262055335,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 36.36951437483058,
+                  "colored": 36.36951437483058,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36951437483058,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 36.36962430406492,
+                  "colored": 36.36962430406492,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36962430406492,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 36.36962980060197,
+                  "colored": 36.36962980060197,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.36962980060197,
+              "fraction": 1,
+              "ride": true
+            }
+          ]
+        },
+        {
+          "side": "no",
+          "times": [
+            0.8760885479864994
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 35.64941769296857,
+                  "colored": 35.64941769296857,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.64941769296857,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 35.65080922753349,
+                  "colored": 35.65080922753349,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.65080922753349,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 35.65215150078794,
+                  "colored": 35.65215150078794,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.65215150078794,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 35.6524871360927,
+                  "colored": 35.6524871360927,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.6524871360927,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 35.65259202762319,
+                  "colored": 35.65259202762319,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.65259202762319,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 35.65259727226853,
+                  "colored": 35.65259727226853,
+                  "fraction": 1
+                }
+              ],
+              "longest": 35.65259727226853,
+              "fraction": 1,
+              "ride": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ip-30-1109261-0",
+      "palette": 30,
+      "order": [
+        2,
+        1,
+        3
+      ],
+      "variants": [
+        {
+          "side": "yes",
+          "times": [
+            2.2,
+            1.0541666666666667
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 22.77428134607505,
+                  "colored": 22.77428134607505,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.00671966028165,
+                  "colored": 36.00671966028165,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.00671966028165,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 22.774675647451534,
+                  "colored": 22.774675647451534,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.00818253305354,
+                  "colored": 36.00818253305354,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.00818253305354,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 22.775057404618618,
+                  "colored": 22.775057404618618,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.009593648622435,
+                  "colored": 36.009593648622435,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.009593648622435,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 22.77515308107314,
+                  "colored": 22.77515308107314,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.009946502461936,
+                  "colored": 36.009946502461936,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.009946502461936,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 22.775182999478375,
+                  "colored": 22.775182999478375,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.01005677543701,
+                  "colored": 36.01005677543701,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.01005677543701,
+              "fraction": 1,
+              "ride": true
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 22.775184495642876,
+                  "colored": 22.775184495642876,
+                  "fraction": 1
+                },
+                {
+                  "length": 36.01006228916266,
+                  "colored": 36.01006228916266,
+                  "fraction": 1
+                }
+              ],
+              "longest": 36.01006228916266,
+              "fraction": 1,
+              "ride": true
+            }
+          ]
+        },
+        {
+          "side": "no",
+          "times": [
+            2.2,
+            0.9390878499348955
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 22.77428134607505,
+                  "colored": 22.77428134607505,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.44462305281826,
+                  "colored": 32.44462305281826,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.44462305281826,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 22.774675647451534,
+                  "colored": 22.774675647451534,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.44577716531756,
+                  "colored": 32.44577716531756,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.44577716531756,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 22.775057404618618,
+                  "colored": 22.775057404618618,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.44689036559983,
+                  "colored": 32.44689036559983,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.44689036559983,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 22.77515308107314,
+                  "colored": 22.77515308107314,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.4471687126486,
+                  "colored": 32.4471687126486,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.4471687126486,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 22.775182999478375,
+                  "colored": 22.775182999478375,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.44725569995609,
+                  "colored": 32.44725569995609,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.44725569995609,
+              "fraction": 1,
+              "ride": false
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 22.775184495642876,
+                  "colored": 22.775184495642876,
+                  "fraction": 1
+                },
+                {
+                  "length": 32.44726004936959,
+                  "colored": 32.44726004936959,
+                  "fraction": 1
+                }
+              ],
+              "longest": 32.44726004936959,
+              "fraction": 1,
+              "ride": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ip-30-1109262-1",
+      "palette": 30,
+      "order": [
+        3,
+        2,
+        1
+      ],
+      "variants": [
+        {
+          "side": "yes",
+          "times": [
+            1.625833333333334,
+            0.504147420247396
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 46.07089162752429,
+                  "colored": 37.13392083783363,
+                  "fraction": 0.8060169778795552
+                },
+                {
+                  "length": 10.221242215551433,
+                  "colored": 10.221242215551433,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.07089162752429,
+              "fraction": 0.841239438273844,
+              "ride": true
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 46.073346368612704,
+                  "colored": 37.8101953970732,
+                  "fraction": 0.820652250751885
+                },
+                {
+                  "length": 10.221255961850954,
+                  "colored": 10.221255961850954,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.073346368612704,
+              "fraction": 0.853215927824968,
+              "ride": true
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 46.07571498768204,
+                  "colored": 38.47730988330542,
+                  "fraction": 0.8350887206762176
+                },
+                {
+                  "length": 10.221269221052985,
+                  "colored": 10.221269221052985,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.07571498768204,
+              "fraction": 0.8650299796485785,
+              "ride": true
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 46.07630738007144,
+                  "colored": 38.47783584996034,
+                  "fraction": 0.8350893992560365
+                },
+                {
+                  "length": 10.221272536443132,
+                  "colored": 10.221272536443132,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.07630738007144,
+              "fraction": 0.8650302279178056,
+              "ride": true
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 46.07649252219759,
+                  "colored": 38.8130315857006,
+                  "fraction": 0.8423608104935987
+                },
+                {
+                  "length": 10.221273572550931,
+                  "colored": 10.221273572550931,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.07649252219759,
+              "fraction": 0.8709813649750743,
+              "ride": true
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 46.07650177954761,
+                  "colored": 38.91807647517637,
+                  "fraction": 0.844640434323321
+                },
+                {
+                  "length": 10.221273624356924,
+                  "colored": 10.221273624356924,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.07650177954761,
+              "fraction": 0.8728471018079558,
+              "ride": true
+            }
+          ]
+        },
+        {
+          "side": "no",
+          "times": [
+            1.6958333333333342,
+            0.5047565917968749
+          ],
+          "resolutions": [
+            {
+              "samples": 48,
+              "strokes": [
+                {
+                  "length": 46.179167561183654,
+                  "colored": 37.29087291580791,
+                  "fraction": 0.8075258798548182
+                },
+                {
+                  "length": 10.191419449616692,
+                  "colored": 10.191419449616692,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.179167561183654,
+              "fraction": 0.8423238941316542,
+              "ride": true
+            },
+            {
+              "samples": 64,
+              "strokes": [
+                {
+                  "length": 46.18168012171997,
+                  "colored": 35.90598307062004,
+                  "fraction": 0.7774940837142235
+                },
+                {
+                  "length": 10.191433254089022,
+                  "colored": 10.191433254089022,
+                  "fraction": 1
+                }
+              ],
+              "longest": 10.191433254089022,
+              "fraction": 0.8177198945426798,
+              "ride": false
+            },
+            {
+              "samples": 128,
+              "strokes": [
+                {
+                  "length": 46.184104569037466,
+                  "colored": 37.61010727994605,
+                  "fraction": 0.8143517695298231
+                },
+                {
+                  "length": 10.191446569382434,
+                  "colored": 10.191446569382434,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.184104569037466,
+              "fraction": 0.8479128431394041,
+              "ride": true
+            },
+            {
+              "samples": 256,
+              "strokes": [
+                {
+                  "length": 46.18471092982567,
+                  "colored": 38.46463283868079,
+                  "fraction": 0.8328434251136707
+                },
+                {
+                  "length": 10.191449898794835,
+                  "colored": 10.191449898794835,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.18471092982567,
+              "fraction": 0.8630613014849776,
+              "ride": true
+            },
+            {
+              "samples": 1024,
+              "strokes": [
+                {
+                  "length": 46.184900438007254,
+                  "colored": 38.93120273032638,
+                  "fraction": 0.8429422248637882
+                },
+                {
+                  "length": 10.19145093928453,
+                  "colored": 10.19145093928453,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.184900438007254,
+              "fraction": 0.871334388791208,
+              "ride": true
+            },
+            {
+              "samples": 2048,
+              "strokes": [
+                {
+                  "length": 46.18490991367182,
+                  "colored": 39.03763491883994,
+                  "fraction": 0.8452465316443951
+                },
+                {
+                  "length": 10.191450991309635,
+                  "colored": 10.191450991309635,
+                  "fraction": 1
+                }
+              ],
+              "longest": 46.18490991367182,
+              "fraction": 0.873222129273684,
+              "ride": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

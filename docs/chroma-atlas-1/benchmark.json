@@ -1,0 +1,175 @@
+{
+  "physics": "bdedde08b4bedf2b95d3ed13bec79a6ab3f0d5f5b1c5005aba924db7a939f40a",
+  "benchmark": [
+    {
+      "id": "condition-929831-820-0-1/joint",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.095,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-929831-546-2-0/joint",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.086,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 2.7755575615628914e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-929831-410-3-3/joint",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.072,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-929831-300-4-3/fixed-target",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.082,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 2.220446049250313e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-929831-326-6-2",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.08,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-1031931-546-0-2",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.076,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-1031931-3-1-0/joint",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.078,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-1031931-698-2-5/joint",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.078,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-1031931-1-4-5/fixed-target",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.077,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 3.3306690738754696e-16,
+        "validatedPaths": 960
+      }
+    },
+    {
+      "id": "condition-1031931-746-6-0/fixed-target",
+      "fieldHit": false,
+      "queryHit": false,
+      "stats": {
+        "seconds": 0.075,
+        "counts": [
+          33,
+          320,
+          320,
+          320
+        ],
+        "discarded": 9300,
+        "maxReplayError": 2.220446049250313e-16,
+        "validatedPaths": 960
+      }
+    }
+  ]
+}

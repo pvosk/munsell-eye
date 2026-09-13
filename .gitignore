@@ -40,3 +40,34 @@ next-env.d.ts
 /work/
 /.image-review/
 *.tsbuildinfo
+
+# Local historical search archive, retained during worktree setup.
+/candidate-search/
+
+# Verbose broad-search cache; portable exact-witness shards and index are archived.
+/docs/play-broad-palette-bank.jsonl.gz
+
+# Exact research-bank caches; verified compressed parts are versioned instead.
+/docs/pigment-leg-audit-1/audits.json
+/docs/pigment-leg-holdout-1/checks.json
+/docs/pigment-leg-search-1/audits.json
+/docs/pigment-leg-search-1/proposal-bank.json
+/docs/pigment-leg-search-1/screened-bank.json
+/docs/pigment-leg-search-2/audits.json
+/docs/pigment-leg-search-2/proposal-bank.json
+/docs/pigment-leg-search-2/screened-bank.json
+/docs/branching-region-search-1/proposals.json
+/docs/branching-region-search-2/proposals.json
+/docs/branching-region-search-2/audits.json
+/docs/conditioned-branch-search-1/audits.json
+/docs/conditioned-branch-search-1/proposals.json
+/docs/conditioned-branch-search-1/refinements.json
+/docs/conditioned-branch-search-2/audits.json
+/docs/conditioned-branch-search-2/proposals.json
+# Exact local research caches; portable SHA-256-verified archives are tracked.
+docs/long-leg-limits-1/proposals-4.json
+docs/long-leg-limits-1/proposals-5.json
+docs/long-leg-limits-1/proposals-6.json
+docs/long-leg-limits-2/proposals-4.json
+docs/long-leg-limits-2/proposals-5.json
+docs/long-leg-limits-2/proposals-6.json

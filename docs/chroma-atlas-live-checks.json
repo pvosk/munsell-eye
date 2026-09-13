@@ -1,0 +1,275 @@
+{
+  "note": "Compute-only Node timings with scheduler yields omitted. Not browser frame timings or exhaustive minimum proofs.",
+  "records": [
+    {
+      "case": 0,
+      "edit": 0,
+      "computeMs": 95.286833,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.000002559599088643149,
+      "accepted": true
+    },
+    {
+      "case": 0,
+      "edit": 1,
+      "computeMs": 73.23500000000001,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0008112528788363825,
+      "accepted": true
+    },
+    {
+      "case": 0,
+      "edit": 2,
+      "computeMs": 33.07933299999996,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0003297356462728854,
+      "accepted": true
+    },
+    {
+      "case": 1,
+      "edit": 0,
+      "computeMs": 83.61899999999997,
+      "shortest": 3,
+      "nodes": 334,
+      "errorT": 0.0000010757238225686513,
+      "accepted": true
+    },
+    {
+      "case": 1,
+      "edit": 1,
+      "computeMs": 62.14529200000004,
+      "shortest": 3,
+      "nodes": 337,
+      "errorT": 0.00012604511502289193,
+      "accepted": true
+    },
+    {
+      "case": 1,
+      "edit": 2,
+      "computeMs": 29.605625000000032,
+      "shortest": 3,
+      "nodes": 334,
+      "errorT": 0.000017418434508954494,
+      "accepted": true
+    },
+    {
+      "case": 2,
+      "edit": 0,
+      "computeMs": 68.16470800000002,
+      "shortest": 3,
+      "nodes": 321,
+      "errorT": 0.000335571682774022,
+      "accepted": true
+    },
+    {
+      "case": 2,
+      "edit": 1,
+      "computeMs": 55.706666999999925,
+      "shortest": 3,
+      "nodes": 321,
+      "errorT": 0.0015026471361869456,
+      "accepted": true
+    },
+    {
+      "case": 2,
+      "edit": 2,
+      "computeMs": 25.568708000000015,
+      "shortest": 3,
+      "nodes": 321,
+      "errorT": 0.0003202092145376173,
+      "accepted": true
+    },
+    {
+      "case": 3,
+      "edit": 0,
+      "computeMs": 65.79941699999995,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0012062712697404848,
+      "accepted": true
+    },
+    {
+      "case": 3,
+      "edit": 1,
+      "computeMs": 65.44841699999995,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.004836244367129405,
+      "accepted": true
+    },
+    {
+      "case": 3,
+      "edit": 2,
+      "computeMs": 28.090000000000032,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0012201295824625707,
+      "accepted": true
+    },
+    {
+      "case": 4,
+      "edit": 0,
+      "computeMs": 49.82816700000001,
+      "shortest": 3,
+      "nodes": 323,
+      "errorT": 6.599095866287121e-7,
+      "accepted": true
+    },
+    {
+      "case": 4,
+      "edit": 1,
+      "computeMs": 63.10237499999994,
+      "shortest": 3,
+      "nodes": 322,
+      "errorT": 0.0007744561136081013,
+      "accepted": true
+    },
+    {
+      "case": 4,
+      "edit": 2,
+      "computeMs": 23.27279199999998,
+      "shortest": 3,
+      "nodes": 323,
+      "errorT": 0.00009424762738723358,
+      "accepted": true
+    },
+    {
+      "case": 5,
+      "edit": 0,
+      "computeMs": 58.824959000000035,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0000010555497417173022,
+      "accepted": true
+    },
+    {
+      "case": 5,
+      "edit": 1,
+      "computeMs": 58.62887499999988,
+      "shortest": 3,
+      "nodes": 327,
+      "errorT": 0.00009977655019595631,
+      "accepted": true
+    },
+    {
+      "case": 5,
+      "edit": 2,
+      "computeMs": 28.54666599999996,
+      "shortest": 3,
+      "nodes": 328,
+      "errorT": 0.0002035283671896212,
+      "accepted": true
+    },
+    {
+      "case": 6,
+      "edit": 0,
+      "computeMs": 53.689542000000074,
+      "shortest": 3,
+      "nodes": 332,
+      "errorT": 8.6931811993102e-7,
+      "accepted": true
+    },
+    {
+      "case": 6,
+      "edit": 1,
+      "computeMs": 50.22129199999995,
+      "shortest": 3,
+      "nodes": 332,
+      "errorT": 0.00009992944201367742,
+      "accepted": true
+    },
+    {
+      "case": 6,
+      "edit": 2,
+      "computeMs": 23.22829200000001,
+      "shortest": 3,
+      "nodes": 332,
+      "errorT": 0.00013727951803743868,
+      "accepted": true
+    },
+    {
+      "case": 7,
+      "edit": 0,
+      "computeMs": 41.6372080000001,
+      "shortest": 3,
+      "nodes": 348,
+      "errorT": 7.563448356737442e-7,
+      "accepted": true
+    },
+    {
+      "case": 7,
+      "edit": 1,
+      "computeMs": 44.036124999999856,
+      "shortest": 3,
+      "nodes": 346,
+      "errorT": 0.00006788431591680608,
+      "accepted": true
+    },
+    {
+      "case": 7,
+      "edit": 2,
+      "computeMs": 22.574499999999944,
+      "shortest": 3,
+      "nodes": 348,
+      "errorT": 0.00012909378806293364,
+      "accepted": true
+    },
+    {
+      "case": 8,
+      "edit": 0,
+      "computeMs": 77.6434999999999,
+      "shortest": 3,
+      "nodes": 327,
+      "errorT": 0.047750099311722034,
+      "accepted": true
+    },
+    {
+      "case": 8,
+      "edit": 1,
+      "computeMs": 70.3427079999999,
+      "shortest": 3,
+      "nodes": 329,
+      "errorT": 0.001448633690394458,
+      "accepted": true
+    },
+    {
+      "case": 8,
+      "edit": 2,
+      "computeMs": 31.39329100000009,
+      "shortest": 3,
+      "nodes": 327,
+      "errorT": 0.047597310536660394,
+      "accepted": true
+    },
+    {
+      "case": 9,
+      "edit": 0,
+      "computeMs": 44.43899999999985,
+      "shortest": 3,
+      "nodes": 336,
+      "errorT": 7.344569440418209e-7,
+      "accepted": true
+    },
+    {
+      "case": 9,
+      "edit": 1,
+      "computeMs": 43.18766699999992,
+      "shortest": 3,
+      "nodes": 333,
+      "errorT": 0.00007245816813882508,
+      "accepted": true
+    },
+    {
+      "case": 9,
+      "edit": 2,
+      "computeMs": 21.87866699999995,
+      "shortest": 3,
+      "nodes": 336,
+      "errorT": 0.00008094888395309385,
+      "accepted": true
+    }
+  ]
+}

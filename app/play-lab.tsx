@@ -1,7 +1,9 @@
 'use client';
 import {memo,useMemo,useState} from 'react';
+import {PremixPicker,PremixRouteReview} from './play-premix-ui';
+import {premixItem} from './play-premix-bank';
 import {PLAY_LEVELS,LANDING_TOLERANCE,withLiveLanding,designLabBank,focusedLabBank,addPaint,chargeAmount,colorDistance,mixtureColor,pourPath,rgbStyle,totalMass,type ColorPoint} from './play-engine';
-import {supportedLabEngine,LAB_GROUPS,LAB_DESIGN,directedForHole,analysisForHole,suggestedComparison,labReviewEntries,selectedLabEntry,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
+import {supportedLabEngine,LAB_GROUPS,LAB_FRESH,LAB_HARD,LAB_INVERSE,LAB_DESIGN,directedForHole,analysisForHole,suggestedComparison,labReviewEntries,selectedLabEntry,type LabAttempt,type LabReview,type LabSpecimen,type LabEntry} from './play-lab-model';
 import type {usePlayLabSync} from './play-lab-sync';
 import finishProfiles from './generated/play-finish-profiles.json';
 import {CAMPAIGN_CHAPTERS,campaignForHole,campaignSourceId} from './play-campaign';
@@ -19,7 +21,8 @@ function FinishProfileReview({id}:{id:string}){
  </details>;
 }
 
-const RouteReview=memo(function RouteReview({entry}:{entry:LabEntry}) {
+function RouteReview({entry}:{entry:LabEntry}){return entry.attempt.specimen.hole.premix?<PremixRouteReview key={entry.attempt.id} entry={entry}/>:<LegacyRouteReview entry={entry}/>;}
+const LegacyRouteReview=memo(function LegacyRouteReview({entry}:{entry:LabEntry}) {
   const {attempt}=entry,[showSolution,setShowSolution]=useState(true),[step,setStep]=useState(0),[inspectExample,setInspectExample]=useState(true),[example,setExample]=useState(-1);
   const analysis=analysisForHole(attempt.specimen.hole.courseId);
   const directed=directedForHole(attempt.specimen.hole.courseId);
@@ -99,11 +102,11 @@ function ReviewForm({entry,onSave}:{entry:LabEntry;onSave:(review:LabReview)=>vo
 
 export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
  const {current,onChoose}=props;
- const [view,setView]=useState('campaign'),[selected,setSelected]=useState(()=>Math.max(0,CAMPAIGN_CHAPTERS.findIndex(c=>c.levelIndex===current.levelIndex)));
+ const [view,setView]=useState(()=>current.hole.premix?(premixItem(current.hole)?.collection??(premixItem(current.hole)?.role?'regions':'premix')):campaignForHole(current.hole.courseId)?'campaign':current.hole.courseId.startsWith('lab-12-')?'fresh':current.hole.courseId.startsWith('lab-11-')?'hard':current.hole.courseId.startsWith('lab-10-')?'inverse':'branches'),[selected,setSelected]=useState(()=>Math.max(0,CAMPAIGN_CHAPTERS.findIndex(c=>c.levelIndex===current.levelIndex)));
  const chapter=CAMPAIGN_CHAPTERS[selected],playable=chapter.slots.filter(s=>s.specimen),at=playable.findIndex(s=>s.id===current.hole.courseId||s.alternatives?.some(a=>a.id===current.hole.courseId));
  const choose=(id:string)=>{const match=campaignForHole(id);if(match?.chapter.id===chapter.id&&match.slot.specimen)onChoose(structuredClone(match.slot.specimen));};
- return <div className="lab-campaign-picker"><label>Test collection<select value={view} onChange={e=>setView(e.target.value)}><option value="campaign">Campaign · one palette at a time</option><option value="archive">Earlier lab rounds</option></select></label>
- {view==='archive'?<LegacyLabPicker {...props}/>:<>
+ return <div className="lab-campaign-picker"><label>Test collection<select value={view} onChange={e=>setView(e.target.value)}><option value="branches">New · 4 branching setups</option><option value="legs">Previous · 10 contrasting pigment-leg puzzles</option><option value="regions">Previous · 11 normalized premix puzzles</option><option value="premix">Archive · 4 puzzles × A/B mass</option><option value="fresh">6 harder holes · newer palettes</option><option value="hard">Previous · 8 harder setup holes</option><option value="inverse">30 inverse-planning holes</option><option value="campaign">Campaign · one palette at a time</option><option value="archive">All lab rounds</option></select></label>
+ {view==='branches'?<PremixPicker key="branches" collection="branches" {...props}/>:view==='legs'?<PremixPicker key="legs" collection="legs" {...props}/>:view==='regions'?<PremixPicker key="regions" {...props}/>:view==='premix'?<PremixPicker key="premix" archive {...props}/>:view==='fresh'?<InverseLabPicker key="fresh" {...props} bank={LAB_FRESH}/>:view==='hard'?<InverseLabPicker key="hard" {...props} bank={LAB_HARD}/>:view==='inverse'?<InverseLabPicker key="inverse" {...props} bank={LAB_INVERSE}/>:view==='archive'?<LegacyLabPicker {...props}/>:<>
   <label>Campaign palette<select value={selected} onChange={e=>{const i=Number(e.target.value);setSelected(i);const first=CAMPAIGN_CHAPTERS[i].slots.find(s=>s.specimen);if(first?.specimen)onChoose(structuredClone(first.specimen));}}>{CAMPAIGN_CHAPTERS.map((c,i)=><option key={c.id} value={i}>{i+1}. {c.name} · {c.slots.filter(s=>s.specimen).length}/{c.slots.length} candidates</option>)}</select></label>
   <label>Hole in this palette<select disabled={!playable.length} value={at<0?'':playable[at].id} onChange={e=>choose(e.target.value)}>{at<0&&<option value="">Choose a candidate…</option>}{chapter.slots.map((s,i)=><option key={s.id} value={s.id} disabled={!s.specimen}>{i+1}. {s.title}{s.specimen?` · ${s.specimen.hole.notation}`:' · Still to find'}</option>)}</select></label>
   {at>=0&&!!playable[at].alternatives?.length&&<label>Candidate version<select value={current.hole.courseId} onChange={e=>choose(e.target.value)}><option value={playable[at].id}>Primary · {playable[at].specimen!.hole.notation}</option>{playable[at].alternatives!.map((a,i)=><option key={a.id} value={a.id}>Alternative {i+1} · {a.specimen.hole.notation}</option>)}</select></label>}
@@ -113,6 +116,24 @@ export function LabPicker(props:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>v
   <ol>{chapter.slots.map(s=><li key={s.id}><strong>{s.title}</strong> — {s.specimen?'Ready to test':'Still to find'}. {s.note}</li>)}</ol></details>
  </>}
  </div>;
+}
+
+function InverseLabPicker({current,onChoose,bank}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void;bank:LabSpecimen[]}) {
+ const levels=[...new Set(bank.map(s=>s.levelIndex))];
+ const [browsing,setBrowsing]=useState(levels.includes(current.levelIndex)?current.levelIndex:levels[0]);
+ const level=levels.includes(current.levelIndex)?current.levelIndex:browsing;
+ const items=bank.filter(s=>s.levelIndex===level),at=items.findIndex(s=>s.hole.courseId===current.hole.courseId);
+ const choose=(s:LabSpecimen)=>onChoose(structuredClone(s));
+ const hard=bank===LAB_HARD;
+ const row=at>=0?directedForHole(items[at].hole.courseId):null;
+ return <>
+  <label>Test palette<select value={level} onChange={e=>{const n=Number(e.target.value);setBrowsing(n);choose(bank.find(s=>s.levelIndex===n)!);}}>{levels.map((n,i)=><option key={n} value={n}>{i+1}. {PLAY_LEVELS[n].name} · {bank.filter(s=>s.levelIndex===n).length} holes</option>)}</select></label>
+  <label>Hole in this palette<select value={at<0?'':items[at].hole.courseId} onChange={e=>choose(items.find(s=>s.hole.courseId===e.target.value)!)}>{at<0&&<option value="">Choose a new hole…</option>}{items.map((s,i)=><option key={s.hole.courseId} value={s.hole.courseId}>{i+1}. {directedForHole(s.hole.courseId)?.label} · {s.hole.notation}</option>)}</select></label>
+  <button type="button" onClick={()=>choose(items[at<0?0:(at+1)%items.length])}>{at<0?'Start this palette':at===items.length-1?'Replay palette':'Next hole →'}</button>
+  {hard&&<p className="lab-muted">Six harder setups, then two lighter contrasts. No one-addition solution found from any base on the six setup holes. Same controls and landing tolerance.</p>}
+  {bank===LAB_FRESH&&<p className="lab-muted">Six fresh targets across three newer palettes. No one- or two-addition shortcut found from any base in two numerical passes. Five-Paint Field has some four-addition timing-supported routes. Free base selection, unchanged controls and tolerance.</p>}
+  <details><summary>Paints & hole intent{row?` · ${row.label}`:''}</summary><p>{PLAY_LEVELS[level].paints.map(p=>p.name).join(' · ')}</p><p>{row?.brief??'Choose a test palette and hole. Start anywhere, skip freely, and replay as often as you like. Campaign and earlier reviews remain available.'}</p><p>Controls, pigment strengths and landing tolerance are unchanged. A useful featured route is not always the shortest route. Review includes competing examples.</p></details>
+ </>;
 }
 
 function LegacyLabPicker({current,onChoose}:{current:LabSpecimen;onChoose:(s:LabSpecimen)=>void}) {
@@ -145,7 +166,7 @@ export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<t
     <header><div><h2>Hole Lab</h2><p>Repeat the hole. Keep the evidence.</p></div><div className="lab-sync"><span role="status">{sync.status}</span><button type="button" onClick={sync.retry}>Refresh / retry</button></div></header>
     {!sync.signedIn?<p><a href="/signin-with-chatgpt?return_to=%2F%3Fmode%3Dplay%26lab%3D1" target="_top">Sign in with ChatGPT</a> to save private attempts and notes across devices.</p>:<>
       <div className="lab-toolbar"><button type="button" disabled={!entry} onClick={()=>{setReviewing(!reviewing);if(!reviewing)onReveal();}}>{reviewing?'Hide review':'Reveal route analysis'}</button><button type="button" onClick={sync.exportFile}>Export backup</button><label className="lab-import">Import backup<input type="file" accept="application/json,.json" onChange={e=>{const file=e.target.files?.[0];if(file)void sync.importFile(file);e.target.value='';}}/></label></div>
-      <p className="lab-muted">Campaign draft: all 34 slots are ready to test, one palette at a time. Newly filled slots include optional alternatives. Existing holes and reviews are preserved. Pigments, controls and existing pars are unchanged; new candidates use the existing par calculation and current landing setting.</p>
+      <p className="lab-muted">{current?.specimen.hole.premix&&premixItem(current.specimen.hole)?.collection?'Try your own approach first, then compare the examples and shortest-found alternative. Note where you reconsidered, whether the finish felt satisfying, and whether a shortcut improved or weakened the hole. Replay any puzzle; all previous collections and reviews remain available.':'Campaign draft: all 34 slots are ready to test, one palette at a time. Newly filled slots include optional alternatives. Existing holes and reviews are preserved. Pigments, controls and existing pars are unchanged; new candidates use the existing par calculation and current landing setting.'}</p>
       {current?.specimen.comparison&&<p className="lab-paired" role="status">Comparison attempt: try <strong>{current.paints[current.specimen.comparison.base].name}</strong> as your base. You remain free to choose otherwise.</p>}
       {entries.length>0&&<label className="lab-history">Attempt<select value={entry?.attempt.id??''} onChange={e=>{setChosen(e.target.value);setReviewing(true);onReveal();}}>{entries.map((e,i)=><option key={e.attempt.id} value={e.attempt.id}>{e.attempt.id===currentId?'Current · ':''}{PLAY_LEVELS[e.attempt.specimen.levelIndex].name} · {e.attempt.specimen.hole.notation} · {e.attempt.outcome} · {new Date(e.attempt.started).toLocaleString()} · {entries.length-i}</option>)}</select><button type="button" onClick={()=>{setChosen(null);setReviewing(true);onReveal();}}>Current attempt</button></label>}
       {reviewing&&entry&&<div className="lab-review" key={entry.attempt.id}>
@@ -160,7 +181,7 @@ export function PlayLabPanel({sync,current,onReplay,onReveal}:{sync:ReturnType<t
         {pairedSpecimen&&<div className="lab-paired"><p>{experiment?.brief} Compare with <strong>{PLAY_LEVELS[pairedSpecimen.levelIndex].name}</strong>.</p><button type="button" onClick={()=>{onReplay(pairedSpecimen);setChosen(null);setReviewing(false);}}>Try paired palette ↗</button></div>}
         {comparison&&<div className="lab-paired"><p>Compare the same target from <strong>{PLAY_LEVELS[comparison.levelIndex].paints[comparison.comparison!.base].name}</strong>. Choose that base yourself; other paints remain available.</p><button type="button" onClick={()=>{onReplay(comparison);setChosen(null);setReviewing(false);}}>Replay with suggested start ↗</button></div>}
         {analysis&&<details className="lab-base-analysis"><summary>Starting-choice measurements</summary><p>{analysis.qualifyingBases.length}/{analysis.bases.length} starts meet provisional route-quality checks. {analysis.robustThree?'Three additions found from every base; no one- or two-addition solution found.':''} This predicts candidates, not enjoyment.</p><div className="lab-base-scroll"><table><thead><tr><th>Base</th><th>Additions found</th><th>Shortest travel</th><th>Measured support</th>{focused&&<th>Intended style</th>}</tr></thead><tbody>{analysis.bases.map(b=><tr key={b.base}><td>{entry.attempt.paints[b.base].name}</td><td>{b.fewestFound??'Not found'}</td><td>{b.minimumTravel?.toFixed(1)??'—'}</td><td>{b.qualifies?'Supported':'Uncertain'}</td>{focused&&<td>{focused.coverage.styleBases.includes(b.base)?'Found':'Not found'}</td>}</tr>)}</tbody></table></div><p>Travel is in display-world units. Search is sampled, not exhaustive. Setup tests vary earlier release times within ±0.18 seconds and search for a successful finish; they do not prove global difficulty.</p></details>}
-        <div className="lab-comparison">{same.map((e,i)=>{const shots=e.attempt.shots.filter(s=>!s.cancelled),last=shots.at(-1),error=last?colorDistance(mixtureColor(PLAY_LEVELS[e.attempt.specimen.levelIndex].paints,last.after),e.attempt.specimen.hole.target)/e.attempt.specimen.hole.tolerance:null;return <button type="button" key={e.attempt.id} aria-pressed={entry.attempt.id===e.attempt.id} onClick={()=>setChosen(e.attempt.id)}><strong>Attempt {same.length-i}</strong><span>{Math.max(0,shots.length-1)} pours · {last?totalMass(last.after).toFixed(2):0} parts</span><span>{error===null?'No base yet':`${error.toFixed(2)} × tolerance`} · {e.attempt.outcome}</span></button>;})}</div>
+        <div className="lab-comparison">{same.map((e,i)=>{const shots=e.attempt.shots.filter(s=>!s.cancelled),last=shots.at(-1),error=last?colorDistance(mixtureColor(PLAY_LEVELS[e.attempt.specimen.levelIndex].paints,last.after),e.attempt.specimen.hole.target)/e.attempt.specimen.hole.tolerance:null;return <button type="button" key={e.attempt.id} aria-pressed={entry.attempt.id===e.attempt.id} onClick={()=>setChosen(e.attempt.id)}><strong>Attempt {same.length-i}</strong><span>{Math.max(0,shots.length-(e.attempt.specimen.hole.premix?0:1))} pours · {last?totalMass(last.after).toFixed(2):0} parts</span><span>{error===null?'No base yet':`${error.toFixed(2)} × tolerance`} · {e.attempt.outcome}</span></button>;})}</div>
         <RouteReview key={entry.attempt.id} entry={entry}/>
       </div>}
       {entry&&<div className="lab-review"><h3>Feedback · {PLAY_LEVELS[entry.attempt.specimen.levelIndex].name}</h3><p className="lab-muted">For this palette: did this hole fit its position, feel different from the previous one, and stay worthwhile from your chosen base? Add those observations to your note.</p><ReviewForm key={entry.attempt.id} entry={entry} onSave={review=>sync.save({id:crypto.randomUUID(),attemptId:entry.attempt.id,type:'review',review})}/></div>}

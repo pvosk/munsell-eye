@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { HOLES_PER_PALETTE, PLAY_LEVELS, nextCoursePalette, withLiveLanding, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
 import {newLabAttempt,nextFixedLabSpecimen,labHoleProgress,type LabAttempt,type LabSpecimen} from './play-lab-model';
+import {premixStep} from './play-premix';
 import {usePlayLabSync} from './play-lab-sync';
 import {LabPicker,PlayLabPanel} from './play-lab';
 import './play.css';
@@ -107,7 +108,7 @@ export default function PlayView() {
             targetLabel.current.style.setProperty('--bearing', `${angle}rad`);
           },
           onError() { charge.current = null; setCharged(null); setReady(false); setError(true); },
-          onIntroEnd() { if(cancelled||epoch!==sceneEpoch.current)return;setPhase('seed'); setAnnouncement('Choose your first paint.'); },
+          onIntroEnd() { if(cancelled||epoch!==sceneEpoch.current)return;setPhase(hole.premix?'rest':'seed'); setAnnouncement(hole.premix?'Prepared mixture ready. Every pour counts.':'Choose your first paint.'); },
         },{paints:PLAY_LEVELS[levelIndex].paints,revealPalette:lastRevealedPalette.current!==levelIndex});
         lastRevealedPalette.current=levelIndex;
         scene.current = mounted; setError(false); setReady(true);
@@ -146,9 +147,10 @@ export default function PlayView() {
     const before = s.quantities;
     const beforeMass = totalMass(before);
     const seconds=(performance.now()-held.started)/1000;
-    const amount = chargeAmount(beforeMass, seconds);
-    const after = addPaint(before, held.index, amount);
-    const path = pourPath(palette, before, held.index, amount);
+    const transition=s.hole.premix?premixStep(before,held.index,seconds,s.hole.premix.massMode):null;
+    const amount = transition?.amount??chargeAmount(beforeMass, seconds);
+    const after = transition?.after??addPaint(before, held.index, amount);
+    const path = pourPath(palette, transition?.before??before, held.index, amount);
     const nextPours = s.pours + (beforeMass ? 1 : 0);
     rollback.current={quantities:[...before],pours:s.pours,phase:beforeMass?'rest':'seed'};
     // Lock before React renders so overlapping key/pointer events cannot pour twice.
@@ -226,12 +228,14 @@ export default function PlayView() {
     rollback.current=null;
     setFinishPaused(false);
     cancelCharge(); setReady(false); setError(false); setSelected(0); setPours(0); setPhase('intro'); setHelp(false);
-    setQuantities(PLAY_LEVELS[index].paints.map(() => 0)); setLevelIndex(index);
+    setLevelIndex(index);
     // Keep a round's seed through all five holes. A requested new target should
     // not immediately repeat the same bank entry when the random variant repeats.
     let next=exact??(same&&index===levelIndex&&stage===hole.stage?{...hole}:generateHole(index,same?hole.seed:crypto.getRandomValues(new Uint32Array(1))[0],stage));
     if(!exact&&!same && index===levelIndex)for(let attempt=0;attempt<32 && next.courseId===hole.courseId;attempt++)next=generateHole(index,crypto.getRandomValues(new Uint32Array(1))[0],stage);
     if(!exact&&!(same&&index===levelIndex&&stage===hole.stage))next=withLiveLanding(next);
+    const initial=next.premix?[...next.premix.initial]:PLAY_LEVELS[index].paints.map(()=>0);
+    setQuantities(initial);
     if(labLive.current.enabled){
       const previous=attemptRef.current;
       if(previous&&previous.outcome==='playing')record({...previous,outcome:previous.specimen.hole.courseId===next.courseId?'replayed':'left'});
@@ -240,7 +244,7 @@ export default function PlayView() {
     }
     // Navigation is allowed during a shot/charge. Block stale input before
     // React installs the new scene, and never attach it to the previous attempt.
-    live.current={...live.current,levelIndex:index,hole:next,quantities:PLAY_LEVELS[index].paints.map(()=>0),phase:'intro',ready:false,pours:0,selected:0,help:false,error:false};
+    live.current={...live.current,levelIndex:index,hole:next,quantities:initial,phase:'intro',ready:false,pours:0,selected:0,help:false,error:false};
     setHole(next);
     setAnnouncement(`Hole ${labHoleProgress(next)}. Arriving in color space.`);
   };
@@ -253,7 +257,7 @@ export default function PlayView() {
     const url=new URL(location.href);if(next)url.searchParams.set('lab','1');else url.searchParams.delete('lab');history.replaceState(null,'',url);
     // Enter with a clean start so every recorded route includes its free base.
     if(next)startHole(levelIndex,true);
-    else if(PLAY_LEVELS[levelIndex].labOnly||PLAY_LEVELS[levelIndex].retired)startHole(0,false,0);
+    else if(hole.premix||PLAY_LEVELS[levelIndex].labOnly||PLAY_LEVELS[levelIndex].retired)startHole(0,false,0);
   };
   const reveal=()=>{if(attemptRef.current&&!attemptRef.current.revealed)record({...attemptRef.current,revealed:true});};
   const nextHole = () => hole.stage < HOLES_PER_PALETTE - 1
@@ -333,10 +337,10 @@ export default function PlayView() {
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>
       <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span><span>Destination</span></div>
       <div className="play-score"><span><b>{labHoleProgress(hole)}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span>{(!lab||attempt?.revealed)&&<span><b>{hole.par}</b> Par</span>}<span><b>{massLabel(mass)}</b> Parts</span></div>
-      <div className="play-world-caption"><span>{status}</span><i /><span>{phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
+      <div className="play-world-caption"><span>{status}</span><i /><span>{hole.premix?`Premix · ${hole.premix.massMode==='normalized'?'quantity resets to 1 part':'quantity accumulates'} · every pour counts`:phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
-{help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. As your mixture grows, the same charge has less influence.</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>The original palettes draw from four evaluated five-hole rounds; the two experimental palettes each have one. Courses have their own balance of colorful rides, value changes and quieter mixtures. The final hole carries the round’s toughest par or timing margin. A qualifying endpoint is drawn into the cup, then advances automatically. All palettes are available to explore.</p><p className="play-fineprint">Player par includes room for adjustment; it is not the fewest possible shots. It is provisionally calibrated from sampled routes and timing margins. Every starting paint is checked for one- and two-pour alternatives, but the search is not a mathematical proof. Landing tolerance stays fixed within each palette. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
+{help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>{hole.premix?'This puzzle begins with the displayed prepared recipe. Hold a paint, then release to mix into it. Every pour counts; there is no free base selection.':'Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.'}</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. {hole.premix?.massMode==='normalized'?'This version resets total quantity to 1 after each shot, retaining the proportions and pigment strengths.':'As your mixture grows, the same charge has less influence.'}</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>The original palettes draw from four evaluated five-hole rounds; the two experimental palettes each have one. Courses have their own balance of colorful rides, value changes and quieter mixtures. The final hole carries the round’s toughest par or timing margin. A qualifying endpoint is drawn into the cup, then advances automatically. All palettes are available to explore.</p><p className="play-fineprint">Player par includes room for adjustment; it is not the fewest possible shots. It is provisionally calibrated from sampled routes and timing margins. Every starting paint is checked for one- and two-pour alternatives, but the search is not a mathematical proof. Landing tolerance stays fixed within each palette. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
       {phase === 'landed' && !help && <div className="play-arrival" data-result={pours<=hole.par?'within':'over'} onFocus={()=>setFinishPaused(true)} onPointerDown={()=>setFinishPaused(true)}>
         <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Shots</span></div><div><strong>{massLabel(mass)}</strong><span>Total parts</span></div></div>
         {(!lab||attempt?.revealed)&&<p className="play-par-difference">{pours===hole.par?'On par':`${pours>hole.par?'+':''}${pours-hole.par} vs par`} <span>· Player par {hole.par}</span></p>}

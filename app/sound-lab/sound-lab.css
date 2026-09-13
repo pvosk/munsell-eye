@@ -1050,7 +1050,17 @@
 }
 .sl-v2 .sl-header {
   height: 56px;
+  gap: 16px;
 }
+.sl-v2 .sl-header > .sl-status { margin-left: auto; }
+.sl-mode-nav { position: relative; flex: 0 0 auto; z-index: 50; }
+.sl-v2 .sl-mode-trigger { border-radius: 999px; min-height: 40px; min-width: 96px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 16px; font-size: 14px; }
+.sl-mode-options { position: absolute; right: 0; top: calc(100% + 8px); width: min(276px, calc(100vw - 24px)); padding: 8px; border: 1px solid var(--sl-line); border-radius: 18px; background: var(--sl-bg, #f8f7f3); box-shadow: 0 14px 36px #0002; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.sl-mode-options[hidden] { display: none; }
+.sl-mode-options a { display: flex; align-items: center; min-height: 44px; padding: 8px 12px; border-radius: 12px; text-decoration: none; color: inherit; font-size: 14px; }
+.sl-mode-options a:hover, .sl-mode-options a[aria-current] { background: #80808018; }
+.sl-mode-options a:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+@media(max-width: 560px) { .sl-v2 .sl-header { gap: 8px; } .sl-v2 .sl-header > .sl-status { display: none; } .sl-mode-nav { margin-left: auto; } .sl-v2 .sl-header > strong { font-size: 12px; } }
 .sl-v2 h1 {
   font-size: 28px;
   letter-spacing: -0.035em;

@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -23,6 +22,7 @@ import { HarmonyJourney } from "./harmony-journey";
 import { MelodyGrid } from "./melody-grid";
 import { MusicPanel } from "./music-panel";
 import { StudyBrowser } from "./study-browser";
+import { SoundModeNav } from "./mode-nav";
 import {
   JOURNEY_STUDIES,
   STUDY_FAMILIES,
@@ -583,9 +583,9 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
   return (
     <main className="sl-root sl-v2">
       <header className="sl-header">
-        <Link className="sl-back" href="/?mode=play">
-          ← Munsell Eye
-        </Link>
+        <a className="sl-back" href="/?mode=play">
+          ◐ Munsell Eye
+        </a>
         <strong>Sound lab</strong>
         <span className="sl-status">
           {status === "loading"
@@ -596,6 +596,7 @@ export default function SoundLab({ signIn }: { signIn: ReactNode }) {
                 : "Audio ready"
               : "Audio off"}
         </span>
+        <SoundModeNav />
       </header>
       <div className="sl-workspace">
         <div className="sl-master">

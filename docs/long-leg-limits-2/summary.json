@@ -1,0 +1,136 @@
+{
+  "seed": 711091,
+  "mode": "inverse-chain",
+  "perDepth": 160,
+  "catalog": 87,
+  "proposals": 3840,
+  "screened": 243,
+  "refined": 18,
+  "seconds": 169.467,
+  "groups": [
+    {
+      "legs": 4,
+      "paints": 5,
+      "proposals": 1280,
+      "screened": 75,
+      "initial3LegEscapes": 75,
+      "final": [
+        {
+          "id": "limit-711091-4-92-0",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-4-56-0",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-4-108-4",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-4-47-2",
+          "shortcut": 1,
+          "independent": 1
+        },
+        {
+          "id": "limit-711091-4-12-0",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-4-143-7",
+          "shortcut": 2,
+          "independent": 2
+        }
+      ]
+    },
+    {
+      "legs": 5,
+      "paints": 6,
+      "proposals": 1280,
+      "screened": 84,
+      "initial3LegEscapes": 84,
+      "final": [
+        {
+          "id": "limit-711091-5-141-1",
+          "shortcut": 1,
+          "independent": 1
+        },
+        {
+          "id": "limit-711091-5-89-6",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-5-158-6",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-5-32-5",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-5-40-1",
+          "shortcut": 1,
+          "independent": 1
+        },
+        {
+          "id": "limit-711091-5-120-5",
+          "shortcut": 2,
+          "independent": 2
+        }
+      ]
+    },
+    {
+      "legs": 6,
+      "paints": 7,
+      "proposals": 1280,
+      "screened": 84,
+      "initial3LegEscapes": 84,
+      "final": [
+        {
+          "id": "limit-711091-6-82-7",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-6-45-6",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-6-61-7",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-6-158-5",
+          "shortcut": 1,
+          "independent": 1
+        },
+        {
+          "id": "limit-711091-6-3-5",
+          "shortcut": 2,
+          "independent": 2
+        },
+        {
+          "id": "limit-711091-6-136-6",
+          "shortcut": 2,
+          "independent": 2
+        }
+      ]
+    }
+  ],
+  "sourceHash": "9786eb0cbf7363b664d7d594656692a4e92f775940b178243d85e6a06732c937",
+  "limitations": [
+    "Finite sampling, not impossibility proof",
+    "All recipe targets and starts are movable within their palette",
+    "Search objectives do not imply route quality",
+    "Three-leg shortcuts refute longer necessity without testing every longer order"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "source": "docs/branching-region-search-2",
+  "cases": 12,
+  "acceptedRefinements": 12,
+  "threeLegAfter": 7,
+  "policy": "Shared start plus two branch controls refined; target/pigments fixed. Dense independent endpoint/order validation after refinement. Region support and branch counts are not required journey/style claims."
+}
