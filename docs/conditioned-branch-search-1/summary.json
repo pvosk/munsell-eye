@@ -1,0 +1,138 @@
+{
+  "seed": 929831,
+  "config": {
+    "palettes": 1024,
+    "starts": 8,
+    "auditsPerGroup": 5,
+    "refine": 12
+  },
+  "seconds": 243.588,
+  "proposals": 34472,
+  "unavailable": 2859,
+  "screened": 225,
+  "audited": 50,
+  "refinements": 19,
+  "groups": [
+    {
+      "n": 4,
+      "spec": "light-rise",
+      "audited": 5,
+      "minNMinusOne": 5,
+      "regionNMinusOne": 5,
+      "styleEfficient": 5
+    },
+    {
+      "n": 4,
+      "spec": "dark-drop",
+      "audited": 5,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 2
+    },
+    {
+      "n": 4,
+      "spec": "mid-balance",
+      "audited": 5,
+      "minNMinusOne": 4,
+      "regionNMinusOne": 4,
+      "styleEfficient": 5
+    },
+    {
+      "n": 4,
+      "spec": "vivid-ride",
+      "audited": 5,
+      "minNMinusOne": 1,
+      "regionNMinusOne": 1,
+      "styleEfficient": 4
+    },
+    {
+      "n": 4,
+      "spec": "fixed-hansa",
+      "audited": 5,
+      "minNMinusOne": 5,
+      "regionNMinusOne": 5,
+      "styleEfficient": 4
+    },
+    {
+      "n": 4,
+      "spec": "fixed-earth",
+      "audited": 2,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 2
+    },
+    {
+      "n": 4,
+      "spec": "fixed-ryb",
+      "audited": 5,
+      "minNMinusOne": 3,
+      "regionNMinusOne": 3,
+      "styleEfficient": 2
+    },
+    {
+      "n": 5,
+      "spec": "light-rise",
+      "audited": 4,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 1
+    },
+    {
+      "n": 5,
+      "spec": "dark-drop",
+      "audited": 0,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 0
+    },
+    {
+      "n": 5,
+      "spec": "mid-balance",
+      "audited": 5,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 3
+    },
+    {
+      "n": 5,
+      "spec": "vivid-ride",
+      "audited": 1,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 1
+    },
+    {
+      "n": 5,
+      "spec": "fixed-hansa",
+      "audited": 5,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 3
+    },
+    {
+      "n": 5,
+      "spec": "fixed-earth",
+      "audited": 0,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 0
+    },
+    {
+      "n": 5,
+      "spec": "fixed-ryb",
+      "audited": 3,
+      "minNMinusOne": 0,
+      "regionNMinusOne": 0,
+      "styleEfficient": 0
+    }
+  ],
+  "sourceHash": "c9ea145bbcae86dd8ad019e10f76206b3a4bec457742e34b5fd4c2a9c66558fd",
+  "limitations": [
+    "Finite candidate and region sampling; not exhaustive",
+    "n−1 is proposal depth, not automatic minimum",
+    "Recipe-level four-leg witnesses may have color-equivalent three-leg shortcuts",
+    "Recovery depth capped at three; missing recovery is not a dead end proof",
+    "Recovery is measured, not optimized or player-calibrated",
+    "No control, tolerance, pigment strength or live lab changes"
+  ]
+}

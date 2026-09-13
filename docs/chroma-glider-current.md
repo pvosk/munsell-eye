@@ -4,6 +4,8 @@ Updated 13 September 2026.
 
 ## Latest research checkpoint
 
+The [destination-conditioned branching study](play-conditioned-branch-findings.md) expands offline backward search to 87 modeled paint snapshots and 1,785 distinct four/five-paint palettes. It banks 60,007 proposals, deeply audits 96 and compares 36 fixed/joint refinements. Four-paint three-leg candidates survive for light, balancing, vivid and fixed-color requests; no five-paint four-leg minimum survives the tested checks. First-choice recovery and exact-target invariants are archived. A fresh 17-record holdout finds no additional shorter counterexamples. Desired style is separated from efficient-route evidence; public lab v80, controls, strength and tolerance remain unchanged.
+
 The [four-hole branching lab and recent review assessment](play-branch-lab.md) turns four refined shared-start cases into a small playable collection. It preserves both branch examples and different-ingredient-set alternatives where found, without changing controls, tolerance or older collections. Player feedback favors meaningful correction over obvious lifts or length alone.
 
 The [branching-region search](play-branching-region-findings.md) adds offline accepted-endpoint sampling and shared-start/two-branch refinement. Its larger run banks 24,576 proposals across 384 palettes, audits 48, and refines twelve paired branches; seven instances retain a shortest-found three-leg solution. This is not full inverse-image optimization or a new live generator. Branches using different ingredient sets are distinguished from reordered contributions, and the public lab stays unchanged.

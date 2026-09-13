@@ -59,3 +59,8 @@ next-env.d.ts
 /docs/branching-region-search-1/proposals.json
 /docs/branching-region-search-2/proposals.json
 /docs/branching-region-search-2/audits.json
+/docs/conditioned-branch-search-1/audits.json
+/docs/conditioned-branch-search-1/proposals.json
+/docs/conditioned-branch-search-1/refinements.json
+/docs/conditioned-branch-search-2/audits.json
+/docs/conditioned-branch-search-2/proposals.json

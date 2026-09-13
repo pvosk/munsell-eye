@@ -1,0 +1,115 @@
+{
+  "policy": "Fresh ordered-fraction coordinate search; finite numerical holdout, not a global proof",
+  "rows": [
+    {
+      "id": "condition-1031931-546-0-2",
+      "previousMinimum": 3,
+      "depth": 2,
+      "seed": 3172994,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 81838,
+      "bestByDepth": [
+        2.6235364112449457,
+        1.6458965838913506
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-3-1-0/joint",
+      "previousMinimum": 3,
+      "depth": 2,
+      "seed": 3173991,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 83628,
+      "bestByDepth": [
+        3.784191872157611,
+        2.801336139709403
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-698-2-5/joint",
+      "previousMinimum": 3,
+      "depth": 2,
+      "seed": 3174988,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 45444,
+      "bestByDepth": [
+        3.042352426439345,
+        2.793299104181951
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-1-4-5/fixed-target",
+      "previousMinimum": 3,
+      "depth": 2,
+      "seed": 3175985,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 75324,
+      "bestByDepth": [
+        2.890588344085544,
+        2.0283528227995755
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-746-6-0/fixed-target",
+      "previousMinimum": 3,
+      "depth": 2,
+      "seed": 3176982,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 55664,
+      "bestByDepth": [
+        3.1044567505352347,
+        1.8967677323454921
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-53-4-4/fixed-target",
+      "previousMinimum": 2,
+      "depth": 1,
+      "seed": 3177979,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 7582,
+      "bestByDepth": [
+        2.7545101676912815
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-53-4-4",
+      "previousMinimum": 2,
+      "depth": 1,
+      "seed": 3178976,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 7804,
+      "bestByDepth": [
+        2.7539885395312176
+      ],
+      "counterexamples": []
+    },
+    {
+      "id": "condition-1031931-589-4-5",
+      "previousMinimum": 2,
+      "depth": 1,
+      "seed": 3179973,
+      "samples": 384,
+      "restarts": 20,
+      "evaluations": 7672,
+      "bestByDepth": [
+        2.8453085791699433
+      ],
+      "counterexamples": []
+    }
+  ],
+  "counterexamples": 0
+}
