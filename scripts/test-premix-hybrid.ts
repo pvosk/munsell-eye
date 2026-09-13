@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {PLAY_LEVELS,mixtureColor,colorDistance,LIVE_LANDING_TOLERANCE as T} from '../app/play-engine';
 import {premixReplay} from '../app/play-premix';
-import {gradient,ascend,encode,decode,gradientChallenger,oneShotField,closestOne,cleanupAttack,structuralVerdict,targetOf,refinePuzzle,type Puzzle} from './premix-hybrid';
+import {gradient,ascend,encode,decode,gradientChallenger,oneShotField,closestOne,cleanupAttack,structuralVerdict,targetOf,refinePuzzle,refinementBounds,type Puzzle,type RefinementMode} from './premix-hybrid';
+import {compositionPlans} from './premix-composition-plan';
 import {searchPremix} from './premix-search';
 import {geometry,measureRegion} from './premix-region-metrics';
 const p:Puzzle={id:'test',palette:'Zorn',paints:PLAY_LEVELS[1].paints,start:[.4,.3,.2,.1],targetRecipe:[],control:{order:[2,3,1],times:[.4,.4,.4],error:0}};
@@ -60,4 +61,25 @@ test('refinement preserves physical parameters and playable witness',()=>{
  assert.equal(JSON.stringify(r.p.paints),snapshot);
  assert(colorDistance(mixtureColor(r.p.paints,premixReplay(r.p.start,r.p.control.order,r.p.control.times,'normalized')),targetOf(r.p))<=T);
  assert(r.history.length===2);
+});
+test('ablation locks recipes exactly and allows independent dose refinement',()=>{
+ for(const mode of ['dose-only','start-only','target-only','joint'] as RefinementMode[]){
+  const bounds=refinementBounds(p,mode),n=p.paints.length-1;
+  const r=refinePuzzle(p,11791,2,mode).p;
+  if(mode==='dose-only'||mode==='target-only')assert.deepEqual(r.start,p.start);
+  if(mode==='dose-only'||mode==='start-only')assert.deepEqual(r.targetRecipe,p.targetRecipe);
+  assert(bounds.slice(2*n).every(([lo,hi])=>lo<hi));
+  assert.deepEqual(r.paints,p.paints);assert.deepEqual(r.control.order,p.control.order);
+ }
+ assert.deepEqual(refinePuzzle(p,11913,2),refinePuzzle(p,11913,2,'joint'));
+});
+test('algebraic recipe construction uses at most n-1 distinct additions when doses are legal',()=>{
+ for(const n of [3,4,5,6]){
+  const start=Array(n).fill(1/n),finish=start.map((_,i)=>(i+1)/(n*(n+1)/2));
+  const plan=compositionPlans(start,finish);assert(plan.distinctAdditions<=n-1);assert(plan.legalRoutes.length>0);
+  for(const route of plan.legalRoutes)assert(route.recipeError!<1e-10);
+ }
+ const cap=compositionPlans([.999,.0005,.0005],[.0001,.9994,.0005]);
+ assert(cap.routes.some(r=>r.times===null));
+ assert.equal(compositionPlans([.3,.3,.4],[.3,.3,.4]).distinctAdditions,0);
 });

@@ -62,13 +62,24 @@ export function designScore(p:Puzzle,rivals:PremixControl[]){
   -35*Math.max(0,error-.65)**2-2*moves.reduce((sum,x)=>sum+Math.max(0,1.5-x)**2,0)-3*Math.max(0,finishJitter-1)**2;
 }
 
-export function refinePuzzle(initial:Puzzle,seed:number,rounds=8){
+export type RefinementMode='dose-only'|'start-only'|'target-only'|'joint';
+export function refinementBounds(p:Puzzle,mode:RefinementMode):[number,number][]{
+ const n=p.paints.length-1,x=encode(p);
+ return x.map((v,i)=>{
+  const frozen=i<n?(mode==='target-only'||mode==='dose-only'):i<2*n?(mode==='start-only'||mode==='dose-only'):false;
+  return frozen?[v,v]:i<2*n?[-8,8]:[.08,1.6];
+ });
+}
+export function refinePuzzle(initial:Puzzle,seed:number,rounds=8,mode:RefinementMode='joint'){
  let p=initial,c=gradientChallenger(p,Math.min(2,p.control.order.length-1),20,seed),score=designScore(p,c.routes);
  const before={score,bestT:c.best.map(e=>e/T),start:p.start,targetRecipe:p.targetRecipe},history:any[]=[];
  let evaluations=c.evaluations;
  for(let round=0;round<rounds;round++){
-  const n=p.paints.length-1,x=encode(p),bounds:[number,number][]=x.map((_,i)=>i<2*n?[-8,8]:[.08,1.6]);
+  const x=encode(p),bounds=refinementBounds(p,mode);
   const proposal=ascend(z=>designScore(decode(p,z),c.routes),x,bounds,3),trial=decode(p,proposal.x);
+  // Keep locked recipes bit-for-bit fixed, not just softmax-roundtrip equivalent.
+  if(mode==='target-only'||mode==='dose-only')trial.start=initial.start;
+  if(mode==='start-only'||mode==='dose-only')trial.targetRecipe=initial.targetRecipe;
   // Re-solve rivals after every proposed move. A stale shortcut gradient is not
   // accepted as improvement of the puzzle itself.
   const next=gradientChallenger(trial,Math.min(2,p.control.order.length-1),24,seed+round*137+1),nextScore=designScore(trial,next.routes);evaluations+=next.evaluations;

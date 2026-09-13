@@ -103,3 +103,14 @@ pre-optimization puzzles are stored, and finalist baselines are re-challenged
 with the same independent solver settings as refined puzzles. Failed support
 and meaningless-action checks have explicit failure reasons. First-pass archives
 and the implementation checkpoint remain unchanged.
+
+## Controlled start/target comparison
+
+`refinePuzzle` now accepts `dose-only`, `start-only`, `target-only` or `joint`
+(the unchanged default). Locked recipes remain exactly fixed; doses are free in
+every optimized arm. `scripts/compare-premix-hybrid.ts` audits all arms of the
+128 original parents plus a separately labeled substitution anchor. It also adds
+an algebraic recipe-space shortcut attack without substituting it for color-space
+numerical validation. See [comparison results](premix-ablation-results.md) and
+[terminology / algebra](premix-search-terms.md). These capabilities are offline;
+no new playable lab or gameplay policy is selected automatically.
