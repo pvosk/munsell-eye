@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {readBankBytes} from './research-bank-io';
 // Preserve exact original bytes/hash. Local raw caches remain untouched; only
 // portable chunks are versioned for archives too large for the source host.
-for(const dir of readdirSync('docs').filter(d=>d.startsWith('pigment-leg-')||d.startsWith('branching-region-')||d.startsWith('conditioned-branch-')))for(const file of readdirSync('docs/'+dir)){
+for(const dir of readdirSync('docs').filter(d=>d.startsWith('pigment-leg-')||d.startsWith('branching-region-')||d.startsWith('conditioned-branch-')||d.startsWith('long-leg-limits-')))for(const file of readdirSync('docs/'+dir)){
  const path='docs/'+dir+'/'+file;if(!file.endsWith('.json')||statSync(path).size<=2_000_000)continue;
  if(existsSync(path+'.archive.json'))continue;
  const bytes=readFileSync(path),parts:{path:string}[]=[];mkdirSync(path+'.parts');

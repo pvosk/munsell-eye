@@ -16,6 +16,7 @@ export function SoundModeNav(){
     <nav id="sound-app-sections" aria-label="App sections" className="sl-mode-options" hidden={!open}>
       {sections.map(([id,label])=><a key={id} href={`/?mode=${id}`}>{label}</a>)}
       <a href="/sound-lab" aria-current="page">Sound Lab</a>
+      <a href="/chroma-atlas">Chroma Atlas</a>
     </nav>
   </div>;
 }

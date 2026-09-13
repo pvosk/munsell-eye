@@ -64,3 +64,10 @@ next-env.d.ts
 /docs/conditioned-branch-search-1/refinements.json
 /docs/conditioned-branch-search-2/audits.json
 /docs/conditioned-branch-search-2/proposals.json
+# Exact local research caches; portable SHA-256-verified archives are tracked.
+docs/long-leg-limits-1/proposals-4.json
+docs/long-leg-limits-1/proposals-5.json
+docs/long-leg-limits-1/proposals-6.json
+docs/long-leg-limits-2/proposals-4.json
+docs/long-leg-limits-2/proposals-5.json
+docs/long-leg-limits-2/proposals-6.json

@@ -618,6 +618,7 @@ function MobileSectionNav({ view, open, onToggle, onClose, onChange, onProgress 
         ))}
         {/* A full page navigation also releases the game's WebGL resources. */}
         <a href="/sound-lab" tabIndex={open ? 0 : -1}>Sound Lab</a>
+        <a href="/chroma-atlas" tabIndex={open ? 0 : -1}>Chroma Atlas</a>
         <button onClick={onProgress} tabIndex={open ? 0 : -1} type="button">Progress</button>
       </nav>
     </div>
@@ -2210,6 +2211,7 @@ export default function Home() {
           <button className={view === 'explore' ? 'active' : ''} onClick={() => setView('explore')} type="button">Explore</button>
           <button className={view === 'reference' ? 'active' : ''} onClick={() => setView('reference')} type="button">Reference</button>
           <a href="/sound-lab">Sound Lab</a>
+          <a href="/chroma-atlas">Chroma Atlas</a>
           <button className="quiet-button" type="button" onClick={() => { setPaletteOpen(false); setProgressOpen(true); }}>Progress</button>
         </nav>
         <MobileSectionNav

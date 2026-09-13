@@ -1,0 +1,1088 @@
+{
+  "records": [
+    {
+      "case": "condition-929831-820-0-1/joint",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.1162722641174065,
+        2.1433612542939966,
+        0.0000035637037829106665
+      ],
+      "counterexample": {
+        "paints": [
+          1,
+          2,
+          3
+        ],
+        "weights": [
+          0.1763612679818006,
+          0.12185962562730564,
+          0.33999046297778673,
+          0.3617886434131067
+        ],
+        "error": 1.0477289121757359e-7,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-820-0-1/joint",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.052174213964446145
+      ],
+      "counterexample": {
+        "paints": [
+          2
+        ],
+        "weights": [
+          0.7991482294495096,
+          0.2008517705504903
+        ],
+        "error": 0.0015339218905547167,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-820-0-1/joint",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        0.6696397741552227,
+        0.006430825021433873
+      ],
+      "counterexample": {
+        "paints": [
+          3
+        ],
+        "weights": [
+          0.7608991581820941,
+          0.23910084181790592
+        ],
+        "error": 0.019687409360163548,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-820-0-1/joint",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        1.3745885126188706,
+        0.04953309851883386,
+        0.027003681815929076
+      ],
+      "counterexample": {
+        "paints": [
+          1,
+          2
+        ],
+        "weights": [
+          0.761843907524648,
+          0.07278694378916778,
+          0.16536914868618466
+        ],
+        "error": 0.0014562730964537156,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-546-2-0/joint",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.4311184988361387,
+        2.120447432128825,
+        0.0000024680565467720403
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          3
+        ],
+        "weights": [
+          0.27028906504325917,
+          0.184952966958762,
+          0.21715214980551614,
+          0.3276058181924625
+        ],
+        "error": 7.256086247509799e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-546-2-0/joint",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        7.2429994170289536e-9
+      ],
+      "counterexample": {
+        "paints": [
+          1
+        ],
+        "weights": [
+          0.8606394400766333,
+          0.13936055992336663
+        ],
+        "error": 2.1294418286065122e-10,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-546-2-0/joint",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        0.10619952944792603,
+        0.028012484432455995
+      ],
+      "counterexample": {
+        "paints": [
+          3
+        ],
+        "weights": [
+          0.9007764001795411,
+          0.09922359982045897
+        ],
+        "error": 0.003122266165769025,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-546-2-0/joint",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        1.8486026140392258,
+        0.13409401537395732,
+        0.09898488015893993
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1
+        ],
+        "weights": [
+          0.7955389219581036,
+          0.08071991625916028,
+          0.12374116178273614
+        ],
+        "error": 0.003942364051994345,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-410-3-3/joint",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        4.114921058616477,
+        2.396651184893282,
+        0.000001139550739916614
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          3
+        ],
+        "weights": [
+          0.00035209755761718707,
+          0.2569451315861964,
+          0.39254346573784704,
+          0.35015930511833937
+        ],
+        "error": 3.350279175354845e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-410-3-3/joint",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.0479316113300162
+      ],
+      "counterexample": {
+        "paints": [
+          3
+        ],
+        "weights": [
+          0.7522275328306903,
+          0.24777246716930967
+        ],
+        "error": 0.0014091893731024764,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-410-3-3/joint",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        1.71833476726753,
+        0.17022984844055147
+      ],
+      "counterexample": {
+        "paints": [
+          1,
+          3
+        ],
+        "weights": [
+          0.48630236194849763,
+          0.3439902773168592,
+          0.1697073607346432
+        ],
+        "error": 0.005004757544152213,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-410-3-3/joint",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        2.460549186197795,
+        0.9812312092855644,
+        0.00018519709138233213
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1
+        ],
+        "weights": [
+          0.42644094565290674,
+          0.27545133135133004,
+          0.29810772299576327
+        ],
+        "error": 0.028848197552995593,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-300-4-3/fixed-target",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        4.197246183144667,
+        2.4055297475480293,
+        0.0012735355184750625
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          3
+        ],
+        "weights": [
+          0.19969376850512846,
+          0.26953620034152853,
+          0.35200384330131135,
+          0.17876618785203055
+        ],
+        "error": 0.000037441944243166834,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-300-4-3/fixed-target",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.32453912525116607
+      ],
+      "counterexample": {
+        "paints": [
+          2
+        ],
+        "weights": [
+          0.895049029896538,
+          0.10495097010346181
+        ],
+        "error": 0.009541450282384283,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-300-4-3/fixed-target",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.17230391669461,
+        0.02700499371377563
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1
+        ],
+        "weights": [
+          0.36008523914951757,
+          0.28646044438126084,
+          0.3534543164692216
+        ],
+        "error": 0.0007939468151850035,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-300-4-3/fixed-target",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        4.354090370928611,
+        2.1773187857927985,
+        0.002407780768078962
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          3
+        ],
+        "weights": [
+          0.2038414501994469,
+          0.28295329925015167,
+          0.34465316530391105,
+          0.16855208524649049
+        ],
+        "error": 0.00007078875458152148,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-326-6-2",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        2.9657790327177613,
+        1.3388476773711022,
+        0.000001136271683184497
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          2
+        ],
+        "weights": [
+          0.12533245186669897,
+          0.26631935335979495,
+          0.17437975308242995,
+          0.43396844169107535
+        ],
+        "error": 3.3406387485624214e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-326-6-2",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.2938156558505848
+      ],
+      "counterexample": {
+        "paints": [
+          2
+        ],
+        "weights": [
+          0.5801531827591645,
+          0.41984681724083545
+        ],
+        "error": 0.008638180282007192,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-326-6-2",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        2.8703291749466926,
+        0.05121860715823068
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.3209044603993906,
+          0.24786906478332396,
+          0.43122647481728543
+        ],
+        "error": 0.001505827050451982,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-929831-326-6-2",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        0.16383149694012053,
+        0.07915949984415911,
+        2.9470880276197715e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0
+        ],
+        "weights": [
+          0.727939485952528,
+          0.272060514047472
+        ],
+        "error": 0.004816646010039544,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-546-0-2",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        2.623536411244927,
+        1.6458965838914095,
+        0.0000015618954369600633
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          2
+        ],
+        "weights": [
+          0.16051132517299055,
+          0.18235560103724036,
+          0.17576489502289838,
+          0.4813681787668707
+        ],
+        "error": 4.591972584662586e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-546-0-2",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.17835495224523587
+      ],
+      "counterexample": {
+        "paints": [
+          2
+        ],
+        "weights": [
+          0.6640928331362189,
+          0.335907166863781
+        ],
+        "error": 0.005243635596009934,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-546-0-2",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        1.6504919169930785,
+        0.45548470159858306
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1
+        ],
+        "weights": [
+          0.7868413659148381,
+          0.13569114132590637,
+          0.07746749275925519
+        ],
+        "error": 0.013391250226998342,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-546-0-2",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        2.4408696996520702,
+        0.1822551793679054,
+        5.205900766439179e-7
+      ],
+      "counterexample": {
+        "paints": [
+          1,
+          2
+        ],
+        "weights": [
+          0.42107693410476754,
+          0.14655362795280735,
+          0.43236943794242527
+        ],
+        "error": 0.0053583022734164185,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-3-1-0/joint",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.7841918721574643,
+        2.801336139709325,
+        4.6124988677354674e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          2
+        ],
+        "weights": [
+          0.21455407132523824,
+          0.31038006355810915,
+          0.20691904190618496,
+          0.2681468232104677
+        ],
+        "error": 1.3560746671142274e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-3-1-0/joint",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.52977199019881
+      ],
+      "counterexample": {
+        "paints": [
+          0
+        ],
+        "weights": [
+          0.8970897201369514,
+          0.10291027986304867
+        ],
+        "error": 0.015575296511845015,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-3-1-0/joint",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        1.90404003098148,
+        0.08655397775952002
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.6797193883574413,
+          0.21264219981472243,
+          0.10763841182783629
+        ],
+        "error": 0.0025446869461298884,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-3-1-0/joint",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        1.27087609826004,
+        2.4516257100850555e-7,
+        2.61819216297495e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.7174710852837315,
+          0.10990599727008188,
+          0.17262291744618644
+        ],
+        "error": 7.2077795876500636e-9,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-698-2-5/joint",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.0423524264393405,
+        2.79329910418195,
+        8.770021664206866e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          3
+        ],
+        "weights": [
+          0.26329057735390543,
+          0.2386946889623569,
+          0.24919430084570665,
+          0.24882043283803099
+        ],
+        "error": 2.5783863692768184e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-698-2-5/joint",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.6994877488025105
+      ],
+      "counterexample": {
+        "paints": [
+          3
+        ],
+        "weights": [
+          0.7601516381627356,
+          0.2398483618372645
+        ],
+        "error": 0.02056493981479381,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-698-2-5/joint",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        0.5603876262950113,
+        0.09535197251481894
+      ],
+      "counterexample": {
+        "paints": [
+          3
+        ],
+        "weights": [
+          0.9056264750255056,
+          0.09437352497449433
+        ],
+        "error": 0.01647539621307333,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-698-2-5/joint",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        1.314587292844754,
+        0.7681273159451478,
+        7.708013293349999e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.575528942562972,
+          0.3706863055449381,
+          0.053784751892089845
+        ],
+        "error": 0.022582943088787347,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-1-4-5/fixed-target",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        2.8905883440853866,
+        2.028352888031487,
+        0.04727460614062442
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          1,
+          2
+        ],
+        "weights": [
+          0.011181641624999957,
+          0.571064720782396,
+          0.24493005462368836,
+          0.1728235829689147
+        ],
+        "error": 0.0013898734205343578,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-1-4-5/fixed-target",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.15172218121273637
+      ],
+      "counterexample": {
+        "paints": [
+          0
+        ],
+        "weights": [
+          0.8421111222794835,
+          0.15788887772051682
+        ],
+        "error": 0.0044606321276544495,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-1-4-5/fixed-target",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        1.174241083507596,
+        0.3502803774920822
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.7349079457596073,
+          0.1909426820971386,
+          0.07414937214325418
+        ],
+        "error": 0.010298243098267216,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-1-4-5/fixed-target",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        2.052788463193766,
+        0.07550260055074955,
+        0.0470150024819842
+      ],
+      "counterexample": {
+        "paints": [
+          1,
+          2
+        ],
+        "weights": [
+          0.6461894434344624,
+          0.22904651455332387,
+          0.12476404201221392
+        ],
+        "error": 0.0022197764561920365,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-746-6-0/fixed-target",
+      "node": 996,
+      "layer": 3,
+      "rawMinimum": 3,
+      "knownMinimum": 3,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        3.104456750535243,
+        1.8967677323456822,
+        0.0000011221312339501854
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          2,
+          3
+        ],
+        "weights": [
+          0.16913700531290887,
+          0.4628256751794137,
+          0.2017312876219746,
+          0.16630603188570284
+        ],
+        "error": 3.299065827813545e-8,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-746-6-0/fixed-target",
+      "node": 50,
+      "layer": 1,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        0.7012497922486013
+      ],
+      "counterexample": {
+        "paints": [
+          0
+        ],
+        "weights": [
+          0.5418841830609924,
+          0.45811581693900766
+        ],
+        "error": 0.020616743892108876,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-746-6-0/fixed-target",
+      "node": 370,
+      "layer": 2,
+      "rawMinimum": 2,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": false,
+      "bestT": [
+        2.1865588546158023,
+        0.4562804765433407
+      ],
+      "counterexample": {
+        "paints": [
+          0,
+          3
+        ],
+        "weights": [
+          0.4657939276012095,
+          0.39108232909804175,
+          0.14312374330074878
+        ],
+        "error": 0.013414646010374216,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    },
+    {
+      "case": "condition-1031931-746-6-0/fixed-target",
+      "node": 690,
+      "layer": 3,
+      "rawMinimum": 1,
+      "knownMinimum": null,
+      "missedKnownWitness": false,
+      "shorterThanLayer": true,
+      "bestT": [
+        0.7248553740771262,
+        0.03631552425976878,
+        9.696204149933932e-7
+      ],
+      "counterexample": {
+        "paints": [
+          0
+        ],
+        "weights": [
+          0.5299917953888453,
+          0.4700082046111546
+        ],
+        "error": 0.02131074799786751,
+        "source": "subset-simplex-1"
+      },
+      "knownShortcut": []
+    }
+  ],
+  "disagreements": [],
+  "shorterThanLayer": 12
+}

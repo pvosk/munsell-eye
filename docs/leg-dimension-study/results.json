@@ -1,0 +1,1088 @@
+{
+  "spectralBands": 38,
+  "dependencyHash": "dbaa1a8b44d2c734b48b6d44777b1f182c9740e9220d2cbded02002c8e6d271a",
+  "maxSpectralError": 2.8657631823136853e-15,
+  "maxRecipeReplayError": 2.220446049250313e-16,
+  "records": [
+    {
+      "n": 4,
+      "paints": [
+        "permanent-green-light",
+        "mars-yellow",
+        "transparent-earth-yellow",
+        "phthalo-green"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cobalt-blue",
+        "phthalo-blue-green",
+        "india-yellow",
+        "hansa-yellow-medium"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cadmium-orange",
+        "titanium-white",
+        "olive-green",
+        "perylene-maroon"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "yellow-ochre",
+        "radiant-violet",
+        "olive-green",
+        "permanent-green-light"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "olive-green",
+        "cobalt-blue",
+        "prussian-blue",
+        "transparent-earth-red"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "naphthol-scarlet",
+        "cobalt-violet",
+        "mars-red",
+        "phthalo-blue-green"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cadmium-red-light",
+        "transparent-white",
+        "nickel-titanate-yellow",
+        "cadmium-yellow-medium"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "raw-umber",
+        "naples-yellow",
+        "phthalo-emerald",
+        "cobalt-green"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cobalt-turquoise",
+        "radiant-lemon",
+        "cerulean-blue",
+        "olive-green"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "perylene-maroon",
+        "indanthrone-blue",
+        "cerulean-blue-hue",
+        "cadmium-yellow-light"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "alizarin-permanent",
+        "chromium-oxide-green",
+        "raw-umber",
+        "quinacridone-violet"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "phthalo-blue-green",
+        "kings-blue",
+        "flake-white-replacement",
+        "chrome-titanate-yellow"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "kings-blue",
+        "radiant-lemon",
+        "alizarin-crimson",
+        "cadmium-yellow-deep"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "indian-yellow-deep",
+        "kings-blue",
+        "phthalo-green",
+        "pyrrole-orange"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "nickel-titanate-yellow",
+        "phthalo-blue",
+        "phthalo-emerald",
+        "perylene-red"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cerulean-blue-hue",
+        "cadmium-red-deep",
+        "cadmium-yellow-light",
+        "permanent-green-light"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cadmium-red-deep",
+        "winsor-red",
+        "transparent-orange",
+        "india-yellow"
+      ],
+      "ksAffineRank": 2,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "mars-yellow",
+        "ultramarine-blue",
+        "cadmium-lemon",
+        "indian-red"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "cadmium-yellow-light",
+        "olive-green",
+        "kings-blue",
+        "ivory-black"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 4,
+      "paints": [
+        "terre-verte",
+        "hansa-yellow-medium",
+        "transparent-white",
+        "manganese-blue-hue"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 3
+    },
+    {
+      "n": 5,
+      "paints": [
+        "cadmium-yellow-light",
+        "cobalt-turquoise",
+        "mars-orange",
+        "bismuth-yellow",
+        "viridian"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "flake-white-replacement",
+        "perylene-maroon",
+        "ivory-black",
+        "venetian-red",
+        "mars-orange"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "manganese-blue-hue",
+        "raw-sienna",
+        "winsor-red",
+        "dioxazine-purple",
+        "chrome-titanate-yellow"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "indanthrone-blue",
+        "cobalt-green",
+        "indian-red",
+        "ultramarine-violet",
+        "quinacridone-rose"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "hansa-yellow-deep",
+        "cobalt-teal",
+        "winsor-red",
+        "cobalt-violet",
+        "ultramarine-blue"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "dioxazine-purple",
+        "perylene-maroon",
+        "cadmium-yellow-light",
+        "cobalt-blue",
+        "permanent-rose"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "terre-verte",
+        "hansa-yellow-medium",
+        "cobalt-teal",
+        "ivory-black",
+        "ultramarine-blue"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "ultramarine-blue",
+        "indigo",
+        "permanent-red",
+        "radiant-green",
+        "raw-sienna"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "transparent-white",
+        "radiant-lemon",
+        "cobalt-turquoise",
+        "ultramarine-violet",
+        "radiant-violet"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "indanthrone-blue",
+        "manganese-violet",
+        "winsor-yellow-deep",
+        "phthalo-green-yellow",
+        "indian-yellow-deep"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "viridian",
+        "phthalo-blue",
+        "cobalt-turquoise",
+        "quinacridone-magenta",
+        "kings-blue"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "olive-green",
+        "cadmium-red-medium",
+        "radiant-violet",
+        "phthalo-blue-green",
+        "cadmium-lemon"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "indian-yellow-deep",
+        "radiant-turquoise",
+        "cadmium-yellow-deep",
+        "raw-sienna",
+        "transparent-earth-orange"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "mars-red",
+        "bismuth-yellow",
+        "terre-verte",
+        "india-yellow",
+        "ivory-black"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "titanium-white",
+        "mars-red",
+        "transparent-earth-yellow",
+        "cobalt-green",
+        "cadmium-orange"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "cerulean-blue-hue",
+        "quinacridone-red",
+        "hansa-yellow-deep",
+        "bismuth-yellow",
+        "permanent-green-light"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "titanium-white",
+        "cerulean-blue",
+        "cobalt-blue",
+        "hansa-yellow-medium",
+        "perylene-maroon"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "raw-umber",
+        "cadmium-red-light",
+        "alizarin-crimson",
+        "cobalt-blue",
+        "pyrrole-orange"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "transparent-orange",
+        "naphthol-scarlet",
+        "manganese-blue-hue",
+        "indigo",
+        "warm-white"
+      ],
+      "ksAffineRank": 3,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 5,
+      "paints": [
+        "alizarin-crimson",
+        "venetian-red",
+        "indigo",
+        "hansa-yellow-deep",
+        "raw-sienna"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 4
+    },
+    {
+      "n": 6,
+      "paints": [
+        "raw-umber",
+        "chromium-oxide-green",
+        "transparent-white",
+        "olive-green",
+        "zinc-white",
+        "sap-green"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "burnt-umber",
+        "warm-white",
+        "winsor-yellow-deep",
+        "radiant-lemon",
+        "dioxazine-purple",
+        "nickel-titanate-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "radiant-white",
+        "naphthol-scarlet",
+        "mars-orange",
+        "raw-umber",
+        "indian-red",
+        "chrome-titanate-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "cobalt-blue",
+        "pyrrole-orange",
+        "quinacridone-rose",
+        "raw-umber",
+        "radiant-lemon",
+        "mars-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "cadmium-lemon",
+        "hansa-yellow-medium",
+        "cobalt-turquoise",
+        "ultramarine-violet",
+        "sap-green",
+        "permanent-rose"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "perylene-red",
+        "transparent-earth-yellow",
+        "hansa-yellow-deep",
+        "dioxazine-purple",
+        "cadmium-yellow-light",
+        "zinc-white"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "zinc-white",
+        "cadmium-red-light",
+        "indanthrone-blue",
+        "indian-yellow-deep",
+        "cobalt-green",
+        "india-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "cobalt-teal",
+        "hansa-yellow-deep",
+        "ultramarine-blue",
+        "permanent-green-light",
+        "titanium-white",
+        "chrome-titanate-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "venetian-red",
+        "alizarin-crimson",
+        "perylene-red",
+        "cadmium-yellow-light",
+        "transparent-orange",
+        "burnt-umber"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "sap-green",
+        "cobalt-turquoise",
+        "hansa-yellow-light",
+        "kings-blue",
+        "cadmium-red-deep",
+        "cadmium-yellow-medium"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "india-yellow",
+        "winsor-red",
+        "cadmium-red-light",
+        "terre-verte",
+        "kings-blue",
+        "cadmium-yellow-deep"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "ivory-black",
+        "indian-red",
+        "cobalt-turquoise",
+        "quinacridone-magenta",
+        "terre-verte",
+        "hansa-yellow-medium"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "pyrrole-orange",
+        "terre-verte",
+        "chromium-oxide-green",
+        "phthalo-emerald",
+        "kings-blue",
+        "transparent-earth-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "permanent-red",
+        "warm-white",
+        "manganese-blue-hue",
+        "hansa-yellow-deep",
+        "flake-white-replacement",
+        "bismuth-yellow"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "indian-red",
+        "cadmium-orange",
+        "mars-yellow",
+        "permanent-green-light",
+        "cadmium-red-medium",
+        "cadmium-yellow-medium"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "zinc-white",
+        "cadmium-red-deep",
+        "radiant-lemon",
+        "cadmium-red-light",
+        "burnt-umber",
+        "quinacridone-red"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "alizarin-permanent",
+        "cadmium-red-deep",
+        "permanent-red",
+        "green-earth",
+        "quinacridone-rose",
+        "terre-verte"
+      ],
+      "ksAffineRank": 4,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "pyrrole-orange",
+        "indanthrone-blue",
+        "hansa-yellow-deep",
+        "cobalt-green",
+        "cerulean-blue",
+        "indigo"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "transparent-orange",
+        "manganese-blue-hue",
+        "perylene-red",
+        "sap-green",
+        "permanent-rose",
+        "raw-sienna"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 6,
+      "paints": [
+        "quinacridone-red",
+        "cobalt-violet",
+        "chromium-oxide-green",
+        "sap-green",
+        "cadmium-red-light",
+        "venetian-red"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 5
+    },
+    {
+      "n": 7,
+      "paints": [
+        "radiant-white",
+        "transparent-orange",
+        "cadmium-orange",
+        "quinacridone-violet",
+        "mars-orange",
+        "prussian-blue",
+        "alizarin-permanent"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "phthalo-blue-green",
+        "cadmium-lemon",
+        "radiant-turquoise",
+        "transparent-earth-orange",
+        "permanent-orange",
+        "mars-orange",
+        "burnt-umber"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "burnt-umber",
+        "venetian-red",
+        "naples-yellow",
+        "cerulean-blue-hue",
+        "titanium-white",
+        "cadmium-red-light",
+        "hansa-yellow-light"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cadmium-yellow-medium",
+        "permanent-green-light",
+        "pyrrole-orange",
+        "transparent-earth-orange",
+        "indanthrone-blue",
+        "phthalo-blue",
+        "phthalo-blue-green"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "viridian",
+        "pyrrole-orange",
+        "olive-green",
+        "cobalt-blue",
+        "radiant-violet",
+        "phthalo-emerald",
+        "raw-umber"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "permanent-green-light",
+        "indigo",
+        "cerulean-blue",
+        "cobalt-violet",
+        "permanent-rose",
+        "viridian",
+        "olive-green"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "dioxazine-purple",
+        "perylene-red",
+        "radiant-white",
+        "transparent-earth-yellow",
+        "alizarin-permanent",
+        "sap-green",
+        "cerulean-blue"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "mars-orange",
+        "cobalt-blue",
+        "winsor-red",
+        "dioxazine-purple",
+        "radiant-turquoise",
+        "hansa-yellow-deep",
+        "burnt-umber"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "permanent-orange",
+        "titanium-white",
+        "quinacridone-rose",
+        "cadmium-orange",
+        "winsor-yellow-deep",
+        "quinacridone-red",
+        "indanthrone-blue"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cobalt-green",
+        "cadmium-red-deep",
+        "cadmium-red-light",
+        "chrome-titanate-yellow",
+        "quinacridone-rose",
+        "warm-white",
+        "radiant-lemon"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cerulean-blue",
+        "radiant-white",
+        "warm-white",
+        "permanent-green-light",
+        "hansa-yellow-light",
+        "phthalo-blue-green",
+        "india-yellow"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cadmium-yellow-deep",
+        "phthalo-green",
+        "sap-green",
+        "cobalt-turquoise",
+        "green-earth",
+        "mars-yellow",
+        "cadmium-yellow-light"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cobalt-teal",
+        "indanthrone-blue",
+        "burnt-sienna",
+        "transparent-earth-yellow",
+        "pyrrole-orange",
+        "cadmium-red-medium",
+        "chromium-oxide-green"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "radiant-turquoise",
+        "cadmium-yellow-medium",
+        "alizarin-crimson",
+        "radiant-violet",
+        "naples-yellow",
+        "prussian-blue",
+        "indian-yellow-deep"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "terre-verte",
+        "radiant-turquoise",
+        "cobalt-green",
+        "ivory-black",
+        "titanium-white",
+        "perylene-red",
+        "cerulean-blue"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "permanent-green-light",
+        "zinc-white",
+        "permanent-orange",
+        "cobalt-turquoise",
+        "quinacridone-violet",
+        "dioxazine-purple",
+        "ivory-black"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "terre-verte",
+        "pyrrole-orange",
+        "winsor-yellow-deep",
+        "yellow-ochre",
+        "alizarin-crimson",
+        "green-earth",
+        "titanium-white"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "cadmium-red-deep",
+        "zinc-white",
+        "pyrrole-orange",
+        "permanent-green-light",
+        "naphthol-scarlet",
+        "burnt-sienna",
+        "cadmium-orange"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "titanium-white",
+        "raw-sienna",
+        "winsor-yellow-deep",
+        "green-earth",
+        "pyrrole-orange",
+        "ivory-black",
+        "phthalo-green"
+      ],
+      "ksAffineRank": 6,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    },
+    {
+      "n": 7,
+      "paints": [
+        "permanent-rose",
+        "naphthol-scarlet",
+        "permanent-red",
+        "cerulean-blue-hue",
+        "cadmium-yellow-deep",
+        "phthalo-emerald",
+        "raw-sienna"
+      ],
+      "ksAffineRank": 5,
+      "colorJacobianRank": 3,
+      "recipeLegs": 6
+    }
+  ]
+}
