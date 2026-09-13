@@ -1,4 +1,4 @@
-import {PREMIX_ENGINE,PREMIX_SPECIMENS,REGION_SPECIMENS,LEG_SPECIMENS,BRANCH_SPECIMENS,generatePremixHole,allPremixRows,premixItem,premixProgress} from './play-premix-bank';
+import {PREMIX_ENGINE,PREMIX_SPECIMENS,REGION_SPECIMENS,LEG_SPECIMENS,BRANCH_SPECIMENS,CONDITIONED_SPECIMENS,generatePremixHole,allPremixRows,premixItem,premixProgress} from './play-premix-bank';
 import {premixStep} from './play-premix';
 import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, generateDesignHole, generateFocusedHole, generateDirectedHole, directedLabBank, pairedLabBank, designLabBank, focusedLabBank, type Hole, type Mixture } from './play-engine';
 import {freshLabBank,generateFreshHole,hardLabBank,generateHardHole,inverseLabBank,generateInverseHole,contrastLabBank,generateContrastHole,journeyLabBank,generateJourneyHole,protectedLabBank,generateProtectedHole} from './play-engine';
@@ -45,7 +45,8 @@ export const LAB_HARD:LabSpecimen[]=hardLabBank.holes.map(h=>({levelIndex:h.leve
 export const directedForHole=(raw:string)=>{const id=campaignSourceId(raw);return freshLabBank.holes.find(h=>h.record.id===id)??hardLabBank.holes.find(h=>h.record.id===id)??inverseLabBank.holes.find(h=>h.record.id===id)??contrastLabBank.holes.find(h=>h.record.id===id)??journeyLabBank.holes.find(h=>h.record.id===id)??protectedLabBank.holes.find(h=>h.record.id===id)??directedLabBank.holes.find(h=>h.record.id===id);};
 export const labHoleProgress=(hole:Hole)=>hole.premix?premixProgress(hole):campaignForHole(hole.courseId)?`${hole.stage+1}/${campaignForHole(hole.courseId)!.chapter.slots.length}`:hole.courseId.startsWith('lab-12-')?`${LAB_FRESH.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_FRESH.length}`:hole.courseId.startsWith('lab-11-')?`${LAB_HARD.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_HARD.length}`:hole.courseId.startsWith('lab-10-')?`${LAB_INVERSE.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_INVERSE.length}`:hole.courseId.startsWith('lab-9-')?`${LAB_CONTRAST.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_CONTRAST.length}`:hole.courseId.startsWith('lab-8-')?`${LAB_JOURNEYS.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_JOURNEYS.length}`:hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
 export const LAB_GROUPS=[
-  {name:'New · Four branching setups',items:BRANCH_SPECIMENS},
+  {name:'New · 16 destination branching puzzles',items:CONDITIONED_SPECIMENS},
+  {name:'Previous · Four branching setups',items:BRANCH_SPECIMENS},
   {name:'Previous · Ten contrasting pigment-leg puzzles',items:LEG_SPECIMENS},
   {name:'Premix · Regions & route families',items:REGION_SPECIMENS},
   {name:'Premix · A/B mass experiment',items:PREMIX_SPECIMENS},
@@ -62,7 +63,7 @@ export const LAB_GROUPS=[
   {name:'Round 2 · Earlier tests',items:LAB_STARTERS},
 ].map(g=>({...g,items:g.items.filter(s=>!PLAY_LEVELS[s.levelIndex].retired)}));
 export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
-  if(current.hole.premix){const item=premixItem(current.hole),bank=item?.collection==='branches'?BRANCH_SPECIMENS:item?.collection==='legs'?LEG_SPECIMENS:item?.role?REGION_SPECIMENS:PREMIX_SPECIMENS;const i=bank.findIndex(s=>s.hole.courseId===current.hole.courseId);return bank[(i+1)%bank.length]??null;}
+  if(current.hole.premix){const item=premixItem(current.hole),bank=item?.collection==='conditioned'?CONDITIONED_SPECIMENS:item?.collection==='branches'?BRANCH_SPECIMENS:item?.collection==='legs'?LEG_SPECIMENS:item?.role?REGION_SPECIMENS:PREMIX_SPECIMENS;const i=bank.findIndex(s=>s.hole.courseId===current.hole.courseId);return bank[(i+1)%bank.length]??null;}
   const campaign=nextCampaignSpecimen(current.hole.courseId);if(campaign)return campaign;
   const bank=current.hole.courseId.startsWith('lab-12-')?LAB_FRESH:current.hole.courseId.startsWith('lab-11-')?LAB_HARD:current.hole.courseId.startsWith('lab-10-')?LAB_INVERSE:current.hole.courseId.startsWith('lab-9-')?LAB_CONTRAST:current.hole.courseId.startsWith('lab-8-')?LAB_JOURNEYS:current.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED:current.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED:current.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED:current.hole.courseId.startsWith('lab-4-')?LAB_DESIGN:current.hole.courseId.startsWith('lab-3-')?LAB_PAIRED:current.hole.courseId.startsWith('lab-2-')?LAB_STARTERS:null;
   if(!bank)return null;

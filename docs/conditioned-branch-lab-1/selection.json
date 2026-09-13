@@ -1,0 +1,250 @@
+{
+  "source": "conditioned-branch-search-1 and -2; predates the new region comparison",
+  "holes": [
+    {
+      "id": "conditioned-lab-1-0",
+      "title": "Shared destination · secondary balance",
+      "sourceId": "condition-1031931-1-4-5/fixed-target",
+      "style": "coupled-balance",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-1",
+      "title": "Vivid green with competing approaches",
+      "sourceId": "condition-929831-410-3-3/joint",
+      "style": "chromatic-ride",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-2",
+      "title": "Light green · prepare the rise",
+      "sourceId": "condition-929831-820-0-1/joint",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-3",
+      "title": "Dark interior · not a drop finish",
+      "sourceId": "condition-1031931-3-1-0/joint",
+      "style": "interior-assembly",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-4",
+      "title": "Two-leg warm chromatic finish",
+      "sourceId": "condition-929831-2-3-5",
+      "style": "chromatic-ride",
+      "minimum": 2
+    },
+    {
+      "id": "conditioned-lab-1-5",
+      "title": "Rose destination · balance the corrections",
+      "sourceId": "condition-1031931-698-2-5/joint",
+      "style": "coupled-balance",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-6",
+      "title": "Shared destination · different counterweights",
+      "sourceId": "condition-929831-300-4-3/fixed-target",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-7",
+      "title": "Shorter dark drop",
+      "sourceId": "condition-929831-354-1-1",
+      "style": "drop",
+      "minimum": 2
+    },
+    {
+      "id": "conditioned-lab-1-8",
+      "title": "Warm balancing without white",
+      "sourceId": "condition-929831-546-2-0/joint",
+      "style": "coupled-balance",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-9",
+      "title": "Pale destination · value rise",
+      "sourceId": "condition-929831-326-6-2",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-10",
+      "title": "Light target with a dark counterweight",
+      "sourceId": "condition-1031931-546-0-2",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-11",
+      "title": "Shared destination · earth pigments",
+      "sourceId": "condition-929831-302-4-7",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-12",
+      "title": "Two-leg green ride candidate",
+      "sourceId": "condition-929831-304-3-2",
+      "style": "chromatic-ride",
+      "minimum": 2
+    },
+    {
+      "id": "conditioned-lab-1-13",
+      "title": "Pale finish through earth red",
+      "sourceId": "condition-1031931-746-6-0/fixed-target",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-14",
+      "title": "Five paints · three-leg alternatives",
+      "sourceId": "condition-1031931-4-6-6",
+      "style": "rise",
+      "minimum": 3
+    },
+    {
+      "id": "conditioned-lab-1-15",
+      "title": "Five paints · shorter lift contrast",
+      "sourceId": "condition-929831-23-0-6",
+      "style": "rise",
+      "minimum": 2
+    }
+  ],
+  "checks": [
+    {
+      "id": "condition-1031931-1-4-5/fixed-target",
+      "bestByDepth": [
+        2.8905883440853892,
+        2.028352861305896
+      ],
+      "evaluations": 75500
+    },
+    {
+      "id": "condition-929831-410-3-3/joint",
+      "bestByDepth": [
+        4.114921058616618,
+        2.3966511848932694
+      ],
+      "evaluations": 44040
+    },
+    {
+      "id": "condition-929831-820-0-1/joint",
+      "bestByDepth": [
+        3.1162722641175766,
+        2.1433612596124534
+      ],
+      "evaluations": 92940
+    },
+    {
+      "id": "condition-1031931-3-1-0/joint",
+      "bestByDepth": [
+        3.7841918721577295,
+        2.8013361397094507
+      ],
+      "evaluations": 85880
+    },
+    {
+      "id": "condition-929831-2-3-5",
+      "bestByDepth": [
+        2.666404402134729
+      ],
+      "evaluations": 5604
+    },
+    {
+      "id": "condition-1031931-698-2-5/joint",
+      "bestByDepth": [
+        3.042352426439442,
+        2.7932991041819593
+      ],
+      "evaluations": 45748
+    },
+    {
+      "id": "condition-929831-300-4-3/fixed-target",
+      "bestByDepth": [
+        4.197246183144681,
+        2.405529747549375
+      ],
+      "evaluations": 73276
+    },
+    {
+      "id": "condition-929831-354-1-1",
+      "bestByDepth": [
+        2.1774817729111935
+      ],
+      "evaluations": 5950
+    },
+    {
+      "id": "condition-929831-546-2-0/joint",
+      "bestByDepth": [
+        3.431118498836176,
+        2.120447432128725
+      ],
+      "evaluations": 86028
+    },
+    {
+      "id": "condition-929831-326-6-2",
+      "bestByDepth": [
+        2.965779032717862,
+        1.3388476773710785
+      ],
+      "evaluations": 54574
+    },
+    {
+      "id": "condition-1031931-546-0-2",
+      "bestByDepth": [
+        2.6235364112449293,
+        1.645896583891381
+      ],
+      "evaluations": 82030
+    },
+    {
+      "id": "condition-929831-302-4-7",
+      "bestByDepth": [
+        2.322098310261599,
+        1.664009668696115
+      ],
+      "evaluations": 77202
+    },
+    {
+      "id": "condition-929831-304-3-2",
+      "bestByDepth": [
+        1.2893371710456105
+      ],
+      "evaluations": 5616
+    },
+    {
+      "id": "condition-1031931-746-6-0/fixed-target",
+      "bestByDepth": [
+        3.1044567505353338,
+        1.896767732345616
+      ],
+      "evaluations": 56828
+    },
+    {
+      "id": "condition-1031931-4-6-6",
+      "bestByDepth": [
+        2.3731413551345844,
+        1.6157971253615424
+      ],
+      "evaluations": 100410
+    },
+    {
+      "id": "condition-929831-23-0-6",
+      "bestByDepth": [
+        1.3124138643368484
+      ],
+      "evaluations": 6652
+    }
+  ],
+  "unchanged": [
+    "pigments",
+    "normalized mass",
+    "tolerance",
+    "par",
+    "controls"
+  ]
+}

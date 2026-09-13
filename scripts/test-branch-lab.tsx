@@ -7,7 +7,7 @@ import {LabPicker} from '../app/play-lab';import {PremixRouteReview} from '../ap
 import bank from '../app/generated/play-branch-lab.json';
 Object.assign(globalThis,{React});
 test('four append-only branch puzzles replay both branches and every alternative',()=>{
- assert.equal(BRANCH_SPECIMENS.length,4);assert.deepEqual(PLAY_LEVELS.slice(bank.paletteOffset),bank.palettes);
+ assert.equal(BRANCH_SPECIMENS.length,4);assert.deepEqual(PLAY_LEVELS.slice(bank.paletteOffset,bank.paletteOffset+bank.palettes.length),bank.palettes);
  for(const [i,s] of BRANCH_SPECIMENS.entries()){
   const item=branchLabBank.holes[i],mode=item.modes.normalized!;assert.equal(item.lab!.rawLegMinimum,3);assert.equal(s.hole.par,3);assert.equal(s.hole.tolerance,T);assert.equal(premixProgress(s.hole),`${i+1}/4 · normalized`);
   assert.equal(nextFixedLabSpecimen(s)?.hole.courseId,BRANCH_SPECIMENS[(i+1)%4].hole.courseId);
