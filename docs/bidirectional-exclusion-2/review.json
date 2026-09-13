@@ -1,0 +1,2663 @@
+[
+  {
+    "id": "branch-lab-1-0",
+    "title": "Different corrections",
+    "palette": "Hansa · Scarlet · Violet",
+    "start": [
+      0.12060447779223128,
+      0.024871278088910796,
+      0.22013940322657685,
+      0.22506162009010602,
+      0.40932322080217515
+    ],
+    "target": {
+      "rgb": [
+        137.13515292496388,
+        122.74467719625433,
+        67.03248944274245
+      ],
+      "lab": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "position": [
+        1.1479993705939426,
+        0.04147138989667809,
+        13.811482933170604
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": true,
+        "shots": [
+          1,
+          0,
+          2,
+          0,
+          1,
+          3,
+          3,
+          3,
+          4
+        ],
+        "legs": 7
+      },
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          0,
+          3,
+          3,
+          0,
+          0,
+          0,
+          3,
+          1,
+          2
+        ],
+        "legs": 6,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "ONE OF THE BEST ROUTES",
+          "shot": null
+        }
+      },
+      {
+        "outcome": "playing",
+        "revealed": false,
+        "shots": [
+          3,
+          3,
+          1,
+          0
+        ],
+        "legs": 3
+      },
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          2,
+          3,
+          0,
+          3,
+          1,
+          3,
+          1,
+          0,
+          2,
+          3
+        ],
+        "legs": 10
+      }
+    ],
+    "sourceMeasurement": {
+      "label": "Refined branch A",
+      "order": [
+        0,
+        0,
+        1,
+        3
+      ],
+      "times": [
+        0.9093356120732791,
+        0.9093356120732791,
+        0.4730937491959287,
+        0.5635992070712477
+      ],
+      "error": 0.0029317567612900147,
+      "finishWindowMs": 56.123471260070666,
+      "setupCoverage": 0.76,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.07147445529699326,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    },
+    "paints": [
+      "Hansa Yellow Light",
+      "Cerulean Blue Hue",
+      "Naphthol Scarlet",
+      "Ultramarine Violet",
+      "Warm White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.9445971418109689
+        },
+        {
+          "paint": 1,
+          "share": 0.36438862068061234
+        },
+        {
+          "paint": 3,
+          "share": 0.4907769633353242
+        }
+      ],
+      "error": 0.0029317567612900147,
+      "lengths": [
+        0.2955551043367728,
+        0.14513426460632314,
+        0.2682089068517611
+      ],
+      "finish": 0.2682089068517611,
+      "setup": 0.44068936894309596,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.22169634870230998,
+        0.12950493539035993,
+        0.2674951181847506
+      ],
+      "tradeoff": 0.028323498878957007,
+      "hueTravel": 0.5998237052838808,
+      "abTravel": 0.14393058176080875,
+      "chromaticFraction": 1,
+      "value": -0.2262805471352053,
+      "initialDistance": 0.16346542468180655,
+      "initialAB": 0.11103847198272722,
+      "excursion": 0.1913918934125249,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "branch-lab-1-1",
+    "title": "Earth and cool counterweights",
+    "palette": "Earth Orange · Cobalt Green",
+    "start": [
+      0.10244451876352352,
+      0.6966504190113244,
+      0.1539394037445726,
+      0.04696565848057939
+    ],
+    "target": {
+      "rgb": [
+        48.35612098782546,
+        44.908155928820996,
+        44.4125270252808
+      ],
+      "lab": [
+        0.30024462000611096,
+        0.004521860915639164,
+        0.0023386230282682885
+      ],
+      "position": [
+        0.7485624850792454,
+        -12.703911408345277,
+        0.40021849640945445
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          2,
+          1,
+          2,
+          3,
+          1,
+          2,
+          0,
+          3
+        ],
+        "legs": 9,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "Wow really unique and new, a lot of rebalancing around the lowest values!",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "label": "Refined branch A",
+      "order": [
+        0,
+        0,
+        2,
+        3
+      ],
+      "times": [
+        0.7798412174934171,
+        0.7798412174934171,
+        0.5098048532345609,
+        0.40132430961433607
+      ],
+      "error": 0.014025298464692533,
+      "finishWindowMs": 158.12940597534168,
+      "setupCoverage": 0.88,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.2348819226026535,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    },
+    "paints": [
+      "Transparent Earth Orange",
+      "Cobalt Green",
+      "Perylene Maroon",
+      "Prussian Blue"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.9075000188582468
+        },
+        {
+          "paint": 2,
+          "share": 0.41804188365787104
+        },
+        {
+          "paint": 3,
+          "share": 0.2554885864257802
+        }
+      ],
+      "error": 0.01402529846469191,
+      "lengths": [
+        0.19609872438046086,
+        0.052240540935612347,
+        0.09221456322355685
+      ],
+      "finish": 0.09221456322355685,
+      "setup": 0.2483392653160732,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.04907043075488117,
+        0.06704475508885915,
+        0.10005057464463153
+      ],
+      "tradeoff": 0.016889628845555185,
+      "hueTravel": 0.06132145745257922,
+      "abTravel": 0.07227711452309206,
+      "chromaticFraction": 0.3137362890083535,
+      "value": -0.05687255005865216,
+      "initialDistance": 0.21785765829712236,
+      "initialAB": 0.06284759607890268,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "branch-lab-1-2",
+    "title": "Choose a different set",
+    "palette": "Emerald · Yellow · Scarlet",
+    "start": [
+      0.06369954666001257,
+      0.026497124396750508,
+      0.35512963878101284,
+      0.038633159546803714,
+      0.5160405306154204
+    ],
+    "target": {
+      "rgb": [
+        188.86400419597464,
+        156.09203392489812,
+        119.36340281165401
+      ],
+      "lab": [
+        0.7136715736016225,
+        0.022041989998337563,
+        0.0596613776762297
+      ],
+      "position": [
+        5.633449471021167,
+        5.970088649005914,
+        10.240005174204889
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          3,
+          1,
+          4,
+          0,
+          3,
+          4,
+          3,
+          0,
+          2,
+          2,
+          4,
+          0,
+          1,
+          1,
+          4,
+          0,
+          2,
+          3,
+          3,
+          4,
+          0
+        ],
+        "legs": 18,
+        "review": {
+          "verdict": "keep",
+          "challenge": "paint-choice",
+          "issue": "",
+          "note": "maybe one of the hardest routes i’ve done. in a very good way! why is that? ",
+          "shot": null,
+          "routeVerdict": "keep"
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "label": "Refined branch A",
+      "order": [
+        2,
+        1,
+        3
+      ],
+      "times": [
+        0.4531463325144135,
+        0.4421852990076327,
+        0.46799707675739943
+      ],
+      "error": 0.003959894599798316,
+      "finishWindowMs": 52.70910263061535,
+      "setupCoverage": 0.6,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.07874863594770432,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    },
+    "paints": [
+      "Phthalo Green (Yellow Shade)",
+      "Cadmium Yellow Light",
+      "Viridian",
+      "Flake White Replacement",
+      "Naphthol Scarlet"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 2,
+          "share": 0.3343292802617081
+        },
+        {
+          "paint": 1,
+          "share": 0.3176566186318686
+        },
+        {
+          "paint": 3,
+          "share": 0.3567538466842007
+        }
+      ],
+      "error": 0.003959894599798126,
+      "lengths": [
+        0.08996726161519529,
+        0.17890100605872786,
+        0.20639585673385805
+      ],
+      "finish": 0.20639585673385805,
+      "setup": 0.26886826767392313,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.06272988249016476,
+        0.10547770581801795,
+        0.20839914002387805
+      ],
+      "tradeoff": 0.024054245397000892,
+      "hueTravel": 0.1102717926931649,
+      "abTravel": 0.012001538468712488,
+      "chromaticFraction": 1,
+      "value": 0.20600097372766502,
+      "initialDistance": 0.3232994345837905,
+      "initialAB": 0.07311871555013606,
+      "excursion": 0.06060172563138355,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "branch-lab-1-3",
+    "title": "RYB branching setup",
+    "palette": "RYB",
+    "start": [
+      0.7032489674159584,
+      0.027492962361011182,
+      0.25364947772198115,
+      0.01560859250104938
+    ],
+    "target": {
+      "rgb": [
+        214.93686579218263,
+        213.21845407416336,
+        125.7330678296109
+      ],
+      "lab": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "position": [
+        -2.760296326354311,
+        12.928928261612915,
+        18.59088359445883
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          1,
+          1,
+          3,
+          2,
+          0,
+          0
+        ],
+        "legs": 4
+      },
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          1,
+          2,
+          1,
+          2,
+          3,
+          1,
+          0,
+          0,
+          1,
+          2,
+          3
+        ],
+        "legs": 10,
+        "review": {
+          "verdict": "",
+          "challenge": "",
+          "issue": "",
+          "note": "good interesting route. the pigment corrections I made sent me way off course to darker values made it fascinating. ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "label": "Refined branch A",
+      "order": [
+        1,
+        0,
+        3
+      ],
+      "times": [
+        0.4888916922932769,
+        0.49611049340748326,
+        0.23810224882236344
+      ],
+      "error": 0.019150292161005895,
+      "finishWindowMs": 69.72167491912839,
+      "setupCoverage": 0.44,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.04557475447654724,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": true
+      }
+    },
+    "paints": [
+      "Flake White",
+      "Cadmium Lemon",
+      "Cadmium Red Medium",
+      "Phthalo Blue (Green Shade)"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.3877958098831896
+        },
+        {
+          "paint": 0,
+          "share": 0.39834062244468005
+        },
+        {
+          "paint": 3,
+          "share": 0.058543095110881904
+        }
+      ],
+      "error": 0.019150292161005937,
+      "lengths": [
+        0.1638029434790383,
+        0.08285916178795925,
+        0.05178386664894296
+      ],
+      "finish": 0.05178386664894296,
+      "setup": 0.24666210526699756,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.1458251448314101,
+        0.10175190127158963,
+        0.04898350473318464
+      ],
+      "tradeoff": 0,
+      "hueTravel": 0.3227036212286485,
+      "abTravel": 0.03687186603518867,
+      "chromaticFraction": 1,
+      "value": -0.03626162959762114,
+      "initialDistance": 0.20798947494356926,
+      "initialAB": 0.19091357934621592,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-0",
+    "title": "Shared destination · secondary balance",
+    "palette": "Secondaries",
+    "start": [
+      0.28943253026784516,
+      0.23391120438949053,
+      0.13507368073592338,
+      0.3415825846067409
+    ],
+    "target": {
+      "rgb": [
+        137.13515292496388,
+        122.74467719625433,
+        67.03248944274245
+      ],
+      "lab": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "position": [
+        1.1479993705939426,
+        0.04147138989667809,
+        13.811482933170604
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          1,
+          2,
+          0,
+          2,
+          0,
+          1,
+          1,
+          0,
+          2,
+          1,
+          0
+        ],
+        "legs": 11,
+        "review": {
+          "verdict": "",
+          "challenge": "",
+          "issue": "",
+          "note": "fine, not the best secondaries route bc you start close but there is serious correction risk. ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        2,
+        0
+      ],
+      "times": [
+        1.1256323477904142,
+        0.47732702550224204,
+        0.6154323814080995
+      ],
+      "error": 0.001531724342415487,
+      "finishWindowMs": 78.36761474609388,
+      "setupCoverage": 0.88,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.08646145462989807,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Cadmium Orange",
+      "Dioxazine Purple",
+      "Phthalo Green (Yellow Shade)",
+      "Titanium White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.8298479848941401
+        },
+        {
+          "paint": 2,
+          "share": 0.37070133168834585
+        },
+        {
+          "paint": 0,
+          "share": 0.5526766610529117
+        }
+      ],
+      "error": 0.0015317243424155423,
+      "lengths": [
+        0.4145440848861219,
+        0.08444541366217015,
+        0.29128957951180756
+      ],
+      "finish": 0.29128957951180756,
+      "setup": 0.498989498548292,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.07494201531038279,
+        0.07106078021844622,
+        0.28934618723014105
+      ],
+      "tradeoff": 0.014076942613238608,
+      "hueTravel": 0.08758351886417093,
+      "abTravel": 0.13651148634518118,
+      "chromaticFraction": 0.1519910221160025,
+      "value": 0.2559458672480326,
+      "initialDistance": 0.14206862351670016,
+      "initialAB": 0.04346727757470336,
+      "excursion": 0.16690857706899023,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-1",
+    "title": "Vivid green with competing approaches",
+    "palette": "Lemon · Ochre · Teal",
+    "start": [
+      0.2938276643760384,
+      0.11094605806538818,
+      0.2828224026928142,
+      0.3124038748657592
+    ],
+    "target": {
+      "rgb": [
+        87.79070115733553,
+        148.52605935338568,
+        66.3874077446028
+      ],
+      "lab": [
+        0.6076230306543863,
+        -0.09814458991309094,
+        0.08769571770809631
+      ],
+      "position": [
+        -13.583698853443606,
+        1.700070074887539,
+        15.307090080370152
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": true,
+        "shots": [
+          1,
+          3,
+          0
+        ],
+        "legs": 3
+      },
+      {
+        "outcome": "left",
+        "revealed": false,
+        "shots": [
+          0,
+          3
+        ],
+        "legs": 2,
+        "review": {
+          "verdict": "",
+          "challenge": "",
+          "issue": "",
+          "note": "similar to many chromatic rides aiming into bright green, fine",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        0,
+        1,
+        3
+      ],
+      "times": [
+        0.8574478919634714,
+        0.8574478919634714,
+        0.651699263086447,
+        0.45884163283596824
+      ],
+      "error": 0.00007928255503610261,
+      "finishWindowMs": 147.6043701171877,
+      "setupCoverage": 0.68,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.21677350997924805,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": false
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Radiant Lemon",
+      "Yellow Ochre",
+      "Alizarin Crimson",
+      "Cobalt Teal"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.932733793141229
+        },
+        {
+          "paint": 1,
+          "share": 0.5909521588776435
+        },
+        {
+          "paint": 3,
+          "share": 0.34295654196875086
+        }
+      ],
+      "error": 0.00007928255503605813,
+      "lengths": [
+        0.47427208187853953,
+        0.22881920839945835,
+        0.14495201347976577
+      ],
+      "finish": 0.14495201347976577,
+      "setup": 0.7030912902779979,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.09305413337745902,
+        0.1822401991703785,
+        0.14424494117052036
+      ],
+      "tradeoff": 0.090104213650182,
+      "hueTravel": 0.9385548674870599,
+      "abTravel": 0.116259864187508,
+      "chromaticFraction": 1,
+      "value": -0.08642745515452455,
+      "initialDistance": 0.21277831919056037,
+      "initialAB": 0.16613398716872213,
+      "excursion": 0.10422867348135259,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": false
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-2",
+    "title": "Light green · prepare the rise",
+    "palette": "Violet · Chromium",
+    "start": [
+      0.7502273500721809,
+      0.14182927501621934,
+      0.07092071850436135,
+      0.03702265640723841
+    ],
+    "target": {
+      "rgb": [
+        171.18464825491856,
+        199.82835382107638,
+        130.01732869845205
+      ],
+      "lab": [
+        0.7940618201292705,
+        -0.05877620910742465,
+        0.07895719614119268
+      ],
+      "position": [
+        -7.974810637054833,
+        10.184860548869466,
+        14.877603227073722
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          2,
+          1,
+          2,
+          0,
+          1,
+          3,
+          3,
+          2,
+          1,
+          0,
+          0,
+          2,
+          1,
+          3,
+          0,
+          2
+        ],
+        "legs": 14,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "very pretty new palette pastel route! and hard like secondaries. unique ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        2,
+        3
+      ],
+      "times": [
+        0.5034340781133608,
+        0.5981180892045433,
+        0.47139396228031694
+      ],
+      "error": 0.000012983728076375759,
+      "finishWindowMs": 63.46492767333972,
+      "setupCoverage": 0.84,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.09451495856046677,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Radiant Violet",
+      "Cadmium Yellow Medium",
+      "Chromium Oxide Green",
+      "Warm White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.4089284352852488
+        },
+        {
+          "paint": 2,
+          "share": 0.5329415055092964
+        },
+        {
+          "paint": 3,
+          "share": 0.36184638004162256
+        }
+      ],
+      "error": 0.000012983728076516243,
+      "lengths": [
+        0.1598283620828955,
+        0.20760017247997062,
+        0.20069787354234464
+      ],
+      "finish": 0.20069787354234464,
+      "setup": 0.3674285345628661,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.06671602898103665,
+        0.09102196693604347,
+        0.1999687192524847
+      ],
+      "tradeoff": 0.07471409512519528,
+      "hueTravel": 0.058317766817236105,
+      "abTravel": 0.01898471769911588,
+      "chromaticFraction": 1,
+      "value": 0.19941598937014016,
+      "initialDistance": 0.1592622310627999,
+      "initialAB": 0.10860500908517635,
+      "excursion": 0.04070648818968478,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-3",
+    "title": "Dark interior · not a drop finish",
+    "palette": "Cobalt Ember",
+    "start": [
+      0.2608814775478414,
+      0.1140506762771112,
+      0.08227625092062278,
+      0.5427915952544246
+    ],
+    "target": {
+      "rgb": [
+        94.7450515476595,
+        75.78641641943854,
+        86.2267818839754
+      ],
+      "lab": [
+        0.4388752211719329,
+        0.02894232816578507,
+        -0.008196821742174454
+      ],
+      "position": [
+        4.38870967837825,
+        -6.69802807846372,
+        -2.321314510373779
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "left",
+        "revealed": false,
+        "shots": [
+          0,
+          2,
+          1,
+          0
+        ],
+        "legs": 4,
+        "review": {
+          "verdict": "",
+          "challenge": "",
+          "issue": "",
+          "note": "great route. dark interior really good ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        2,
+        0
+      ],
+      "times": [
+        0.5637290951238864,
+        0.4895985530801037,
+        0.43741368180144014
+      ],
+      "error": 2.5557952853377668e-8,
+      "finishWindowMs": 99.55799579620356,
+      "setupCoverage": 0.4,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.15018581598997116,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Cobalt Blue",
+      "Cadmium Orange",
+      "Quinacridone Magenta",
+      "Flake White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.4909425415192234
+        },
+        {
+          "paint": 2,
+          "share": 0.38883285937680684
+        },
+        {
+          "paint": 0,
+          "share": 0.31038004157752447
+        }
+      ],
+      "error": 2.5557952570675744e-8,
+      "lengths": [
+        0.15594799840477278,
+        0.23732745528176163,
+        0.14905860634870474
+      ],
+      "finish": 0.14905860634870474,
+      "setup": 0.3932754536865344,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.08354210388853114,
+        0.21353959540883957,
+        0.14893229450875375
+      ],
+      "tradeoff": 0.04549490782388654,
+      "hueTravel": 0.17933359787490785,
+      "abTravel": 0.10905865428869597,
+      "chromaticFraction": 0.693894726361809,
+      "value": -0.10143796222338852,
+      "initialDistance": 0.34595111201952017,
+      "initialAB": 0.05820875311299036,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-4",
+    "title": "Two-leg warm chromatic finish",
+    "palette": "RYB",
+    "start": [
+      0.5456178520714616,
+      0.0981944825709865,
+      0.28321022359938997,
+      0.07297744175816182
+    ],
+    "target": {
+      "rgb": [
+        234.90184819396111,
+        95.35859107598677,
+        61.600236311414704
+      ],
+      "lab": [
+        0.6599999988618948,
+        0.14771539726322294,
+        0.10285993855053571
+      ],
+      "position": [
+        32.83541959590995,
+        2.70993869814104,
+        10.905253283672101
+      ]
+    },
+    "expected": 2,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          2,
+          1
+        ],
+        "legs": 2,
+        "review": {
+          "verdict": "reject",
+          "challenge": "",
+          "issue": "",
+          "note": "terribly easy",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        2
+      ],
+      "times": [
+        1.1238613487715803,
+        0.5053427607612334
+      ],
+      "error": 0.009844651973332143,
+      "finishWindowMs": 73.08516502380358,
+      "setupCoverage": 1,
+      "supported": true,
+      "legCount": 2,
+      "finishShareWidth": 0.10390375554561615,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": false
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Flake White",
+      "Cadmium Lemon",
+      "Cadmium Red Medium",
+      "Phthalo Blue (Green Shade)"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.8294791483948389
+        },
+        {
+          "paint": 2,
+          "share": 0.411668553483477
+        }
+      ],
+      "error": 0.009844651973332279,
+      "lengths": [
+        0.3348266858016279,
+        0.3212853969695002
+      ],
+      "finish": 0.3212853969695002,
+      "setup": 0.3348266858016279,
+      "meaningful": 2,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.11810367549135647,
+        0.32145639026798095
+      ],
+      "tradeoff": 0,
+      "hueTravel": 1.171119221113178,
+      "abTravel": 0.20518286683374712,
+      "chromaticFraction": 1,
+      "value": -0.2465371867073285,
+      "initialDistance": 0.09437159708197183,
+      "initialAB": 0.09220830309058574,
+      "excursion": 0.227084793186009,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": true,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": false
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-5",
+    "title": "Rose destination · balance the corrections",
+    "palette": "Rose · Chartreuse · Cerulean",
+    "start": [
+      0.4518185474136517,
+      0.22307357931606075,
+      0.2432864824314269,
+      0.08182139083886056
+    ],
+    "target": {
+      "rgb": [
+        161.0600284910601,
+        113.2536997466373,
+        152.4678317784918
+      ],
+      "lab": [
+        0.6112110607321735,
+        0.07213725662501175,
+        -0.036714604778959714
+      ],
+      "position": [
+        11.09466165921976,
+        0.9090750302011578,
+        -10.525048281412737
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          3,
+          1,
+          0,
+          3,
+          2,
+          0,
+          3,
+          0,
+          1,
+          1,
+          3
+        ],
+        "legs": 11,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "i’d keep. easy setup but easy to miss. i wonder if there’s another start that’s similar but requires yellow ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1,
+        3
+      ],
+      "times": [
+        0.5517830960279604,
+        0.45143892256921436,
+        0.39689050810091764
+      ],
+      "error": 2.2236538045361246e-8,
+      "finishWindowMs": 83.74631404876698,
+      "setupCoverage": 0.36,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.12447739392518997,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Permanent Rose",
+      "Flake White Replacement",
+      "Chartreuse",
+      "Cerulean Blue"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.47550160241643324
+        },
+        {
+          "paint": 1,
+          "share": 0.3317374307413092
+        },
+        {
+          "paint": 3,
+          "share": 0.2488204370210636
+        }
+      ],
+      "error": 2.2236538166895234e-8,
+      "lengths": [
+        0.1144215502157505,
+        0.13894077564779636,
+        0.09292274660744032
+      ],
+      "finish": 0.09292274660744032,
+      "setup": 0.25336232586354684,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.12552391830926984,
+        0.1378837079799762,
+        0.0929182362786173
+      ],
+      "tradeoff": 0.01584763773121778,
+      "hueTravel": 0.41058929955496815,
+      "abTravel": 0.07089358227290171,
+      "chromaticFraction": 1,
+      "value": -0.060066276970310306,
+      "initialDistance": 0.10708503185907758,
+      "initialAB": 0.10639164180445478,
+      "excursion": 0.011591328384980781,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-6",
+    "title": "Shared destination · different counterweights",
+    "palette": "Maroon · Lemon · Green",
+    "start": [
+      0.38430009943457233,
+      0.038730251871589495,
+      0.42944556255679045,
+      0.14752408613704787
+    ],
+    "target": {
+      "rgb": [
+        137.13515292496388,
+        122.74467719625433,
+        67.03248944274245
+      ],
+      "lab": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "position": [
+        1.1479993705939426,
+        0.04147138989667809,
+        13.811482933170604
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          1,
+          0,
+          3,
+          1,
+          1,
+          0
+        ],
+        "legs": 5,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "fine balancing",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        3,
+        1
+      ],
+      "times": [
+        0.6350448449449118,
+        0.41471300422037527,
+        0.4647428287150235
+      ],
+      "error": 0.00005436984657074303,
+      "finishWindowMs": 50.24752616882322,
+      "setupCoverage": 0.64,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.07548767328262329,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Perylene Maroon",
+      "Cadmium Lemon",
+      "Titanium White",
+      "Permanent Green Light"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.5738858707995229
+        },
+        {
+          "paint": 3,
+          "share": 0.27576453476339746
+        },
+        {
+          "paint": 1,
+          "share": 0.3518609807670438
+        }
+      ],
+      "error": 0.00005436984657111624,
+      "lengths": [
+        0.28616258763634006,
+        0.07414085150381507,
+        0.1821173341486646
+      ],
+      "finish": 0.1821173341486646,
+      "setup": 0.3603034391401551,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.1627466562639825,
+        0.07820292878222913,
+        0.1766659832288088
+      ],
+      "tradeoff": 0.004309977726007774,
+      "hueTravel": 0.0854994300275369,
+      "abTravel": 0.11240095630593004,
+      "chromaticFraction": 0.22963691091974345,
+      "value": 0.13627697434262703,
+      "initialDistance": 0.18053995449730498,
+      "initialAB": 0.11208121060410665,
+      "excursion": 0.014694448327854798,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-7",
+    "title": "Shorter dark drop",
+    "palette": "Indigo · Cobalt Green",
+    "start": [
+      0.04498873501011869,
+      0.33872702320549253,
+      0.18187875561067673,
+      0.4344054861737121
+    ],
+    "target": {
+      "rgb": [
+        81.46642250068865,
+        46.17027657910596,
+        69.90097800327261
+      ],
+      "lab": [
+        0.35500000578716917,
+        0.058831239931826235,
+        -0.021098212251929316
+      ],
+      "position": [
+        8.73479375012085,
+        -10.607496422950327,
+        -5.853755764649938
+      ]
+    },
+    "expected": 2,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": true,
+        "shots": [
+          1,
+          3,
+          1,
+          0,
+          3
+        ],
+        "legs": 5,
+        "review": {
+          "verdict": "revise",
+          "challenge": "",
+          "issue": "",
+          "note": "on the fence. a little easy",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1
+      ],
+      "times": [
+        0.5053499271939209,
+        0.40166120961863994
+      ],
+      "error": 0.012469820681855556,
+      "finishWindowMs": 83.92124176025389,
+      "setupCoverage": 1,
+      "supported": true,
+      "legCount": 2,
+      "finishShareWidth": 0.12557067722082138,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": false
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Cadmium Red Medium",
+      "Indigo",
+      "Cobalt Green",
+      "Cadmium Orange"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.411678826183762
+        },
+        {
+          "paint": 1,
+          "share": 0.2559963657097808
+        }
+      ],
+      "error": 0.012469820681855343,
+      "lengths": [
+        0.16411499656426862,
+        0.1315556118091839
+      ],
+      "finish": 0.1315556118091839,
+      "setup": 0.16411499656426862,
+      "meaningful": 2,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.09854994255684969,
+        0.13204673897749328
+      ],
+      "tradeoff": 0,
+      "hueTravel": 0.42912830934096874,
+      "abTravel": 0.07668561804404728,
+      "chromaticFraction": 0.9562229140351491,
+      "value": -0.10688464892734778,
+      "initialDistance": 0.2165062204042659,
+      "initialAB": 0.11117208297552694,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": true,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": false,
+        "interior-assembly": false
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-8",
+    "title": "Warm balancing without white",
+    "palette": "Deep Red · Blue · Yellows",
+    "start": [
+      0.009986221030868393,
+      0.1340444943298764,
+      0.7124841973962202,
+      0.1434850872430352
+    ],
+    "target": {
+      "rgb": [
+        124.17010982696902,
+        96.44140524119746,
+        51.34284773794893
+      ],
+      "lab": [
+        0.5084588793988457,
+        0.014689433633286703,
+        0.07020015543417879
+      ],
+      "position": [
+        4.698352302827225,
+        -3.4592917274276673,
+        12.339053798718037
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          3,
+          3,
+          1,
+          0,
+          3,
+          1,
+          2,
+          2
+        ],
+        "legs": 6,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "good.  i like these holes",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        3,
+        1
+      ],
+      "times": [
+        0.5100958637693961,
+        0.5201944099082844,
+        0.3764590695277169
+      ],
+      "error": 0.0009668118926652521,
+      "finishWindowMs": 78.99677753448486,
+      "setupCoverage": 0.48,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.11413893103599548,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Phthalo Blue",
+      "Cadmium Red Deep",
+      "Cadmium Yellow Deep",
+      "Indian Yellow Deep"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.4184559308820936
+        },
+        {
+          "paint": 3,
+          "share": 0.4326969397895586
+        },
+        {
+          "paint": 1,
+          "share": 0.21854096865602696
+        }
+      ],
+      "error": 0.0009668118926652676,
+      "lengths": [
+        0.3375924487798755,
+        0.12050268680980251,
+        0.082501985285881
+      ],
+      "finish": 0.082501985285881,
+      "setup": 0.458095135589678,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.17663782238764955,
+        0.11187780711028406,
+        0.08278912900904217
+      ],
+      "tradeoff": 0.04636893183198165,
+      "hueTravel": 0.6038612095961127,
+      "abTravel": 0.05818563995678319,
+      "chromaticFraction": 1,
+      "value": -0.058484815823625746,
+      "initialDistance": 0.29523111018992587,
+      "initialAB": 0.05542409271364587,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-9",
+    "title": "Pale destination · value rise",
+    "palette": "Hansa · Manganese · Violet",
+    "start": [
+      0.2614433806148458,
+      0.04741849680139889,
+      0.03986160838637937,
+      0.6512765141973761
+    ],
+    "target": {
+      "rgb": [
+        214.93686579218263,
+        213.21845407416336,
+        125.7330678296109
+      ],
+      "lab": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "position": [
+        -2.760296326354311,
+        12.928928261612915,
+        18.59088359445883
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          2,
+          1
+        ],
+        "legs": 3,
+        "review": {
+          "verdict": "revise",
+          "challenge": "",
+          "issue": "",
+          "note": "eh",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "times": [
+        1.2009150073350718,
+        0.46009610769205533,
+        0.5358995123876981
+      ],
+      "error": 0.0026735447158039815,
+      "finishWindowMs": 97.51393795013435,
+      "setupCoverage": 1,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.13056151568889618,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Hansa Yellow Deep",
+      "Manganese Blue Hue",
+      "Titanium White",
+      "Cobalt Violet"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.8437493215896024
+        },
+        {
+          "paint": 1,
+          "share": 0.34485262809727885
+        },
+        {
+          "paint": 2,
+          "share": 0.45432360788466586
+        }
+      ],
+      "error": 0.0026735447158039815,
+      "lengths": [
+        0.2315746845289806,
+        0.1251591249650503,
+        0.178332802380744
+      ],
+      "finish": 0.178332802380744,
+      "setup": 0.3567338094940309,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.09232292207493199,
+        0.053194714989574704,
+        0.1761861429104182
+      ],
+      "tradeoff": 0.08142055325698563,
+      "hueTravel": 0.0433969088676216,
+      "abTravel": 0.022574822281270546,
+      "chromaticFraction": 1,
+      "value": 0.1760909038954216,
+      "initialDistance": 0.3284985907620531,
+      "initialAB": 0.1143392293276732,
+      "excursion": 0,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-10",
+    "title": "Light target with a dark counterweight",
+    "palette": "Chartreuse · Rose · Black",
+    "start": [
+      0.026778082865502168,
+      0.013128948185300362,
+      0.5499261130076908,
+      0.41016685594150665
+    ],
+    "target": {
+      "rgb": [
+        235.38346046160416,
+        197.83931513034,
+        142.8250411150289
+      ],
+      "lab": [
+        0.8457884670489606,
+        0.018969881279234657,
+        0.08069897330601805
+      ],
+      "position": [
+        5.946329878006545,
+        12.172194034529193,
+        13.680096138961003
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          1,
+          3,
+          2,
+          0,
+          1,
+          2
+        ],
+        "legs": 7,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "such an odd palette! unique take on zorn",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "times": [
+        0.5971886847889217,
+        0.45616193808995853,
+        0.5562829422472283
+      ],
+      "error": 3.103316261888443e-8,
+      "finishWindowMs": 112.9988431930542,
+      "setupCoverage": 0.52,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.14442335069179535,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Chartreuse",
+      "Permanent Rose",
+      "Flake White Replacement",
+      "Ivory Black"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.5318552692588996
+        },
+        {
+          "paint": 1,
+          "share": 0.33890104055264403
+        },
+        {
+          "paint": 2,
+          "share": 0.48136804989307286
+        }
+      ],
+      "error": 3.1033162565785493e-8,
+      "lengths": [
+        0.20575568415315565,
+        0.2120689462292851,
+        0.1797830565181525
+      ],
+      "finish": 0.1797830565181525,
+      "setup": 0.4178246303824408,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.09950180283783698,
+        0.1098122447289395,
+        0.1791625414813331
+      ],
+      "tradeoff": 0.06072039736653815,
+      "hueTravel": 0.3366567296715255,
+      "abTravel": 0.05093960624757429,
+      "chromaticFraction": 1,
+      "value": 0.1723087704579701,
+      "initialDistance": 0.13445603690194483,
+      "initialAB": 0.07527051885335143,
+      "excursion": 0.04470650457938827,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-11",
+    "title": "Shared destination · earth pigments",
+    "palette": "Sienna · Orange · Prussian",
+    "start": [
+      0.7855206783475074,
+      0.08544296062667173,
+      0.06885619288461671,
+      0.060180168141203985
+    ],
+    "target": {
+      "rgb": [
+        137.13515292496388,
+        122.74467719625433,
+        67.03248944274245
+      ],
+      "lab": [
+        0.5824497693504583,
+        -0.00710156243204213,
+        0.07705100465144199
+      ],
+      "position": [
+        1.1479993705939426,
+        0.04147138989667809,
+        13.811482933170604
+      ]
+    },
+    "expected": 3,
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          1,
+          2,
+          1,
+          3,
+          1
+        ],
+        "legs": 5,
+        "review": {
+          "verdict": "revise",
+          "challenge": "",
+          "issue": "",
+          "note": "i want a route in this palette that requires burnt sienna. ",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        1,
+        2,
+        3
+      ],
+      "times": [
+        0.9555719226139394,
+        0.9555719226139394,
+        0.3642875404711443,
+        0.331450932805321
+      ],
+      "error": 0.017080106563949923,
+      "finishWindowMs": 44.125318527221566,
+      "setupCoverage": 0.36,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.05695565789937973,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Burnt Sienna",
+      "Mars Orange",
+      "Prussian Blue",
+      "Titanium White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.9527899968454514
+        },
+        {
+          "paint": 2,
+          "share": 0.20096797165361321
+        },
+        {
+          "paint": 3,
+          "share": 0.15604471000755338
+        }
+      ],
+      "error": 0.017080106563950207,
+      "lengths": [
+        0.18744023609117938,
+        0.12246816454743834,
+        0.07605119478584946
+      ],
+      "finish": 0.07605119478584946,
+      "setup": 0.3099084006386177,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.0774436026865664,
+        0.09871413385991892,
+        0.07767144363933003
+      ],
+      "tradeoff": 0.06708259618299461,
+      "hueTravel": 0.027316136835615623,
+      "abTravel": 0.008889752019327228,
+      "chromaticFraction": 1,
+      "value": 0.0755266043416587,
+      "initialDistance": 0.16935644458860832,
+      "initialAB": 0.06959120690482504,
+      "excursion": 0,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-12",
+    "title": "Two-leg green ride candidate",
+    "palette": "Rose · Turquoise · Yellow",
+    "start": [
+      0.18745758572830684,
+      0.32362829560961015,
+      0.41573488134652326,
+      0.07317923731555964
+    ],
+    "target": {
+      "rgb": [
+        83.29545999272494,
+        168.6392949411347,
+        83.55605936002809
+      ],
+      "lab": [
+        0.6600000065776842,
+        -0.11837557843721558,
+        0.08681268256453428
+      ],
+      "position": [
+        -16.938720818816495,
+        4.239994794872063,
+        14.97914747955463
+      ]
+    },
+    "expected": 2,
+    "played": [],
+    "sourceMeasurement": {
+      "order": [
+        1,
+        3
+      ],
+      "times": [
+        0.42070730157061553,
+        0.40106597504519326
+      ],
+      "error": 0.017257283474511362,
+      "finishWindowMs": 59.684443473815904,
+      "setupCoverage": 1,
+      "supported": true,
+      "legCount": 2,
+      "finishShareWidth": 0.08955755829811096,
+      "proportionSupported": true,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": true,
+        "setup-glide": true,
+        "coupled-balance": false,
+        "interior-assembly": false
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Quinacridone Rose",
+      "Radiant Turquoise",
+      "Cobalt Blue",
+      "Cadmium Yellow Light"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 1,
+          "share": 0.28488995469260464
+        },
+        {
+          "paint": 3,
+          "share": 0.25509932246949435
+        }
+      ],
+      "error": 0.017257283474511362,
+      "lengths": [
+        0.11690003419797271,
+        0.17493546854580388
+      ],
+      "finish": 0.17493546854580388,
+      "setup": 0.11690003419797271,
+      "meaningful": 2,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.06346796009201486,
+        0.1768775779698604
+      ],
+      "tradeoff": 0,
+      "hueTravel": 1.5791123319872977,
+      "abTravel": 0.16101395489806775,
+      "chromaticFraction": 1,
+      "value": 0.04831574320057119,
+      "initialDistance": 0.23898989871473494,
+      "initialAB": 0.18297776069949698,
+      "excursion": 0,
+      "traits": {
+        "rise": false,
+        "drop": false,
+        "chromatic-ride": true,
+        "setup-glide": true,
+        "coupled-balance": false,
+        "interior-assembly": false
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-13",
+    "title": "Pale finish through earth red",
+    "palette": "Cerulean · Bismuth · Indian Red",
+    "start": [
+      0.032506040148473594,
+      0.6762652533287807,
+      0.17539882001113602,
+      0.11582988651160965
+    ],
+    "target": {
+      "rgb": [
+        214.93686579218263,
+        213.21845407416336,
+        125.7330678296109
+      ],
+      "lab": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "position": [
+        -2.760296326354311,
+        12.928928261612915,
+        18.59088359445883
+      ]
+    },
+    "expected": 3,
+    "played": [],
+    "sourceMeasurement": {
+      "order": [
+        2,
+        3,
+        0
+      ],
+      "times": [
+        0.6076672196107412,
+        0.43689867415308603,
+        0.5422113888779125
+      ],
+      "error": 2.1593033804450706e-8,
+      "finishWindowMs": 101.37126445770251,
+      "setupCoverage": 0.6,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.1337825506925583,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Flake White Replacement",
+      "Cerulean Blue",
+      "Bismuth Yellow",
+      "Indian Red"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 2,
+          "share": 0.5439433767109391
+        },
+        {
+          "paint": 3,
+          "share": 0.30959427636405806
+        },
+        {
+          "paint": 0,
+          "share": 0.4628257509609843
+        }
+      ],
+      "error": 2.1593033804450706e-8,
+      "lengths": [
+        0.32222779307199767,
+        0.16928535118419688,
+        0.17603992532879834
+      ],
+      "finish": 0.17603992532879834,
+      "setup": 0.4915131442561945,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.10144788388996526,
+        0.07668437128399333,
+        0.17491958036325936
+      ],
+      "tradeoff": 0.08189050011072253,
+      "hueTravel": 0.0820244747549217,
+      "abTravel": 0.021148615314103458,
+      "chromaticFraction": 1,
+      "value": 0.17435479351158067,
+      "initialDistance": 0.34005114560304345,
+      "initialAB": 0.09557116512005838,
+      "excursion": 0,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-14",
+    "title": "Five paints · three-leg alternatives",
+    "palette": "Hansa · Scarlet · Violet",
+    "start": [
+      0.05282075682703038,
+      0.05350080554265024,
+      0.3117869693938133,
+      0.15901752155334511,
+      0.4228739466831609
+    ],
+    "target": {
+      "rgb": [
+        214.93686579218263,
+        213.21845407416336,
+        125.7330678296109
+      ],
+      "lab": [
+        0.8559856780284271,
+        -0.03313475552686618,
+        0.10489487712976919
+      ],
+      "position": [
+        -2.760296326354311,
+        12.928928261612915,
+        18.59088359445883
+      ]
+    },
+    "expected": 3,
+    "played": [],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1,
+        4
+      ],
+      "times": [
+        0.5174490192959166,
+        0.3526324825603556,
+        0.5272176460050438
+      ],
+      "error": 9.123306539151056e-9,
+      "finishWindowMs": 121.97601795196539,
+      "setupCoverage": 0.4,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.16576574742794037,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Hansa Yellow Light",
+      "Cerulean Blue Hue",
+      "Naphthol Scarlet",
+      "Ultramarine Violet",
+      "Warm White"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.42885030171853694
+        },
+        {
+          "paint": 1,
+          "share": 0.18456272037117155
+        },
+        {
+          "paint": 4,
+          "share": 0.4424493617356182
+        }
+      ],
+      "error": 9.123306539151056e-9,
+      "lengths": [
+        0.17227154654336413,
+        0.10434457194775963,
+        0.14282202853016854
+      ],
+      "finish": 0.14282202853016854,
+      "setup": 0.2766161184911238,
+      "meaningful": 3,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.12174041823620739,
+        0.04770017790435715,
+        0.14199774664812673
+      ],
+      "tradeoff": 0.06683807851451706,
+      "hueTravel": 0.06698856018869193,
+      "abTravel": 0.019784912782473612,
+      "chromaticFraction": 1,
+      "value": 0.14098399994618382,
+      "initialDistance": 0.2556500386458199,
+      "initialAB": 0.17260037092675687,
+      "excursion": 0,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      }
+    }
+  },
+  {
+    "id": "conditioned-lab-1-15",
+    "title": "Five paints · shorter lift contrast",
+    "palette": "Orange · Raw Umber · Violet",
+    "start": [
+      0.2540911078767128,
+      0.28964968099023897,
+      0.04039793747783718,
+      0.050969515790728864,
+      0.3648917578644822
+    ],
+    "target": {
+      "rgb": [
+        197.15853006869477,
+        197.58210015805233,
+        134.77635347537054
+      ],
+      "lab": [
+        0.8100000034938338,
+        -0.026090124379579582,
+        0.07826591752459522
+      ],
+      "position": [
+        -2.365832052281558,
+        10.748927329883792,
+        14.454319233926345
+      ]
+    },
+    "expected": 2,
+    "played": [],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1
+      ],
+      "times": [
+        0.3555756145702783,
+        0.38138425617181704
+      ],
+      "error": 0.020106494199493157,
+      "finishWindowMs": 82.0757150650025,
+      "setupCoverage": 1,
+      "supported": true,
+      "legCount": 2,
+      "finishShareWidth": 0.11952510476112366,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": false
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    },
+    "paints": [
+      "Cadmium Orange",
+      "Warm White",
+      "Manganese Violet",
+      "Raw Umber",
+      "Radiant Green"
+    ],
+    "demoGeometry": {
+      "legs": [
+        {
+          "paint": 0,
+          "share": 0.1886622389774815
+        },
+        {
+          "paint": 1,
+          "share": 0.2257608515084897
+        }
+      ],
+      "error": 0.02010649419949305,
+      "lengths": [
+        0.052410516416745,
+        0.08022125061969222
+      ],
+      "finish": 0.08022125061969222,
+      "setup": 0.052410516416745,
+      "meaningful": 2,
+      "allMeaningful": true,
+      "deletionErrors": [
+        0.04762996674770523,
+        0.08070209773060735
+      ],
+      "tradeoff": 0.016559212522289254,
+      "hueTravel": 0.003923966380437127,
+      "abTravel": 0.01175659966589058,
+      "chromaticFraction": 1,
+      "value": 0.07924308077719788,
+      "initialDistance": 0.06384771383917952,
+      "initialAB": 0.0476838584552557,
+      "excursion": 0.016854383891427835,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": false
+      }
+    }
+  }
+]

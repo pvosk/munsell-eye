@@ -1,0 +1,42 @@
+{
+  "fixedCases": 20,
+  "directSolved": 20,
+  "bidirectionalSolved": 20,
+  "minimumDisagreements": [],
+  "independentShorterDisagreements": [],
+  "directMs": 2741.767000000001,
+  "bidirectionalMs": 995.2194960000029,
+  "directEvaluations": 766362,
+  "bidirectionalEvaluations": 224610,
+  "moreBidirectionalFirstPaints": [
+    "conditioned-lab-1-14"
+  ],
+  "moreDirectFirstPaints": [],
+  "selectionQueries": 192,
+  "rawProposals": 12288,
+  "screened": 197,
+  "baseline": {
+    "selected": 42,
+    "shorterFound": 40,
+    "resistant": 2,
+    "resistantSupported": 2
+  },
+  "exclusion": {
+    "selected": 6,
+    "shorterFound": 0,
+    "resistant": 6,
+    "resistantSupported": 6
+  },
+  "changedSelections": 4,
+  "gateMs": 4788.686045000002,
+  "gateEvaluations": 1288629,
+  "limitations": [
+    "Algebraic meet-in-the-middle uses the affine recipe structure, not a general continuous bidirectional tree.",
+    "Accepted-root sampling is incomplete, and projected roots require actual-color replay; approximate and exact joins remain distinguished.",
+    "Same cases and same candidate pool do not mean equal CPU: work is reported explicitly.",
+    "Raw exclusion is finite numerical evidence, not a certified global non-reachability proof.",
+    "Support measurements are local fraction-grid estimates, not player probabilities.",
+    "No claim that more pigment legs or more alternatives equals better play.",
+    "Free-base endpoint analysis here ignores accumulated-mass timing and release limits."
+  ]
+}

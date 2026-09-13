@@ -1,0 +1,9 @@
+{
+  "seed": 927451,
+  "tolerance": 0.0294,
+  "inputHash": "2f6ce7549dc607e1297d0db6d3be0afbff0a443c857127148d8ca240e078df57",
+  "eventCount": 2438,
+  "distinctAttempts": 320,
+  "policy": "Fixed cases use no intended route/recipe/style for either solver. Root recovery costs charged to bidirectional. All starts/targets frozen. Selection ablation uses same 64 proposals and ranking; only pre-selection shorter exclusion differs. Computational, not randomized player trial. No runtime changes.",
+  "physicsHash": "ac5ef952b268447d11123bba45c12b8d5d874229cdcfc2564d71d58c5e5d42b9"
+}

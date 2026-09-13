@@ -1,0 +1,654 @@
+{
+  "p": {
+    "id": "conditioned-lab-1-10",
+    "title": "Light target with a dark counterweight",
+    "palette": "Chartreuse · Rose · Black",
+    "paints": [
+      {
+        "id": "play-chartreuse",
+        "name": "Chartreuse",
+        "pigment": "PY3/PG36",
+        "category": "Yellow",
+        "h": "7.5Y",
+        "v": 8.5,
+        "c": 12,
+        "strength": 0.96,
+        "opacity": "semi-transparent",
+        "rgb": [
+          229,
+          230,
+          29
+        ],
+        "notation": "Chartreuse premix"
+      },
+      {
+        "id": "permanent-rose",
+        "name": "Permanent Rose",
+        "pigment": "PV19",
+        "category": "Red",
+        "brands": "Winsor & Newton",
+        "h": "5RP",
+        "v": 4,
+        "c": 12,
+        "strength": 1.05,
+        "opacity": "transparent",
+        "rgb": [
+          169,
+          50,
+          112
+        ],
+        "notation": "5RP 4/12"
+      },
+      {
+        "id": "flake-white-replacement",
+        "name": "Flake White Replacement",
+        "pigment": "PW6/PW4",
+        "category": "White",
+        "brands": "Gamblin",
+        "v": 9.5,
+        "strength": 0.86,
+        "opacity": "opaque",
+        "rgb": [
+          249,
+          248,
+          242
+        ],
+        "notation": "N9.5"
+      },
+      {
+        "id": "ivory-black",
+        "name": "Ivory Black",
+        "pigment": "PBk9",
+        "category": "Black",
+        "v": 1,
+        "strength": 1.08,
+        "opacity": "semi-transparent",
+        "rgb": [
+          24,
+          24,
+          22
+        ],
+        "notation": "N1"
+      }
+    ],
+    "start": [
+      0.026778082865502168,
+      0.013128948185300362,
+      0.5499261130076908,
+      0.41016685594150665
+    ],
+    "target": {
+      "rgb": [
+        235.38346046160416,
+        197.83931513034,
+        142.8250411150289
+      ],
+      "lab": [
+        0.8457884670489606,
+        0.018969881279234657,
+        0.08069897330601805
+      ],
+      "position": [
+        5.946329878006545,
+        12.172194034529193,
+        13.680096138961003
+      ]
+    },
+    "expected": 3,
+    "demonstration": [
+      {
+        "paint": 0,
+        "share": 0.5318552692588996
+      },
+      {
+        "paint": 1,
+        "share": 0.33890104055264403
+      },
+      {
+        "paint": 2,
+        "share": 0.48136804989307286
+      }
+    ],
+    "played": [
+      {
+        "outcome": "landed",
+        "revealed": false,
+        "shots": [
+          0,
+          1,
+          3,
+          2,
+          0,
+          1,
+          2
+        ],
+        "legs": 7,
+        "review": {
+          "verdict": "keep",
+          "challenge": "",
+          "issue": "",
+          "note": "such an odd palette! unique take on zorn",
+          "shot": null
+        }
+      }
+    ],
+    "sourceMeasurement": {
+      "order": [
+        0,
+        1,
+        2
+      ],
+      "times": [
+        0.5971886847889217,
+        0.45616193808995853,
+        0.5562829422472283
+      ],
+      "error": 3.103316261888443e-8,
+      "finishWindowMs": 112.9988431930542,
+      "setupCoverage": 0.52,
+      "supported": true,
+      "legCount": 3,
+      "finishShareWidth": 0.14442335069179535,
+      "proportionSupported": true,
+      "traits": {
+        "rise": true,
+        "drop": false,
+        "chromatic-ride": false,
+        "setup-glide": false,
+        "coupled-balance": true,
+        "interior-assembly": true
+      },
+      "allMeaningful": true,
+      "label": "Featured efficient example"
+    }
+  },
+  "id": "conditioned-lab-1-10",
+  "directMs": 119.52470799999992,
+  "bidirectionalMs": 33.705832999999984,
+  "directEvaluations": 36462,
+  "bidirectionalEvaluations": 7063,
+  "rootCount": 64,
+  "exactRootJoins": 64,
+  "approximateRootProposals": 0,
+  "direct": {
+    "minimum": 3,
+    "routes": 6,
+    "orders": 6,
+    "measured": [
+      {
+        "legs": [
+          {
+            "paint": 0,
+            "share": 0.5318553462285478
+          },
+          {
+            "paint": 1,
+            "share": 0.33890103786732606
+          },
+          {
+            "paint": 2,
+            "share": 0.48136812964310827
+          }
+        ],
+        "error": 3.6203676471953424e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.14442335814237595,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": true,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 0,
+            "share": 0.5318553462285478
+          },
+          {
+            "paint": 2,
+            "share": 0.584017979163453
+          },
+          {
+            "paint": 1,
+            "share": 0.17576487913502312
+          }
+        ],
+        "error": 3.620367645466927e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.06929463893175125,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": false,
+          "drop": true,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 1,
+            "share": 0.522680060272399
+          },
+          {
+            "paint": 0,
+            "share": 0.35160901739640693
+          },
+          {
+            "paint": 2,
+            "share": 0.48136812964310827
+          }
+        ],
+        "error": 3.6203676471953424e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.14442335814237595,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": true,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 1,
+            "share": 0.522680060272399
+          },
+          {
+            "paint": 2,
+            "share": 0.5887255566868522
+          },
+          {
+            "paint": 0,
+            "share": 0.18235564232664742
+          }
+        ],
+        "error": 3.6203676471953424e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.11051511019468307,
+        "setupCoverage": 0.4444444444444444,
+        "traits": {
+          "rise": false,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 2,
+            "share": 0.7499353784284656
+          },
+          {
+            "paint": 0,
+            "share": 0.22124226171687267
+          },
+          {
+            "paint": 1,
+            "share": 0.17576487913502312
+          }
+        ],
+        "error": 3.620367645466927e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.06929463893175125,
+        "setupCoverage": 0.3333333333333333,
+        "traits": {
+          "rise": false,
+          "drop": true,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 2,
+            "share": 0.7499353784284656
+          },
+          {
+            "paint": 1,
+            "share": 0.21496495081941341
+          },
+          {
+            "paint": 0,
+            "share": 0.18235564232664742
+          }
+        ],
+        "error": 3.6203676251519995e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.11051511019468307,
+        "setupCoverage": 0.3333333333333333,
+        "traits": {
+          "rise": false,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      }
+    ],
+    "firstPaints": [
+      0,
+      1,
+      2
+    ],
+    "supportedEfficient": 6
+  },
+  "bidirectional": {
+    "minimum": 3,
+    "routes": 384,
+    "orders": 6,
+    "measured": [
+      {
+        "legs": [
+          {
+            "paint": 0,
+            "share": 0.5318565282808598
+          },
+          {
+            "paint": 1,
+            "share": 0.3389014859878366
+          },
+          {
+            "paint": 2,
+            "share": 0.4813685119745585
+          }
+        ],
+        "error": 4.0951161889879866e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.14442329853773117,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": true,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 0,
+            "share": 0.5318565282808598
+          },
+          {
+            "paint": 2,
+            "share": 0.5840185158914838
+          },
+          {
+            "paint": 1,
+            "share": 0.175764981971905
+          }
+        ],
+        "error": 4.0951161794156613e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.06929463148117065,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": false,
+          "drop": true,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 1,
+            "share": 0.522681189217673
+          },
+          {
+            "paint": 0,
+            "share": 0.35160956051414466
+          },
+          {
+            "paint": 2,
+            "share": 0.4813685119745585
+          }
+        ],
+        "error": 4.0951161889879866e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.14442329853773117,
+        "setupCoverage": 0.5555555555555556,
+        "traits": {
+          "rise": true,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 1,
+            "share": 0.522681189217673
+          },
+          {
+            "paint": 2,
+            "share": 0.588726130309687
+          },
+          {
+            "paint": 0,
+            "share": 0.18235578957342236
+          }
+        ],
+        "error": 4.0951161794156613e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.11051513999700546,
+        "setupCoverage": 0.4444444444444444,
+        "traits": {
+          "rise": false,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 2,
+            "share": 0.7499362662559678
+          },
+          {
+            "paint": 0,
+            "share": 0.22124246796707508
+          },
+          {
+            "paint": 1,
+            "share": 0.175764981971905
+          }
+        ],
+        "error": 4.0951161794156613e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.06929463148117065,
+        "setupCoverage": 0.3333333333333333,
+        "traits": {
+          "rise": false,
+          "drop": true,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": false,
+          "interior-assembly": true
+        }
+      },
+      {
+        "legs": [
+          {
+            "paint": 2,
+            "share": 0.7499362662559678
+          },
+          {
+            "paint": 1,
+            "share": 0.21496511530388712
+          },
+          {
+            "paint": 0,
+            "share": 0.18235578957342238
+          }
+        ],
+        "error": 4.0951161889879866e-8,
+        "meaningful": true,
+        "supported": true,
+        "finishWidth": 0.11051513999700546,
+        "setupCoverage": 0.3333333333333333,
+        "traits": {
+          "rise": false,
+          "drop": false,
+          "chromatic-ride": false,
+          "setup-glide": false,
+          "coupled-balance": true,
+          "interior-assembly": true
+        }
+      }
+    ],
+    "firstPaints": [
+      0,
+      1,
+      2
+    ],
+    "supportedEfficient": 6
+  },
+  "check": {
+    "bestByDepth": [
+      2.6235364112450443,
+      1.6458965838914144
+    ],
+    "counterexamples": [],
+    "evaluations": 50116
+  },
+  "omissions": [
+    {
+      "paint": "Chartreuse",
+      "bestWithoutT": 2.6235364112449244
+    },
+    {
+      "paint": "Permanent Rose",
+      "bestWithoutT": 1.645896583891352
+    },
+    {
+      "paint": "Flake White Replacement",
+      "bestWithoutT": 2.8014357289948197
+    },
+    {
+      "paint": "Ivory Black",
+      "bestWithoutT": 0.0000012314175664853492
+    }
+  ],
+  "freeBases": [
+    {
+      "paint": "Chartreuse",
+      "startDistanceT": 4.718192059843858,
+      "minimum": 2,
+      "bestByDepth": [
+        2.8014357289934635,
+        0.2579178793547545
+      ],
+      "witness": {
+        "paints": [
+          1,
+          2
+        ],
+        "weights": [
+          0.20391617973057474,
+          0.19640448507503006,
+          0.5996793351943953
+        ],
+        "error": 0.007582785653029782,
+        "evaluations": 265,
+        "source": "subset-simplex-1"
+      }
+    },
+    {
+      "paint": "Permanent Rose",
+      "startDistanceT": 12.813325462945912,
+      "minimum": 2,
+      "bestByDepth": [
+        2.8014357289934044,
+        0.2579178793555653
+      ],
+      "witness": {
+        "paints": [
+          0,
+          2
+        ],
+        "weights": [
+          0.19640451626338623,
+          0.20391622646279778,
+          0.5996792572738162
+        ],
+        "error": 0.007582785653053621,
+        "evaluations": 229,
+        "source": "subset-simplex-1"
+      }
+    },
+    {
+      "paint": "Flake White Replacement",
+      "startDistanceT": 5.186602773085226,
+      "minimum": 2,
+      "bestByDepth": [
+        2.6661027908230777,
+        0.2579178793548579
+      ],
+      "witness": {
+        "paints": [
+          0,
+          1
+        ],
+        "weights": [
+          0.5996792901575717,
+          0.20391622620245548,
+          0.1964044836399728
+        ],
+        "error": 0.007582785653032822,
+        "evaluations": 235,
+        "source": "subset-simplex-1"
+      }
+    },
+    {
+      "paint": "Ivory Black",
+      "startDistanceT": 21.853525603876342,
+      "minimum": null,
+      "bestByDepth": [
+        2.666102790823112,
+        1.6482039738228524
+      ],
+      "witness": null
+    }
+  ]
+}
