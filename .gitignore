@@ -71,3 +71,8 @@ docs/long-leg-limits-1/proposals-6.json
 docs/long-leg-limits-2/proposals-4.json
 docs/long-leg-limits-2/proposals-5.json
 docs/long-leg-limits-2/proposals-6.json
+# Broad paired-search caches; every shard has a verified portable archive.
+/docs/branching-region-comparison-1/proposals-*.json
+/docs/branching-region-comparison-2/proposals-*.json
+!/docs/branching-region-comparison-1/proposals-*.json.archive.json
+!/docs/branching-region-comparison-2/proposals-*.json.archive.json
