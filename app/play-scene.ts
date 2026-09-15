@@ -60,7 +60,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     shader.fragmentShader='uniform float uBrightness; varying vec3 vRimPosition;\n'+shader.fragmentShader;
     shader.fragmentShader=shader.fragmentShader.replace('#include <color_fragment>',`#include <color_fragment>
       vec3 prism=.58+.13*cos(vec3(0.0,2.1,4.2)+vRimPosition.y*5.0+vRimPosition.x*4.0);
-      diffuseColor.rgb=mix(prism,prism*.28,uBrightness);`);
+      diffuseColor.rgb=prism*(1.0-.15*uBrightness);`);
   };
   blob.add(darkOutline);
   // Soft geometric shells, not a bloom/post-processing pass.
@@ -75,6 +75,10 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   scene.add(chargeRing);
   const satellite = new THREE.Mesh(new THREE.SphereGeometry(.13, 16, 12), new THREE.MeshBasicMaterial({ color: '#ffffff' }));
   satellite.visible = false; scene.add(satellite);
+  const previewGeometry=new THREE.BufferGeometry();
+  const previewMaterial=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.2,depthWrite:false});
+  const preview=new THREE.Line(previewGeometry,previewMaterial);
+  preview.visible=false;scene.add(preview);
 
   // One instanced draw: crisp matte cells throughout the color volume. No
   // ring scaffolding, point-sprite blur, lighting glare, or empty neutral grid.
@@ -365,7 +369,9 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       targetRecoil.copy(f.recoil[index-1]).lerp(f.recoil[index],fraction);
       target.position.copy(targetAnchor).add(targetRecoil);
       const old = blob.position.clone(); blob.position.copy(p);
-      captureAmount=f.qualifies ? easeQuint((progress-.78)/.22) : 0;
+      // Geometric overlap prevention, independent of the flight's duration.
+      const approach=1.25+Math.min(.8,Math.sqrt(f.length)*.1);
+      captureAmount=f.qualifies ? Math.max(captureAmount,easeQuint(1-p.distanceTo(targetAnchor)/approach)) : 0;
       if(!reduced && time-lastWake>.42) {
         wakeSamples[wakeCursor].set(p.x,p.y,p.z,time); wakeCursor=(wakeCursor+1)%wakeSamples.length; lastWake=time;
       }
@@ -421,7 +427,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     const facing = charge?.tangent ?? (flight || won ? travelDirection : idleFacing);
     if (facing.lengthSq() > .001) body.quaternion.slerp(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), facing), 1 - Math.exp(-dt * 7));
     outline.quaternion.copy(body.quaternion); outline.scale.copy(body.scale).multiplyScalar(1.13);
-    darkOutline.quaternion.copy(body.quaternion); darkOutline.scale.copy(body.scale).multiplyScalar(1.22-.065*rimBrightness.value);
+    darkOutline.quaternion.copy(body.quaternion); darkOutline.scale.copy(body.scale).multiplyScalar(1.2);
     halos.forEach(mesh=>{mesh.quaternion.copy(body.quaternion);mesh.scale.copy(body.scale).multiplyScalar(mesh.userData.factor);});
     blobMaterial.color.copy(mass ? color(movingPoint.rgb) : new THREE.Color('#d8d5c7'));
     tendrils.forEach(mesh => {
@@ -544,7 +550,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
     renderer.setClearColor(background); (scene.fog as THREE.FogExp2).color.copy(background);
     (scene.fog as THREE.FogExp2).density=inPaletteReveal?THREE.MathUtils.lerp(.001,.005,easeQuint((paletteProgress-.4)/.6)):.005;
     rimBrightness.value+=(brightness-rimBrightness.value)*(1-Math.exp(-dt*2));
-    outline.material.color.set('#fff5e3').lerp(new THREE.Color('#34434a'),rimBrightness.value);
+    outline.material.color.set('#fff5e3').multiplyScalar(1-.15*rimBrightness.value);
     halos.forEach(mesh=>mesh.material.color.copy(outline.material.color));
     const desiredFov = reduced ? 58 : 58 + Math.min(3, speed * .06);
     camera.fov += (desiredFov - camera.fov) * (1 - Math.exp(-dt * 5));
@@ -565,7 +571,32 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
   return {
     reset: setHole,
     charge(rgb: RGB, ratio: number, power: number, strength: number, tangent?: ColorPoint) { charge = { rgb, ratio, power, strength, tangent: tangent ? v3(tangent).sub(blob.position).normalize() : undefined }; },
-    cancelCharge() { charge = null; },
+    previewCurve(path:ColorPoint[]) {
+      const points:THREE.Vector3[]=[],colors:number[]=[];
+      let length=0;
+      for(let i=0;i<path.length;i++){
+        const p=v3(path[i]);
+        if(i)length+=p.distanceTo(v3(path[i-1]));
+        if(length>2.1)break;
+        points.push(p);
+        const tint=color(path[i].rgb).lerp(new THREE.Color().setHSL((i/Math.max(1,path.length-1)+.55)%1,.32,.72),.45);
+        colors.push(tint.r,tint.g,tint.b);
+      }
+      previewGeometry.setAttribute('position',new THREE.Float32BufferAttribute(points.flatMap(p=>p.toArray()),3));
+      previewGeometry.setDrawRange(0,points.length);
+      previewGeometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+      // Fade the far end rather than implying a landing location.
+      const count=points.length;
+      previewMaterial.onBeforeCompile=shader=>{
+        shader.vertexShader='attribute float aFade; varying float vFade;\n'+shader.vertexShader;
+        shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvFade=aFade;');
+        shader.fragmentShader='varying float vFade;\n'+shader.fragmentShader;
+        shader.fragmentShader=shader.fragmentShader.replace('#include <opaque_fragment>','diffuseColor.a*=vFade;\n#include <opaque_fragment>');
+      };
+      previewGeometry.setAttribute('aFade',new THREE.Float32BufferAttribute(Array.from({length:count},(_,i)=>1-i/Math.max(1,count-1)),1));
+      previewGeometry.computeBoundingSphere();preview.visible=count>1;
+    },
+    cancelCharge() { charge = null; preview.visible=false; },
     cancelFlight() {
       if(!flight)return false;
       const aborted=flight;flight=null;mass=aborted.fromMass;charge=null;won=false;captureAmount=0;
@@ -577,7 +608,7 @@ export function createPlayScene(host: HTMLDivElement, hole: Hole, callbacks: Sce
       return true;
     },
     launch(path: ColorPoint[], fromMass: number, toMass: number, done: () => void) {
-      charge = null; releaseTime = time;
+      charge = null; preview.visible=false;captureAmount=0;releaseTime = time;
       if (path.length === 1) path = baseLaunchPath(activeHole.start, path[0]);
       const endpoint=path[path.length-1];
       const qualifies=fromMass>0 && colorDistance(endpoint,activeHole.target)<=activeHole.tolerance;

@@ -1,0 +1,3122 @@
+{
+  "version": "premix-campaign-1",
+  "seed": 190915,
+  "tolerance": 0.0294,
+  "palettes": [],
+  "chapters": [
+    {
+      "name": "UltraOx Dual",
+      "level": 0,
+      "ids": [
+        "premix-campaign-1-0-0",
+        "premix-campaign-1-0-1"
+      ]
+    },
+    {
+      "name": "Zorny",
+      "level": 1,
+      "ids": [
+        "premix-campaign-1-1-0",
+        "premix-campaign-1-1-1"
+      ]
+    },
+    {
+      "name": "Maroon Drift",
+      "level": 25,
+      "ids": [
+        "premix-campaign-1-2-0",
+        "premix-campaign-1-2-1"
+      ]
+    },
+    {
+      "name": "RYB",
+      "level": 2,
+      "ids": [
+        "premix-campaign-1-3-0",
+        "premix-campaign-1-3-1"
+      ]
+    },
+    {
+      "name": "Violet · Chromium",
+      "level": 65,
+      "ids": [
+        "premix-campaign-1-4-0",
+        "premix-campaign-1-4-1"
+      ]
+    },
+    {
+      "name": "CMY",
+      "level": 4,
+      "ids": [
+        "premix-campaign-1-5-0",
+        "premix-campaign-1-5-1"
+      ]
+    },
+    {
+      "name": "Secondaries",
+      "level": 5,
+      "ids": [
+        "premix-campaign-1-6-0",
+        "premix-campaign-1-6-1",
+        "premix-campaign-1-6-2"
+      ]
+    },
+    {
+      "name": "Sienna Field",
+      "level": 29,
+      "ids": [
+        "premix-campaign-1-7-0",
+        "premix-campaign-1-7-1"
+      ]
+    },
+    {
+      "name": "Maroon Arc",
+      "level": 30,
+      "ids": [
+        "premix-campaign-1-8-0",
+        "premix-campaign-1-8-1"
+      ]
+    },
+    {
+      "name": "Chartreuse · Rose · Black",
+      "level": 71,
+      "ids": [
+        "premix-campaign-1-9-0",
+        "premix-campaign-1-9-1"
+      ]
+    },
+    {
+      "name": "Violet Estuary",
+      "level": 20,
+      "ids": [
+        "premix-campaign-1-10-0"
+      ]
+    },
+    {
+      "name": "Teal Ember",
+      "level": 24,
+      "ids": [
+        "premix-campaign-1-11-0",
+        "premix-campaign-1-11-1"
+      ]
+    },
+    {
+      "name": "Magenta Grove",
+      "level": 23,
+      "ids": [
+        "premix-campaign-1-12-0",
+        "premix-campaign-1-12-1"
+      ]
+    },
+    {
+      "name": "Turquoise Rust",
+      "level": 28,
+      "ids": [
+        "premix-campaign-1-13-0"
+      ]
+    },
+    {
+      "name": "Emerald · Yellow · Scarlet",
+      "level": 63,
+      "ids": [
+        "premix-campaign-1-14-0",
+        "premix-campaign-1-14-1"
+      ]
+    },
+    {
+      "name": "French Light",
+      "level": 6,
+      "ids": [
+        "premix-campaign-1-15-0"
+      ]
+    },
+    {
+      "name": "Cobalt Ember",
+      "level": 10,
+      "ids": [
+        "premix-campaign-1-16-0",
+        "premix-campaign-1-16-1"
+      ]
+    }
+  ],
+  "holes": [
+    {
+      "id": "premix-campaign-1-0-0",
+      "level": 0,
+      "stage": 0,
+      "title": "Warm balance",
+      "style": "Warm balance",
+      "initial": [
+        0.13988621921297267,
+        0.7968493940516886,
+        0.06326438673533855
+      ],
+      "targetRGB": [
+        121.1202342593077,
+        93.90247500900094,
+        97.48148420559183
+      ],
+      "paints": [
+        [
+          "transparent-earth-red",
+          [
+            78,
+            38,
+            34
+          ],
+          0.82
+        ],
+        [
+          "ultramarine-blue",
+          [
+            36,
+            40,
+            112
+          ],
+          0.92
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-0-1.json",
+      "sourceId": "praise-0-anchor/d2/52",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            2
+          ],
+          "times": [
+            0.6090930170287626,
+            0.3297447597391362
+          ],
+          "error": 3.110407520001285e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              2
+            ],
+            "times": [
+              0.6090930170287626,
+              0.3297447597391362
+            ],
+            "error": 3.110407520001285e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-0-1",
+      "level": 0,
+      "stage": 1,
+      "title": "Blue finish",
+      "style": "Blue finish",
+      "initial": [
+        0.7724627465193814,
+        0.18006669471957962,
+        0.04747055876103886
+      ],
+      "targetRGB": [
+        98.56886635376291,
+        107.02008057471247,
+        159.1410494511063
+      ],
+      "paints": [
+        [
+          "transparent-earth-red",
+          [
+            78,
+            38,
+            34
+          ],
+          0.82
+        ],
+        [
+          "ultramarine-blue",
+          [
+            36,
+            40,
+            112
+          ],
+          0.92
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-0-4.json",
+      "sourceId": "campaign-draft-1-0-2/d2/3",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2
+          ],
+          "times": [
+            0.699501010316932,
+            0.3658698701594377
+          ],
+          "error": 1.4823319252014615e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              2
+            ],
+            "times": [
+              0.699501010316932,
+              0.3658698701594377
+            ],
+            "error": 1.4823319252014615e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-1-0",
+      "level": 1,
+      "stage": 0,
+      "title": "Setup and value",
+      "style": "Setup and value",
+      "initial": [
+        0.02074069572732439,
+        0.6430655405576904,
+        0.03361551865623125,
+        0.302578245058754
+      ],
+      "targetRGB": [
+        203.27650537167332,
+        158.93146118173746,
+        151.41263831895995
+      ],
+      "paints": [
+        [
+          "yellow-ochre",
+          [
+            163,
+            113,
+            28
+          ],
+          0.62
+        ],
+        [
+          "cadmium-red-light",
+          [
+            230,
+            53,
+            42
+          ],
+          0.86
+        ],
+        [
+          "ivory-black",
+          [
+            24,
+            24,
+            22
+          ],
+          1.08
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-1-3.json",
+      "sourceId": "campaign-draft-1-2-2/d2/58",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            2,
+            3
+          ],
+          "times": [
+            0.49510808958909935,
+            0.4312818234972077
+          ],
+          "error": 0.00023880804467553234,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              2,
+              3
+            ],
+            "times": [
+              0.49510808958909935,
+              0.4312818234972077
+            ],
+            "error": 0.00023880804467553234,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-1-1",
+      "level": 1,
+      "stage": 1,
+      "title": "Warm nuance puzzle",
+      "style": "Warm nuance puzzle",
+      "initial": [
+        0.01421975448629274,
+        0.00511926952894971,
+        0.7411471168827054,
+        0.23951385910205214
+      ],
+      "targetRGB": [
+        169.8973949661657,
+        136.8055107307295,
+        101.96391928926592
+      ],
+      "paints": [
+        [
+          "yellow-ochre",
+          [
+            163,
+            113,
+            28
+          ],
+          0.62
+        ],
+        [
+          "cadmium-red-light",
+          [
+            230,
+            53,
+            42
+          ],
+          0.86
+        ],
+        [
+          "ivory-black",
+          [
+            24,
+            24,
+            22
+          ],
+          1.08
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-1-2.json",
+      "sourceId": "praise-1-anchor/d3/79",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            1,
+            3
+          ],
+          "times": [
+            0.5180605593370751,
+            0.3727751891020441,
+            0.33023607920031095
+          ],
+          "error": 1.8304009367878045e-8,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              1,
+              3
+            ],
+            "times": [
+              0.5180605593370751,
+              0.3727751891020441,
+              0.33023607920031095
+            ],
+            "error": 1.8304009367878045e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-2-0",
+      "level": 25,
+      "stage": 0,
+      "title": "Warm adjustment",
+      "style": "Warm adjustment",
+      "initial": [
+        0.2741343132373893,
+        0.22959208226234512,
+        0.02992175240895025,
+        0.4663518520913154
+      ],
+      "targetRGB": [
+        102.19232985463758,
+        95.16100823757816,
+        64.25203544667869
+      ],
+      "paints": [
+        [
+          "perylene-maroon",
+          [
+            85,
+            30,
+            52
+          ],
+          1.12
+        ],
+        [
+          "ultramarine-blue",
+          [
+            36,
+            40,
+            112
+          ],
+          0.92
+        ],
+        [
+          "raw-sienna",
+          [
+            157,
+            115,
+            56
+          ],
+          0.58
+        ],
+        [
+          "winsor-yellow-deep",
+          [
+            248,
+            193,
+            105
+          ],
+          0.94
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-2-0.json",
+      "sourceId": "praise-2-sibling--1/d2/59",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            1,
+            2
+          ],
+          "times": [
+            0.9717438542739028,
+            0.9717438542739028,
+            0.7264455301749848
+          ],
+          "error": 0.0014266821024691817,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              1,
+              1,
+              2
+            ],
+            "times": [
+              0.9717438542739028,
+              0.9717438542739028,
+              0.7264455301749848
+            ],
+            "error": 0.0014266821024691817,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-2-1",
+      "level": 25,
+      "stage": 1,
+      "title": "Cooler counterpart",
+      "style": "Cooler counterpart",
+      "initial": [
+        0.3137588873082632,
+        0.47957715063106393,
+        0.1277470993980801,
+        0.07891686266259268
+      ],
+      "targetRGB": [
+        47.53136912206797,
+        59.79333412795621,
+        114.4538883308851
+      ],
+      "paints": [
+        [
+          "perylene-maroon",
+          [
+            85,
+            30,
+            52
+          ],
+          1.12
+        ],
+        [
+          "ultramarine-blue",
+          [
+            36,
+            40,
+            112
+          ],
+          0.92
+        ],
+        [
+          "raw-sienna",
+          [
+            157,
+            115,
+            56
+          ],
+          0.58
+        ],
+        [
+          "winsor-yellow-deep",
+          [
+            248,
+            193,
+            105
+          ],
+          0.94
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-2-4.json",
+      "sourceId": "praise-2-cool/d2/48",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            3
+          ],
+          "times": [
+            1.2937956408836677,
+            0.33048115343690787
+          ],
+          "error": 0.00026272896885826016,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              3
+            ],
+            "times": [
+              1.2937956408836677,
+              0.33048115343690787
+            ],
+            "error": 0.00026272896885826016,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-3-0",
+      "level": 2,
+      "stage": 0,
+      "title": "Cool-color balance",
+      "style": "Cool-color balance",
+      "initial": [
+        0.45146065254438705,
+        0.08074591461608728,
+        0.40725471619464115,
+        0.06053871664488453
+      ],
+      "targetRGB": [
+        63.49517577518645,
+        127.80466641523785,
+        152.94927025467788
+      ],
+      "paints": [
+        [
+          "play-flake-white",
+          [
+            246,
+            243,
+            233
+          ],
+          0.65
+        ],
+        [
+          "cadmium-lemon",
+          [
+            243,
+            236,
+            15
+          ],
+          0.76
+        ],
+        [
+          "cadmium-red-medium",
+          [
+            190,
+            26,
+            52
+          ],
+          0.88
+        ],
+        [
+          "phthalo-blue-green",
+          [
+            16,
+            53,
+            74
+          ],
+          1.4
+        ]
+      ],
+      "collection": "public",
+      "par": 5,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-3-3.json",
+      "sourceId": "praise-3-cool/d2/48",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            0,
+            3
+          ],
+          "times": [
+            0.9330164575168144,
+            0.9330164575168144,
+            0.9330164575168144,
+            0.5440594530711338
+          ],
+          "error": 0.0016177603063511933,
+          "minimum": 4,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              0,
+              3
+            ],
+            "times": [
+              0.9330164575168144,
+              0.9330164575168144,
+              0.9330164575168144,
+              0.5440594530711338
+            ],
+            "error": 0.0016177603063511933,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-3-1",
+      "level": 2,
+      "stage": 1,
+      "title": "Dark mixing puzzle",
+      "style": "Dark mixing puzzle",
+      "initial": [
+        0.5845258193498387,
+        0.05997600061398659,
+        0.2806059709803329,
+        0.0748922090558419
+      ],
+      "targetRGB": [
+        106.6053363103799,
+        85.56743452128495,
+        66.27527994942992
+      ],
+      "paints": [
+        [
+          "play-flake-white",
+          [
+            246,
+            243,
+            233
+          ],
+          0.65
+        ],
+        [
+          "cadmium-lemon",
+          [
+            243,
+            236,
+            15
+          ],
+          0.76
+        ],
+        [
+          "cadmium-red-medium",
+          [
+            190,
+            26,
+            52
+          ],
+          0.88
+        ],
+        [
+          "phthalo-blue-green",
+          [
+            16,
+            53,
+            74
+          ],
+          1.4
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-3-2.json",
+      "sourceId": "campaign-draft-1-3-2/d3/44",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2,
+            3
+          ],
+          "times": [
+            0.5231192431053302,
+            0.41995899665051306,
+            0.36875545880008287
+          ],
+          "error": 1.339776140482677e-7,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              1,
+              2,
+              3
+            ],
+            "times": [
+              0.5231192431053302,
+              0.41995899665051306,
+              0.36875545880008287
+            ],
+            "error": 1.339776140482677e-7,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-4-0",
+      "level": 65,
+      "stage": 0,
+      "title": "Pale-violet balance",
+      "style": "Pale-violet balance",
+      "initial": [
+        0.3266987771683796,
+        0.17892656662838075,
+        0.10789572331752334,
+        0.3864789328857163
+      ],
+      "targetRGB": [
+        222.8022266478965,
+        193.8509996006439,
+        220.72645538127946
+      ],
+      "paints": [
+        [
+          "radiant-violet",
+          [
+            182,
+            132,
+            183
+          ],
+          0.62
+        ],
+        [
+          "cadmium-yellow-medium",
+          [
+            251,
+            194,
+            17
+          ],
+          0.8
+        ],
+        [
+          "chromium-oxide-green",
+          [
+            65,
+            106,
+            80
+          ],
+          0.58
+        ],
+        [
+          "warm-white",
+          [
+            249,
+            248,
+            242
+          ],
+          0.8
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/praise-palette-inspection-1/premix-audit-0-3.json",
+      "sourceId": "praise-0-spread-11/d2/13",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            3
+          ],
+          "times": [
+            0.743909387041846,
+            0.743909387041846,
+            0.5493130323999521
+          ],
+          "error": 6.050742095533068e-7,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              3
+            ],
+            "times": [
+              0.743909387041846,
+              0.743909387041846,
+              0.5493130323999521
+            ],
+            "error": 6.050742095533068e-7,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-4-1",
+      "level": 65,
+      "stage": 1,
+      "title": "Yellow-green assembly",
+      "style": "Yellow-green assembly",
+      "initial": [
+        0.7244456294263635,
+        0.031265987258144605,
+        0.09907941539693385,
+        0.14520896791855809
+      ],
+      "targetRGB": [
+        171.18464825491856,
+        199.82835382107638,
+        130.01732869845205
+      ],
+      "paints": [
+        [
+          "radiant-violet",
+          [
+            182,
+            132,
+            183
+          ],
+          0.62
+        ],
+        [
+          "cadmium-yellow-medium",
+          [
+            251,
+            194,
+            17
+          ],
+          0.8
+        ],
+        [
+          "chromium-oxide-green",
+          [
+            65,
+            106,
+            80
+          ],
+          0.58
+        ],
+        [
+          "warm-white",
+          [
+            249,
+            248,
+            242
+          ],
+          0.8
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/praise-palette-inspection-1/premix-audit-0-2.json",
+      "sourceId": "praise-0-anchor/d3/35",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2,
+            3
+          ],
+          "times": [
+            0.5225261609318953,
+            0.5773740620785764,
+            0.45807408309408637
+          ],
+          "error": 4.115323672798191e-7,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              1,
+              2,
+              3
+            ],
+            "times": [
+              0.5225261609318953,
+              0.5773740620785764,
+              0.45807408309408637
+            ],
+            "error": 4.115323672798191e-7,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-5-0",
+      "level": 4,
+      "stage": 0,
+      "title": "Olive counterbalance",
+      "style": "Olive counterbalance",
+      "initial": [
+        0.11994759670309096,
+        0.5304072667739378,
+        0.34964513652297136
+      ],
+      "targetRGB": [
+        100.11148643141613,
+        133.89865246864085,
+        66.80376150959343
+      ],
+      "paints": [
+        [
+          "phthalo-blue-green",
+          [
+            16,
+            53,
+            74
+          ],
+          1.4
+        ],
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "hansa-yellow-light",
+          [
+            253,
+            232,
+            21
+          ],
+          0.92
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-5-4.json",
+      "sourceId": "praise-5-middle/d2/36",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            2
+          ],
+          "times": [
+            0.49684779404951895,
+            0.4277852864249837
+          ],
+          "error": 1.5133520167775506e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              2
+            ],
+            "times": [
+              0.49684779404951895,
+              0.4277852864249837
+            ],
+            "error": 1.5133520167775506e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-5-1",
+      "level": 4,
+      "stage": 1,
+      "title": "Golden-orange ride",
+      "style": "Golden-orange ride",
+      "initial": [
+        0.5792030870403252,
+        0.2739504315081091,
+        0.14684648145156576
+      ],
+      "targetRGB": [
+        215.15672030060966,
+        143.97568281564347,
+        60.7505608858846
+      ],
+      "paints": [
+        [
+          "phthalo-blue-green",
+          [
+            16,
+            53,
+            74
+          ],
+          1.4
+        ],
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "hansa-yellow-light",
+          [
+            253,
+            232,
+            21
+          ],
+          0.92
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-5-2.json",
+      "sourceId": "praise-5-sibling-1/d2/44",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2
+          ],
+          "times": [
+            0.913651221405836,
+            0.6437470934741772
+          ],
+          "error": 1.7931920151240025e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              2
+            ],
+            "times": [
+              0.913651221405836,
+              0.6437470934741772
+            ],
+            "error": 1.7931920151240025e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-6-0",
+      "level": 5,
+      "stage": 0,
+      "title": "Teal correction",
+      "style": "Teal correction",
+      "initial": [
+        0.24029860765098093,
+        0.4659035714588497,
+        0.11019760223449446,
+        0.18360021865567497
+      ],
+      "targetRGB": [
+        91.43760019217704,
+        163.06991100469003,
+        149.3518142871298
+      ],
+      "paints": [
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "dioxazine-purple",
+          [
+            71,
+            28,
+            100
+          ],
+          1.25
+        ],
+        [
+          "phthalo-green-yellow",
+          [
+            27,
+            81,
+            69
+          ],
+          1.34
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-6-1.json",
+      "sourceId": "praise-6-cool/d2/34",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            2,
+            2,
+            3
+          ],
+          "times": [
+            0.7794121866780688,
+            0.7794121866780688,
+            0.5199840655301551
+          ],
+          "error": 0.00012591022767253763,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              2,
+              2,
+              3
+            ],
+            "times": [
+              0.7794121866780688,
+              0.7794121866780688,
+              0.5199840655301551
+            ],
+            "error": 0.00012591022767253763,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-6-1",
+      "level": 5,
+      "stage": 1,
+      "title": "Warm counterpoint",
+      "style": "Warm counterpoint",
+      "initial": [
+        0.717075532711165,
+        0.051082942998851646,
+        0.16180769705995124,
+        0.07003382723003215
+      ],
+      "targetRGB": [
+        206.6638172739498,
+        167.36339678775084,
+        158.2251058127277
+      ],
+      "paints": [
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "dioxazine-purple",
+          [
+            71,
+            28,
+            100
+          ],
+          1.25
+        ],
+        [
+          "phthalo-green-yellow",
+          [
+            27,
+            81,
+            69
+          ],
+          1.34
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-6-0.json",
+      "sourceId": "praise-6-sibling-1/d2/7",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            3
+          ],
+          "times": [
+            0.5041748895541921,
+            0.4875499349393455
+          ],
+          "error": 0.007953244487910028,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              3
+            ],
+            "times": [
+              0.5041748895541921,
+              0.4875499349393455
+            ],
+            "error": 0.007953244487910028,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-6-2",
+      "level": 5,
+      "stage": 2,
+      "title": "Cool-gray assembly",
+      "style": "Cool-gray assembly",
+      "initial": [
+        0.6389368548640804,
+        0.048656460306397906,
+        0.010668898879166182,
+        0.3017377859503556
+      ],
+      "targetRGB": [
+        147.4157154503035,
+        161.13513741311846,
+        178.248952449615
+      ],
+      "paints": [
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "dioxazine-purple",
+          [
+            71,
+            28,
+            100
+          ],
+          1.25
+        ],
+        [
+          "phthalo-green-yellow",
+          [
+            27,
+            81,
+            69
+          ],
+          1.34
+        ],
+        [
+          "titanium-white",
+          [
+            249,
+            248,
+            242
+          ],
+          1.2
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-6-2.json",
+      "sourceId": "praise-6-sibling--1/d3/5",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2,
+            3
+          ],
+          "times": [
+            0.6420204534628496,
+            0.448473739448933,
+            0.45655875711642
+          ],
+          "error": 3.61927783025492e-8,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              1,
+              2,
+              3
+            ],
+            "times": [
+              0.6420204534628496,
+              0.448473739448933,
+              0.45655875711642
+            ],
+            "error": 3.61927783025492e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-7-0",
+      "level": 29,
+      "stage": 0,
+      "title": "Spring-green balance",
+      "style": "Spring-green balance",
+      "initial": [
+        0.38237361021541955,
+        0.5597661453079,
+        0.05786024447668042
+      ],
+      "targetRGB": [
+        125.55514854121033,
+        187.28123310289214,
+        120.68645822436906
+      ],
+      "paints": [
+        [
+          "burnt-sienna",
+          [
+            105,
+            60,
+            52
+          ],
+          0.68
+        ],
+        [
+          "nickel-titanate-yellow",
+          [
+            217,
+            204,
+            118
+          ],
+          0.58
+        ],
+        [
+          "cobalt-green",
+          [
+            48,
+            137,
+            116
+          ],
+          0.58
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-7-1.json",
+      "sourceId": "praise-7-chroma/d2/65",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            1,
+            2
+          ],
+          "times": [
+            0.8791376676847341,
+            0.8791376676847341,
+            0.49630478860979543
+          ],
+          "error": 0.00005674297449387045,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              1,
+              1,
+              2
+            ],
+            "times": [
+              0.8791376676847341,
+              0.8791376676847341,
+              0.49630478860979543
+            ],
+            "error": 0.00005674297449387045,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-7-1",
+      "level": 29,
+      "stage": 1,
+      "title": "Rust return",
+      "style": "Rust return",
+      "initial": [
+        0.3132882795258492,
+        0.1385820879807119,
+        0.5481296324934389
+      ],
+      "targetRGB": [
+        134.25826174798104,
+        85.66364471395187,
+        71.15823487547217
+      ],
+      "paints": [
+        [
+          "burnt-sienna",
+          [
+            105,
+            60,
+            52
+          ],
+          0.68
+        ],
+        [
+          "nickel-titanate-yellow",
+          [
+            217,
+            204,
+            118
+          ],
+          0.58
+        ],
+        [
+          "cobalt-green",
+          [
+            48,
+            137,
+            116
+          ],
+          0.58
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-7-2.json",
+      "sourceId": "praise-7-spread-11/d2/6",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            1
+          ],
+          "times": [
+            0.7559304660208169,
+            0.7559304660208169,
+            0.4180020132575327
+          ],
+          "error": 9.745219988859822e-7,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              1
+            ],
+            "times": [
+              0.7559304660208169,
+              0.7559304660208169,
+              0.4180020132575327
+            ],
+            "error": 9.745219988859822e-7,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-8-0",
+      "level": 30,
+      "stage": 0,
+      "title": "Charcoal descent",
+      "style": "Charcoal descent",
+      "initial": [
+        0.09807317257183208,
+        0.660245306840664,
+        0.17312931082696414,
+        0.06855220976053979
+      ],
+      "targetRGB": [
+        73.73515201356567,
+        66.78035588343361,
+        63.722451769925776
+      ],
+      "paints": [
+        [
+          "perylene-maroon",
+          [
+            85,
+            30,
+            52
+          ],
+          1.12
+        ],
+        [
+          "hansa-yellow-light",
+          [
+            253,
+            232,
+            21
+          ],
+          0.92
+        ],
+        [
+          "raw-sienna",
+          [
+            157,
+            115,
+            56
+          ],
+          0.58
+        ],
+        [
+          "cobalt-blue",
+          [
+            22,
+            73,
+            127
+          ],
+          0.65
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-8-4.json",
+      "sourceId": "praise-8-neutral/d2/0",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            3
+          ],
+          "times": [
+            0.6829009156683588,
+            0.4932897836259701
+          ],
+          "error": 1.522586752112331e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              3
+            ],
+            "times": [
+              0.6829009156683588,
+              0.4932897836259701
+            ],
+            "error": 1.522586752112331e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-8-1",
+      "level": 30,
+      "stage": 1,
+      "title": "Vivid-green ride",
+      "style": "Vivid-green ride",
+      "initial": [
+        0.3139868430710046,
+        0.10279945435656151,
+        0.383812546371705,
+        0.19940115620072899
+      ],
+      "targetRGB": [
+        66.24670613452065,
+        150.30431077085606,
+        70.78179310838688
+      ],
+      "paints": [
+        [
+          "perylene-maroon",
+          [
+            85,
+            30,
+            52
+          ],
+          1.12
+        ],
+        [
+          "hansa-yellow-light",
+          [
+            253,
+            232,
+            21
+          ],
+          0.92
+        ],
+        [
+          "raw-sienna",
+          [
+            157,
+            115,
+            56
+          ],
+          0.58
+        ],
+        [
+          "cobalt-blue",
+          [
+            22,
+            73,
+            127
+          ],
+          0.65
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-8-1.json",
+      "sourceId": "praise-8-colorful middle/d2/44",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            3
+          ],
+          "times": [
+            1.4116771803025951,
+            0.7017988764218344
+          ],
+          "error": 0.0002644050531175717,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              3
+            ],
+            "times": [
+              1.4116771803025951,
+              0.7017988764218344
+            ],
+            "error": 0.0002644050531175717,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-9-0",
+      "level": 71,
+      "stage": 0,
+      "title": "Ochre correction",
+      "style": "Ochre correction",
+      "initial": [
+        0.06801688781798837,
+        0.47094153903821634,
+        0.41413217870438335,
+        0.046909394439412014
+      ],
+      "targetRGB": [
+        141.36243828677775,
+        118.80789611714808,
+        78.0388839777174
+      ],
+      "paints": [
+        [
+          "play-chartreuse",
+          [
+            229,
+            230,
+            29
+          ],
+          0.96
+        ],
+        [
+          "permanent-rose",
+          [
+            169,
+            50,
+            112
+          ],
+          1.05
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "ivory-black",
+          [
+            24,
+            24,
+            22
+          ],
+          1.08
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/praise-palette-inspection-1/premix-audit-2-1.json",
+      "sourceId": "praise-2-middle/d2/69",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            3
+          ],
+          "times": [
+            0.4291795035865906,
+            0.447373540164007
+          ],
+          "error": 0.004317658566894664,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              3
+            ],
+            "times": [
+              0.4291795035865906,
+              0.447373540164007
+            ],
+            "error": 0.004317658566894664,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-9-1",
+      "level": 71,
+      "stage": 1,
+      "title": "Peach assembly",
+      "style": "Peach assembly",
+      "initial": [
+        0.09363800732245818,
+        0.1751896883853838,
+        0.2947917212593264,
+        0.4363805830328317
+      ],
+      "targetRGB": [
+        236.9822198288589,
+        175.93558544105147,
+        147.9955080663858
+      ],
+      "paints": [
+        [
+          "play-chartreuse",
+          [
+            229,
+            230,
+            29
+          ],
+          0.96
+        ],
+        [
+          "permanent-rose",
+          [
+            169,
+            50,
+            112
+          ],
+          1.05
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "ivory-black",
+          [
+            24,
+            24,
+            22
+          ],
+          1.08
+        ]
+      ],
+      "collection": "public",
+      "par": 5,
+      "source": "docs/praise-palette-inspection-1/premix-audit-2-2.json",
+      "sourceId": "praise-2-sibling--1/d3/38",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            1,
+            2
+          ],
+          "times": [
+            0.7594498230338073,
+            0.7594498230338073,
+            0.643397719205744,
+            0.6184152390282234
+          ],
+          "error": 0.0000698934960579756,
+          "minimum": 4,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              1,
+              2
+            ],
+            "times": [
+              0.7594498230338073,
+              0.7594498230338073,
+              0.643397719205744,
+              0.6184152390282234
+            ],
+            "error": 0.0000698934960579756,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-10-0",
+      "level": 20,
+      "stage": 0,
+      "title": "Green crossing",
+      "style": "Green crossing",
+      "initial": [
+        0.25302040392102304,
+        0.3808376876705107,
+        0.29304239850201524,
+        0.0730995099064509
+      ],
+      "targetRGB": [
+        73.54019256957326,
+        165.9708244433492,
+        69.3283091552638
+      ],
+      "paints": [
+        [
+          "cadmium-lemon",
+          [
+            243,
+            236,
+            15
+          ],
+          0.76
+        ],
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "dioxazine-purple",
+          [
+            71,
+            28,
+            100
+          ],
+          1.25
+        ],
+        [
+          "cerulean-blue",
+          [
+            29,
+            102,
+            151
+          ],
+          0.55
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/praise-palette-inspection-1/premix-audit-4-1.json",
+      "sourceId": "praise-4-colorful middle/d2/74",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            3
+          ],
+          "times": [
+            0.8085529846722008,
+            0.6396204712497628
+          ],
+          "error": 0.000085992562111036,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              3
+            ],
+            "times": [
+              0.8085529846722008,
+              0.6396204712497628
+            ],
+            "error": 0.000085992562111036,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-11-0",
+      "level": 24,
+      "stage": 0,
+      "title": "Violet correction",
+      "style": "Violet correction",
+      "initial": [
+        0.09645198552471589,
+        0.568550223232678,
+        0.12357493892712347,
+        0.2114228523154826
+      ],
+      "targetRGB": [
+        108.78119791171808,
+        101.09171961345426,
+        167.1636056907369
+      ],
+      "paints": [
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "cobalt-teal",
+          [
+            27,
+            136,
+            145
+          ],
+          0.62
+        ],
+        [
+          "permanent-orange",
+          [
+            246,
+            105,
+            48
+          ],
+          1
+        ],
+        [
+          "kings-blue",
+          [
+            112,
+            151,
+            204
+          ],
+          0.58
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-9-2.json",
+      "sourceId": "praise-9-spread-12/d2/39",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            3
+          ],
+          "times": [
+            0.48105895321432957,
+            0.6025997074841034
+          ],
+          "error": 0.007581559387089089,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              3
+            ],
+            "times": [
+              0.48105895321432957,
+              0.6025997074841034
+            ],
+            "error": 0.007581559387089089,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-11-1",
+      "level": 24,
+      "stage": 1,
+      "title": "Inward assembly",
+      "style": "Inward assembly",
+      "initial": [
+        0.02975556877508647,
+        0.08807350168490892,
+        0.03192092263164845,
+        0.8502500069083562
+      ],
+      "targetRGB": [
+        108.40168741034218,
+        90.27433537228045,
+        94.58929417813917
+      ],
+      "paints": [
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "cobalt-teal",
+          [
+            27,
+            136,
+            145
+          ],
+          0.62
+        ],
+        [
+          "permanent-orange",
+          [
+            246,
+            105,
+            48
+          ],
+          1
+        ],
+        [
+          "kings-blue",
+          [
+            112,
+            151,
+            204
+          ],
+          0.58
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-9-1.json",
+      "sourceId": "praise-9-anchor/d3/23",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            1,
+            2
+          ],
+          "times": [
+            0.4386244810742377,
+            0.37565344412137713,
+            0.3433828395148526
+          ],
+          "error": 2.5314323324152006e-8,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              1,
+              2
+            ],
+            "times": [
+              0.4386244810742377,
+              0.37565344412137713,
+              0.3433828395148526
+            ],
+            "error": 2.5314323324152006e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-12-0",
+      "level": 23,
+      "stage": 0,
+      "title": "Magenta finish",
+      "style": "Magenta finish",
+      "initial": [
+        0.06173767527116157,
+        0.18997282315451067,
+        0.36850217068884616,
+        0.3797873308854816
+      ],
+      "targetRGB": [
+        182.9352952889552,
+        68.16800161308055,
+        140.38784542152192
+      ],
+      "paints": [
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "cadmium-yellow-deep",
+          [
+            248,
+            193,
+            105
+          ],
+          0.82
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "phthalo-green",
+          [
+            34,
+            53,
+            52
+          ],
+          1.38
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/praise-palette-inspection-1/premix-audit-3-1.json",
+      "sourceId": "praise-3-chroma/d2/40",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            2
+          ],
+          "times": [
+            0.7863216660114005,
+            0.7863216660114005,
+            0.455888829393445
+          ],
+          "error": 0.00003144548515717189,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              2
+            ],
+            "times": [
+              0.7863216660114005,
+              0.7863216660114005,
+              0.455888829393445
+            ],
+            "error": 0.00003144548515717189,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-12-1",
+      "level": 23,
+      "stage": 1,
+      "title": "Mauve assembly",
+      "style": "Mauve assembly",
+      "initial": [
+        0.2583294011646518,
+        0.41088700481129414,
+        0.24289499451033889,
+        0.0878885995137152
+      ],
+      "targetRGB": [
+        169.78478041935506,
+        134.63498025963,
+        171.76222852757002
+      ],
+      "paints": [
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "cadmium-yellow-deep",
+          [
+            248,
+            193,
+            105
+          ],
+          0.82
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "phthalo-green",
+          [
+            34,
+            53,
+            52
+          ],
+          1.38
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/praise-palette-inspection-1/premix-audit-3-2.json",
+      "sourceId": "praise-3-sibling--1/d3/19",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            2,
+            3
+          ],
+          "times": [
+            0.5750827184611638,
+            0.5671687715259927,
+            0.36096129797051146
+          ],
+          "error": 0.00023635856274306725,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              2,
+              3
+            ],
+            "times": [
+              0.5750827184611638,
+              0.5671687715259927,
+              0.36096129797051146
+            ],
+            "error": 0.00023635856274306725,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-13-0",
+      "level": 28,
+      "stage": 0,
+      "title": "Purple crossing",
+      "style": "Purple crossing",
+      "initial": [
+        0.7672348498924209,
+        0.1932572653576221,
+        0.039507884749957006
+      ],
+      "targetRGB": [
+        110.82342728379625,
+        78.09282976787311,
+        142.76582344509367
+      ],
+      "paints": [
+        [
+          "venetian-red",
+          [
+            155,
+            73,
+            50
+          ],
+          0.72
+        ],
+        [
+          "radiant-turquoise",
+          [
+            61,
+            190,
+            219
+          ],
+          0.62
+        ],
+        [
+          "quinacridone-red",
+          [
+            187,
+            23,
+            86
+          ],
+          1.08
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/praise-palette-inspection-1/premix-audit-5-1.json",
+      "sourceId": "praise-5-spread-12/d2/30",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            2
+          ],
+          "times": [
+            0.98941286942959,
+            0.43766582080318484
+          ],
+          "error": 1.5276537333464076e-8,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              2
+            ],
+            "times": [
+              0.98941286942959,
+              0.43766582080318484
+            ],
+            "error": 1.5276537333464076e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-14-0",
+      "level": 63,
+      "stage": 0,
+      "title": "Orange approach",
+      "style": "Orange approach",
+      "initial": [
+        0.2509418989365512,
+        0.2702351673736856,
+        0.1626648345017022,
+        0.09670127770362483,
+        0.21945682148443613
+      ],
+      "targetRGB": [
+        218.00509340475693,
+        100.84445025578403,
+        53.11422896028131
+      ],
+      "paints": [
+        [
+          "phthalo-green-yellow",
+          [
+            27,
+            81,
+            69
+          ],
+          1.34
+        ],
+        [
+          "cadmium-yellow-light",
+          [
+            223,
+            205,
+            51
+          ],
+          0.78
+        ],
+        [
+          "viridian",
+          [
+            34,
+            53,
+            54
+          ],
+          0.78
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "naphthol-scarlet",
+          [
+            188,
+            34,
+            33
+          ],
+          1.05
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/praise-palette-inspection-1/premix-audit-1-1.json",
+      "sourceId": "praise-1-colorful middle/d2/16",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            1,
+            4
+          ],
+          "times": [
+            1.074952669196004,
+            0.46108971676734634
+          ],
+          "error": 8.620635379676992e-7,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              1,
+              4
+            ],
+            "times": [
+              1.074952669196004,
+              0.46108971676734634
+            ],
+            "error": 8.620635379676992e-7,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-14-1",
+      "level": 63,
+      "stage": 1,
+      "title": "Warm-neutral assembly",
+      "style": "Warm-neutral assembly",
+      "initial": [
+        0.06847056142892889,
+        0.5721274405206241,
+        0.1194423163095426,
+        0.09420441044463407,
+        0.1457552712962703
+      ],
+      "targetRGB": [
+        188.86400419597464,
+        156.09203392489812,
+        119.36340281165401
+      ],
+      "paints": [
+        [
+          "phthalo-green-yellow",
+          [
+            27,
+            81,
+            69
+          ],
+          1.34
+        ],
+        [
+          "cadmium-yellow-light",
+          [
+            223,
+            205,
+            51
+          ],
+          0.78
+        ],
+        [
+          "viridian",
+          [
+            34,
+            53,
+            54
+          ],
+          0.78
+        ],
+        [
+          "flake-white-replacement",
+          [
+            249,
+            248,
+            242
+          ],
+          0.86
+        ],
+        [
+          "naphthol-scarlet",
+          [
+            188,
+            34,
+            33
+          ],
+          1.05
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/praise-palette-inspection-1/premix-audit-1-2.json",
+      "sourceId": "praise-1-anchor/d3/72",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            3,
+            4
+          ],
+          "times": [
+            0.3489374870182893,
+            0.5195194358133205,
+            0.30327668916720374
+          ],
+          "error": 2.7559048216195734e-8,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              3,
+              4
+            ],
+            "times": [
+              0.3489374870182893,
+              0.5195194358133205,
+              0.30327668916720374
+            ],
+            "error": 2.7559048216195734e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-15-0",
+      "level": 6,
+      "stage": 0,
+      "title": "Studio green",
+      "style": "Studio green",
+      "initial": [
+        0.15340333127435007,
+        0.014462087313567741,
+        0.5313432567908658,
+        0.10198546017227111,
+        0.07209139860348004,
+        0.07255150068266873,
+        0.03407159321407206,
+        0.02009137194872443
+      ],
+      "targetRGB": [
+        115.75587982534587,
+        152.543234486285,
+        90.56068548564295
+      ],
+      "paints": [
+        [
+          "play-flake-white",
+          [
+            246,
+            243,
+            233
+          ],
+          0.65
+        ],
+        [
+          "cadmium-yellow-light",
+          [
+            223,
+            205,
+            51
+          ],
+          0.78
+        ],
+        [
+          "yellow-ochre",
+          [
+            163,
+            113,
+            28
+          ],
+          0.62
+        ],
+        [
+          "cadmium-red-light",
+          [
+            230,
+            53,
+            42
+          ],
+          0.86
+        ],
+        [
+          "alizarin-crimson",
+          [
+            95,
+            16,
+            54
+          ],
+          1.04
+        ],
+        [
+          "cobalt-blue",
+          [
+            22,
+            73,
+            127
+          ],
+          0.65
+        ],
+        [
+          "ultramarine-blue",
+          [
+            36,
+            40,
+            112
+          ],
+          0.92
+        ],
+        [
+          "viridian",
+          [
+            34,
+            53,
+            54
+          ],
+          0.78
+        ]
+      ],
+      "collection": "public",
+      "par": 3,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-10-0.json",
+      "sourceId": "praise-10-sibling--1/d2/37",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            5
+          ],
+          "times": [
+            0.41703959801857593,
+            0.39229681189033816
+          ],
+          "error": 0.008149681129726303,
+          "minimum": 2,
+          "measurement": {
+            "order": [
+              0,
+              5
+            ],
+            "times": [
+              0.41703959801857593,
+              0.39229681189033816
+            ],
+            "error": 0.008149681129726303,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-16-0",
+      "level": 10,
+      "stage": 0,
+      "title": "Blue counterbalance",
+      "style": "Blue counterbalance",
+      "initial": [
+        0.2856546335575087,
+        0.1068995318715534,
+        0.3545605761623398,
+        0.2528852584085981
+      ],
+      "targetRGB": [
+        45.35853196575419,
+        112.75792563268539,
+        166.7253652339307
+      ],
+      "paints": [
+        [
+          "cobalt-blue",
+          [
+            22,
+            73,
+            127
+          ],
+          0.65
+        ],
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "play-flake-white",
+          [
+            246,
+            243,
+            233
+          ],
+          0.65
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-11-3.json",
+      "sourceId": "praise-11-cool/d2/36",
+      "foundLegs": 2,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            0,
+            3
+          ],
+          "times": [
+            1.167605118940957,
+            1.167605118940957,
+            0.40942264389784566
+          ],
+          "error": 0.00023671938976767745,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              0,
+              3
+            ],
+            "times": [
+              1.167605118940957,
+              1.167605118940957,
+              0.40942264389784566
+            ],
+            "error": 0.00023671938976767745,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    },
+    {
+      "id": "premix-campaign-1-16-1",
+      "level": 10,
+      "stage": 1,
+      "title": "Rose-gray finale",
+      "style": "Rose-gray finale",
+      "initial": [
+        0.04022513109823182,
+        0.5454019100823575,
+        0.11312413807398813,
+        0.3012488207454226
+      ],
+      "targetRGB": [
+        162.5143741758293,
+        137.72021072354173,
+        151.0434592594126
+      ],
+      "paints": [
+        [
+          "cobalt-blue",
+          [
+            22,
+            73,
+            127
+          ],
+          0.65
+        ],
+        [
+          "cadmium-orange",
+          [
+            252,
+            151,
+            53
+          ],
+          0.82
+        ],
+        [
+          "quinacridone-magenta",
+          [
+            131,
+            30,
+            88
+          ],
+          1.12
+        ],
+        [
+          "play-flake-white",
+          [
+            246,
+            243,
+            233
+          ],
+          0.65
+        ]
+      ],
+      "collection": "public",
+      "par": 4,
+      "source": "docs/campaign-branch-inspection-1/premix-audit-11-2.json",
+      "sourceId": "campaign-draft-1-11-2/d3/30",
+      "foundLegs": 3,
+      "modes": {
+        "normalized": {
+          "order": [
+            0,
+            2,
+            3
+          ],
+          "times": [
+            0.5273416017551357,
+            0.3934089724033588,
+            0.45577110680174326
+          ],
+          "error": 2.988513220113987e-8,
+          "minimum": 3,
+          "measurement": {
+            "order": [
+              0,
+              2,
+              3
+            ],
+            "times": [
+              0.5273416017551357,
+              0.3934089724033588,
+              0.45577110680174326
+            ],
+            "error": 2.988513220113987e-8,
+            "finishWindowMs": 0,
+            "setupCoverage": 0,
+            "supported": true,
+            "label": "Proportion-supported research example; live timing not calibrated"
+          },
+          "rivals": []
+        }
+      }
+    }
+  ]
+}

@@ -66,8 +66,9 @@ test('round 2 passes calibrated filters, is new, and has replayable routes',()=>
   assert.ok(validLabEvent({id:'old-current-event',attemptId:old.id,type:'attempt',attempt:old}));
 });
 
-test('every palette shares one perceptual landing tolerance', () => {
-  PLAY_LEVELS.forEach(level=>assert.equal(level.tolerance,.028));
+test('original palettes retain archived tolerance; newer banks may use the live revision', () => {
+  PLAY_LEVELS.slice(0,12).forEach(level=>assert.equal(level.tolerance,.028));
+  PLAY_LEVELS.forEach(level=>assert.ok([.028,.0294].includes(level.tolerance)));
 });
 
 test('original palettes are unchanged and the two experimental palettes are appended', () => {

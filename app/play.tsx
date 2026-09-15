@@ -1,16 +1,17 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent, type MouseEvent } from 'react';
-import { HOLES_PER_PALETTE, PLAY_LEVELS, nextCoursePalette, withLiveLanding, addPaint, chargeAmount, chargePower, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, rgbToLab, totalMass, type Hole, type Mixture } from './play-engine';
+import { HOLES_PER_PALETTE, PLAY_LEVELS, nextCoursePalette, withLiveLanding, addPaint, chargeAmount, colorDistance, generateHole, mixtureColor, nearestNotation, pourPath, rgbStyle, totalMass, type Hole, type Mixture } from './play-engine';
 import type { PlayScene } from './play-scene';
 import {newLabAttempt,nextFixedLabSpecimen,labHoleProgress,type LabAttempt,type LabSpecimen} from './play-lab-model';
 import {labMixtureStep} from './play-premix';
+import {PUBLIC_SPECIMENS,publicCampaignBank} from './play-premix-bank';
+import {TOUCH_VERSION,touchPower,touchPrecision,touchRatio,touchEquivalentSeconds} from './play-touch';
 import {usePlayLabSync} from './play-lab-sync';
 import {LabPicker,PlayLabPanel} from './play-lab';
 import './play.css';
 
 type Phase = 'intro' | 'seed' | 'rest' | 'flight' | 'landed';
-type Charge = { index: number; started: number; source: string };
-const massLabel = (mass: number) => mass < 1000 ? mass.toLocaleString(undefined, { maximumFractionDigits: mass < 10 ? 2 : 1 }) : mass.toExponential(1);
+type Charge = { index: number; started: number; source: string; precision:number };
 
 function PaletteRail({value,disabled,onChange}:{value:number;disabled:boolean;onChange:(index:number)=>void}) {
   const [open,setOpen]=useState(false);
@@ -48,9 +49,13 @@ export default function PlayView() {
     saveLabEvent({id:crypto.randomUUID(),attemptId:next.id,type:'attempt',attempt:next});
   },[saveLabEvent]);
   useEffect(()=>{const frame=requestAnimationFrame(()=>setLab(new URLSearchParams(location.search).get('lab')==='1'));return()=>cancelAnimationFrame(frame);},[]);
-  const [levelIndex, setLevelIndex] = useState(0);
-  const [hole, setHole] = useState<Hole>(() => withLiveLanding(generateHole(0, 190926)));
-  const [quantities, setQuantities] = useState<Mixture>([0, 0, 0]);
+  const [levelIndex, setLevelIndex] = useState(PUBLIC_SPECIMENS[0].levelIndex);
+  const [hole, setHole] = useState<Hole>(() => PUBLIC_SPECIMENS[0].hole);
+  const [quantities, setQuantities] = useState<Mixture>(()=>[...PUBLIC_SPECIMENS[0].hole.premix!.initial]);
+  const [campaignScores,setCampaignScores]=useState<Record<string,number>>({});
+  const [scoresLoaded,setScoresLoaded]=useState(false);
+  useEffect(()=>{try{const saved=JSON.parse(localStorage.getItem('chroma-campaign-1-scores')??'{}');setCampaignScores(Object.fromEntries(Object.entries(saved).filter(([id,n])=>PUBLIC_SPECIMENS.some(s=>s.hole.courseId===id)&&Number.isInteger(n)&&Number(n)>=1&&Number(n)<10000)) as Record<string,number>);}catch{}setScoresLoaded(true);},[]);
+  useEffect(()=>{if(scoresLoaded)try{localStorage.setItem('chroma-campaign-1-scores',JSON.stringify(campaignScores));}catch{}},[campaignScores,scoresLoaded]);
   const [phase, setPhase] = useState<Phase>('intro');
   const [pours, setPours] = useState(0);
   const [selected, setSelected] = useState(0);
@@ -143,7 +148,7 @@ export default function PlayView() {
     const s = live.current;
     if(labLive.current.enabled&&(!labLive.current.signedIn||(attemptRef.current?.shots.length??0)>=200))return;
     if (!s.ready || s.error || s.help || s.phase === 'intro' || s.phase === 'flight' || s.phase === 'landed' || charge.current) return;
-    charge.current = { index, started, source };
+    charge.current = { index, started, source,precision:touchPrecision(colorDistance(mixtureColor(PLAY_LEVELS[s.levelIndex].paints,s.quantities),s.hole.target),s.hole.tolerance) };
     setSelected(index); setCharged(0);
   }, []);
   const release = useCallback((source: string) => {
@@ -154,7 +159,8 @@ export default function PlayView() {
     const palette = PLAY_LEVELS[s.levelIndex].paints;
     const before = s.quantities;
     const beforeMass = totalMass(before);
-    const seconds=(performance.now()-held.started)/1000;
+    const heldSeconds=(performance.now()-held.started)/1000;
+    const seconds=touchEquivalentSeconds(heldSeconds,held.precision);
     const transition=s.hole.premix?labMixtureStep(before,held.index,seconds,s.hole.premix.massMode,s.hole.premix.freeBase):null;
     const amount = transition?.amount??chargeAmount(beforeMass, seconds);
     const after = transition?.after??addPaint(before, held.index, amount);
@@ -165,7 +171,7 @@ export default function PlayView() {
     live.current = { ...s, phase: 'flight', pours: nextPours, quantities: after };
     setPhase('flight'); setPours(nextPours);
     setAnnouncement(`Pour ${nextPours}: ${palette[held.index].name}.`);
-    if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,shots:[...attemptRef.current.shots,{paint:held.index,seconds,amount,before:[...before],after:[...after],cancelled:false}]});
+    if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,shots:[...attemptRef.current.shots,{paint:held.index,seconds,heldSeconds,controlsVersion:TOUCH_VERSION,amount,before:[...before],after:[...after],cancelled:false}]});
     const epoch=sceneEpoch.current;
     scene.current.launch(path, beforeMass, totalMass(after), () => {
       if(epoch!==sceneEpoch.current)return;
@@ -174,6 +180,7 @@ export default function PlayView() {
       const landed = colorDistance(result, s.hole.target) <= s.hole.tolerance;
       setQuantities(after); setPhase(landed ? 'landed' : 'rest');
       if (landed) {
+        if(!labLive.current.enabled&&PUBLIC_SPECIMENS.some(item=>item.hole.courseId===s.hole.courseId))setCampaignScores(scores=>({...scores,[s.hole.courseId]:nextPours}));
         if(labLive.current.enabled&&attemptRef.current)record({...attemptRef.current,outcome:'landed'});
         scene.current?.celebrate();
         setResults((current) => current.map((round, i) => i === s.levelIndex ? round.map((score, j) => j === s.hole.stage ? Math.min(score ?? Infinity, nextPours) : score) : round));
@@ -196,8 +203,9 @@ export default function PlayView() {
         if (cachedCharge !== held) {
           cachedCharge = held;
           tangent = mass ? mixtureColor(palette, addPaint(s.quantities, held.index, mass * .03)) : undefined;
+          scene.current.previewCurve(mass?pourPath(palette,s.quantities,held.index,mass*.18,32):[]);
         }
-        scene.current.charge(palette[held.index].rgb, chargeAmount(mass, seconds) / Math.max(1, mass), chargePower(seconds), palette[held.index].strength, tangent);
+        scene.current.charge(palette[held.index].rgb, chargeAmount(mass,touchEquivalentSeconds(seconds,held.precision)) / Math.max(1, mass), touchPower(seconds), palette[held.index].strength, tangent);
         if (now - lastUI > 25) { setCharged(seconds); lastUI = now; }
       }
       frame = requestAnimationFrame(tick);
@@ -225,6 +233,11 @@ export default function PlayView() {
 
   const startHole = (index: number, same = false, stage = index === levelIndex ? hole.stage : 0, exact?:Hole, comparison?:LabSpecimen['comparison']) => {
     sceneEpoch.current++;
+    if(!exact&&publicCampaignBank.chapters.some(c=>c.ids.includes(hole.premix?.pairId??''))&&index===levelIndex){
+      const at=PUBLIC_SPECIMENS.findIndex(s=>s.hole.courseId===hole.courseId);
+      const chosen=same&&stage===hole.stage?PUBLIC_SPECIMENS[at]:PUBLIC_SPECIMENS[(at+1)%PUBLIC_SPECIMENS.length];
+      index=chosen.levelIndex;stage=chosen.hole.stage;exact={...chosen.hole};
+    }
     // New target/next on a fixed experiment advances the experiment bank,
     // never asks the ordinary course generator for a lab-only palette.
     if(!exact&&index===levelIndex&&(!same||stage!==hole.stage)){
@@ -265,10 +278,15 @@ export default function PlayView() {
     const url=new URL(location.href);if(next)url.searchParams.set('lab','1');else url.searchParams.delete('lab');history.replaceState(null,'',url);
     // Enter with a clean start so every recorded route includes its free base.
     if(next)startHole(levelIndex,true);
-    else if(hole.premix||PLAY_LEVELS[levelIndex].labOnly||PLAY_LEVELS[levelIndex].retired)startHole(0,false,0);
+    else if(!hole.premix&&!PLAY_LEVELS[levelIndex].labOnly&&!PLAY_LEVELS[levelIndex].retired)startHole(levelIndex,true);
+    else replaySpecimen(PUBLIC_SPECIMENS.find(s=>s.hole.courseId===hole.courseId)??PUBLIC_SPECIMENS[0]);
   };
   const reveal=()=>{if(attemptRef.current&&!attemptRef.current.revealed)record({...attemptRef.current,revealed:true});};
-  const nextHole = () => hole.stage < HOLES_PER_PALETTE - 1
+  const campaignAt=PUBLIC_SPECIMENS.findIndex(s=>s.hole.courseId===hole.courseId);
+  const chapter=publicCampaignBank.chapters.find(c=>c.ids.includes(hole.premix?.pairId??''));
+  const chapterAt=chapter?publicCampaignBank.chapters.indexOf(chapter):-1;
+  const campaignDone=campaignAt===PUBLIC_SPECIMENS.length-1;
+  const nextHole = () => campaignAt>=0?replaySpecimen(PUBLIC_SPECIMENS[(campaignAt+1)%PUBLIC_SPECIMENS.length]):hole.stage < HOLES_PER_PALETTE - 1
     ? startHole(levelIndex, true, hole.stage + 1)
     : startHole(nextCoursePalette(levelIndex), false, 0);
   const controls = (index: number) => ({
@@ -319,46 +337,50 @@ export default function PlayView() {
       if (event.detail === 0 && !charge.current) { begin(index, 'accessible'); release('accessible'); }
     },
   });
-  const power = charged === null ? 0 : chargePower(charged);
+  const power = charged === null ? 0 : touchPower(charged);
   const advance = useRef(nextHole);
   useEffect(() => { advance.current = nextHole; });
   useEffect(() => {
-    if (lab || phase !== 'landed' || help || finishPaused) return;
+    if (lab || campaignDone || phase !== 'landed' || help || finishPaused) return;
     const timer = window.setTimeout(() => advance.current(), 5200);
     return () => window.clearTimeout(timer);
-  }, [phase, help, hole, finishPaused,lab]);
-  const amount = charged === null ? 0 : chargeAmount(mass, charged);
-  const paintLab=rgbToLab(level.paints[selected].rgb);
-  const mutedPaint=`oklab(${paintLab[0]} ${paintLab[1]*.08} ${paintLab[2]*.08})`;
+  }, [phase, help, hole, finishPaused,lab,campaignDone]);
+  const precision=charge.current?.precision??touchPrecision(distance,hole.tolerance);
+  const chargeGradient=useMemo(()=>`linear-gradient(90deg,${Array.from({length:17},(_,i)=>{
+    const p=i/16,ratio=touchRatio(p,precision),dose=Math.max(1,mass)**.8*ratio;
+    const rgb=!mass?level.paints[selected].rgb:i===0?point.rgb:mixtureColor(level.paints,addPaint(quantities,selected,dose)).rgb;
+    return `${rgbStyle(rgb)} ${p*100}%`;
+  }).join(',')})`,[level.paints,selected,quantities,mass,point,precision]);
   const disabled = !ready || error || phase === 'intro' || phase === 'flight' || phase === 'landed' || help || (lab&&!sync.signedIn);
   const status = phase === 'intro' ? 'Arriving' : phase === 'seed' ? 'Choose Your Base' : phase === 'flight' ? 'In Motion' : phase === 'landed' ? 'Landed' : distance < hole.tolerance * 1.6 ? 'Just Outside the Landing Zone' : 'Choose Your Next Pour';
 
   return <section className="paint-play" data-lab={lab} aria-label="Paint mixing game">
     <div className="play-topline">
       <div className="play-name"><h1>Chroma Glider</h1></div>
-      <PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />
+      {chapter?<label className="play-chapter-select"><span>Chapter {chapterAt+1}/{publicCampaignBank.chapters.length}</span><select aria-label="Campaign palette" value={chapterAt} onChange={e=>replaySpecimen(PUBLIC_SPECIMENS.find(s=>s.hole.premix?.pairId===publicCampaignBank.chapters[Number(e.target.value)].ids[0])!)}>{publicCampaignBank.chapters.map((c,i)=><option key={c.name} value={i}>{i+1}. {c.name}</option>)}</select></label>:<PaletteRail value={levelIndex} disabled={phase === 'flight' || charged !== null} onChange={index=>startHole(index)} />}
       <div className="play-upper-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button><button className="play-help-button" aria-label="How to play" aria-expanded={help} onClick={() => { cancelCharge(); setHelp(!help); }} type="button">?</button></div>
     </div>
-    <div className="play-lab-bar"><button type="button" aria-pressed={lab} onClick={toggleLab}>{lab?'Return to course':'Hole Lab'}</button>{lab&&<><LabPicker current={{levelIndex,hole}} onChoose={replaySpecimen}/><button type="button" onClick={()=>startHole(levelIndex,true)}>Replay hole</button></>}</div>
+    <div className="play-lab-bar"><button type="button" aria-pressed={lab} onClick={toggleLab}>{lab?'Return to course':'Hole Lab'}</button>{!lab&&<button type="button" onClick={()=>chapter?startHole(0,false,0,withLiveLanding(generateHole(0,190926))):replaySpecimen(PUBLIC_SPECIMENS[0])}>{chapter?'Free-start courses':'Premix campaign'}</button>}{chapter&&<label className="play-hole-select"><span>Hole</span><select aria-label="Hole in this chapter" value={hole.premix!.pairId} onChange={e=>replaySpecimen(PUBLIC_SPECIMENS.find(s=>s.hole.premix?.pairId===e.target.value)!)}>{chapter.ids.map((id,i)=><option key={id} value={id}>{i+1}. {publicCampaignBank.holes.find(h=>h.id===id)!.title}</option>)}</select></label>}{lab&&<><LabPicker current={{levelIndex,hole}} onChoose={replaySpecimen}/><button type="button" onClick={()=>startHole(levelIndex,true)}>Replay hole</button></>}</div>
     <div className="play-world">
       <div className="play-canvas" ref={host} /><div className="play-world-vignette" />
       <div className="play-hud"><div className="play-target-swatch play-guess-swatch"><i style={{ background: mass ? rgbStyle(point.rgb) : '#e2dfd0' }} /><div><span className="play-eyebrow">Your Mixture</span><strong>{mass ? `≈ ${notation}` : 'No Paint Yet'}</strong></div></div><div className="play-target-swatch"><div><span className="play-eyebrow">Destination</span><strong>≈ {hole.notation}</strong></div><i style={{ background: rgbStyle(hole.target.rgb) }} /></div></div>
-      <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span><span>Destination</span></div>
-      <div className="play-score"><span><b>{labHoleProgress(hole)}</b> Hole</span><span><b>{String(pours).padStart(2, '0')}</b> Pours</span>{(!lab||attempt?.revealed)&&<span><b>{hole.par}</b> Par</span>}<span><b>{massLabel(mass)}</b> Parts</span></div>
+      <div ref={targetLabel} className="play-target-label" aria-hidden="true"><span className="play-target-arrow">➤</span></div>
+      <div className="play-score" data-over={pours>hole.par}><span><b>{chapter?`${hole.stage+1}/${chapter.ids.length}`:labHoleProgress(hole)}</b> Hole</span><span className="play-score-primary"><b>{String(pours).padStart(2, '0')}</b> Shots</span><span className="play-score-primary"><b>{hole.par}</b> Par</span></div>
       <div className="play-world-caption"><span>{status}</span><i /><span>{hole.premix?.freeBase?'Free base · quantity resets to 1 part · first paint free':hole.premix?`Premix · ${hole.premix.massMode==='normalized'?'quantity resets to 1 part':'quantity accumulates'} · every pour counts`:phase === 'seed' ? 'Your first paint starts pure' : 'The mixture carries every pour'}</span></div>
       {!ready && !error && <div className="play-loading">Opening Color Space<span /></div>}
       {error && <div className="play-message"><h2>The 3D View Couldn’t Open</h2><p>Try reopening the view, or use a browser with hardware acceleration enabled.</p><button type="button" onClick={() => startHole(levelIndex, true)}>Reopen View</button></div>}
-{help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>{hole.premix&&!hole.premix.freeBase?'This puzzle begins with the displayed prepared recipe. Hold a paint, then release to mix into it. Every pour counts; there is no free base selection.':'Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.'}</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. {hole.premix?.massMode==='normalized'?'This version resets total quantity to 1 after each shot, retaining the proportions and pigment strengths.':'As your mixture grows, the same charge has less influence.'}</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>The original palettes draw from four evaluated five-hole rounds; the two experimental palettes each have one. Courses have their own balance of colorful rides, value changes and quieter mixtures. The final hole carries the round’s toughest par or timing margin. A qualifying endpoint is drawn into the cup, then advances automatically. All palettes are available to explore.</p><p className="play-fineprint">Player par includes room for adjustment; it is not the fewest possible shots. It is provisionally calibrated from sampled routes and timing margins. Every starting paint is checked for one- and two-pour alternatives, but the search is not a mathematical proof. Landing tolerance stays fixed within each palette. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
+{help && <div className="play-message play-instructions"><button className="play-close-help" aria-label="Close instructions" onClick={() => setHelp(false)} type="button">×</button><span className="play-eyebrow">How to Play</span><h2>A Little Paint. A Long Way.</h2><p>{hole.premix&&!hole.premix.freeBase?'This puzzle begins with the displayed prepared recipe. Hold a paint, then release to mix into it. Every pour counts; there is no free base selection.':'Hold a paint, then release. Your first shot carries you from the empty neutral starting point to that pure paint, free of the pour count. Every later pour blends into everything you’ve already added.'}</p><p>The meter sweeps up and returns. Release at the amount you want. A light touch adds a trace; a well-timed full charge adds a large pour. {hole.premix?.massMode==='normalized'?'This version resets total quantity to 1 after each shot, retaining the proportions and pigment strengths.':'As your mixture grows, the same charge has less influence.'}</p><p>Aim for the center of the destination sphere and settle close to its color. The outline is a guide; passing through it doesn’t count. Use keys 1–{level.paints.length}, or hold Space for your selected paint. Escape cancels a charge. Drag the view between shots to look around.</p><p>The premix campaign has 32 fixed holes across 17 palette chapters. Each begins from a prepared mixture, with no carryover between holes. Choose any chapter or replay a hole. Your scorecard keeps the latest completed score for each hole on this device. Free-start courses and earlier labs remain available. A qualifying endpoint is drawn into the cup.</p><p className="play-fineprint">Campaign par is provisional: the executable example’s release count plus an adjustment allowance, not a proved minimum or a calibrated difficulty rating. Efficient alternatives remain possible. The charge gradient follows actual mixtures. Near the target, ordinary holds have finer dose control while a full charge retains its range. Landing tolerance is unchanged for each saved hole. Landing uses OKLab color difference; the map uses a smooth Munsell-calibrated projection. Paint colors and tinting strengths remain approximations.</p><button onClick={() => setHelp(false)} type="button">Back to Gliding</button></div>}
       {phase === 'landed' && !help && <div className="play-arrival" data-result={pours<=hole.par?'within':'over'} onFocus={()=>setFinishPaused(true)} onPointerDown={()=>setFinishPaused(true)}>
-        <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Shots</span></div><div><strong>{massLabel(mass)}</strong><span>Total parts</span></div></div>
-        {(!lab||attempt?.revealed)&&<p className="play-par-difference">{pours===hole.par?'On par':`${pours>hole.par?'+':''}${pours-hole.par} vs par`} <span>· Player par {hole.par}</span></p>}
-        <span className="play-eyebrow">{hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span>
+        <div className="play-finish-numbers"><div><strong>{String(pours).padStart(2,'0')}</strong><span>Your shots</span></div><div><strong>{hole.par}</strong><span>Par</span></div></div>
+        <p className="play-par-difference">{pours===hole.par?'On par':pours<hole.par?`${hole.par-pours} under par`:`${pours-hole.par} over par`} <span>{pours<=hole.par?'Within par':'Landed · try again for par'}</span></p>
+        {chapter&&!lab&&<p className="play-campaign-total">Latest scores · {Object.keys(campaignScores).length}/32 completed · {Object.values(campaignScores).reduce((sum,n)=>sum+n,0)} shots · {(()=>{const delta=PUBLIC_SPECIMENS.reduce((sum,s)=>sum+(campaignScores[s.hole.courseId]===undefined?0:campaignScores[s.hole.courseId]-s.hole.par),0);return `${delta>0?'+':''}${delta} vs played par`;})()}</p>}
+        <span className="play-eyebrow">{chapter?(!lab&&PUBLIC_SPECIMENS.every(s=>campaignScores[s.hole.courseId]!==undefined)?'Campaign Complete':!lab&&chapter.ids.every(id=>campaignScores[`${id}-normalized`]!==undefined)?'Chapter Complete':`Hole ${hole.stage+1} Complete`):hole.stage === HOLES_PER_PALETTE - 1 ? 'Palette Complete' : `Hole ${hole.stage + 1} Complete`}</span>
         <h2>{lab?'Route complete.':pours < hole.par ? 'Beautifully Judged.' : pours === hole.par ? 'Right on Par.' : 'Found Your Way.'}</h2>
-        <div>{!lab&&<button type="button" onClick={nextHole}>{hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button>}<button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button>{lab&&<button type="button" onClick={()=>document.querySelector('.play-lab-panel')?.scrollIntoView({behavior:'smooth'})}>Review below ↓</button>}</div>
+        <div>{!lab&&<button type="button" onClick={nextHole}>{chapter?(campaignDone?'Return to first hole':hole.stage<chapter.ids.length-1?'Next hole':'Next chapter'):hole.stage < HOLES_PER_PALETTE - 1 ? 'Next Hole' : 'Next Palette'} <span>↗</span></button>}<button type="button" className="play-arrival-secondary" onClick={() => startHole(levelIndex, true)}>Replay</button>{lab&&<button type="button" onClick={()=>document.querySelector('.play-lab-panel')?.scrollIntoView({behavior:'smooth'})}>Review below ↓</button>}</div>
       </div>}
     </div>
     <div className="play-dock">
-      <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span><strong>{charged === null ? '' : `+ ${massLabel(amount)} parts`}</strong></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--paint': rgbStyle(level.paints[selected].rgb), '--paint-muted':mutedPaint } as CSSProperties}><i /><b /></div></div></div>
+      <div className="play-dock-status"><div className="play-charge-control"><div className="play-charge-caption"><span>{charged === null ? 'Hold & Release' : !mass ? 'Pure Base' : power > .8 ? 'Power Pour' : 'Loading Paint'}</span></div><div className="play-charge-meter" role="meter" aria-label="Pour power" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(power * 100)} style={{ '--power': power, '--mixture-gradient':chargeGradient } as CSSProperties}><i /><b /></div></div></div>
       <div className="play-paints" data-wide={level.paints.length > 4} role="group" aria-label="Paint palette" onScroll={() => { if (paintPress.current) cancelCharge(); }} style={{ '--paint-count': level.paints.length } as CSSProperties}>{level.paints.map((entry, i) => <button {...controls(i)} data-pour="true" key={entry.id} type="button" disabled={disabled} className={`play-paint ${selected === i ? 'selected' : ''} ${charged !== null && selected === i ? 'charging' : ''}`} style={{ '--paint': rgbStyle(entry.rgb) } as CSSProperties} aria-label={`${i + 1}: ${entry.name}. Hold and release to pour.`} aria-pressed={selected === i}><span className="play-paint-color" /><span className="play-paint-name">{entry.name.replace(' (Green Shade)', '').replace(' (Yellow Shade)', '')}</span></button>)}</div>
       <div className="play-control-hint"><span>{phase === 'flight' ? 'Following your pour…' : charged !== null ? <button type="button" onPointerDown={cancelCharge} onClick={cancelCharge}>Cancel charge · Esc</button> : 'Hold a paint. Release to pour.'}</span><span className="play-keyboard-hint">1–{level.paints.length} to pour · Space to repeat</span></div>
       <div className="play-mobile-actions"><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex, true)}>Restart</button><button type="button" disabled={phase === 'flight' || charged !== null} onClick={() => startHole(levelIndex)}>New Target ↗</button></div>

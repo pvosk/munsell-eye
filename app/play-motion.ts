@@ -45,11 +45,23 @@ export function planArrival(target: Vector3, rest: Vector3, restLook: Vector3, s
 
 // Presentation only. The caller retains the original recipe endpoint for
 // scoring. Successful arrivals converge gently; misses skirt the solid core.
+export function captureApproach(path:ColorPoint[],target:ColorPoint){
+ const distances=[0],goal=new Vector3(...target.position);
+ for(let i=1;i<path.length;i++)distances.push(distances[i-1]+new Vector3(...path[i].position).distanceTo(new Vector3(...path[i-1].position)));
+ const length=distances.at(-1)??0;
+ const radius=Math.min(6,1.8+Math.sqrt(length)*.45);
+ // Last continuous approach only: do not swallow an earlier pass-by.
+ let at=path.length-1;
+ while(at>0&&new Vector3(...path[at-1].position).distanceTo(goal)<radius)at--;
+ const start=distances[Math.max(0,at-1)];
+ return {start,length,radius};
+}
 export function targetFlightPath(path: ColorPoint[], target: ColorPoint, qualifies: boolean): ColorPoint[] {
   const goal = new Vector3(...target.position);
   const distances=[0];
   for(let i=1;i<path.length;i++) distances.push(distances[i-1]+new Vector3(...path[i].position).distanceTo(new Vector3(...path[i-1].position)));
   const length=distances.at(-1) || 1;
+  const approach=captureApproach(path,target);
   const tangent = new Vector3(...path.at(-1)!.position).sub(new Vector3(...path[0].position)).normalize();
   const side=tangent.clone().cross(new Vector3(0,1,0));
   if(side.lengthSq()<.001) side.set(1,0,0); else side.normalize();
@@ -58,7 +70,7 @@ export function targetFlightPath(path: ColorPoint[], target: ColorPoint, qualifi
   return path.map((point,i)=>{
     const p=new Vector3(...point.position);
     const progress=distances[i]/length;
-    if(qualifies) p.lerp(goal,easeQuint((progress-.7)/.3));
+    if(qualifies) p.lerp(goal,easeQuint((distances[i]-approach.start)/Math.max(.00001,length-approach.start)));
     else if(radius>.01 && i>0 && i<path.length-1) {
       const delta=p.clone().sub(goal), along=delta.dot(side);
       const perpendicularSq=Math.max(0,delta.lengthSq()-along*along);

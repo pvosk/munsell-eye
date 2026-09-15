@@ -1,4 +1,6 @@
-import {PREMIX_ENGINE,PREMIX_SPECIMENS,REGION_SPECIMENS,LEG_SPECIMENS,BRANCH_SPECIMENS,CONDITIONED_SPECIMENS,WORKBENCH_SPECIMENS,generatePremixHole,allPremixRows,premixItem,premixProgress} from './play-premix-bank';
+import {PREMIX_ENGINE,PREMIX_SPECIMENS,REGION_SPECIMENS,LEG_SPECIMENS,BRANCH_SPECIMENS,CONDITIONED_SPECIMENS,WORKBENCH_SPECIMENS,PUBLIC_SPECIMENS,generatePremixHole,allPremixRows,premixItem,premixProgress} from './play-premix-bank';
+import {TOUCH_VERSION,touchEquivalentSeconds,touchPrecision} from './play-touch';
+import {mixtureColor,colorDistance} from './play-engine';
 import {labMixtureStep} from './play-premix';
 import { PLAY_LEVELS, LIVE_LANDING_TOLERANCE, withLiveLanding, generateHole, generateLabHole, generatePairedHole, generateDesignHole, generateFocusedHole, generateDirectedHole, directedLabBank, pairedLabBank, designLabBank, focusedLabBank, type Hole, type Mixture } from './play-engine';
 import {freshLabBank,generateFreshHole,hardLabBank,generateHardHole,inverseLabBank,generateInverseHole,contrastLabBank,generateContrastHole,journeyLabBank,generateJourneyHole,protectedLabBank,generateProtectedHole} from './play-engine';
@@ -20,7 +22,9 @@ export const LAB_CONTRAST_ENGINE='glider-lab-9-controls-1';
 const originalEngine=(engine:string)=>engine.endsWith('-landing-2')?engine.slice(0,-10):engine;
 export const supportedLabEngine=(engine:string)=>[PREMIX_ENGINE,LAB_FRESH_ENGINE,LAB_HARD_ENGINE,LAB_INVERSE_ENGINE,LAB_CAMPAIGN_ENGINE,LAB_ENGINE,'glider-courses-2-controls-1',LAB_ROUND_ENGINE,LAB_PAIRED_ENGINE,LAB_DESIGN_ENGINE,LAB_FOCUSED_ENGINE,LAB_DIRECTED_ENGINE,LAB_PROTECTED_ENGINE,LAB_JOURNEY_ENGINE,LAB_CONTRAST_ENGINE].includes(originalEngine(engine));
 export type LabSpecimen = { levelIndex: number; hole: Hole; comparison?:{base:number;sourceAttemptId:string} };
-export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean };
+// seconds remains the legacy-equivalent replay control; heldSeconds records
+// actual player timing separately so archived analyses never silently drift.
+export type LabShot = { paint: number; seconds: number; amount: number; before: Mixture; after: Mixture; cancelled: boolean; heldSeconds?:number; controlsVersion?:'touch-2' };
 export type LabAttempt = {
   id: string; engine: string; specimen: LabSpecimen; started: string;
   paints: {id:string;name:string;rgb:number[];strength:number}[];
@@ -45,6 +49,7 @@ export const LAB_HARD:LabSpecimen[]=hardLabBank.holes.map(h=>({levelIndex:h.leve
 export const directedForHole=(raw:string)=>{const id=campaignSourceId(raw);return freshLabBank.holes.find(h=>h.record.id===id)??hardLabBank.holes.find(h=>h.record.id===id)??inverseLabBank.holes.find(h=>h.record.id===id)??contrastLabBank.holes.find(h=>h.record.id===id)??journeyLabBank.holes.find(h=>h.record.id===id)??protectedLabBank.holes.find(h=>h.record.id===id)??directedLabBank.holes.find(h=>h.record.id===id);};
 export const labHoleProgress=(hole:Hole)=>hole.premix?premixProgress(hole):campaignForHole(hole.courseId)?`${hole.stage+1}/${campaignForHole(hole.courseId)!.chapter.slots.length}`:hole.courseId.startsWith('lab-12-')?`${LAB_FRESH.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_FRESH.length}`:hole.courseId.startsWith('lab-11-')?`${LAB_HARD.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_HARD.length}`:hole.courseId.startsWith('lab-10-')?`${LAB_INVERSE.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_INVERSE.length}`:hole.courseId.startsWith('lab-9-')?`${LAB_CONTRAST.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_CONTRAST.length}`:hole.courseId.startsWith('lab-8-')?`${LAB_JOURNEYS.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_JOURNEYS.length}`:hole.courseId.startsWith('lab-7-')?`${LAB_PROTECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/${LAB_PROTECTED.length}`:hole.courseId.startsWith('lab-6-')?`${LAB_DIRECTED.findIndex(s=>s.hole.courseId===hole.courseId)+1}/8`:`${hole.stage+1}/${hole.courseId.startsWith('lab-5-')?2:5}`;
 export const LAB_GROUPS=[
+ {name:'Campaign · 32 prepared-mixture holes',items:PUBLIC_SPECIMENS},
  {name:'Course workbench · normalized free-base + premix',items:WORKBENCH_SPECIMENS},
   {name:'New · 16 destination branching puzzles',items:CONDITIONED_SPECIMENS},
   {name:'Previous · Four branching setups',items:BRANCH_SPECIMENS},
@@ -64,7 +69,7 @@ export const LAB_GROUPS=[
   {name:'Round 2 · Earlier tests',items:LAB_STARTERS},
 ].map(g=>({...g,items:g.items.filter(s=>!PLAY_LEVELS[s.levelIndex].retired)}));
 export function nextFixedLabSpecimen(current:LabSpecimen):LabSpecimen|null{
-  if(current.hole.premix){const item=premixItem(current.hole),bank=item?.collection==='workbench'?WORKBENCH_SPECIMENS:item?.collection==='conditioned'?CONDITIONED_SPECIMENS:item?.collection==='branches'?BRANCH_SPECIMENS:item?.collection==='legs'?LEG_SPECIMENS:item?.role?REGION_SPECIMENS:PREMIX_SPECIMENS;const i=bank.findIndex(s=>s.hole.courseId===current.hole.courseId);return bank[(i+1)%bank.length]??null;}
+  if(current.hole.premix){const item=premixItem(current.hole),bank=item?.collection==='public'?PUBLIC_SPECIMENS:item?.collection==='workbench'?WORKBENCH_SPECIMENS:item?.collection==='conditioned'?CONDITIONED_SPECIMENS:item?.collection==='branches'?BRANCH_SPECIMENS:item?.collection==='legs'?LEG_SPECIMENS:item?.role?REGION_SPECIMENS:PREMIX_SPECIMENS;const i=bank.findIndex(s=>s.hole.courseId===current.hole.courseId);return bank[(i+1)%bank.length]??null;}
   const campaign=nextCampaignSpecimen(current.hole.courseId);if(campaign)return campaign;
   const bank=current.hole.courseId.startsWith('lab-12-')?LAB_FRESH:current.hole.courseId.startsWith('lab-11-')?LAB_HARD:current.hole.courseId.startsWith('lab-10-')?LAB_INVERSE:current.hole.courseId.startsWith('lab-9-')?LAB_CONTRAST:current.hole.courseId.startsWith('lab-8-')?LAB_JOURNEYS:current.hole.courseId.startsWith('lab-7-')?LAB_PROTECTED:current.hole.courseId.startsWith('lab-6-')?LAB_DIRECTED:current.hole.courseId.startsWith('lab-5-')?LAB_FOCUSED:current.hole.courseId.startsWith('lab-4-')?LAB_DESIGN:current.hole.courseId.startsWith('lab-3-')?LAB_PAIRED:current.hole.courseId.startsWith('lab-2-')?LAB_STARTERS:null;
   if(!bank)return null;
@@ -155,6 +160,12 @@ export function validLabEvent(value:unknown):value is LabEvent {
     &&Number.isFinite(t.seconds)&&t.seconds>=0&&t.seconds<86400&&Number.isFinite(t.amount)&&t.amount>0&&t.amount<1e15
     &&q(t.before)&&q(t.after)&&typeof t.cancelled==='boolean');
   if(!basic)return false;
+  for(const shot of a.shots){
+    if(shot.controlsVersion===undefined){if(shot.heldSeconds!==undefined)return false;continue;}
+    if(shot.controlsVersion!==TOUCH_VERSION||!Number.isFinite(shot.heldSeconds)||shot.heldSeconds!<0||shot.heldSeconds!>=86400)return false;
+    const precision=touchPrecision(colorDistance(mixtureColor(PLAY_LEVELS[s.levelIndex].paints,shot.before),s.hole.target),s.hole.tolerance);
+    if(Math.abs(touchEquivalentSeconds(shot.heldSeconds!,precision)-shot.seconds)>1e-9)return false;
+  }
   if(s.hole.premix){
     let state=[...s.hole.premix.initial];const near=(a:number[],b:number[])=>a.length===b.length&&a.every((v,i)=>Math.abs(v-b[i])<=1e-9*Math.max(1,Math.abs(v),Math.abs(b[i])));
     for(const shot of a.shots){
